@@ -1,29 +1,40 @@
 package frc.robot;
 
-import static edu.wpi.first.wpilibj.XboxController.Axis.*;
-import static edu.wpi.first.wpilibj.XboxController.Button.*;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
+import static edu.wpi.first.wpilibj.XboxController.Button.kA;
+import static edu.wpi.first.wpilibj.XboxController.Button.kB;
+import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
+import static edu.wpi.first.wpilibj.XboxController.Button.kLeftBumper;
+import static edu.wpi.first.wpilibj.XboxController.Button.kLeftStick;
+import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
+import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
+import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
+import static edu.wpi.first.wpilibj.XboxController.Button.kY;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+import static frc.robot.Konstants.kCANivoreName;
+import static frc.robot.Konstants.DriveConstants.kPigeonID;
 import static frc.robot.Konstants.SwerveConstants.kBackLeftDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kBackLeftEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kBackLeftTurnMotorID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightTurnMotorID;
-import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
-import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
-import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
-import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.SwerveConstants.kFrontLeftDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontLeftEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kFrontLeftTurnMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
-import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
-import frc.lib.utils.filters.DeadbandFilter;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 

@@ -1,15 +1,9 @@
 package frc.lib.auto;
 
-import static frc.robot.Konstants.AutoConstants.kDefaultPathfindingConstraints;
-
 import java.util.function.DoubleSupplier;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
-import com.pathplanner.lib.controllers.PathFollowingController;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj2.command.Command;
 
 public class OverrideAutoDriveController extends Command {
