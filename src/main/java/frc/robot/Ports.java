@@ -8,6 +8,9 @@ import static frc.robot.Konstants.SwerveConstants.kBackLeftTurnMotorID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kBackRightTurnMotorID;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.SwerveConstants.kFrontLeftDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontLeftEncoderID;
@@ -15,18 +18,14 @@ import static frc.robot.Konstants.SwerveConstants.kFrontLeftTurnMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
-import static frc.robot.Konstants.SwerveConstants.kPigeonID;
-//import static frc.robot.utils.SKTrigger.INPUT_TYPE.*;
-import static frc.robot.utils.SKTrigger.INPUT_TYPE.AXIS;
-import static frc.robot.utils.SKTrigger.INPUT_TYPE.BUTTON;
-import static frc.robot.utils.SKTrigger.INPUT_TYPE.POV;
+import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import frc.robot.utils.CANPort;
-import frc.robot.utils.SKTrigger;
-import frc.robot.utils.filters.DeadbandFilter;
-import frc.robot.utils.filters.FilteredAxis;
-import frc.robot.utils.filters.FilteredXboxController;
+import frc.lib.utils.CANPort;
+import frc.lib.utils.SKTrigger;
+import frc.lib.utils.filters.DeadbandFilter;
+import frc.lib.utils.filters.FilteredAxis;
+import frc.lib.utils.filters.FilteredXboxController;
 
 // Unused Imports
 
@@ -38,20 +37,12 @@ public class Ports
     public static class DriverPorts
     {
         // Driver Controller set to Xbox Controller
-        //public static final CommandXboxController kDriver = new CommandXboxController(0);
-        //static CommandXboxController importedKDriver = frc.robot.bindings.SK25SwerveBinder.kDriver;
-        //static GenericHID kUnderlyingDriverController = importedKDriver.getHID();
         public static final GenericHID kDriver = new FilteredXboxController(0).getHID();
         
         // Filtered axis (translation & rotation)
         public static final FilteredAxis kTranslationXPort = new FilteredAxis(() -> kDriver.getRawAxis(kLeftY.value));
         public static final FilteredAxis kTranslationYPort = new FilteredAxis(() -> kDriver.getRawAxis(kLeftX.value));
         public static final FilteredAxis kVelocityOmegaPort = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
-
-        public static final SKTrigger climbRaiseButton = new SKTrigger(kDriver, 270, POV);
-        public static final SKTrigger climbLowerButton = new SKTrigger(kDriver, 90, POV);
-        // public static final SKTrigger climbStopButton = new SKTrigger(kDriver, 90, POV);
-        // public static final SKTrigger climbSlowButton = new SKTrigger(kDriver, 270, POV);
         
         // Vision subsystem enable/disable
         public static final SKTrigger kVisionOff = new SKTrigger(kDriver, 180, POV);
@@ -60,23 +51,14 @@ public class Ports
         // Vision Driving buttons
         public static final SKTrigger kResetPoseToVision = new SKTrigger(kDriver, kB.value, BUTTON);
         public static final SKTrigger kForceResetPoseToVision = new SKTrigger(kDriver, kY.value, BUTTON);
-        public static final SKTrigger kAlignToReef = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kLeftReef = new SKTrigger(kDriver, kLeftTrigger.value, AXIS);
-        public static final SKTrigger kRightReef = new SKTrigger(kDriver, kRightTrigger.value, AXIS);
-
-        // Driver Function Button (Activates secondary control scheme when held)
-        public static final SKTrigger kDriveFn = new SKTrigger(kDriver, kRightBumper.value, BUTTON);
 
         // Switch modes
-        public static final SKTrigger kRobotCentricMode = new SKTrigger(kDriver, kRightBumper.value, BUTTON); // Function Controlscheme (NOTE: This button is meant to be impossible to accidentally press)
-        public static final SKTrigger kSlowMode = new SKTrigger(kDriver, kLeftBumper.value, BUTTON); // Function Controlscheme
+        public static final SKTrigger kRobotCentricMode = new SKTrigger(kDriver, kRightBumper.value, BUTTON);
+        public static final SKTrigger kSlowMode = new SKTrigger(kDriver, kLeftBumper.value, BUTTON);
+        public static final SKTrigger kFastMode = new SKTrigger(kDriver, kLeftStick.value, BUTTON); 
 
         // Reset gyro
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
-
-        // Party mode
-        
-
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external

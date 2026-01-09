@@ -28,13 +28,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import frc.lib.utils.SubsystemControls;
+import frc.lib.utils.files.Elastic;
+import frc.lib.utils.files.Elastic.Notification.NotificationLevel;
+import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
-import frc.robot.subsystems.SK26Swerve;
-import frc.robot.utils.SubsystemControls;
-import frc.robot.utils.files.Elastic;
-import frc.robot.utils.files.Elastic.Notification.NotificationLevel;
-import frc.robot.utils.filters.FilteredJoystick;
+import frc.robot.subsystems.drive.SKSwerve;
 
 
 /**
@@ -55,9 +55,9 @@ public class RobotContainer extends Robot{
 
   // The robot's subsystems and commands are defined here...
 
-  public Optional<SK26Swerve> m_swerveContainer = Optional.empty();
+  public Optional<SKSwerve> m_swerveContainer = Optional.empty();
 
-  public static SK26Swerve m_swerve;
+  public static SKSwerve m_swerve;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -98,7 +98,7 @@ public class RobotContainer extends Robot{
                     factory.createParser(new File(deployDirectory, Konstants.SUBSYSTEMFILE));
             SubsystemControls subsystems = mapper.readValue(parser, SubsystemControls.class);
             if(subsystems.isSwervePresent()) {
-                m_swerveContainer = Optional.of(Konstants.TunerConstants.createDrivetrain());
+                m_swerveContainer = Optional.of(new SKSwerve());
                 m_swerve = m_swerveContainer.get(); // Returns new SKSwerve
             }
         }
