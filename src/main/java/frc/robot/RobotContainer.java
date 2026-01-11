@@ -27,6 +27,7 @@ import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.vision.SKVision;
 
 
 /**
@@ -48,8 +49,10 @@ public class RobotContainer extends Robot{
   // The robot's subsystems and commands are defined here...
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
+  public Optional<SKVision> m_visionContainer = Optional.empty();
 
-  public static SKSwerve m_swerve;
+  public static SKSwerve m_swerveInstance;
+  public static SKVision m_visionInstance;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -89,9 +92,14 @@ public class RobotContainer extends Robot{
             JsonParser parser =
                     factory.createParser(new File(deployDirectory, Konstants.SUBSYSTEMFILE));
             SubsystemControls subsystems = mapper.readValue(parser, SubsystemControls.class);
+
             if(subsystems.isSwervePresent()) {
                 m_swerveContainer = Optional.of(new SKSwerve());
-                m_swerve = m_swerveContainer.get(); // Returns new SKSwerve
+                m_swerveInstance = m_swerveContainer.get(); // Returns new SKSwerve
+            }
+            if(subsystems.isVisionPresent()) {
+                m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
+                m_visionInstance = m_visionContainer.get();
             }
         }
         catch (IOException e)

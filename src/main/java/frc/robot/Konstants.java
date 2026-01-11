@@ -124,12 +124,10 @@ public final class Konstants
 
         public static final int kAprilTagPipeline = 0; // Default Apriltag pipeline value for all Limelights
 
-        public static final double kLeftSideReefAlignOffset = 0.0; // Degrees of tx to align to a reef apriltag to score on its left side
-        public static final double kRightSideReefAlignOffset = 0.0; // Degrees of tx to align to a reef april to score on its right side
-
-        public static final class limelightAlpha {
+        /* Example:
+        public static final class RightLimelight {
             // Network/pipeline values
-            public static final String kName = "limelight-alpha";
+            public static final String kName = "right-limelight"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
             public static final double kForward = 0.17145; // (z) meters forward of center; negative is backwards
@@ -143,35 +141,10 @@ public final class Konstants
 
             public static final boolean kAttached = true;
         }
-        public static final class limelightBeta {
-            // Network/pipeline values
-            public static final String kName = "limelight-beta";
-
-            // Translation (in meters) from center of robot
-            public static final double kForward = 0.1651; // (z) meters forward of center; negative is backwards
-            public static final double kRight = -0.276225; // (x) meters right of center; negative is left
-            public static final double kUp = 0.3114625; // (y) meters up of center; negative is down
-
-            // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 1.9; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = -23; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
-            
-            public static final boolean kAttached = true;
-        }
+        */
 
         public static final class AlignmentConstants {
-                public static double kRotSetpoint = 0.0;
-
-                public static double kRightYSetpoint = 0.185; //0.2
-                public static double kCenterYSetpoint = 0.02;
-                public static double kLeftYSetpoint = -0.1958;
-
-                public static double kCoralXSetpoint = -0.56; //-0.54
-                public static double kAlgaeXSetpoint = -0.40; //-0.45
-                public static double kFarXSetpoint = -1;
-
-                public static double kRejectDistance = 1.4; // 1.4m
+            public static double kRejectDistance = 1.4; // 1.4m
         }
     }
 
