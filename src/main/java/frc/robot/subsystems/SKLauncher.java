@@ -20,5 +20,18 @@ public class SKLauncher extends SubsystemBase {
     public void initialize() {
         
     }
-    
+
+    @Override
+    public void periodic() {
+
+    }
+
+    public void runLauncher(double speed) {
+        
+    }
+
+    public void stopLauncher() {
+
+    }
+
 }
