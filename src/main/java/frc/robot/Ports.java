@@ -193,6 +193,12 @@ public class Ports
 
     }
 
+    public static class LauncherPorts
+    {
+        private static final String busName = "";
+        public static final CANPort kLauncherMotor = new CANPort(35, busName);
+    }
+
 
     // public static class ExamplePorts
     // {
