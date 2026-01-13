@@ -1,18 +1,17 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.controls.VelocityDutyCycle;
-import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 import static frc.robot.Ports.LauncherPorts.kAgitatorMotor;
 import static frc.robot.Ports.LauncherPorts.kShooterMotor;
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
+import static frc.robot.Ports.LauncherPorts.kTurretMotor;
+
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
+import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.configs.*;
-import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SK26Turret extends SubsystemBase 
@@ -33,6 +32,7 @@ public class SK26Turret extends SubsystemBase
     private static final double kMaxAngleDegrees = 170.0;
     private static final double kCruiseVelocity = 60; //rotations/sec
     private static final double kAcceleration = 30000; //rotations/sec^2
+    private static final double kExtraDegrees = 40.0; //Degrees beyond 180 degrees that the turret can rotate without "snapping its own neck"
 
     // More physical constants (shooter related)
     private final VelocityDutyCycle shooterVelocityControl = new VelocityDutyCycle(0);
@@ -126,6 +126,50 @@ public class SK26Turret extends SubsystemBase
         motionMagic.Position = degreesToMotorRotations(angleDegrees);
         turretMotor.setControl(motionMagic);
     }
+
+    // Something to be noted: getting a Rotation2d's angle using inputModulus in degrees returns values from (-180, 180]
+    public void setRotation2d(Rotation2d rotation)
+    {
+        // Get the current angle in degrees
+        double currentAngle = getAngleDegrees();
+
+        // Get the target angle in degrees
+        double targetAngle = MathUtil.inputModulus(rotation.getDegrees(), -180, 180);
+
+        // If the sign of the current angle and target angle aren't opposites,
+        // the turret will not need to cross the 180/-180 boundary
+        if(Math.signum(currentAngle) + Math.signum(targetAngle) != 0) {
+            // Run the method as usual
+            setAngleDegrees(targetAngle);
+            return;
+        }
+
+        // Check to see how far beyond the 180 degree mark the turret plans to rotate
+        double targetAngle180DegDiff = 180 - Math.abs(targetAngle);
+
+        // If it is attempting to rotate more than the extraDegrees beyond 180 degrees, use the default method to rotate the turret
+        if(targetAngle180DegDiff > kExtraDegrees) {
+            // This effectively snaps the turret around the long way, avoiding "snapping its own neck"
+            setAngleDegrees(targetAngle);
+            return;
+        }
+
+        double newTargetAngle;
+        // Create a new, temporary target angle that is cocentric with the original target angle
+        if(Math.abs(currentAngle) < 180) {
+            // Find the degrees difference in order for the turret to cross beyond 180 
+            // degrees and also reach the target angle 
+            double totalAngleDifference = (180 - Math.abs(currentAngle)) + targetAngle180DegDiff;
+
+            newTargetAngle = currentAngle + (totalAngleDifference * Math.signum(currentAngle));
+        }
+        // If the current angle has already passed beyond 180 degrees
+        else {
+            newTargetAngle = Math.signum(currentAngle) * (180 + Math.abs(targetAngle180DegDiff));
+        }
+        setAngleDegrees(newTargetAngle);
+    }
+
     public double getAngleDegrees()
     {
         return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
