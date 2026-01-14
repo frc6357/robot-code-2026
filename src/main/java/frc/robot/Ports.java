@@ -197,7 +197,7 @@ public class Ports
     {
         private static final String busName = "";
         public static final CANPort kTurretMotor = new CANPort(55, busName);
-        public static final CANPort kShooterMotor = new CANPort(56, busName);
+        public static final CANPort kLauncherMotor = new CANPort(56, busName);
         public static final CANPort kAgitatorMotor = new CANPort(57, busName);
     }
 

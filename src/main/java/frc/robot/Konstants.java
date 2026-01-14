@@ -172,6 +172,23 @@ public final class Konstants
         public static final double kLightsOnBrightness = 0.5;
     }
 
+    public static final class IndexerConstants
+    {
+        public static final double kFeederSpeed = 0.7;
+        public static final double kFeederStop = 0.0;
+    }
+
+    public static final class LauncherConstants
+    {
+        public static final double kLauncherSpeed = 0.7;
+    }
+
+    public static final class TurretConstants
+    {
+        
+    }
+
+
 
     public static final class ExampleConstants
     {
