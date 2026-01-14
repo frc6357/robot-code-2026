@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
+import frc.lib.utils.filters.LinearDeadbandFilter;
 import frc.lib.utils.filters.DriveStickFilter;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
@@ -74,20 +75,20 @@ public class SKSwerveBinder implements CommandBinder{
 
         // TODO: Might need to uncomment this later? It caused a weird issue that made the robot drift like it's in space.
         // Sets filters for driving axes
-        // kTranslationXPort.setFilter(translationXFilter);
-        // kTranslationYPort.setFilter(translationYFilter);
-        // kVelocityOmegaPort.setFilter(rotationFilter);
+        kTranslationXPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kTranslationYPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kVelocityOmegaPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
 
-        // robotCentric.whileTrue(
-        //     drive.followSwerveRequestCommand(
-        //         DriveRequests.robotCentricTeleopRequest, 
-        //         DriveRequests.getRobotCentricTeleopRequestUpdater(
-        //                 () -> -kTranslationXPort.getFilteredAxis(), 
-        //                 () -> -kTranslationYPort.getFilteredAxis(), 
-        //                 () -> -kVelocityOmegaPort.getFilteredAxis(), 
-        //                 () -> slowmode.getAsBoolean(), 
-        //                 () -> fastmode.getAsBoolean())
-        // ));
+        robotCentric.whileTrue(
+            drive.followSwerveRequestCommand(
+                DriveRequests.robotCentricTeleopRequest, 
+                DriveRequests.getRobotCentricTeleopRequestUpdater(
+                        () -> -kTranslationXPort.getFilteredAxis(), 
+                        () -> -kTranslationYPort.getFilteredAxis(), 
+                        () -> -kVelocityOmegaPort.getFilteredAxis(), 
+                        () -> slowmode.getAsBoolean(), 
+                        () -> fastmode.getAsBoolean())
+        ));
         
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));

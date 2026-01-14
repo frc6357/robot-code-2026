@@ -18,7 +18,8 @@ public class DriveStickFilter implements Filter {
         @Override
         public double filter(double rawAxis) {
             double processedAxis = deadbandFilter.filter(rawAxis);
-            return slewRateFilter.calculate(processedAxis);
+            double slewedAxis = slewRateFilter.calculate(processedAxis);
+            return Math.min(slewedAxis, 1.0);
         }
     
     
