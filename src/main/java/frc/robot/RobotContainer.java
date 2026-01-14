@@ -36,7 +36,7 @@ import frc.robot.subsystems.vision.SKVision;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer extends Robot{
+public class RobotContainer {
 
     // private final Telemetry logger = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)); // "MaxSpeed"
 
@@ -160,7 +160,6 @@ public class RobotContainer extends Robot{
     {
     }
 
-    @Override
     public void teleopPeriodic()
     {
     }
