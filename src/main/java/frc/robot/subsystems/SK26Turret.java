@@ -61,7 +61,7 @@ public class SK26Turret extends SubsystemBase
     /*
      *  Turret-related methods
      */
-    public void setAngleDegrees(double angleDegrees)
+    private void setAngleDegrees(double angleDegrees)
     {
         angleDegrees = clamp(angleDegrees, kMinAngleDegrees, kMaxAngleDegrees);
         motionMagic.Position = degreesToMotorRotations(angleDegrees);
