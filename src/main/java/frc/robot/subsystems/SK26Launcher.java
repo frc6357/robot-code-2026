@@ -75,7 +75,7 @@ public class SK26Launcher extends SubsystemBase
     public boolean isLauncherAtSpeed()
     {
         double motorRPS = launcherMotor.getVelocity().getValueAsDouble();
-        double targetMotorRPS = (exitVelocity / kShooterEfficiency) / kWheelRadiusMeters / (2 * Math.PI) * kGearRatioShooter;
+        double targetMotorRPS = (exitVelocity / kShooterEfficiency) / (kWheelRadiusMeters * (2 * Math.PI) * kGearRatioShooter);
 
         return Math.abs(motorRPS - targetMotorRPS) < shooterSpeedTolerance;
     }
