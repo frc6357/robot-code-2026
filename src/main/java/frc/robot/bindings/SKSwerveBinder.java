@@ -21,10 +21,13 @@ import frc.lib.utils.filters.DriveStickFilter;
 import frc.robot.commands.AlignForBumpJump;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.drive.SKTargetPoint;
+import frc.robot.commands.AlignAroundPoint;
 
 @SuppressWarnings("unused")
 public class SKSwerveBinder implements CommandBinder{
     Optional<SKSwerve>  m_drive;
+    Optional<SKTargetPoint> m_targetPoint;
     DriveStickFilter translationXFilter;
     DriveStickFilter translationYFilter;
     DriveStickFilter rotationFilter;
@@ -52,8 +55,9 @@ public class SKSwerveBinder implements CommandBinder{
     private final Trigger bumpAlign = kBumpAlign.button;
 
 
-    public SKSwerveBinder(Optional<SKSwerve> m_drive) {
+    public SKSwerveBinder(Optional<SKSwerve> m_drive, Optional<SKTargetPoint> m_targetPoint) {
         this.m_drive = m_drive;
+        this.m_targetPoint = m_targetPoint;
 
         this.translationXFilter = new DriveStickFilter(
             driverTranslationSlewPref.get(),
@@ -96,7 +100,8 @@ public class SKSwerveBinder implements CommandBinder{
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
 
-        bumpAlign.whileTrue(new AlignForBumpJump(drive));
+        // bumpAlign.whileTrue(new AlignForBumpJump(drive));
+        bumpAlign.whileTrue(new AlignAroundPoint(drive, m_targetPoint.get()));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(

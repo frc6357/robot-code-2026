@@ -38,6 +38,10 @@ public class SKTargetPoint extends SubsystemBase{
         return targetPoint.getTranslation();
     }
 
+    public Pose2d getTargetPose() {
+        return targetPoint;
+    }
+
     public void moveTargetPoint(double deltaX, double deltaY) {
         targetPoint = new Pose2d(
             targetPoint.getTranslation().getX() + deltaX,
