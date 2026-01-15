@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.auto.AutoBuilder;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -26,8 +27,10 @@ import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
+import frc.robot.subsystems.drive.SKTargetPoint;
 
 
 /**
@@ -50,6 +53,7 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SKTargetPoint> m_targetPoint = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
@@ -101,6 +105,7 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            m_targetPoint = Optional.of(new SKTargetPoint(new Translation2d(0, 0), "Operator"));
         }
         catch (IOException e)
         {
@@ -117,6 +122,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SKTargetPointsBinder(m_targetPoint));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

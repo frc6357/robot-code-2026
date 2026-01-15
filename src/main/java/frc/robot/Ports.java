@@ -5,6 +5,7 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static edu.wpi.first.wpilibj.XboxController.Button.kA;
 import static edu.wpi.first.wpilibj.XboxController.Button.kB;
 import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
@@ -81,6 +82,9 @@ public class Ports
         * Example of rawAxis values (Joysticks on the controller)
         * public static final FilteredAxis kExampleRawAxis = new FilteredAxis(() -> kOperator.getRawAxis(kLeftY.value));
         */
+
+        public static final FilteredAxis kMoveTargetX = new FilteredAxis(() -> kOperator.getRawAxis(kRightY.value)); 
+        public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value)); 
 
 
         // Party mode and Teal Lights
