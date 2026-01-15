@@ -38,6 +38,7 @@ public class AlignAroundPoint extends Command{
     @Override
     public void execute() {
         double desiredAngle = Math.toDegrees(
+            Math.signum(m_drive.getRobotPose().getTranslation().getY() - targetPoint.getTargetPoint().getY()) *
             Math.acos(
                 (m_drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
                 m_drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))

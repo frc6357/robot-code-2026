@@ -35,13 +35,14 @@ public class SKVision extends SubsystemBase {
 
     // Declare your limelights here and write their hostnames in a comment next to each limelight
     /* Example:
-    public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // right-limelight
+    public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
+    public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {}; 
+    public final Limelight[] allLimelights = {frontLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {}; 
+    public final Limelight[] poseLimelights = {frontLL}; 
     
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();

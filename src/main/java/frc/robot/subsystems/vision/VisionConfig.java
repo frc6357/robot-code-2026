@@ -8,6 +8,7 @@ import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
+import frc.robot.Konstants.VisionConstants.FrontLimelight;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -23,6 +24,14 @@ public final class VisionConfig {
                                         .withRotation(RightLimelight.kRoll, RightLimelight.kPitch, RightLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(RightLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
     */
+    public static final String FRONT_LL = FrontLimelight.kName;
+    public static final int FRONT_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig FRONT_CONFIG = 
+                                        new LimelightConfig(FrontLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
+                                        .withTranslation(FrontLimelight.kForward, FrontLimelight.kRight, FrontLimelight.kUp) // Feeds in the position of the limelight on the bot
+                                        .withRotation(FrontLimelight.kRoll, FrontLimelight.kPitch, FrontLimelight.kYaw) // Feeds in rotation of limelight
+                                        .withAttached(FrontLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+
 
     // Standard deviations for vision measurements (in meters and degrees)
     public static double VISION_STD_DEV_X = 0.5; // These are not final because they are sometimes (not often) changed 

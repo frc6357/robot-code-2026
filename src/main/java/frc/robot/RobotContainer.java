@@ -28,6 +28,7 @@ import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
+import frc.robot.bindings.SKVisionBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.drive.SKTargetPoint;
@@ -123,6 +124,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer, m_targetPoint));
         buttonBinders.add(new SKTargetPointsBinder(m_targetPoint));
+        buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
