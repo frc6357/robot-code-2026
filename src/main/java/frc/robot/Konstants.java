@@ -47,7 +47,7 @@ public final class Konstants
         public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
 
         //pigeon ID
-        public static final int kPigeonID = 30; //30
+        public static final int kPigeonID = 5; //5
 
         public static double getDeadbandedStick(double rawValue) {
             if (Math.abs(rawValue) < kJoystickDeadband) {
@@ -58,34 +58,28 @@ public final class Konstants
                 return (rawValue > 0 ? unsignedValue : -unsignedValue);
             }
         }
+
+        public static final class RotationAligningConstants {
+            public static final double kP = 0.75;
+            public static final double kI = 0.0;
+            public static final double kD = 0.05;
+
+            public static final Rotation2d[] kBumpJumpAngles = new Rotation2d[] {
+                Rotation2d.fromDegrees(45),
+                Rotation2d.fromDegrees(135),
+                Rotation2d.fromDegrees(-45),
+                Rotation2d.fromDegrees(-135)
+            };
+        }
     }
 
     public static final class SwerveConstants
     {
-        // //Device Settings and Default States
-        
-        //swerve motor IDs
-        public static final int kFrontLeftDriveMotorID = 1; //1
-        public static final int kFrontRightDriveMotorID = 2; //2
-        public static final int kBackLeftDriveMotorID = 3; //3
-        public static final int kBackRightDriveMotorID = 4; //4
-        
-        public static final int kFrontLeftTurnMotorID = 11; //11
-        public static final int kFrontRightTurnMotorID = 12; //12
-        public static final int kBackLeftTurnMotorID = 13; //13
-        public static final int kBackRightTurnMotorID = 14; //14
-        
-        //encoder IDs
-        public static final int kFrontLeftEncoderID = 21; //21
-        public static final int kFrontRightEncoderID = 22; //22
-        public static final int kBackLeftEncoderID = 23; //23
-        public static final int kBackRightEncoderID = 24; //24
-        
-        //Robot Dimension values
+        // Robot Dimension values
     
-        //swerve chassis width and length in inches 
-        public static final int kChassisLength = 27;
-        public static final int kChassisWidth = 27;    
+        // swerve chassis width and length in inches 
+        public static final int kChassisLength = 28; // TODO: protobot is 28x28, but final bot will be different
+        public static final int kChassisWidth = 28; 
     }
 
     public static final class AutoConstants

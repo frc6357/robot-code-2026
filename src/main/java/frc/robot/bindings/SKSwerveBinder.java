@@ -8,6 +8,7 @@ import static frc.robot.Ports.DriverPorts.kSlowMode;
 import static frc.robot.Ports.DriverPorts.kTranslationXPort;
 import static frc.robot.Ports.DriverPorts.kTranslationYPort;
 import static frc.robot.Ports.DriverPorts.kVelocityOmegaPort;
+import static frc.robot.Ports.DriverPorts.kBumpAlign;
 
 import java.util.Optional;
 
@@ -17,6 +18,7 @@ import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 import frc.lib.utils.filters.DriveStickFilter;
+import frc.robot.commands.AlignForBumpJump;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 
@@ -47,6 +49,7 @@ public class SKSwerveBinder implements CommandBinder{
     private final Trigger slowmode = kSlowMode.button;
     private final Trigger resetButton = kResetGyroPos.button;
     private final Trigger fastmode = kFastMode.button;
+    private final Trigger bumpAlign = kBumpAlign.button;
 
 
     public SKSwerveBinder(Optional<SKSwerve> m_drive) {
@@ -92,6 +95,8 @@ public class SKSwerveBinder implements CommandBinder{
         
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
+
+        bumpAlign.whileTrue(new AlignForBumpJump(drive));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(
