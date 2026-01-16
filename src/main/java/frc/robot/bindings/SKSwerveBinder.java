@@ -22,12 +22,14 @@ import frc.robot.commands.AlignForBumpJump;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
+import frc.robot.RobotContainer;
 import frc.robot.commands.AlignAroundPoint;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
+import static frc.robot.Konstants.TargetPointConstants.targetPoints;
 
 @SuppressWarnings("unused")
 public class SKSwerveBinder implements CommandBinder{
     Optional<SKSwerve>  m_drive;
-    Optional<SKTargetPoint> m_targetPoint;
     DriveStickFilter translationXFilter;
     DriveStickFilter translationYFilter;
     DriveStickFilter rotationFilter;
@@ -55,9 +57,8 @@ public class SKSwerveBinder implements CommandBinder{
     private final Trigger bumpAlign = kBumpAlign.button;
 
 
-    public SKSwerveBinder(Optional<SKSwerve> m_drive, Optional<SKTargetPoint> m_targetPoint) {
+    public SKSwerveBinder(Optional<SKSwerve> m_drive) {
         this.m_drive = m_drive;
-        this.m_targetPoint = m_targetPoint;
 
         this.translationXFilter = new DriveStickFilter(
             driverTranslationSlewPref.get(),
@@ -101,7 +102,7 @@ public class SKSwerveBinder implements CommandBinder{
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
 
         // bumpAlign.whileTrue(new AlignForBumpJump(drive));
-        bumpAlign.whileTrue(new AlignAroundPoint(drive, m_targetPoint.get()));
+        bumpAlign.whileTrue(new AlignAroundPoint(drive, targetPoints[kOperatorControlled.ordinal()]));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(

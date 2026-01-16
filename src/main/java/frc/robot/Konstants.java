@@ -33,6 +33,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
 import frc.robot.subsystems.drive.GeneratedConstants;
+import frc.robot.subsystems.drive.SKTargetPoint;
 
 @SuppressWarnings("unused")
 public final class Konstants
@@ -71,6 +72,21 @@ public final class Konstants
                 Rotation2d.fromDegrees(-135)
             };
         }
+    }
+
+    public static final class TargetPointConstants {
+        public enum TargetPoint {
+            kOperatorControlled,
+            kBlueHub,
+            kRedHub
+        }
+
+        // Order these the same as the TargetPoint enum
+        public static SKTargetPoint[] targetPoints = {
+            new SKTargetPoint(new Translation2d(0, 0), "Operator"),
+            new SKTargetPoint(new Translation2d(4.622, 4.0295), "Blue Hub"),
+            new SKTargetPoint(new Pose2d(11.929, 4.0295, Rotation2d.k180deg), "Red Hub")
+        };
     }
 
     public static final class SwerveConstants
