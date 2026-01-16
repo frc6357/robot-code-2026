@@ -62,7 +62,7 @@ public final class Konstants
         public static final class RotationAligningConstants {
             public static final double kP = 0.85;
             public static final double kI = 0.1;
-            public static final double kD = 0.07;
+            public static final double kD = 0.03;
 
             public static final Rotation2d[] kBumpJumpAngles = new Rotation2d[] {
                 Rotation2d.fromDegrees(45),

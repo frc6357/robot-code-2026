@@ -4,9 +4,11 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 import static frc.robot.Ports.OperatorPorts.kMoveTargetX;
 import static frc.robot.Ports.OperatorPorts.kMoveTargetY;
 import frc.lib.utils.filters.LinearDeadbandFilter;
+import frc.lib.utils.Field;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
 public class SKTargetPointsBinder implements CommandBinder {
@@ -25,8 +27,8 @@ public class SKTargetPointsBinder implements CommandBinder {
         operatorControlledTargetPoint.setDefaultCommand(
             new InstantCommand(
                 () -> operatorControlledTargetPoint.moveTargetPoint(
-                    0.1 * -kMoveTargetX.getFilteredAxis(), 
-                    0.1 * -kMoveTargetY.getFilteredAxis()), 
+                    (Field.isBlue() ? -1 : 1) * 0.1 * kMoveTargetX.getFilteredAxis(), 
+                    (Field.isBlue() ? -1 : 1) * 0.1 * kMoveTargetY.getFilteredAxis()), 
                     operatorControlledTargetPoint).ignoringDisable(true)
         );
     }
