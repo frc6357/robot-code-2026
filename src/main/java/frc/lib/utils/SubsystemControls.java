@@ -11,6 +11,7 @@ public class SubsystemControls
 
     private final boolean swerve;
     private final boolean vision;
+    private final boolean indexer;
 
      /**  
      * @param swerve
@@ -20,11 +21,13 @@ public class SubsystemControls
      */
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
-        @JsonProperty(required = true, value = "vision")      boolean vision
+        @JsonProperty(required = true, value = "vision")      boolean vision,
+        @JsonProperty(required = true, value = "indexer")     boolean indexer
     )
     {
         this.swerve = swerve;
         this.vision = vision;
+        this.indexer = indexer;
     }
 
 
@@ -40,5 +43,9 @@ public class SubsystemControls
     }
     public boolean isVisionPresent() {
         return vision;
+    }
+
+    public boolean isIndexerPresent() {
+        return indexer;
     }
 }

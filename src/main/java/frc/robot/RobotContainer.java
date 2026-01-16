@@ -28,6 +28,7 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
+import frc.robot.subsystems.SKIndexer;
 
 
 /**
@@ -50,9 +51,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SKIndexer> m_indexerContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static SKIndexer m_indexerInstance;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -100,6 +103,11 @@ public class RobotContainer {
             if(subsystems.isVisionPresent()) {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
+            }
+
+            if(subsystems.isIndexerPresent()) {
+                m_indexerContainer = Optional.of(new SKIndexer());
+                m_indexerInstance = m_indexerContainer.get(); // Returns new SKSwerve
             }
         }
         catch (IOException e)
