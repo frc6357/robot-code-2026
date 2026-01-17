@@ -167,6 +167,12 @@ public class Ports
 
     }
 
+        public static class IntakePorts
+    {
+        private static final String busName = "";
+        public static final CANPort kIntakeMotor = new CANPort(50, busName);
+    }
+
 
     // public static class ExamplePorts
     // {
