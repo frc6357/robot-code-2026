@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import static frc.robot.Ports.LauncherPorts.kLauncherMotor;
+import static frc.robot.Konstants.LauncherConstants.kLauncherStopSpeed;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -82,7 +83,7 @@ public class SK26Launcher extends SubsystemBase
     public void stopShooting()
     {
         isShooting = false;
-        launcherMotor.set(0.0);
+        launcherMotor.set(kLauncherStopSpeed);
     }
 
     @Override
