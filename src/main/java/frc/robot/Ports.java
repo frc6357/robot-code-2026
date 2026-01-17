@@ -167,6 +167,15 @@ public class Ports
 
     }
 
+    // public static class pickupOBPorts
+    // {
+    //     //bus name is null
+    //     private static final String busName = "";
+
+    //     //assign a motor ID of 49 to the example motor
+    //     public static final CANPort kExampleMotor = new CANPort(59, busName); //Placeholder values
+    // }
+
 
     // public static class ExamplePorts
     // {
