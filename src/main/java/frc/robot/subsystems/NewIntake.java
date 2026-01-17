@@ -6,6 +6,9 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+
 import static frc.robot.Ports.IntakePorts.*;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -14,7 +17,8 @@ public class NewIntake extends SubsystemBase {
   SparkMax intakeMotor;
   
   public NewIntake() {
-    intakeMotor = new SparkMax(kIntakeMotor.ID, null);
+    intakeMotor = new SparkMax(kIntakeMotor.ID, MotorType.kBrushless);
+    
   }
 
   @Override
