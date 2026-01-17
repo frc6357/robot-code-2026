@@ -33,6 +33,7 @@ import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
 import frc.robot.subsystems.drive.GeneratedConstants;
+import frc.robot.subsystems.drive.SKTargetPoint;
 
 @SuppressWarnings("unused")
 public final class Konstants
@@ -47,7 +48,7 @@ public final class Konstants
         public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
 
         //pigeon ID
-        public static final int kPigeonID = 30; //30
+        public static final int kPigeonID = 5; //5
 
         public static double getDeadbandedStick(double rawValue) {
             if (Math.abs(rawValue) < kJoystickDeadband) {
@@ -58,34 +59,43 @@ public final class Konstants
                 return (rawValue > 0 ? unsignedValue : -unsignedValue);
             }
         }
+
+        public static final class RotationAligningConstants {
+            public static final double kP = 0.85;
+            public static final double kI = 0.1;
+            public static final double kD = 0.03;
+
+            public static final Rotation2d[] kBumpJumpAngles = new Rotation2d[] {
+                Rotation2d.fromDegrees(45),
+                Rotation2d.fromDegrees(135),
+                Rotation2d.fromDegrees(-45),
+                Rotation2d.fromDegrees(-135)
+            };
+        }
+    }
+
+    public static final class TargetPointConstants {
+        public enum TargetPoint {
+            kOperatorControlled,
+            kBlueHub,
+            kRedHub
+        }
+
+        // Order these the same as the TargetPoint enum
+        public static SKTargetPoint[] targetPoints = {
+            new SKTargetPoint(new Translation2d(0, 0), "Operator"),
+            new SKTargetPoint(new Translation2d(4.622, 4.0295), "Blue Hub"),
+            new SKTargetPoint(new Pose2d(11.929, 4.0295, Rotation2d.k180deg), "Red Hub")
+        };
     }
 
     public static final class SwerveConstants
     {
-        // //Device Settings and Default States
-        
-        //swerve motor IDs
-        public static final int kFrontLeftDriveMotorID = 1; //1
-        public static final int kFrontRightDriveMotorID = 2; //2
-        public static final int kBackLeftDriveMotorID = 3; //3
-        public static final int kBackRightDriveMotorID = 4; //4
-        
-        public static final int kFrontLeftTurnMotorID = 11; //11
-        public static final int kFrontRightTurnMotorID = 12; //12
-        public static final int kBackLeftTurnMotorID = 13; //13
-        public static final int kBackRightTurnMotorID = 14; //14
-        
-        //encoder IDs
-        public static final int kFrontLeftEncoderID = 21; //21
-        public static final int kFrontRightEncoderID = 22; //22
-        public static final int kBackLeftEncoderID = 23; //23
-        public static final int kBackRightEncoderID = 24; //24
-        
-        //Robot Dimension values
+        // Robot Dimension values
     
-        //swerve chassis width and length in inches 
-        public static final int kChassisLength = 27;
-        public static final int kChassisWidth = 27;    
+        // swerve chassis width and length in inches 
+        public static final int kChassisLength = 28; // TODO: protobot is 28x28, but final bot will be different
+        public static final int kChassisWidth = 28; 
     }
 
     public static final class AutoConstants
@@ -142,6 +152,23 @@ public final class Konstants
             public static final boolean kAttached = true;
         }
         */
+
+        public static final class FrontLimelight {
+            // Network/pipeline values
+            public static final String kName = "limelight-front"; // NetworkTable name and hostname
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = 0.3; // (z) meters forward of center; negative is backwards
+            public static final double kRight = 0.0; // (x) meters right of center; negative is left
+            public static final double kUp = 0.25; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+        }
 
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m

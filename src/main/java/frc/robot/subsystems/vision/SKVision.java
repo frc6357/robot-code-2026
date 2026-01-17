@@ -28,6 +28,7 @@ import frc.lib.vision.Limelight.IMUMode;
 import frc.lib.vision.LimelightHelpers.RawFiducial;
 import frc.robot.Robot;
 import frc.robot.subsystems.drive.SKSwerve;
+import static frc.robot.RobotContainer.m_field;
 
 public class SKVision extends SubsystemBase {
     // Swerve reference is needed in order to get drivetrain information like pose and velocity
@@ -35,13 +36,14 @@ public class SKVision extends SubsystemBase {
 
     // Declare your limelights here and write their hostnames in a comment next to each limelight
     /* Example:
-    public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // right-limelight
+    public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
+    public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {}; 
+    public final Limelight[] allLimelights = {frontLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {}; 
+    public final Limelight[] poseLimelights = {frontLL}; 
     
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();

@@ -17,6 +17,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -26,6 +27,8 @@ import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.bindings.SKTargetPointsBinder;
+import frc.robot.bindings.SKVisionBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
@@ -53,6 +56,8 @@ public class RobotContainer {
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+
+  public static Field2d m_field = new Field2d();
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -101,6 +106,8 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+
+
         }
         catch (IOException e)
         {
@@ -117,6 +124,8 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SKTargetPointsBinder());
+        buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
@@ -162,6 +171,7 @@ public class RobotContainer {
 
     public void teleopPeriodic()
     {
+        
     }
 
     public void teleopInit()

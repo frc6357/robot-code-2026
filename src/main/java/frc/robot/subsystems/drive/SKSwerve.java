@@ -47,6 +47,7 @@ import frc.lib.utils.Field;
 import frc.lib.utils.Util;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
+import static frc.robot.RobotContainer.m_field;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -63,8 +64,6 @@ public class SKSwerve extends SubsystemBase {
     private Supplier<Double> translationXSupplier = () -> -kTranslationXPort.getFilteredAxis();
     private Supplier<Double> translationYSupplier = () -> -kTranslationYPort.getFilteredAxis();
     private Supplier<Double> velocityOmegaSupplier = () -> -kVelocityOmegaPort.getFilteredAxis();
-    
-    private Field2d elasticField = new Field2d();
     
     private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
     .getStructTopic("RobotPose", Pose2d.struct).publish();
@@ -148,8 +147,8 @@ public class SKSwerve extends SubsystemBase {
 		posePublisher.set(getRobotPose());
 		telemetry.telemeterize(lastReadState);
 		SmartDashboard.putData("Drive", this);
-		elasticField.setRobotPose(getRobotPose());
-		SmartDashboard.putData("Elastic Field 2D", elasticField);
+		m_field.setRobotPose(getRobotPose());
+        SmartDashboard.putData("Elastic Field 2D", m_field);
 	}
 
     @Override

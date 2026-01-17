@@ -8,6 +8,7 @@ import static frc.robot.Ports.DriverPorts.kSlowMode;
 import static frc.robot.Ports.DriverPorts.kTranslationXPort;
 import static frc.robot.Ports.DriverPorts.kTranslationYPort;
 import static frc.robot.Ports.DriverPorts.kVelocityOmegaPort;
+import static frc.robot.Ports.DriverPorts.kBumpAlign;
 
 import java.util.Optional;
 
@@ -16,9 +17,19 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.filters.LinearDeadbandFilter;
+import frc.lib.utils.Field;
 import frc.lib.utils.filters.DriveStickFilter;
+import frc.robot.commands.AlignForBumpJump;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.drive.SKTargetPoint;
+import frc.robot.RobotContainer;
+import frc.robot.commands.AlignAroundPoint;
+
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
+import static frc.robot.Konstants.TargetPointConstants.targetPoints;
 
 @SuppressWarnings("unused")
 public class SKSwerveBinder implements CommandBinder{
@@ -47,6 +58,7 @@ public class SKSwerveBinder implements CommandBinder{
     private final Trigger slowmode = kSlowMode.button;
     private final Trigger resetButton = kResetGyroPos.button;
     private final Trigger fastmode = kFastMode.button;
+    private final Trigger hubAlign = kBumpAlign.button;
 
 
     public SKSwerveBinder(Optional<SKSwerve> m_drive) {
@@ -92,6 +104,12 @@ public class SKSwerveBinder implements CommandBinder{
         
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
+
+        // bumpAlign.whileTrue(new AlignForBumpJump(drive));
+        hubAlign.whileTrue(
+            new AlignAroundPoint(
+                drive, 
+                (Field.isBlue() ? targetPoints[kBlueHub.ordinal()] : targetPoints[kRedHub.ordinal()])));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(
