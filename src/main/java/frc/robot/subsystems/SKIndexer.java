@@ -8,17 +8,17 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Konstants.IndexerConstants.kIndexerMotorID;
+import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 
 public class SKIndexer extends SubsystemBase{
     private final TalonFX indexerMotor;
     TalonFXConfiguration config = new TalonFXConfiguration();
     
-    public SKIndexer() {
-        indexerMotor = new TalonFX(kIndexerMotorID);
+    public SKIndexer() 
+    {
+        indexerMotor = new TalonFX(kIndexerMotor.ID);
         indexerMotor.setNeutralMode(NeutralModeValue.Brake);
 
-        
         indexerMotor.getConfigurator().apply(config);
     }
 
