@@ -14,12 +14,28 @@ public class SKIndexer extends SubsystemBase{
     private final TalonFX indexerMotor;
     TalonFXConfiguration config = new TalonFXConfiguration();
     
+    private boolean isFeeding = false;
+
     public SKIndexer() 
     {
         indexerMotor = new TalonFX(kIndexerMotor.ID);
         indexerMotor.setNeutralMode(NeutralModeValue.Brake);
 
         indexerMotor.getConfigurator().apply(config);
+    }
+
+    public void feedFuel(double indexerMotorSpeedRPS) {
+        double indexerSpeed = indexerMotorSpeedRPS;
+        isFeeding = true;
+        setIndexerVelocity(indexerSpeed);
+    }
+    /**
+     * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
+     * @param velocity The desired velocity in RPS.
+     */
+    public void setIndexerVelocity(double velocity) {
+        // In RPS
+        indexerMotor.setControl(new VelocityVoltage(velocity));
     }
 
     @Override
@@ -33,17 +49,10 @@ public class SKIndexer extends SubsystemBase{
             "Motor Speed (RPS)", 
             () -> indexerMotor.getVelocity().getValueAsDouble(),
             null);
+
+        builder.addBooleanProperty("IsFeedig", () -> isFeeding, null);
     }
 
-    /**
-     * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
-     * @param velocity The desired velocity in RPS.
-     */
-    public void setIndexerVelocity(double velocity) {
-        // In RPS
-        indexerMotor.setControl(new VelocityVoltage(velocity));
-    }
     
-
     
 }

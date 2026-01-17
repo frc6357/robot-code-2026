@@ -148,7 +148,9 @@ public final class Konstants
         }
     }
 
-    public static final class IndexerConstants {}
+    public static final class IndexerConstants {
+        public static final double indexerMotorSpeedRPS = 10;
+    }
 
     /** Constants that are used when defining filters for controllers */
     public static final class OIConstants
