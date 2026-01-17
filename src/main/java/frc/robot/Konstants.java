@@ -149,7 +149,16 @@ public final class Konstants
     }
 
     public static final class IndexerConstants {
-        public static final double kIndexerMotorSpeedRPS = 0;
+        public static final double kIndexerFeedRPS = 8.0;
+        public static final double kIndexerIdleRPS = 0.0;
+
+        public static final double kIndexerUnjamReverseRPS = -4.0;
+        public static final double kIndexerUnjamReverseDuration = 0.2;
+
+        public static final double kIndexerUnjamWaitDuration = 0.1;
+
+        public static final double kIndexerUnjamForwardRPS = 5.0;
+        public static final double kIndexerUnjamForwardDuration = 0.3;
     }
 
     /** Constants that are used when defining filters for controllers */

@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
@@ -125,6 +126,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

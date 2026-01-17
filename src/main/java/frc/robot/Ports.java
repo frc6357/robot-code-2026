@@ -113,7 +113,9 @@ public class Ports
         
 
         // Indexer Buttons
-        public static final SKTrigger kIndex = new SKTrigger(kOperator,kRightBumper.value, BUTTON);
+        public static final SKTrigger kIndexFeed = new SKTrigger(kOperator,kRightBumper.value, BUTTON);
+        public static final SKTrigger kIndexUnjam = new SKTrigger(kOperator,kLeftBumper.value, BUTTON);
+
         // End Effector buttons
         // Angles:
         public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);
