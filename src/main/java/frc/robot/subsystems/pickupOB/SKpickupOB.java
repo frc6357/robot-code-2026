@@ -6,26 +6,35 @@ import static frc.robot.Konstants.pickupOBConstants.*;
 import static frc.robot.Ports.pickupOBPorts.*;
 
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkMax;
 
 @SuppressWarnings("unused")
 
 public class SKpickupOB extends SubsystemBase {
   //Declarations
-  //Falcon Motors
-  TalonFX positionerMotor;
-  TalonFX eaterMotor;
-  //If Vortex;
-  
 
-  double motorCurrentPosition = kPositionerMotorMinPosition;
-  double motorTargetPosition = kPositionMotorMaxPosition;
+  // TalonFX positionerMotor;
+  //TalonFX eaterMotor; 
+
+  //If Vortex:
+  SparkFlex positionerMotor;
+  SparkFlex eaterMotor; 
+
+  double motorCurrentPosition;
+  double motorTargetPosition;
 
   // Constructor 
   public SKpickupOB() {
     //Initializations
-    positionerMotor = new TalonFX(kPositionerMotor.ID, kPositionerMotor.bus);
-    eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);
+    //positionerMotor = new TalonFX(kPositionerMotor.ID, kPositionerMotor.bus);
+    //eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);
+    positionerMotor = new SparkFlex(kPositionerMotor.ID, MotorType.kBrushless);
+    eaterMotor = new SparkFlex(kEaterMotor.ID, MotorType.kBrushless);
 
+    motorCurrentPosition = kPositionerMotorMinPosition;
+    motorTargetPosition = kPositionMotorMaxPosition;
 
   }
 
