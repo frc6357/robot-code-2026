@@ -24,6 +24,8 @@ public class SK26Turret extends SubsystemBase
     private static final double kCruiseVelocity = 60; //rotations/sec
     private static final double kAcceleration = 30000; //rotations/sec^2
     private static final double kExtraDegrees = 40.0; //Degrees beyond 180 degrees that the turret can rotate without "snapping its own neck"
+    private static double lastTargetAngle = 0.0;
+
 
     // PID values
     private static final double kTurretP = 0.0;
@@ -110,7 +112,10 @@ public class SK26Turret extends SubsystemBase
         }
         setAngleDegrees(newTargetAngle);
     }
-
+    public void holdPosition() 
+    {
+        setAngleDegrees(lastTargetAngle);
+    }
     public double getAngleDegrees()
     {
         return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
@@ -134,6 +139,10 @@ public class SK26Turret extends SubsystemBase
     public void manualRotate(double dutyCycle)
     {
         turretMotor.set(dutyCycle);
+        if (Math.abs(dutyCycle) > 0.01) 
+        {
+            lastTargetAngle = getAngleDegrees();
+        }
     }
 
     @Override

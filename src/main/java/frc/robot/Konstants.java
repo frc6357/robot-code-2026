@@ -185,7 +185,10 @@ public final class Konstants
 
     public static final class TurretConstants
     {
-        
+        public static final double kManualTurretSpeed = 0.3; // Arbitrary
+        public static final double kTurretDeadband = 0.05; // Arbitrary
+        public static final double kDutyCycleOff = 0.0;
+        public static final boolean kTurretReversed = false;
     }
 
 
