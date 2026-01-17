@@ -9,15 +9,16 @@ public class VisionTurretCommand extends Command {
 
     private final SK26Turret turret;
     private final SKVision vision;
-    private final double kP; // simple proportional control for motion magic adjustment
+    private final double kP;
 
     /**
-     * Vision-based turret command.
+     * Vision turret command
      * @param turret the SK26Turret subsystem
-     * @param vision the SKVision subsystem (manages limelights)
+     * @param vision the SKVision subsystem
      * @param kP proportional gain for error correction (tune as needed)
      */
-    public VisionTurretCommand(SK26Turret turret, SKVision vision, double kP) {
+    public VisionTurretCommand(SK26Turret turret, SKVision vision, double kP) 
+    {
         this.turret = turret;
         this.vision = vision;
         this.kP = kP;
@@ -26,15 +27,18 @@ public class VisionTurretCommand extends Command {
     }
 
     @Override
-    public void initialize() {
-        // Optional: ensure LEDs are on when starting vision tracking
+    public void initialize() 
+    {
+        // Vision tracks to the limelight that can see the AprilTag the best
         vision.getBestLimelight().setLEDMode(true);
     }
 
     @Override
-    public void execute() {
+    public void execute() 
+    {
         var limelight = vision.getBestLimelight();
 
+        // If the imelight can see its target, the turret sets its rotation based on limelight feedback
         if (limelight != null && limelight.targetInView()) 
         {
             double yawError = limelight.getHorizontalOffset();
@@ -43,6 +47,8 @@ public class VisionTurretCommand extends Command {
             turret.setRotation2d(Rotation2d.fromDegrees(targetAngle));
             SK26Turret.lastTargetAngle = targetAngle;
         } 
+        
+        // If it cant see the limelight, hold the position instead
         else 
         {
             turret.holdPosition();
@@ -51,16 +57,15 @@ public class VisionTurretCommand extends Command {
 
 
     @Override
-    public void end(boolean interrupted) {
-        // Optional: turn off LEDs when stopping vision tracking
+    public void end(boolean interrupted) 
+    {
         vision.getBestLimelight().setLEDMode(false);
-
-        // Hold the last position when command ends
         turret.holdPosition();
     }
 
     @Override
-    public boolean isFinished() {
-        return false; // never finishes on its own
+    public boolean isFinished() 
+    {
+        return false;
     }
 }
