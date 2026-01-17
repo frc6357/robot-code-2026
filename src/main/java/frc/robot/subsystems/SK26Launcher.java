@@ -1,5 +1,12 @@
 package frc.robot.subsystems;
 
+import static frc.robot.Konstants.LauncherConstants.kLauncherP;
+import static frc.robot.Konstants.LauncherConstants.kLauncherI;
+import static frc.robot.Konstants.LauncherConstants.kLauncherD;
+import static frc.robot.Konstants.LauncherConstants.kLauncherV;
+import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
+import static frc.robot.Konstants.LauncherConstants.shooterTolerance;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -7,30 +14,21 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 
-//import frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
-
-public class SKFixedLauncher extends SubsystemBase {
+public class SK26Launcher extends SubsystemBase {
 
     //initialize launcher motor
     TalonFX fixedlaunchermotor;
 
-    //intiialize PID values
-    private static final double kLauncherP = 0;
-    private static final double kLauncherI = 0;
-    private static final double kLauncherD = 0;
-    private static final double kLauncherV = 0;
-
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
-    private final double kWheelRadius = 0; //meters
-    private double launchVelocity;
-    private final double shooterTolerance = 0.5;
+    private double targetLaunchVelocity; //meters per second
     private boolean shooting = false;
     
-    SKFixedLauncher() {
+    public SK26Launcher() {
 
-        fixedlaunchermotor = new TalonFX(0);
+        fixedlaunchermotor = new TalonFX(kFixedLauncherMotor.ID);
         configMotor();
     }
 
@@ -46,11 +44,11 @@ public class SKFixedLauncher extends SubsystemBase {
         fixedlaunchermotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
-    public void startLauncher(double launchVelocity) {
+    public void startLauncher(double targetLaunchVelocity) {
 
-        this.launchVelocity = launchVelocity;
+        this.targetLaunchVelocity = targetLaunchVelocity;
         //Math is probably incredibly wrong but I tried
-        double motorRPS = launchVelocity/(2*Math.PI*kWheelRadius);
+        double motorRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
         launcherVelocityControl.Velocity = motorRPS; 
         fixedlaunchermotor.setControl(launcherVelocityControl); //makes launcher launch
         shooting = true;
@@ -59,7 +57,7 @@ public class SKFixedLauncher extends SubsystemBase {
     public boolean isLauncherAtSpeed() {
 
         double motorRPS = fixedlaunchermotor.getVelocity().getValueAsDouble();
-        double targetRPS = launchVelocity/(2*Math.PI*kWheelRadius);
+        double targetRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
         return Math.abs(motorRPS - targetRPS) < shooterTolerance;
     }
 

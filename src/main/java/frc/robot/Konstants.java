@@ -172,6 +172,16 @@ public final class Konstants
         public static final double kLightsOnBrightness = 0.5;
     }
 
+    public static final class LauncherConstants {
+
+        public static final double kLauncherP = 0;
+        public static final double kLauncherI = 0;
+        public static final double kLauncherD = 0;
+        public static final double kLauncherV = 0;
+
+        public static final double kWheelRadius = 0; //meters
+        public static final double shooterTolerance = 0.5; // +/- rps
+    }
 
     public static final class ExampleConstants
     {
