@@ -180,7 +180,16 @@ public final class Konstants
 
     public static final class LauncherConstants
     {
+        // Launcher Speeds
         public static final double kLauncherSpeed = 0.7;
+        public static final double kLauncherStopSpeed = 0.0;
+        public static final double shooterSpeedTolerance = 0.5; //Arbitrary tolerance, but it would be rotations/sec
+
+        // Physical Constants
+        public static final double kWheelRadiusMeters = 0.0; //TODO Change these when it's given to us
+        public static final double kShooterEfficiency = 0.0; //Friction factor
+        public static final double kGearRatioShooter = 0.0;
+
     }
 
     public static final class TurretConstants
@@ -189,6 +198,14 @@ public final class Konstants
         public static final double kTurretDeadband = 0.05; // Arbitrary
         public static final double kDutyCycleOff = 0.0;
         public static final boolean kTurretReversed = false;
+
+        public static final double kMotorRotPerTurretRot = 12.8; //Ideally motor rotations per turret rotation
+        public static final double kDegreesPerMotorRotation = 360.0 / kMotorRotPerTurretRot; 
+        public static final double kMinAngleDegrees = -170.0; //TODO Replace my generic angle values with true value
+        public static final double kMaxAngleDegrees = 170.0;
+        public static final double kCruiseVelocity = 60; //rotations/sec
+        public static final double kAcceleration = 30000; //rotations/sec^2
+        public static final double kExtraDegrees = 40.0; //Degrees beyond 180 degrees that the turret can rotate without "snapping its own neck"
     }
 
 

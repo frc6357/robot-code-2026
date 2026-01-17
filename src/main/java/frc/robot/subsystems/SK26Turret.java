@@ -1,11 +1,23 @@
 package frc.robot.subsystems;
 
+// Imported constants from the Ports file
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 
+// Imported constants from the Konstants file
+import static frc.robot.Konstants.TurretConstants.kAcceleration;
+import static frc.robot.Konstants.TurretConstants.kCruiseVelocity;
+import static frc.robot.Konstants.TurretConstants.kDegreesPerMotorRotation;
+import static frc.robot.Konstants.TurretConstants.kExtraDegrees;
+import static frc.robot.Konstants.TurretConstants.kMaxAngleDegrees;
+import static frc.robot.Konstants.TurretConstants.kMinAngleDegrees;
+
+// Phoenix/Kraken related imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+
+// WPI related imports
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -18,15 +30,7 @@ public class SK26Turret extends SubsystemBase
 
     // Some physical constants (turret related)
     private final MotionMagicDutyCycle motionMagic = new MotionMagicDutyCycle(0);
-    private static final double kMotorRotPerTurretRot = 12.8; //Ideally motor rotations per turret rotation
-    private static final double kDegreesPerMotorRotation = 360.0 / kMotorRotPerTurretRot; 
-    private static final double kMinAngleDegrees = -170.0; //TODO Replace my generic angle values with true value
-    private static final double kMaxAngleDegrees = 170.0;
-    private static final double kCruiseVelocity = 60; //rotations/sec
-    private static final double kAcceleration = 30000; //rotations/sec^2
-    private static final double kExtraDegrees = 40.0; //Degrees beyond 180 degrees that the turret can rotate without "snapping its own neck"
     public static double lastTargetAngle = 0.0;
-
 
     // PID values
     private static final double kTurretP = 0.0;
@@ -151,4 +155,6 @@ public class SK26Turret extends SubsystemBase
     {
         SmartDashboard.putData("Turret", this);
     }
+
+
 }
