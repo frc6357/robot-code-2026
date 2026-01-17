@@ -201,9 +201,9 @@ public class SKVision extends SubsystemBase {
     }
 
     private void updatePoseTeleop() {
-        if (!DriverStation.isTeleopEnabled()) {
-            return;
-        }
+        // if (!DriverStation.isTeleopEnabled()) {
+        //     return;
+        // }
 
         Limelight bestLL = getBestLimelight();
         for(Limelight ll : poseLimelights) {
@@ -226,7 +226,7 @@ public class SKVision extends SubsystemBase {
         updatePoseAutonomous();
 
         /*
-        Teleop pose updater:
+        Teleop/disabled pose updater:
 
         Instead of allowing all limelights to feed data into the SwervePoseEstimator, it scores each limelight that has a
         tag in view based on the tag's proximity to the bot and the number of tags seen. Only then does it feed a pose measurement 
@@ -375,7 +375,8 @@ public class SKVision extends SubsystemBase {
                             VisionConfig.VISION_STD_DEV_THETA));
 
             Pose2d integratedPose = new Pose2d(megaPose.getTranslation(), megaPose.getRotation());
-            m_swerve.getDrivetrain().addVisionMeasurement(integratedPose, poseTimestamp);
+            // m_swerve.getDrivetrain().addVisionMeasurement(integratedPose, poseTimestamp);
+            m_swerve.addVisionMeasurement(integratedPose, poseTimestamp);
             // robotPose = m_swerve.getRobotPose(); // get updated pose
             resetPoseToVisionLog = ("ResetPoseToVision: SUCCESS");
             return true;
@@ -504,34 +505,24 @@ public class SKVision extends SubsystemBase {
             degStds = 15;
         }
 
-        // track STDs
-        VisionConfig.VISION_STD_DEV_X = xyStds;
-        VisionConfig.VISION_STD_DEV_Y = xyStds;
-        VisionConfig.VISION_STD_DEV_THETA = degStds;
-
         Pose2d integratedPose = new Pose2d(botposeMT2.getTranslation(), botposeMT2.getRotation());
 
         addVisionMeasurementWithStdDevs(
             integratedPose, 
             timeStamp, 
             VecBuilder.fill(
-                VisionConfig.VISION_STD_DEV_X,
-                VisionConfig.VISION_STD_DEV_Y,
-                VisionConfig.VISION_STD_DEV_THETA));
+                xyStds,
+                xyStds,
+                degStds));
     }
 
     private void addVisionMeasurementWithStdDevs(Pose2d integratedPose, double timeStamp, Vector<N3>stdDevs) {
-        m_swerve.getDrivetrain().setVisionMeasurementStdDevs(stdDevs);
+        // m_swerve.getDrivetrain().setVisionMeasurementStdDevs(stdDevs);
 
-        m_swerve.getDrivetrain().addVisionMeasurement(integratedPose, timeStamp);
-    }
-    private void addVisionMeasurementWithStdDevs(Pose2d integratedPose, double timeStamp, double stdDevX, double stdDevY, double stdDevTheta) {
-        Vector<N3> stdDevs = VecBuilder.fill(
-            stdDevX,
-            stdDevY,
-            stdDevTheta
-        );
-        addVisionMeasurementWithStdDevs(integratedPose, timeStamp, stdDevs);
+        // m_swerve.getDrivetrain().addVisionMeasurement(integratedPose, timeStamp);
+
+        m_swerve.setVisionMeasurementStdDevs(stdDevs);
+        m_swerve.addVisionMeasurement(integratedPose, timeStamp);
     }
 
     /** If at least one limelight has an accurate pose */
