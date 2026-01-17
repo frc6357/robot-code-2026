@@ -5,7 +5,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Konstants.pickupOBConstants.*;
 import static frc.robot.Ports.pickupOBPorts.*;
 
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -22,6 +24,14 @@ public class SKpickupOB extends SubsystemBase {
   SparkMax positionerMotor;
   SparkMax eaterMotor; 
 
+  //Encoder
+  CANcoder encoder;
+
+  //Limit Switches
+  //SparkLimitSwitch switch1;
+  //SparkLimitSwitch switch2;
+
+
   double motorCurrentPosition;
   double motorTargetPosition;
 
@@ -32,6 +42,10 @@ public class SKpickupOB extends SubsystemBase {
     //eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);
     positionerMotor = new SparkMax(kPositionerMotor.ID, MotorType.kBrushless);
     eaterMotor = new SparkMax(kEaterMotor.ID, MotorType.kBrushless);
+
+    // Limit switches with REV
+    //forwardLimitSwitch = motorL.getForwardLimitSwitch();
+    //reverseLimitSwitch = motorL.getReverseLimitSwitch();
 
     motorCurrentPosition = kPositionerMotorMinPosition;
     motorTargetPosition = kPositionMotorMaxPosition;
