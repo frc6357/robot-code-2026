@@ -10,13 +10,13 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 
-public class SKIndexer extends SubsystemBase{
+public class SK26Indexer extends SubsystemBase{
     private final TalonFX indexerMotor;
     TalonFXConfiguration config = new TalonFXConfiguration();
     
     private boolean isFeeding = false;
 
-    public SKIndexer() 
+    public SK26Indexer() 
     {
         indexerMotor = new TalonFX(kIndexerMotor.ID);
         indexerMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -53,6 +53,9 @@ public class SKIndexer extends SubsystemBase{
         builder.addBooleanProperty("IsFeedig", () -> isFeeding, null);
     }
 
-    
-    
+    public SK26Indexer get() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'get'");
+    }
+
 }

@@ -110,7 +110,10 @@ public class Ports
         public static final SKTrigger kLowAlgae = new SKTrigger(kOperator, kB.value, BUTTON);
         public static final SKTrigger kHighAlgae = new SKTrigger(kOperator, kY.value, BUTTON);
         public static final SKTrigger kNetPos = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        
 
+        // Indexer Buttons
+        public static final SKTrigger kIndex = new SKTrigger(kOperator,kRightBumper.value, BUTTON);
         // End Effector buttons
         // Angles:
         public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);

@@ -149,7 +149,7 @@ public final class Konstants
     }
 
     public static final class IndexerConstants {
-        public static final double indexerMotorSpeedRPS = 10;
+        public static final double kIndexerMotorSpeedRPS = 0;
     }
 
     /** Constants that are used when defining filters for controllers */
