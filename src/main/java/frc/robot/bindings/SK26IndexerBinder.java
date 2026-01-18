@@ -7,6 +7,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Ports.IndexerPorts;
 
 import frc.robot.commands.IndexerFeedCommand;
+import frc.robot.commands.commandGroups.UnjamCommand;
+
 import static frc.robot.Konstants.IndexerConstants.*;
 
 import java.util.Optional;
@@ -33,20 +35,7 @@ public class SK26IndexerBinder implements CommandBinder{
             SK26Indexer indexer = indexerSubsystem.get();
 
             IndexFeed.whileTrue(new IndexerFeedCommand(indexer));
-            // IndexUnjam.whileTrue(
-            //     Commands.sequence(
-            //         indexer.setIndexerVelCommand(kIndexerUnjamReverseRPS),
-            //         new WaitCommand(kIndexerUnjamReverseDuration),
-
-            //         indexer.setIndexerVelCommand(kIndexerIdleRPS),
-            //         new WaitCommand(kIndexerUnjamWaitDuration),
-
-            //         indexer.setIndexerVelCommand(kIndexerUnjamForwardRPS),
-            //         new WaitCommand(kIndexerUnjamForwardDuration),
-
-            //         indexer.setIndexerVelCommand(kIndexerIdleRPS),
-            //         new WaitCommand(kIndexerUnjamWaitDuration)
-            // ).handleInterrupt(() -> indexer.setIndexerVelCommand(kIndexerIdleRPS)));
+            IndexUnjam.whileTrue(new UnjamCommand(indexer));
         }
     }
 }
