@@ -27,6 +27,7 @@ public class UnjamCommand extends SequentialCommandGroup {
                 // Pause
                 Commands.runOnce(() -> indexer.setIndexerVelocity(kIndexerIdleRPS), indexer),
                 Commands.waitSeconds(kIndexerUnjamWaitDuration))
-            .repeatedly());
+            .repeatedly()
+            .finallyDo(() -> indexer.setIndexerVelocity(kIndexerIdleRPS)));
   }
 }
