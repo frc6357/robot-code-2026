@@ -179,7 +179,7 @@ public final class Konstants
         public static final double kLauncherD = 0;
         public static final double kLauncherV = 0;
 
-        public static final double kWheelRadius = 0; //meters
+        public static final double kWheelRadius = .075; //TEMPORARY
         public static final double shooterTolerance = 0.5; // +/- rps
     }
 

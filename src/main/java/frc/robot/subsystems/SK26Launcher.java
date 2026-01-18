@@ -19,7 +19,7 @@ import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 public class SK26Launcher extends SubsystemBase {
 
     //initialize launcher motor
-    TalonFX fixedlaunchermotor;
+    TalonFX launchermotor;
 
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
@@ -28,7 +28,7 @@ public class SK26Launcher extends SubsystemBase {
     
     public SK26Launcher() {
 
-        fixedlaunchermotor = new TalonFX(kFixedLauncherMotor.ID);
+        launchermotor = new TalonFX(kFixedLauncherMotor.ID);
         configMotor();
     }
 
@@ -40,11 +40,11 @@ public class SK26Launcher extends SubsystemBase {
         config.Slot0.kD = kLauncherD;
         config.Slot0.kV = kLauncherV;
 
-        fixedlaunchermotor.getConfigurator().apply(config);
-        fixedlaunchermotor.setNeutralMode(NeutralModeValue.Brake);
+        launchermotor.getConfigurator().apply(config);
+        launchermotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
-    public void startLauncher(double targetLaunchVelocity) {
+    /*public void startLauncher(double targetLaunchVelocity) {
 
         this.targetLaunchVelocity = targetLaunchVelocity;
         //Math is probably incredibly wrong but I tried
@@ -52,23 +52,36 @@ public class SK26Launcher extends SubsystemBase {
         launcherVelocityControl.Velocity = motorRPS; 
         fixedlaunchermotor.setControl(launcherVelocityControl); //makes launcher launch
         shooting = true;
+    }*/
+
+    //for debugging the motor ONLY!!
+    public void startLauncher(double speed) {
+        targetLaunchVelocity = speed;
+        launchermotor.set(speed);
+        shooting = true;
     }
 
     public boolean isLauncherAtSpeed() {
 
-        double motorRPS = fixedlaunchermotor.getVelocity().getValueAsDouble();
+        double motorRPS = launchermotor.getVelocity().getValueAsDouble();
         double targetRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
         return Math.abs(motorRPS - targetRPS) < shooterTolerance;
     }
 
     public void stopLauncher() {
 
-        fixedlaunchermotor.set(0);
+        launchermotor.set(0);
+        targetLaunchVelocity = 0;
         shooting = false;
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Fixed Launcher", shooting);
+        SmartDashboard.putBoolean("Launcher: ", shooting);
+        //Debugging the launcher
+        SmartDashboard.putBoolean("Is at launcher speed", isLauncherAtSpeed());
+        SmartDashboard.putNumber("motorRPS", launchermotor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("targetRPS", targetLaunchVelocity/(2*Math.PI*kWheelRadius));
+
     }
 }
