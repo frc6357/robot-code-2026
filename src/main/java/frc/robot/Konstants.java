@@ -201,7 +201,7 @@ public final class Konstants
 
         public static final class NewIntakeConstants
     {
-        public static final double setIntakeSpeed = 0.5;
+        public static final double kSetIntakeSpeed = 0.5;
     }
 
 

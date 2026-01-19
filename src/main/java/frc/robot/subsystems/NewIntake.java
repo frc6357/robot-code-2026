@@ -24,7 +24,11 @@ public class NewIntake extends SubsystemBase {
 
   public void runNewIntake()
   {
-    intakeMotor.set(setIntakeSpeed);
+    intakeMotor.set(kSetIntakeSpeed);
+  }
+    public void stopNewIntake()
+  {
+    intakeMotor.set(0);
   }
 
   @Override
