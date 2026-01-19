@@ -51,10 +51,10 @@ public class SK26Turret extends SubsystemBase
     public static double lastTargetAngle = 0.0;
 
     // PID values
-    private static final double kTurretP = 0.0;
-    private static final double kTurretI = 0.0;
-    private static final double kTurretD = 0.0;
-    private static final double kTurretF = 0.0;
+    // private static final double kTurretP = 0.0;
+    // private static final double kTurretI = 0.0;
+    // private static final double kTurretD = 0.0;
+    // private static final double kTurretF = 0.0;
 
     public SK26Turret() 
     {

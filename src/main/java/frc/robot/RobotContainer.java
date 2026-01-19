@@ -25,7 +25,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.subsystems.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
@@ -51,9 +53,11 @@ public class RobotContainer
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SK26Turret> m_turretContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static SK26Turret m_turretInstance;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -102,6 +106,10 @@ public class RobotContainer
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            if(subsystems.isTurretPresent()) {
+                m_turretContainer = Optional.of(new SK26Turret());
+                m_turretInstance = m_turretContainer.get();
+            }
         }
         catch (IOException e)
         {
@@ -118,6 +126,7 @@ public class RobotContainer
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SK26TurretBinder(m_turretContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
