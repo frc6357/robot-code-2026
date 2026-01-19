@@ -149,9 +149,14 @@ public final class Konstants
     }
 
     public static final class IndexerConstants {
+
+        // Indexer feed speed in Rotations Per Second (RPS)
         public static final double kIndexerFeedRPS = 8.0;
+
+        // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleRPS = 0.0;
 
+        // Indexer unjam parameters
         public static final double kIndexerUnjamReverseRPS = -4.0;
         public static final double kIndexerUnjamReverseDuration = 0.2;
 
