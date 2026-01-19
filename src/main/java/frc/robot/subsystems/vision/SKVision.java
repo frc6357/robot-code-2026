@@ -93,6 +93,7 @@ public class SKVision extends SubsystemBase {
             () -> resetPoseToVisionLog, 
             null);
         
+        addStdDevsToBuilder(builder);
         addLimelightsToBuilder(builder);
     }
 
@@ -103,6 +104,21 @@ public class SKVision extends SubsystemBase {
                 () -> ll.getLogStatus(), 
                 null);
         }
+    }
+
+    private void addStdDevsToBuilder(SendableBuilder builder) {
+        builder.addDoubleProperty(
+            "StdDevs/Vision Std Dev X", 
+            () -> VisionConfig.VISION_STD_DEV_X, 
+            null);
+        builder.addDoubleProperty(
+            "StdDevs/Y", 
+            () -> VisionConfig.VISION_STD_DEV_Y,
+            null);
+        builder.addDoubleProperty(
+            "StdDevs/Theta", 
+            () -> VisionConfig.VISION_STD_DEV_THETA,
+            null);
     }
 
     private void startupLimelights() {
@@ -368,7 +384,7 @@ public class SKVision extends SubsystemBase {
             VisionConfig.VISION_STD_DEV_X = 0.001;
             VisionConfig.VISION_STD_DEV_Y = 0.001;
             VisionConfig.VISION_STD_DEV_THETA = 0.001;
-            m_swerve.getDrivetrain().setVisionMeasurementStdDevs(
+            m_swerve.setVisionMeasurementStdDevs(
                     VecBuilder.fill(
                             VisionConfig.VISION_STD_DEV_X,
                             VisionConfig.VISION_STD_DEV_Y,
@@ -507,13 +523,17 @@ public class SKVision extends SubsystemBase {
 
         Pose2d integratedPose = new Pose2d(botposeMT2.getTranslation(), botposeMT2.getRotation());
 
+        VisionConfig.VISION_STD_DEV_X = xyStds;
+        VisionConfig.VISION_STD_DEV_Y = xyStds;
+        VisionConfig.VISION_STD_DEV_THETA = degStds;
+
         addVisionMeasurementWithStdDevs(
             integratedPose, 
             timeStamp, 
             VecBuilder.fill(
-                xyStds,
-                xyStds,
-                degStds));
+                VisionConfig.VISION_STD_DEV_X,
+                VisionConfig.VISION_STD_DEV_Y,
+                VisionConfig.VISION_STD_DEV_THETA));
     }
 
     private void addVisionMeasurementWithStdDevs(Pose2d integratedPose, double timeStamp, Vector<N3>stdDevs) {
