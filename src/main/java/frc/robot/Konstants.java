@@ -208,6 +208,8 @@ public final class Konstants
     public static final class pickupOBConstants
     {
         public static final double kEaterMotorSpeed = 0.5;
+        public static final double kPositionerMotorSpeed = 0.5;
+
         public static final double kPositionerMotorMinPosition = 0.5;
         public static final double kPositionMotorMaxPosition = 0.5;
     }

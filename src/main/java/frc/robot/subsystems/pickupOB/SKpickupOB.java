@@ -52,6 +52,22 @@ public class SKpickupOB extends SubsystemBase {
 
   }
 
+  public void runPositionerMotor() {
+    positionerMotor.set(kPositionerMotorSpeed);
+  }
+
+  public void runEaterMotor() {
+    eaterMotor.set(kEaterMotorSpeed);
+  }
+
+  public void stopPositionerMotor() {
+    positionerMotor.set(0);
+  }
+
+  public void stopEaterMotor() {
+    eaterMotor.set(0);
+  }
+
   //Function ideas, getspeed, get position, stop, setspeed,
   @Override
   public void periodic() {
