@@ -14,11 +14,16 @@ public class SK26Indexer extends SubsystemBase
     // Motor
     private TalonFX agitatorMotor;
 
-    // PID values
-    private static final double kAgitatorP = 0.0;
-    private static final double kAgitatorI = 0.0;
-    private static final double kAgitatorD = 0.0;
-    private static final double kAgitatorF = 0.0;
+    .withSlot0(new Slot0Configs().withKP(50))
+
+    // this essentially sets the motor to a max current supply of 120 amps
+    .withCurrentLimits(
+        new CurrentLimitsConfigs()
+
+            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimitEnable(true)
+    )   
+    ;
 
     public SK26Indexer() 
     {
