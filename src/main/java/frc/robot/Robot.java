@@ -7,6 +7,8 @@ package frc.robot;
 import static frc.robot.Ports.DriverPorts.kDriver;
 import static frc.robot.Ports.OperatorPorts.kOperator;
 
+import frc.robot.subsystems.SK26Lights.led;
+
 import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.net.WebServer;
@@ -34,6 +36,8 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    m_led = new AddressableLED(kLightsPWMHeader)
 
     //get the saved elastic dashboard layout
     WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
