@@ -174,11 +174,12 @@ public final class Konstants
 
     public static final class ClimbConstants
     {
-        public static final double motorSpeed = 0;
+        public static final double kClimbMotorSpeed = 0;
         public static final double kClimbP = 0;
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbTolerance = 1; //figure out tolerance
+        public static final double kCLimbMax = 0; //figure out value of encoder when climb is at max height.
     }
 
 

@@ -1,4 +1,4 @@
-package frc.commands;
+package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -7,27 +7,28 @@ import frc.robot.subsystems.Climb;
 
 public class ClimbButtonCommand extends Command{
 
-    private final Climb subsystem;
+    private final Climb climb;
     private final double height;
 
-    public ClimbButtonCommand(double height, Climb Subsystem)
+    public ClimbButtonCommand(double height, Climb climb)
     {
-        this.subsystem = Subsystem;
+        this.climb = climb;
         this.height = height;
 
-        addRequirements(subsystem);
+        addRequirements(climb);
     }
 
     public void initialize()
     {
-        subsystem.setClimbHeight(height);
+        climb.setClimbHeight(height);
+        climb.isRunning = true;
     }
 
     public boolean isFinished()
     {
         if(DriverStation.isAutonomousEnabled())
         {
-            if (subsystem.climbIsAtHeight())
+            if (climb.climbIsAtHeight())
             {
                 return true;
             }
@@ -39,7 +40,7 @@ public class ClimbButtonCommand extends Command{
         }
         else
         {
-            if (subsystem.climbIsAtHeight())
+            if (climb.climbIsAtHeight())
             {
                 return true;
             }

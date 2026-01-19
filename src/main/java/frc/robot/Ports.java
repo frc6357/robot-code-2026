@@ -70,6 +70,10 @@ public class Ports
 
         // Reset gyro
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+
+        //Climb buttons
+        public static final SKTrigger climbUpButton = new SKTrigger(kDriver, 270, POV);
+        public static final SKTrigger climbDownButton = new SKTrigger(kDriver, 90, POV);
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external

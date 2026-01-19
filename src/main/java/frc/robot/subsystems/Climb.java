@@ -15,6 +15,7 @@ import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
 import static frc.robot.Konstants.ClimbConstants.kClimbI;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
+import static frc.robot.Konstants.ClimbConstants.kCLimbMax;
 import static frc.robot.Konstants.ClimbConstants.kClimbD;
 
 import edu.wpi.first.wpilibj.DigitalInput;
@@ -33,13 +34,16 @@ public class Climb extends SubsystemBase
     final double motorRatio = 0.0; //change once we know gear ratio
     final double climbFactor = 0.0; // change once fingure out what the conversion factor is from the encoder to the height
 
-    double cTargetHieight;
-    double cCurrentHeight;
+    double cTargetHieight = 0.0;
+    double cCurrentHeight = 0.0;
+
     SparkFlexConfig climbConfig;
 
     public AbsoluteEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
 
     SparkClosedLoopController cpid;
+
+    public boolean isRunning;
 
     public Climb()
     {
@@ -56,17 +60,19 @@ public class Climb extends SubsystemBase
     }
 
 
-
+    //runs the motor at a given speed
     public void runMotor(double motorSpeed)
     {
         climbMotor.set(motorSpeed);
     }
 
+    // stops the motor by setting the speed to 0
     public void stopMotor()
     {
         climbMotor.set(0);
     }
 
+    // checks if the climb is at the target height
     public boolean climbIsAtHeight()
     {
         if (DriverStation.isTeleop())
@@ -79,21 +85,25 @@ public class Climb extends SubsystemBase
         }
     }
 
+    // etreives the saved target position for the climb
     public double getClimbTargetPosition()
     {
         return cTargetHieight;
     }
 
+    // gets the current position of the climb
     public double getClimbPosition()
     {
         return cEncoder.getPosition() * climbFactor;
     }
 
+    // chacks the limit switch to see if it is true or false
     public boolean isSwitchPressed()
     {
         return cLimitSwitch.get();
     }
 
+    // sets a target height for the climb
     public void setClimbHeight(double targetHieight)
     {
         cTargetHieight = targetHieight;
@@ -102,9 +112,36 @@ public class Climb extends SubsystemBase
         cpid.setReference(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
+    // gets the current position of the encoder
     public double getEncoderPos()
     {
         return cEncoder.getPosition();
+    }
+
+    // hold command, may be necessary to ensure the robot doesnt get pulled back down by gravity
+    public void hold()
+    {
+        if(isRunning == true)
+        {
+            cTargetHieight = getClimbPosition();
+            isRunning = false;
+        }
+        setClimbHeight(cTargetHieight);
+    }
+
+    // checks if the climb arm is at its max height
+    public boolean cAtMaxHeight()
+    {
+        if(getEncoderPos() == kCLimbMax && isSwitchPressed())
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+        
     }
 
     public void teleopPeriodic()
