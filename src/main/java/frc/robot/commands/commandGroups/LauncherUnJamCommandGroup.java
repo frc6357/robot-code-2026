@@ -33,7 +33,9 @@ public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
 
                 //Stops motor
                 Commands.runOnce(() -> launchermotor.unJamLauncher(kStopLauncher)),
-                Commands.waitSeconds(kUnJamLauncherWaitTime)).repeatedly().finallyDo(() -> launchermotor.stopLauncher())
+                Commands.waitSeconds(kUnJamLauncherWaitTime))
+                .repeatedly() //makes the unjam command repeat until button is let go
+                .finallyDo(() -> launchermotor.stopLauncher()) //stops the launcher once it stops repeating
         );
     }
     

@@ -25,7 +25,7 @@ public class SK26Launcher extends SubsystemBase {
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
     private double targetLaunchVelocity; //meters per second
-    private boolean shooting = false;
+    private boolean isShooting = false;
     
     public SK26Launcher() {
 
@@ -35,6 +35,7 @@ public class SK26Launcher extends SubsystemBase {
 
     public void configMotor() {
 
+        //configures PID values onto the launcher motor
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.Slot0.kP = kLauncherP;
         config.Slot0.kI = kLauncherI;
@@ -56,16 +57,19 @@ public class SK26Launcher extends SubsystemBase {
     }*/
 
     //for debugging the motor ONLY!!
+    //Starts the launcher motor to certain target launch velocity
     public void startLauncher(double targetLaunchVelocity) {
         this.targetLaunchVelocity = targetLaunchVelocity;
         launchermotor.set(targetLaunchVelocity);
-        shooting = true;
+        isShooting = true;
     }
     
+    //unjams the motor to allow proper shooting
     public void unJamLauncher(double speed) {
         startLauncher(speed);
     }
 
+    //checks whether or not the motor is at the target speed
     public boolean isLauncherAtSpeed() {
 
         double motorRPS = launchermotor.getVelocity().getValueAsDouble();
@@ -73,17 +77,18 @@ public class SK26Launcher extends SubsystemBase {
         return Math.abs(motorRPS - targetRPS) < kShooterTolerance;
     }
 
+    //Sets the motor speed to zero
     public void stopLauncher() {
 
         launchermotor.set(kStopLauncher);
         targetLaunchVelocity = kStopLauncher;
-        shooting = false;
+        isShooting = false;
     }
 
+    //Sends data to the Smart Dashboard
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Launcher: ", shooting);
-        //Debugging the launcher
+        SmartDashboard.putBoolean("Launcher: ", isShooting);
         SmartDashboard.putBoolean("Is at launcher speed", isLauncherAtSpeed());
         SmartDashboard.putNumber("Velocity", launchermotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("targetRPS", targetLaunchVelocity/(2*Math.PI*kWheelRadius));
