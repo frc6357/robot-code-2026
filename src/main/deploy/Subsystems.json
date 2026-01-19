@@ -1,4 +1,4 @@
 {
-    "swerve": true,
+    "swerve": false,
     "vision": false
 }

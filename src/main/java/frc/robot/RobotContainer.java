@@ -36,7 +36,8 @@ import frc.robot.subsystems.vision.SKVision;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
-public class RobotContainer extends Robot{
+public class RobotContainer
+{
 
     // private final Telemetry logger = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)); // "MaxSpeed"
 
@@ -71,9 +72,9 @@ public class RobotContainer extends Robot{
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
+    //autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    //SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
@@ -160,7 +161,6 @@ public class RobotContainer extends Robot{
     {
     }
 
-    @Override
     public void teleopPeriodic()
     {
     }
