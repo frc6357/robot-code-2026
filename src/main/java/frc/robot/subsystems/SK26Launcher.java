@@ -5,7 +5,7 @@ import static frc.robot.Konstants.LauncherConstants.kLauncherI;
 import static frc.robot.Konstants.LauncherConstants.kLauncherD;
 import static frc.robot.Konstants.LauncherConstants.kLauncherV;
 import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
-import static frc.robot.Konstants.LauncherConstants.shooterTolerance;
+import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -55,9 +55,9 @@ public class SK26Launcher extends SubsystemBase {
     }*/
 
     //for debugging the motor ONLY!!
-    public void startLauncher(double speed) {
-        targetLaunchVelocity = speed;
-        launchermotor.set(speed);
+    public void startLauncher(double targetLaunchVelocity) {
+        this.targetLaunchVelocity = targetLaunchVelocity;
+        launchermotor.set(targetLaunchVelocity);
         shooting = true;
     }
 
@@ -65,7 +65,7 @@ public class SK26Launcher extends SubsystemBase {
 
         double motorRPS = launchermotor.getVelocity().getValueAsDouble();
         double targetRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
-        return Math.abs(motorRPS - targetRPS) < shooterTolerance;
+        return Math.abs(motorRPS - targetRPS) < kShooterTolerance;
     }
 
     public void stopLauncher() {
@@ -80,7 +80,7 @@ public class SK26Launcher extends SubsystemBase {
         SmartDashboard.putBoolean("Launcher: ", shooting);
         //Debugging the launcher
         SmartDashboard.putBoolean("Is at launcher speed", isLauncherAtSpeed());
-        SmartDashboard.putNumber("motorRPS", launchermotor.getVelocity().getValueAsDouble());
+        SmartDashboard.putNumber("Velocity", launchermotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("targetRPS", targetLaunchVelocity/(2*Math.PI*kWheelRadius));
 
     }

@@ -174,13 +174,14 @@ public final class Konstants
 
     public static final class LauncherConstants {
 
-        public static final double kLauncherP = 0;
+        //initialize PID values... NOT FINAL
+        public static final double kLauncherP = 5;
         public static final double kLauncherI = 0;
         public static final double kLauncherD = 0;
         public static final double kLauncherV = 0;
 
         public static final double kWheelRadius = .075; //TEMPORARY
-        public static final double shooterTolerance = 0.5; // +/- rps
+        public static final double kShooterTolerance = 0.5; // +/- rps
     }
 
     public static final class ExampleConstants
