@@ -199,6 +199,11 @@ public final class Konstants
         public static final double kLightsOnBrightness = 0.5;
     }
 
+        public static final class NewIntakeConstants
+    {
+        public static final double setIntakeSpeed = 0.5;
+    }
+
 
     public static final class ExampleConstants
     {

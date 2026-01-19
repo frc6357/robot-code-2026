@@ -10,15 +10,21 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 
 import static frc.robot.Ports.IntakePorts.*;
+import static frc.robot.Konstants.NewIntakeConstants.*;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class NewIntake extends SubsystemBase {
   SparkMax intakeMotor;
   
-  public NewIntake() {
+  public NewIntake() 
+  {
     intakeMotor = new SparkMax(kIntakeMotor.ID, MotorType.kBrushless);
-    
+  }
+
+  public void runNewIntake()
+  {
+    intakeMotor.set(setIntakeSpeed);
   }
 
   @Override
