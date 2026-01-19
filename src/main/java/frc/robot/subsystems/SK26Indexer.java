@@ -14,6 +14,8 @@ public class SK26Indexer extends SubsystemBase
     // Motor
     private TalonFX agitatorMotor;
 
+    TalonFXConfiguration config = new TalonFXConfiguration()
+
     .withSlot0(new Slot0Configs().withKP(50))
 
     // this essentially sets the motor to a max current supply of 120 amps
@@ -28,17 +30,6 @@ public class SK26Indexer extends SubsystemBase
     public SK26Indexer() 
     {
         agitatorMotor = new TalonFX(kAgitatorMotor.ID);
-        configureAgitatorMotor();
-    }
-
-    private void configureAgitatorMotor() 
-    {
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = kAgitatorP;
-        config.Slot0.kI = kAgitatorI;
-        config.Slot0.kD = kAgitatorD;
-        config.Slot0.kV = kAgitatorF;
-
         agitatorMotor.getConfigurator().apply(config);
         agitatorMotor.setNeutralMode(NeutralModeValue.Brake);
     }
