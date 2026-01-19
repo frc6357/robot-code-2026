@@ -12,6 +12,8 @@ import static frc.robot.Konstants.TurretConstants.kMaxAngleDegrees;
 import static frc.robot.Konstants.TurretConstants.kMinAngleDegrees;
 import static frc.robot.Konstants.TurretConstants.kTurretZeroPosition;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
 // Phoenix/Kraken related imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
@@ -29,6 +31,20 @@ public class SK26Turret extends SubsystemBase
     // Motors
     private TalonFX turretMotor;
 
+    TalonFXConfiguration config = new TalonFXConfiguration()
+
+    // PID Configuration
+    .withSlot0(new Slot0Configs().withKP(50))
+
+    // this essentially sets the motor to a max current supply of 120 amps
+    .withCurrentLimits(
+        new CurrentLimitsConfigs()
+
+            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimitEnable(true)
+    )
+    ;
+
     // Some physical constants (turret related)
     private final MotionMagicDutyCycle motionMagic = new MotionMagicDutyCycle(0);
     public static double lastTargetAngle = 0.0;
@@ -42,29 +58,30 @@ public class SK26Turret extends SubsystemBase
     public SK26Turret() 
     {
         turretMotor = new TalonFX(kTurretMotor.ID);
-        configureTurretMotor();
+        turretMotor.getConfigurator().apply(config);
+        turretMotor.setNeutralMode(NeutralModeValue.Brake);
         zeroTurret();
     }
 
-    private void configureTurretMotor() 
-    {
-        TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = kTurretP;
-        config.Slot0.kI = kTurretI;
-        config.Slot0.kD = kTurretD;
-        config.Slot0.kV = kTurretF;
+    // private void configureTurretMotor() 
+    // {
+    //     TalonFXConfiguration config = new TalonFXConfiguration();
+    //     config.Slot0.kP = kTurretP;
+    //     config.Slot0.kI = kTurretI;
+    //     config.Slot0.kD = kTurretD;
+    //     config.Slot0.kV = kTurretF;
 
-        config.MotionMagic.MotionMagicCruiseVelocity = kCruiseVelocity;
-        config.MotionMagic.MotionMagicAcceleration = kAcceleration;
+    //     config.MotionMagic.MotionMagicCruiseVelocity = kCruiseVelocity;
+    //     config.MotionMagic.MotionMagicAcceleration = kAcceleration;
 
-        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRotations(kMaxAngleDegrees);
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRotations(kMinAngleDegrees);
+    //     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+    //     config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+    //     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRotations(kMaxAngleDegrees);
+    //     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRotations(kMinAngleDegrees);
 
-        turretMotor.getConfigurator().apply(config);
-        turretMotor.setNeutralMode(NeutralModeValue.Brake);
-    }
+    //     turretMotor.getConfigurator().apply(config);
+    //     turretMotor.setNeutralMode(NeutralModeValue.Brake);
+    // }
 
     /*
      *  Turret-related methods
