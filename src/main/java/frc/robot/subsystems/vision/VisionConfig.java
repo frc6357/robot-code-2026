@@ -4,14 +4,21 @@ import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
 import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
 import frc.robot.Konstants.VisionConstants.FrontLimelight;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Konstants.VisionConstants.*;
 
 public final class VisionConfig {
@@ -40,7 +47,54 @@ public final class VisionConfig {
 
     public static final Matrix<N3, N1> visionStdMatrix = // This however, creates a matrix using these standard values to reference for that other 90% of the time
             VecBuilder.fill(VISION_STD_DEV_X, VISION_STD_DEV_Y, VISION_STD_DEV_THETA);
-    
+
+    // Record for pose standard deviations (groups xy and theta together)
+    public record PoseStdDevs(double xy, double theta) {
+        public static final PoseStdDevs STATIONARY_CLOSE = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs MULTI_TAG = new PoseStdDevs(0.25, 8.0);
+        public static final PoseStdDevs STRONG_MULTI = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs CLOSE_SINGLE = new PoseStdDevs(0.5, 16.0);
+        public static final PoseStdDevs PROXIMITY = new PoseStdDevs(2.0, 999999.0);
+        public static final PoseStdDevs STABLE = new PoseStdDevs(0.5, 999999.0);
+        public static final PoseStdDevs RESET = new PoseStdDevs(0.001, 0.001);
+
+        public static final PoseStdDevs HIGH_AMBIGUITY_PENALTY = new PoseStdDevs(0, 15.0);
+        public static final PoseStdDevs HIGH_ROTATION_PENALTY = new PoseStdDevs(0, 15.0);
+    }
+
+    // Simple constants for thresholds
+    public static final class Thresholds {
+        // Physical constraints
+        public static final Distance MAX_HEIGHT = Meters.of(0.25);
+        public static final Angle MAX_TILT = Degrees.of(5.0);
+
+        // Tag quality
+        public static final double MAX_AMBIGUITY = 0.9;
+        public static final double HIGH_AMBIGUITY = 0.5;
+        public static final double LOW_AMBIGUITY = 0.25;
+
+        // Motion thresholds
+        public static final AngularVelocity MAX_ROTATION_SPEED = RadiansPerSecond.of(4 * Math.PI);
+        public static final AngularVelocity HIGH_ROTATION_SPEED = RadiansPerSecond.of(0.5);
+        public static final LinearVelocity STATIONARY_SPEED = MetersPerSecond.of(0.2);
+
+        // Target size thresholds
+        public static final double MIN_SIZE = 0.025;
+        public static final double VERY_CLOSE_SIZE = 0.4;
+        public static final double CLOSE_SIZE = 0.8;
+        public static final double MODERATE_SIZE = 0.1;
+        public static final double SMALL_MULTI_SIZE = 0.05;
+        public static final double LARGE_MULTI_SIZE = 0.09;
+        public static final double STABLE_SIZE = 0.03;
+
+        // Pose difference thresholds
+        public static final double CLOSE_POSE_DIFF = 0.5;
+        public static final double PROXIMITY_POSE_DIFF = 0.3;
+
+        // Scoring
+        public static final double TAG_COUNT_WEIGHT = 100.0;
+    }
+
     // Command configs for vision-based commands
     public static final class DriveToPose extends MultiLimelightCommandConfig {
         private DriveToPose() {

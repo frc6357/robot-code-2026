@@ -43,7 +43,7 @@ public class AlignAroundPoint extends Command{
                 (m_drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
                 m_drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))
                  + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
-        if(desiredAngle == Double.NaN){
+        if(Double.isNaN(desiredAngle)) {
             desiredAngle = m_drive.getRobotRotation().getDegrees();
         }
         double output = alignController.calculate(m_drive.getRobotRotation().getDegrees(), desiredAngle);
