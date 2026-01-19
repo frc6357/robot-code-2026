@@ -17,8 +17,9 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.Konstants.ClimbConstants.kClimbD;
 
-
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
@@ -27,6 +28,7 @@ public class Climb extends SubsystemBase
 {
 
     SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
+    DigitalInput cLimitSwitch;
 
     final double motorRatio = 0.0; //change once we know gear ratio
     final double climbFactor = 0.0; // change once fingure out what the conversion factor is from the encoder to the height
@@ -43,6 +45,7 @@ public class Climb extends SubsystemBase
     {
         climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
         cEncoder = climbMotor.getAbsoluteEncoder();
+        cLimitSwitch = new DigitalInput(0);
 
         climbConfig = new SparkFlexConfig();
 
@@ -86,6 +89,11 @@ public class Climb extends SubsystemBase
         return cEncoder.getPosition() * climbFactor;
     }
 
+    public boolean isSwitchPressed()
+    {
+        return cLimitSwitch.get();
+    }
+
     public void setClimbHeight(double targetHieight)
     {
         cTargetHieight = targetHieight;
@@ -99,5 +107,8 @@ public class Climb extends SubsystemBase
         return cEncoder.getPosition();
     }
 
-    
+    public void teleopPeriodic()
+    {
+        SmartDashboard.putBoolean("Limit Switch", isSwitchPressed());
+    }
 }
