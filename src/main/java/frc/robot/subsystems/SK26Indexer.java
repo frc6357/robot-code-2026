@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityVoltage;
@@ -10,13 +11,21 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 
 public class SK26Indexer extends SubsystemBase{
     private final TalonFX indexerMotor;
-    TalonFXConfiguration config = new TalonFXConfiguration().withSlot0(
-        new Slot0Configs().withKP(50)
-    );
+    TalonFXConfiguration config = new TalonFXConfiguration()
+    .withSlot0(new Slot0Configs().withKP(50))
+    .withCurrentLimits(
+        new CurrentLimitsConfigs()
+
+            .withStatorCurrentLimit(Amps.of(120))
+            .withStatorCurrentLimitEnable(true)
+    )   
+    ;
     
     private boolean isFeeding = false;
 
