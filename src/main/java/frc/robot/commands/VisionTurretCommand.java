@@ -55,7 +55,6 @@ public class VisionTurretCommand extends Command {
         }
     }
 
-
     @Override
     public void end(boolean interrupted) 
     {

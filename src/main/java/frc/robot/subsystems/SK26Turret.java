@@ -10,6 +10,7 @@ import static frc.robot.Konstants.TurretConstants.kDegreesPerMotorRotation;
 import static frc.robot.Konstants.TurretConstants.kExtraDegrees;
 import static frc.robot.Konstants.TurretConstants.kMaxAngleDegrees;
 import static frc.robot.Konstants.TurretConstants.kMinAngleDegrees;
+import static frc.robot.Konstants.TurretConstants.kTurretZeroPosition;
 
 // Phoenix/Kraken related imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -80,9 +81,11 @@ public class SK26Turret extends SubsystemBase
     {
         // Get the current angle in degrees
         double currentAngle = getAngleDegrees();
-
         // Get the target angle in degrees
         double targetAngle = MathUtil.inputModulus(rotation.getDegrees(), -180, 180);
+        // Check to see how far beyond the 180 degree mark the turret plans to rotate
+        double targetAngle180DegDiff = 180 - Math.abs(targetAngle);
+        double newTargetAngle;
 
         // If the sign of the current angle and target angle aren't opposites,
         // the turret will not need to cross the 180/-180 boundary
@@ -92,27 +95,26 @@ public class SK26Turret extends SubsystemBase
             return;
         }
 
-        // Check to see how far beyond the 180 degree mark the turret plans to rotate
-        double targetAngle180DegDiff = 180 - Math.abs(targetAngle);
-
         // If it is attempting to rotate more than the extraDegrees beyond 180 degrees, use the default method to rotate the turret
-        if(targetAngle180DegDiff > kExtraDegrees) {
+        if(targetAngle180DegDiff > kExtraDegrees) 
+        {
             // This effectively snaps the turret around the long way, avoiding "snapping its own neck"
             setAngleDegrees(targetAngle);
             return;
         }
 
-        double newTargetAngle;
         // Create a new, temporary target angle that is cocentric with the original target angle
-        if(Math.abs(currentAngle) < 180) {
+        if(Math.abs(currentAngle) < 180) 
+        {
             // Find the degrees difference in order for the turret to cross beyond 180 
             // degrees and also reach the target angle 
             double totalAngleDifference = (180 - Math.abs(currentAngle)) + targetAngle180DegDiff;
-
             newTargetAngle = currentAngle + (totalAngleDifference * Math.signum(currentAngle));
         }
+
         // If the current angle has already passed beyond 180 degrees
-        else {
+        else 
+        {
             newTargetAngle = Math.signum(currentAngle) * (180 + Math.abs(targetAngle180DegDiff));
         }
         setAngleDegrees(newTargetAngle);
@@ -139,7 +141,7 @@ public class SK26Turret extends SubsystemBase
     }
     public void zeroTurret()
     {
-        turretMotor.setPosition(0);
+        turretMotor.setPosition(kTurretZeroPosition);
     }
     public void manualRotate(double dutyCycle)
     {
@@ -155,6 +157,4 @@ public class SK26Turret extends SubsystemBase
     {
         SmartDashboard.putData("Turret", this);
     }
-
-
 }

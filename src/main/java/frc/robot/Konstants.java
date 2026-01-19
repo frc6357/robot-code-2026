@@ -198,6 +198,7 @@ public final class Konstants
         public static final double kTurretDeadband = 0.05; // Arbitrary
         public static final double kDutyCycleOff = 0.0;
         public static final boolean kTurretReversed = false;
+        public static final double kTurretZeroPosition = 0.0;
 
         public static final double kMotorRotPerTurretRot = 12.8; //Ideally motor rotations per turret rotation
         public static final double kDegreesPerMotorRotation = 360.0 / kMotorRotPerTurretRot; 
