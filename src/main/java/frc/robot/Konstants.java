@@ -172,6 +172,15 @@ public final class Konstants
         public static final double kLightsOnBrightness = 0.5;
     }
 
+    public static final class ClimbConstants
+    {
+        public static final double motorSpeed = 0;
+        public static final double kClimbP = 0;
+        public static final double kClimbI = 0;
+        public static final double kClimbD = 0;
+        public static final double kClimbTolerance = 1; //figure out tolerance
+    }
+
 
     public static final class ExampleConstants
     {
