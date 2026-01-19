@@ -2,7 +2,9 @@ package frc.robot.bindings;
 
 //import static edu.wpi.first.units.Units.Degrees;
 //import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static frc.robot.Ports.OperatorPorts;.*;
+import static frc.robot.Ports.OperatorPorts;
+import static frc.robot.Ports.DriverPorts.*;
+
 import frc.robot.subsystems.pickupOB.SKpickupOB;
 import frc.robot.commands.*;
 
@@ -15,43 +17,33 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class ClimbBinder implements CommandBinder {
     Optional<SKpickupOB> subsystem;
-    Trigger raise;
-    Trigger lower;
-    Trigger stop;
-    Trigger slow;
+    Trigger extend;
+    Trigger retract;
     Trigger eat;
+    Trigger spit;
+    //Trigger stop;
 
-    public ClimbBinder(Optional<SK25Climb> climbSys) {
-        subsystem = climbSys;
-        raise = climbRaiseButton.button;
-        lower = climbLowerButton.button;
+
+    public ClimbBinder(Optional<SKpickupOB> pobSys) {
+        subsystem = pobSys;
+        extend = positionExtendButton.button;
+        retract = positionRetractButton.button;
+        eat = eaterEatButton.button;
+        spit = eaterSpitButton.button;
         // stop = climbStopButton.button;
-        // slow = climbSlowButton.button;
     }
 
     public void bindButtons() 
     {
         if (subsystem.isPresent()) 
         {
-            SK25Climb subsys = subsystem.get();
-            raise.whileTrue(new ClimbCommandReturn(subsys));
-            lower.whileTrue(new ClimbCommand1(subsys));
-           // stop.whileTrue(new ClimbCommandStop(subsys));
-            // slow.whileTrue(new ClimbCommandSlow(subsys));
-            // slow.onFalse(new InstantCommand(() -> subsys.runMotor(kVolts)));
+            SKpickupOB subsys = subsystem.get();
 
-             //No-Eyeballing
-               //raise.onTrue(new InstantCommand(() -> subsys.setSetpoint(sigma.getMeasure())));
-            //Angle.in(Degrees.of(620));
-            // //Press to slow
-            // slow.whileTrue(new InstantCommand(() -> subsys.cambiarVelocidad(kTestSpeed)));
-            // slow.onFalse(new InstantCommand(() -> subsys.cambiarVelocidad(kMaxSpeed)));
-
-            //InstantCommand Bindings
-            // raise.onTrue(new InstantCommand(() -> subsys.runMotor(kKrakenSpeed)));
-            // lower.onTrue(new InstantCommand(() -> subsys.runMotor(-kKrakenSpeed)));
-            // stop.onTrue(new InstantCommand(() -> subsys.runMotor(0.0)));
-            // slow.onTrue(new InstantCommand(() -> subsys.runMotor(kKrakenSpeed/2)));
+            extend.whileTrue(new OBPickupPositionCommand(subsys));
+            retract.whileTrue(new OBPickupRetractCommand(subsys));
+            eat.whileTrue(new OBPickupEatCommand(subsys));
+            spit.whileTrue(new OBPickupSpitCommand(subsys));
+            //stop = whileTrue(new OBStopCommand(subsys));
         }
     }
 }

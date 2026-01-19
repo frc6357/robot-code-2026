@@ -60,6 +60,17 @@ public class Ports
 
         // Reset gyro
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+
+        //Intake (OB) Ports, exact buttons to be decided
+        public static final SKTrigger positionExtendButton = new SKTrigger(kDriver, 270, POV);
+        public static final SKTrigger positionRetractButton = new SKTrigger(kDriver, 90, POV);
+        public static final SKTrigger eaterEatButton = new SKTrigger(kDriver, 270, POV);
+        public static final SKTrigger eaterSpitButton = new SKTrigger(kDriver, 90, POV);
+
+        //Should be redundant
+        //public static final SKTrigger climbStopButton = new SKTrigger(kDriver, 90, POV);
+
+        
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
