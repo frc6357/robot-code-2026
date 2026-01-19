@@ -41,7 +41,7 @@ public class Robot extends TimedRobot {
     kDriver.setRumble(RumbleType.kBothRumble, 0.0);
     kOperator.setRumble(RumbleType.kBothRumble, 0.0);
 
-    FollowPathCommand.warmupCommand().schedule();
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand()); // FollowPathCommand.warmupCommand().schedule();
   }
 
   /**
