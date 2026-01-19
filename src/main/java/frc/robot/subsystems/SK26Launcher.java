@@ -6,6 +6,7 @@ import static frc.robot.Konstants.LauncherConstants.kLauncherD;
 import static frc.robot.Konstants.LauncherConstants.kLauncherV;
 import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
 import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
+import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -60,6 +61,10 @@ public class SK26Launcher extends SubsystemBase {
         launchermotor.set(targetLaunchVelocity);
         shooting = true;
     }
+    
+    public void unJamLauncher(double speed) {
+        startLauncher(speed);
+    }
 
     public boolean isLauncherAtSpeed() {
 
@@ -70,8 +75,8 @@ public class SK26Launcher extends SubsystemBase {
 
     public void stopLauncher() {
 
-        launchermotor.set(0);
-        targetLaunchVelocity = 0;
+        launchermotor.set(kStopLauncher);
+        targetLaunchVelocity = kStopLauncher;
         shooting = false;
     }
 

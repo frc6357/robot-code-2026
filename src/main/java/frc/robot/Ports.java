@@ -100,7 +100,7 @@ public class Ports
         
         // Elevator buttons
         // Coral:
-        public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+        //public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         //public static final SKTrigger kTrough = new SKTrigger(kOperator, kX.value, BUTTON);
         //public static final SKTrigger kLowBranch = new SKTrigger(kOperator, kA.value, BUTTON);
         // public static final SKTrigger kMiddleBranch = new SKTrigger(kOperator, kB.value, BUTTON);
@@ -119,7 +119,7 @@ public class Ports
         public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
         // Rollers:
         public static final SKTrigger kIntake = new SKTrigger(kOperator, kRightTrigger.value, AXIS);
-        public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
+        //public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
 
         // Misc.
         public static final SKTrigger kZeroPositionOperator  = new SKTrigger(kOperator, kStart.value, BUTTON);
@@ -129,6 +129,10 @@ public class Ports
         public static final SKTrigger resetencoder = new SKTrigger(kOperator, kRightStick.value, BUTTON);
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
+
+        public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
+        public static final SKTrigger kUnJam = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+
     }
 
     /*

@@ -6,9 +6,11 @@ import frc.robot.subsystems.SK26Launcher;
 public class RunLauncherCommand extends Command {
 
     SK26Launcher launchermotor;
+    double targetLaunchVelocity;
     
-    public RunLauncherCommand(SK26Launcher launchermotor) {
+    public RunLauncherCommand(SK26Launcher launchermotor, double targetLaunchVelocity) {
         this.launchermotor = launchermotor;
+        this.targetLaunchVelocity = targetLaunchVelocity;
     }
 
     @Override
@@ -18,7 +20,7 @@ public class RunLauncherCommand extends Command {
 
     @Override
     public void execute() {
-        launchermotor.startLauncher(1);
+        launchermotor.startLauncher(targetLaunchVelocity);
     }
 
     @Override
