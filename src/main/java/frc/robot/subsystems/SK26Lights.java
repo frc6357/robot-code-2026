@@ -19,10 +19,8 @@ public class SK26Lights {
      * 
      */
 
-
-    
-    AddressableLED led;
-    AddressableLEDBuffer ledBuffer;
+    private AddressableLED led;
+    private AddressableLEDBuffer ledBuffer;
 
     public SK26Lights(){
         
@@ -32,8 +30,16 @@ public class SK26Lights {
         led.setLength(ledBuffer.getLength());
 
         led.setData(ledBuffer);
-        
+    
+    }
 
+    public void turnOnLights(int r, int g, int b){
+
+        for (int i = 0; i < ledBuffer.getLength(); i++) {
+            ledBuffer.setRGB(i, r, g, b);
+        }
+        led.setData(ledBuffer);
+        led.start();
     }
 
 }

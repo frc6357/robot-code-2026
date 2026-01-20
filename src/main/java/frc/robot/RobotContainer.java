@@ -29,6 +29,7 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
+import frc.robot.subsystems.SK26Lights;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
@@ -53,9 +54,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SK26Lights> m_lightsContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static SK26Lights m_lightsInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -105,6 +108,10 @@ public class RobotContainer {
             if(subsystems.isVisionPresent()) {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
+            }
+            if(subsystems.isLightsPresent()) {
+                m_lightsContainer = Optional.of(new SK26Lights());
+                m_lightsInstance = m_lightsContainer.get();
             }
 
 
