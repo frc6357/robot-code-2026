@@ -25,7 +25,7 @@ public class SK26Launcher extends SubsystemBase {
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
     private double targetLaunchVelocity; //meters per second
-    private boolean isShooting = false;
+    private String launchermotorStatus = "Stopped";
     
     public SK26Launcher() {
 
@@ -46,27 +46,27 @@ public class SK26Launcher extends SubsystemBase {
         launchermotor.setNeutralMode(NeutralModeValue.Brake);
     }
 
-    /*public void startLauncher(double targetLaunchVelocity) {
+    public void startLauncher(double targetLaunchVelocity, String launchermotorStatus) {
 
         this.targetLaunchVelocity = targetLaunchVelocity;
         //Math is probably incredibly wrong but I tried
         double motorRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
         launcherVelocityControl.Velocity = motorRPS; 
-        fixedlaunchermotor.setControl(launcherVelocityControl); //makes launcher launch
-        shooting = true;
-    }*/
+        launchermotor.setControl(launcherVelocityControl); //makes launcher launch
+        this.launchermotorStatus = launchermotorStatus;
+    }
 
     //for debugging the motor ONLY!!
     //Starts the launcher motor to certain target launch velocity
-    public void startLauncher(double targetLaunchVelocity) {
+    /*public void startLauncher(double targetLaunchVelocity) {
         this.targetLaunchVelocity = targetLaunchVelocity;
         launchermotor.set(targetLaunchVelocity);
         isShooting = true;
-    }
+    }*/
     
     //unjams the motor to allow proper shooting
     public void unJamLauncher(double speed) {
-        startLauncher(speed);
+        startLauncher(speed, "Unjamming");
     }
 
     //checks whether or not the motor is at the target speed
@@ -82,13 +82,13 @@ public class SK26Launcher extends SubsystemBase {
 
         launchermotor.set(kStopLauncher);
         targetLaunchVelocity = kStopLauncher;
-        isShooting = false;
+        launchermotorStatus = "Stopped";
     }
 
     //Sends data to the Smart Dashboard
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Launcher: ", isShooting);
+        SmartDashboard.putString("Launcher: ", launchermotorStatus);
         SmartDashboard.putBoolean("Is at launcher speed", isLauncherAtSpeed());
         SmartDashboard.putNumber("Velocity", launchermotor.getVelocity().getValueAsDouble());
         SmartDashboard.putNumber("targetRPS", targetLaunchVelocity/(2*Math.PI*kWheelRadius));
