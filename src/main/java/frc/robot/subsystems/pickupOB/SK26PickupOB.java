@@ -12,10 +12,8 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.spark.SparkMax;
 
-@SuppressWarnings("unused")
-
-public class SKpickupOB extends SubsystemBase {
-  //Declarations
+public class SK26PickupOB extends SubsystemBase {
+ //Declarations
 
   // TalonFX positionerMotor;
   //TalonFX eaterMotor; 
@@ -36,7 +34,7 @@ public class SKpickupOB extends SubsystemBase {
   double motorTargetPosition;
 
   // Constructor 
-  public SKpickupOB() {
+  public SK26PickupOB() {
     //Initializations
     //positionerMotor = new TalonFX(kPositionerMotor.ID, kPositionerMotor.bus);
     //eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);

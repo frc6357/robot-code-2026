@@ -5,7 +5,7 @@ package frc.robot.bindings;
 import static frc.robot.Ports.OperatorPorts;
 import static frc.robot.Ports.DriverPorts.*;
 
-import frc.robot.subsystems.pickupOB.SKpickupOB;
+import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.commands.*;
 
 import java.util.Optional;
@@ -15,8 +15,8 @@ import java.util.Optional;
 //import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class ClimbBinder implements CommandBinder {
-    Optional<SKpickupOB> subsystem;
+public class PickupBinder implements CommandBinder {
+    Optional<SK26PickupOB> subsystem;
     Trigger extend;
     Trigger retract;
     Trigger eat;
@@ -24,7 +24,7 @@ public class ClimbBinder implements CommandBinder {
     //Trigger stop;
 
 
-    public ClimbBinder(Optional<SKpickupOB> pobSys) {
+    public PickupBinder(Optional<SK26PickupOB> pobSys) {
         subsystem = pobSys;
         extend = positionExtendButton.button;
         retract = positionRetractButton.button;
@@ -37,7 +37,7 @@ public class ClimbBinder implements CommandBinder {
     {
         if (subsystem.isPresent()) 
         {
-            SKpickupOB subsys = subsystem.get();
+            SK26PickupOB subsys = subsystem.get();
 
             extend.whileTrue(new OBPickupPositionCommand(subsys));
             retract.whileTrue(new OBPickupRetractCommand(subsys));

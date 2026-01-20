@@ -1,13 +1,13 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.pickupOB.SKpickupOB;
+import frc.robot.subsystems.pickupOB.SK26PickupOB;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class OBPickupRetractCommand extends Command {
-  public final SKpickupOB retract;
+  public final SK26PickupOB retract;
   /** Creates a new OBPickupRetractCommand. */
-  public OBPickupRetractCommand(SKpickupOB retract) {
+  public OBPickupRetractCommand(SK26PickupOB retract) {
     this.retract = retract;
     // Use addRequirements() here to declare subsystem dependencies.
     addRequirements(retract);

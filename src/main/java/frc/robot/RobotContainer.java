@@ -29,7 +29,9 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
+import frc.robot.bindings.*;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.subsystems.vision.SKVision;
 
 
@@ -53,9 +55,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SK26PickupOB> m_pickupContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static SK26PickupOB m_pickupInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -106,6 +110,10 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            if(subsystems.isPickupPresent()) {
+                m_pickupContainer = Optional.of(new SK26PickupOB());
+                m_pickupInstance = m_pickupContainer.get();
+            }
 
 
         }
@@ -126,6 +134,7 @@ public class RobotContainer {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
+        buttonBinders.add(new PickupBinder(m_pickupInstance));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
