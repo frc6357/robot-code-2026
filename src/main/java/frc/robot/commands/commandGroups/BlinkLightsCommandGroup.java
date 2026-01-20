@@ -16,7 +16,7 @@ public class BlinkLightsCommandGroup extends SequentialCommandGroup {
         addCommands(
             Commands.sequence(
                 //Turns on light
-                Commands.runOnce(() -> lights.turnOnLights(rgb[0], rgb[1], rgb[2])),
+                Commands.runOnce(() -> lights.turnOnLights(rgb)),
                 Commands.waitSeconds(kLightPulseSpeed),
 
                 //Turns off light

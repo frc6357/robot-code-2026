@@ -36,14 +36,14 @@ public class SK26Lights extends SubsystemBase {
     
     }
 
-    public void turnOnLights(int r, int g, int b){
+    public void turnOnLights(int[] rgb){
 
-        rgb[0] = r;
-        rgb[1] = g;
-        rgb[2] = b;
+        this.rgb[0] = rgb[0];
+        this.rgb[1] = rgb[1];
+        this.rgb[2] = rgb[2];
 
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-            ledBuffer.setRGB(i, r, g, b);
+            ledBuffer.setRGB(i, rgb[0], rgb[1], rgb[2]);
         }
         led.setData(ledBuffer);
         led.start();
