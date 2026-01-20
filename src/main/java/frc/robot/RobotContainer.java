@@ -181,8 +181,7 @@ public class RobotContainer {
         
     }
 
-    public void teleopInit()
-    {
+    public void teleopInit(){
     }
 
     public void autonomousInit()
