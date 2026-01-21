@@ -32,57 +32,57 @@ public class SK26Turret extends SubsystemBase
     // Motors
     private TalonFX turretMotor;
 
-    TalonFXConfiguration config = new TalonFXConfiguration()
+    //TalonFXConfiguration config = new TalonFXConfiguration()
 
     // PID Configuration
-    .withSlot0(new Slot0Configs().withKP(50))
+    // .withSlot0(new Slot0Configs().withKP(50))
 
-    // this essentially sets the motor to a max current supply of 120 amps
-    .withCurrentLimits(
-        new CurrentLimitsConfigs()
+    // // this essentially sets the motor to a max current supply of 120 amps
+    // .withCurrentLimits(
+    //     new CurrentLimitsConfigs()
 
-            .withStatorCurrentLimit(Amps.of(120))
-            .withStatorCurrentLimitEnable(true)
-    )
-    ;
+    //         .withStatorCurrentLimit(Amps.of(120))
+    //         .withStatorCurrentLimitEnable(true)
+    // )
+    // ;
 
     // Some physical constants (turret related)
     private final MotionMagicDutyCycle motionMagic = new MotionMagicDutyCycle(0);
     public static double lastTargetAngle = 0.0;
 
     // PID values
-    // private static final double kTurretP = 0.0;
-    // private static final double kTurretI = 0.0;
-    // private static final double kTurretD = 0.0;
-    // private static final double kTurretF = 0.0;
+    private static final double kTurretP = 1.0;
+    private static final double kTurretI = 0.0;
+    private static final double kTurretD = 0.1;
+    private static final double kTurretF = 0.0;
 
     public SK26Turret() 
     {
         turretMotor = new TalonFX(kTurretMotor.ID);
-        turretMotor.getConfigurator().apply(config);
-        turretMotor.setNeutralMode(NeutralModeValue.Brake);
+
+        configureTurretMotor();
         zeroTurret();
     }
 
-    // private void configureTurretMotor() 
-    // {
-    //     TalonFXConfiguration config = new TalonFXConfiguration();
-    //     config.Slot0.kP = kTurretP;
-    //     config.Slot0.kI = kTurretI;
-    //     config.Slot0.kD = kTurretD;
-    //     config.Slot0.kV = kTurretF;
+    private void configureTurretMotor() 
+    {
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.Slot0.kP = kTurretP;
+        config.Slot0.kI = kTurretI;
+        config.Slot0.kD = kTurretD;
+        config.Slot0.kV = kTurretF;
 
-    //     config.MotionMagic.MotionMagicCruiseVelocity = kCruiseVelocity;
-    //     config.MotionMagic.MotionMagicAcceleration = kAcceleration;
+        config.MotionMagic.MotionMagicCruiseVelocity = kCruiseVelocity;
+        config.MotionMagic.MotionMagicAcceleration = kAcceleration;
 
-    //     config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
-    //     config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-    //     config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRotations(kMaxAngleDegrees);
-    //     config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRotations(kMinAngleDegrees);
+        config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRotations(kMaxAngleDegrees);
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRotations(kMinAngleDegrees);
 
-    //     turretMotor.getConfigurator().apply(config);
-    //     turretMotor.setNeutralMode(NeutralModeValue.Brake);
-    // }
+        turretMotor.getConfigurator().apply(config);
+        turretMotor.setNeutralMode(NeutralModeValue.Brake);
+    }
 
     /*
      *  Turret-related methods
@@ -173,6 +173,11 @@ public class SK26Turret extends SubsystemBase
     @Override
     public void periodic() 
     {
+        double currentAngle = getAngleDegrees();
+        double newTargetAngle = lastTargetAngle;
+
         SmartDashboard.putData("Turret", this);
+        SmartDashboard.putNumber("Current Estimated Position", currentAngle);
+        SmartDashboard.putNumber("Current Target Position", newTargetAngle);
     }
 }
