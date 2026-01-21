@@ -1,8 +1,6 @@
 package frc.robot.bindings;
 
-//import static edu.wpi.first.units.Units.Degrees;
-//import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static frc.robot.Ports.OperatorPorts;
+import static frc.robot.Ports.OperatorPorts.*;
 import static frc.robot.Ports.DriverPorts.*;
 
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
@@ -22,7 +20,6 @@ public class PickupBinder implements CommandBinder {
     Trigger eat;
     Trigger spit;
     //Trigger stop;
-
 
     public PickupBinder(Optional<SK26PickupOB> pobSys) {
         subsystem = pobSys;

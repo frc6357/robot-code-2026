@@ -11,6 +11,7 @@ public class SubsystemControls
 
     private final boolean swerve;
     private final boolean vision;
+    private final boolean pickup;
 
      /**  
      * @param swerve
@@ -20,11 +21,14 @@ public class SubsystemControls
      */
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
-        @JsonProperty(required = true, value = "vision")      boolean vision
+        @JsonProperty(required = true, value = "vision")      boolean vision,
+        @JsonProperty(required = true, value = "pickup")      boolean pickup
+
     )
     {
         this.swerve = swerve;
         this.vision = vision;
+        this.pickup = pickup;
     }
 
 
@@ -40,5 +44,8 @@ public class SubsystemControls
     }
     public boolean isVisionPresent() {
         return vision;
+    }
+    public boolean isPickupPresent() {
+        return pickup;
     }
 }

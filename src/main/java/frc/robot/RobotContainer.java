@@ -29,7 +29,7 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
-import frc.robot.bindings.*;
+import frc.robot.bindings.PickupBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.subsystems.vision.SKVision;
@@ -134,7 +134,7 @@ public class RobotContainer {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
-        buttonBinders.add(new PickupBinder(m_pickupInstance));
+        buttonBinders.add(new PickupBinder(m_pickupContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
