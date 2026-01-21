@@ -194,6 +194,15 @@ public final class Konstants
 
     public static final class TurretConstants
     {
+        public static final double kTurretMinPosition = -170.0;
+        public static final double kTurretMaxPosition = 170.0;
+        public static final double kTurretAngleTolerance = 0.2;
+
+
+        public static final double kTurretP = 1.0;
+        public static final double kTurretI = 0.0;
+        public static final double kTurretD = 0.0;
+
         public static final double kManualTurretSpeed = 0.7; // Arbitrary
         public static final double kTurretDeadband = 0.05;
         public static final double kDutyCycleOff = 0.0;
