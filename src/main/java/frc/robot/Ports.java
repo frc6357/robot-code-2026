@@ -183,9 +183,19 @@ public class Ports
         //bus name is null
         private static final String busName = "";
 
-        //assign a motor ID of 49 to the example motor
+        //assign a motor ID [PLACEHOLDERS}
         public static final CANPort kPositionerMotor = new CANPort(59, busName); 
-        public static final CANPort kEaterMotor = new CANPort(60, busName); 
+        public static final CANPort kEaterMotor = new CANPort(60, busName);
 
     }
+
+
+    // public static class ExamplePorts
+    // {
+    //     //bus name is null
+    //     private static final String busName = "";
+
+    //     //assign a motor ID of 49 to the example motor
+    //     public static final CANPort kExampleMotor = new CANPort(59, busName); 
+    // }
 }
