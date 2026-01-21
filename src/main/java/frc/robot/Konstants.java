@@ -130,7 +130,7 @@ public final class Konstants
     }
 
     public static final class VisionConstants { // Each limelight has a greek letter name and an individual class for their own set of constants
-        public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
         public static final int kAprilTagPipeline = 0; // Default Apriltag pipeline value for all Limelights
 

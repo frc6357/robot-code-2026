@@ -6,6 +6,7 @@ import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
 import static frc.robot.Ports.DriverPorts.kForceResetPoseToVision;
+import static frc.robot.Ports.DriverPorts.kResetPoseToVision;
 import static frc.robot.Ports.DriverPorts.kVisionOff;
 import static frc.robot.Ports.DriverPorts.kVisionOn;
 
@@ -29,6 +30,7 @@ public class SKVisionBinder implements CommandBinder {
         this.m_visionContainer = m_visionContainer;
         this.m_swerveContainer = m_swerveContainer;
 
+        this.resetPoseToVision = kResetPoseToVision.button;
         this.forceResetPoseToVision = kForceResetPoseToVision.button;
         this.visionOn = kVisionOn.button;
         this.visionOff = kVisionOff.button;
