@@ -108,10 +108,8 @@ public class SK26Turret extends SubsystemBase
 
         config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
-            kMaxAngleDegrees / 360.0;
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
-            kMinAngleDegrees / 360.0;
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = kMaxAngleDegrees / 360.0;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = kMinAngleDegrees / 360.0;
 
         turretMotor.getConfigurator().apply(config);
         turretMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -120,6 +118,7 @@ public class SK26Turret extends SubsystemBase
     /*
      *  Turret-related methods
      */
+
     public void setAngleDegrees(double angleDegrees)
     {
         angleDegrees = clamp(angleDegrees, kMinAngleDegrees, kMaxAngleDegrees);
@@ -245,22 +244,18 @@ public class SK26Turret extends SubsystemBase
         turretMotorSim.update(0.020);
 
         // Feed rotor values back into TalonFX
-        simState.setRawRotorPosition(
-            turretMotorSim.getAngularPosition().times(kTurretGearRatio)
-        );
-        simState.setRotorVelocity(
-            turretMotorSim.getAngularVelocity().times(kTurretGearRatio)
-        );
+        simState.setRawRotorPosition(turretMotorSim.getAngularPosition().times(kTurretGearRatio));
+        simState.setRotorVelocity(turretMotorSim.getAngularVelocity().times(kTurretGearRatio));
     }
 
     @Override
     public void periodic() 
     {
         double currentAngle = getAngleDegrees();
-        double newTargetAngle = lastTargetAngle;
+        double displayTargetAngle = lastTargetAngle;
 
         SmartDashboard.putData("Turret", this);
         SmartDashboard.putNumber("Current Estimated Position", currentAngle);
-        SmartDashboard.putNumber("Current Target Position", newTargetAngle);
+        SmartDashboard.putNumber("Current Target Position", displayTargetAngle);
     }
 }
