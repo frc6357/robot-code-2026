@@ -50,6 +50,7 @@ public class SK26Turret extends SubsystemBase
     private void configureTurretMotor() 
     {
         TalonFXConfiguration config = new TalonFXConfiguration();
+        
         config.Slot0.kP = kTurretP;
         config.Slot0.kI = kTurretI;
         config.Slot0.kD = kTurretD;
