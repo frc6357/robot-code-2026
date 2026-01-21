@@ -12,8 +12,6 @@ import static frc.robot.Konstants.TurretConstants.kMaxAngleDegrees;
 import static frc.robot.Konstants.TurretConstants.kMinAngleDegrees;
 import static frc.robot.Konstants.TurretConstants.kTurretZeroPosition;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 // Phoenix/Kraken related imports
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
@@ -25,26 +23,11 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static edu.wpi.first.units.Units.Amps;
 
 public class SK26Turret extends SubsystemBase 
 {
     // Motors
     private TalonFX turretMotor;
-
-    //TalonFXConfiguration config = new TalonFXConfiguration()
-
-    // PID Configuration
-    // .withSlot0(new Slot0Configs().withKP(50))
-
-    // // this essentially sets the motor to a max current supply of 120 amps
-    // .withCurrentLimits(
-    //     new CurrentLimitsConfigs()
-
-    //         .withStatorCurrentLimit(Amps.of(120))
-    //         .withStatorCurrentLimitEnable(true)
-    // )
-    // ;
 
     // Some physical constants (turret related)
     private final MotionMagicDutyCycle motionMagic = new MotionMagicDutyCycle(0);
@@ -82,6 +65,7 @@ public class SK26Turret extends SubsystemBase
 
         turretMotor.getConfigurator().apply(config);
         turretMotor.setNeutralMode(NeutralModeValue.Brake);
+        turretMotor.setPosition(0); // Ensure initial position is set for simulation
     }
 
     /*
@@ -90,6 +74,7 @@ public class SK26Turret extends SubsystemBase
     public void setAngleDegrees(double angleDegrees)
     {
         angleDegrees = clamp(angleDegrees, kMinAngleDegrees, kMaxAngleDegrees);
+        lastTargetAngle = angleDegrees;
         motionMagic.Position = degreesToMotorRotations(angleDegrees);
         turretMotor.setControl(motionMagic);
     }
@@ -120,7 +105,6 @@ public class SK26Turret extends SubsystemBase
             setAngleDegrees(targetAngle);
             return;
         }
-
         // Create a new, temporary target angle that is cocentric with the original target angle
         if(Math.abs(currentAngle) < 180) 
         {
@@ -128,23 +112,31 @@ public class SK26Turret extends SubsystemBase
             // degrees and also reach the target angle 
             double totalAngleDifference = (180 - Math.abs(currentAngle)) + targetAngle180DegDiff;
             newTargetAngle = currentAngle + (totalAngleDifference * Math.signum(currentAngle));
+            setAngleDegrees(newTargetAngle);
         }
 
         // If the current angle has already passed beyond 180 degrees
         else 
         {
             newTargetAngle = Math.signum(currentAngle) * (180 + Math.abs(targetAngle180DegDiff));
+            setAngleDegrees(newTargetAngle);
         }
         setAngleDegrees(newTargetAngle);
     }
+
+    // Holds the turret at its last target position.
     public void holdPosition() 
     {
         setAngleDegrees(lastTargetAngle);
     }
+
+    // Returns the current turret angle in degrees.
     public double getAngleDegrees()
     {
         return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
     }
+
+    // Conversion methods.
     private static double degreesToMotorRotations(double degrees)
     {
         return degrees / kDegreesPerMotorRotation;
@@ -153,20 +145,30 @@ public class SK26Turret extends SubsystemBase
     {
         return rotations * kDegreesPerMotorRotation;
     }
+
+    // Clamps a value between a min and max.
     private static double clamp(double val, double min, double max)
     {
         return Math.max(min, Math.min(max, val));
     }
+
+    // Sets the turret to its zero position.
     public void zeroTurret()
     {
         turretMotor.setPosition(kTurretZeroPosition);
     }
+    
+    // Manually rotates the turret at a given duty cycle.
     public void manualRotate(double dutyCycle)
     {
-        turretMotor.set(dutyCycle);
         if (Math.abs(dutyCycle) > 0.01) 
         {
+            turretMotor.set(dutyCycle);
             lastTargetAngle = getAngleDegrees();
+        }
+        else
+        {
+            holdPosition();
         }
     }
 
