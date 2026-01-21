@@ -65,7 +65,6 @@ public class SK26Turret extends SubsystemBase
 
         turretMotor.getConfigurator().apply(config);
         turretMotor.setNeutralMode(NeutralModeValue.Brake);
-        turretMotor.setPosition(0); // Ensure initial position is set for simulation
     }
 
     /*
@@ -121,7 +120,6 @@ public class SK26Turret extends SubsystemBase
             newTargetAngle = Math.signum(currentAngle) * (180 + Math.abs(targetAngle180DegDiff));
             setAngleDegrees(newTargetAngle);
         }
-        setAngleDegrees(newTargetAngle);
     }
 
     // Holds the turret at its last target position.
