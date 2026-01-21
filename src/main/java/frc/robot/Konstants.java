@@ -194,17 +194,15 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int numLedOnBot = 240;
+        public static final int kNumLedOnBot = 240;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
-        public static final int[] krgbAuto = {255, 255, 255};
-        public static final int[] krgbTeleopBlue = {0, 0, 255};
-        public static final int[] krgbTeleopRed = {255, 0, 0};
-        public static final double kLightPulseSpeed = 0.5; // Speed of the pulsing effect for the lights
     }
+
+
 
 
     public static final class ExampleConstants

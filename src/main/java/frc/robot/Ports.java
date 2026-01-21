@@ -148,11 +148,11 @@ public class Ports
         //public static final CANPort kLeftElevatorMotor = new CANPort(42, busName);
     }
 
-    public static class LightsPorts
-    {
-    private static final String busName = "";
+    public static class LightsPorts{
+        private static final String busName = "";
     //assign an ID of 48 to the CANdle
-    public static final CANPort kCANdle = new CANPort(48, busName);
+        public static final int kCANdleID = 30; // CAN ID for the CANdle controller
+
     }
 
     public static class EndEffectorPorts

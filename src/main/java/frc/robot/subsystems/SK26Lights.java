@@ -1,14 +1,28 @@
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static frc.robot.Konstants.LightsConstants.kLightsPWMHeader;
-import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
+import static frc.robot.Konstants.LightsConstants.*;
 
-public class SK26Lights extends SubsystemBase {
+import com.ctre.phoenix6.hardware.CANdle;
+import com.ctre.phoenix6.signals.RGBWColor;
+import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
+import com.ctre.phoenix6.signals.StripTypeValue;
+//import com.ctre.phoenix.led.CANdle.LEDStripType;
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANdleConfiguration;
+//import com.ctre.phoenix6.configs.LEDConfigs;
+import com.ctre.phoenix6.controls.StrobeAnimation;
+
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+
+
+
+import static frc.robot.Ports.LightsPorts.kCANdleID;
+
+public class SK26Lights extends SubsystemBase{
     /*
      * White for auto
      * 
@@ -21,42 +35,44 @@ public class SK26Lights extends SubsystemBase {
      * 
      */
 
-    private AddressableLED led;
-    private AddressableLEDBuffer ledBuffer;
-    private int[] rgb;
+    private final AddressableLED led;
+    private final AddressableLEDBuffer ledBuffer;
 
-    public SK26Lights(){
-        
+    private final CANdle candle;
+
+    StrobeAnimation strobe;
+
+
+    public SK26Lights(CANBus canBus) {
         led = new AddressableLED(kLightsPWMHeader);
-
-        ledBuffer = new AddressableLEDBuffer(kLEDBufferLength);
+        ledBuffer = new AddressableLEDBuffer(kNumLedOnBot);
         led.setLength(ledBuffer.getLength());
 
-        led.setData(ledBuffer);
-    
+        CANdleConfiguration configs = new CANdleConfiguration();
+        configs.CANdleFeatures.StatusLedWhenActive = StatusLedWhenActiveValue.Disabled;
+        configs.LED.BrightnessScalar = 0.5;
+        configs.LED.StripType = StripTypeValue.RGB;
+        candle = new CANdle(kCANdleID, canBus);
+        candle.getConfigurator().apply(configs);
     }
 
-    public void turnOnLights(int[] rgb){
-
-        this.rgb[0] = rgb[0];
-        this.rgb[1] = rgb[1];
-        this.rgb[2] = rgb[2];
-
+    public void setAllLEDs(int[] colorRGB) {
         for (int i = 0; i < ledBuffer.getLength(); i++) {
-            ledBuffer.setRGB(i, rgb[0], rgb[1], rgb[2]);
+            ledBuffer.setRGB(i, colorRGB[0], colorRGB[1], colorRGB[2]);
         }
         led.setData(ledBuffer);
         led.start();
     }
 
-    public void turnOffLights(){
-        led.stop();
+    public void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
+        strobe = new StrobeAnimation(startIndex, endIndex);
+        strobe.FrameRate = intervalMs;
+        strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
+        candle.setControl(strobe);
     }
-
     @Override
     public void periodic() {
-        // This method will be called once per scheduler run
-        SmartDashboard.putString("Lights RGB", rgb[0] + ", " + rgb[1] + ", " + rgb[2]);
-    }
 
+        SmartDashboard.putNumber("LED Length", ledBuffer.getLength());
+    }
 }
