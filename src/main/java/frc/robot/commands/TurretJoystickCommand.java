@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SK26Turret;
 
-import static frc.robot.Konstants.TurretConstants.kDutyCycleOff;
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 
 public class TurretJoystickCommand extends Command {
@@ -27,21 +26,13 @@ public class TurretJoystickCommand extends Command {
     @Override
     public void execute() 
     {
-        double input = joystickInput.get();
-        if (Math.abs(input) < 0.05) 
-        {
-            turret.holdPosition();
-            return;
-        }
-        double dutyCycle = input * kManualTurretSpeed;
-
-        turret.manualRotate(dutyCycle);
+        turret.runTurret(kManualTurretSpeed);
     }
 
     @Override
     public void end(boolean interrupted) 
     {
-        turret.manualRotate(kDutyCycleOff);
+        turret.stop();
     }
 
     @Override

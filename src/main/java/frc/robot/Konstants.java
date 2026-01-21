@@ -194,21 +194,25 @@ public final class Konstants
 
     public static final class TurretConstants
     {
+        // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;
         public static final double kTurretAngleTolerance = 0.2;
 
+        // Turret physical constants
+        public static final double kGearRatio = 3.0;
+        public static final double kDegrees = 360.0;
 
+        // Turret PID
         public static final double kTurretP = 1.0;
         public static final double kTurretI = 0.0;
         public static final double kTurretD = 0.0;
 
+        // Turret extra constants
         public static final double kManualTurretSpeed = 0.7; // Arbitrary
         public static final double kTurretDeadband = 0.05;
-        public static final double kDutyCycleOff = 0.0;
-        public static final boolean kTurretReversed = false;
-        public static final double kTurretZeroPosition = 0.0;
 
+        // TODO slated for deletion in the future.
         public static final double kMotorRotPerTurretRot = 12.8; //Ideally motor rotations per turret rotation
         public static final double kDegreesPerMotorRotation = 360.0 / kMotorRotPerTurretRot; 
         public static final double kMinAngleDegrees = -180.0; //TODO Replace my generic angle values with true value

@@ -1,75 +1,67 @@
-// 120 min, -140 max
-
-//Subsystem Essentials
 package frc.robot.subsystems;
 
+// Turret constant imports (from Konstants file)
 import static frc.robot.Konstants.TurretConstants.kTurretP;
 import static frc.robot.Konstants.TurretConstants.kTurretI;
 import static frc.robot.Konstants.TurretConstants.kTurretD;
 import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
 import static frc.robot.Konstants.TurretConstants.kTurretMaxPosition;
 import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
+import static frc.robot.Konstants.TurretConstants.kGearRatio;
+
+// Turret ports imports (from Ports file)
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 
-//import com.ctre.phoenix.motorcontrol.NeutralMode;
+// Preferences (from Pref & SKPreferences files)
+import frc.robot.preferences.Pref;
+import frc.robot.preferences.SKPreferences;
+
+// Phoenix-related imports
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionVoltage;
-// import com.ctre.phoenix6.controls.VelocityDutyCycle;
-// import com.ctre.phoenix6.controls.compound.Diff_DutyCycleOut_Velocity;
-//import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
-//import com.ctre.phoenix6.hardware.core.CoreCANcoder;
-import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-//import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
+// WPI-related imports
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.units.Units;
-//import edu.wpi.first.units.Units;
-//import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.DCMotorSim;
-//SmartDashboard Import
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Robot;
-import frc.robot.preferences.Pref;
-import frc.robot.preferences.SKPreferences;
 
 public class SK26Turret extends SubsystemBase 
 {
-    // Launcher motor delcaration.
+    // Launcher motor delcaration
     TalonFX turretMotor;
     TalonFXConfiguration motorConfig;
     MotorOutputConfigs outputConfigs;
 
-    // Launcher PID controller declarations.
+    // Launcher PID controller declarations
     PhoenixPIDController turretPID;
     Slot0Configs turretPID0;
 
-    // Angle tracking declarations.
+    // Angle tracking declarations
     double motorTargetPosition;
     double motorCurrentPosition;
     double target;
     boolean atTarget;
     
-    // Simulation stuff
-    PositionVoltage why;
+    // Simulation neutral declaration
     NeutralOut neutral = new NeutralOut();
 
-    // PID Preferences.
+    // PID Preferences
     Pref<Double> turretkPPref = SKPreferences.attach("turretP", 1.0)
         .onChange((newValue) -> turretPID.setP(newValue));
     Pref<Double> turretkIPref = SKPreferences.attach("turretI", 0.0)
         .onChange((newValue) -> turretPID.setI(newValue));
-    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.0)
+    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.1)
         .onChange((newValue) -> turretPID.setD(newValue));
 
     public SK26Turret() 
@@ -100,10 +92,9 @@ public class SK26Turret extends SubsystemBase
         turretMotor.setControl(neutral);
     }
 
-    //If we Eyeball
-    public void runMotor(double turretSpeed) 
+    public void runTurret(double turretSpeed) 
     {
-        if((getMotorPosition() > (kTurretMaxPosition - kTurretAngleTolerance)) && Math.signum(turretSpeed) > 0) 
+        if(((getMotorPosition() > (kTurretMaxPosition - kTurretAngleTolerance)) || (getMotorPosition() < kTurretMinPosition - kTurretAngleTolerance)) && Math.signum(turretSpeed) > 0) 
         {
             stop();
             return;
@@ -111,13 +102,11 @@ public class SK26Turret extends SubsystemBase
         else
         { 
             // Sets a velocity to target via pid and supplies an average duty cycle in volts
-            turretMotor.setControl(new DutyCycleOut(turretSpeed));//.withFeedForward(3.0)); // FF in volts
+            turretMotor.setControl(new DutyCycleOut(turretSpeed));
         }
     }
 
-    // Simmulation
-    private static final double kGearRatio = 3.0;
-
+    // Simulation
     private final DCMotorSim m_motorSimModel = new DCMotorSim(
     LinearSystemId.createDCMotorSystem(
         DCMotor.getKrakenX60Foc(1), 
@@ -156,12 +145,16 @@ public class SK26Turret extends SubsystemBase
 
     public double getMotorPosition() 
     {
-        return turretMotor.getPosition().getValueAsDouble(); // Rotations
+        double motorRotations = turretMotor.getPosition().getValueAsDouble(); // Rotations
+        double angle = motorRotations / kGearRatio * 360.0; // Degrees conversion
+        return angle;
     }
 
     public double getTargetPosition() 
     {
-        return turretMotor.getClosedLoopReference().getValueAsDouble();
+        double targetMotorRotations = turretMotor.getClosedLoopReference().getValueAsDouble(); // Rotations
+        double angle = targetMotorRotations / kGearRatio * 360.0; // Degrees conversion
+        return angle;
     }
 
     public void stop() 
@@ -182,5 +175,6 @@ public class SK26Turret extends SubsystemBase
         SmartDashboard.putNumber("Turret Velocity", getMotorSpeed());
         SmartDashboard.putNumber("Current Turret Position", getMotorPosition());
         SmartDashboard.putNumber("Target Turret Position", getTargetPosition());
+        SmartDashboard.putBoolean("At Target Position", isAtTargetPosition());
     }
 }
