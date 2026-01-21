@@ -11,7 +11,6 @@ public class SubsystemControls
 
     private final boolean swerve;
     private final boolean vision;
-    private final boolean lights;
 
      /**  
      * @param swerve
@@ -21,13 +20,11 @@ public class SubsystemControls
      */
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
-        @JsonProperty(required = true, value = "vision")      boolean vision,
-        @JsonProperty(required = true, value = "lights")     boolean lights
+        @JsonProperty(required = true, value = "vision")      boolean vision
     )
     {
         this.swerve = swerve;
         this.vision = vision;
-        this.lights = lights;
     }
 
 
@@ -43,8 +40,5 @@ public class SubsystemControls
     }
     public boolean isVisionPresent() {
         return vision;
-    }
-    public boolean isLightsPresent() {
-        return lights;
     }
 }

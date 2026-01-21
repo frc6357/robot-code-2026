@@ -20,7 +20,7 @@ import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 
 
 
-import static frc.robot.Ports.LightsPorts.kCANdleID;
+import static frc.robot.Ports.LightsPorts.kCANdle;
 
 public class SK26Lights extends SubsystemBase{
     /*
@@ -52,7 +52,7 @@ public class SK26Lights extends SubsystemBase{
         configs.CANdleFeatures.StatusLedWhenActive = StatusLedWhenActiveValue.Disabled;
         configs.LED.BrightnessScalar = 0.5;
         configs.LED.StripType = StripTypeValue.RGB;
-        candle = new CANdle(kCANdleID, canBus);
+        candle = new CANdle(kCANdle.ID, canBus);
         candle.getConfigurator().apply(configs);
     }
 

@@ -151,7 +151,7 @@ public class Ports
     public static class LightsPorts{
         private static final String busName = "";
     //assign an ID of 48 to the CANdle
-        public static final int kCANdleID = 30; // CAN ID for the CANdle controller
+        public static final CANPort kCANdle = new CANPort(30, busName); // CAN ID for the CANdle controller
 
     }
 
