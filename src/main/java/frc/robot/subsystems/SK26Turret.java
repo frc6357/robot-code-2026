@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 // Imported constants from the Ports file
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
+import static frc.robot.Ports.LauncherPorts.kTurretEncoder;
 
 // Imported constants from the Konstants file
 import static frc.robot.Konstants.TurretConstants.kAcceleration;
@@ -17,21 +18,38 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.signals.ExternalFeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 
 // WPI related imports
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.math.system.plant.LinearSystemId;
+import edu.wpi.first.units.Units;
+import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 
 public class SK26Turret extends SubsystemBase 
 {
     // Motors
     private TalonFX turretMotor;
 
+    // Absolute Encoder
+    private final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
+
     // Some physical constants (turret related)
     private final MotionMagicDutyCycle motionMagic = new MotionMagicDutyCycle(0);
     public static double lastTargetAngle = 0.0;
+
+    // Simulation Constants (Temporary)
+    private static final double kTurretGearRatio = 3.0; // 3:1 gear ratio
+    private static final double kTurretMOI = 0.002;
 
     // PID values
     private static final double kTurretP = 1.0;
@@ -47,6 +65,29 @@ public class SK26Turret extends SubsystemBase
         zeroTurret();
     }
 
+    private void configureTurretEncoder()
+    {
+        CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
+
+        // Set this encoder as counterclockwise positive
+        encoderConfig.MagnetSensor.SensorDirection = SensorDirectionValue.CounterClockwise_Positive;
+
+        // Magnet offset in rotations (0 → 1 rotation)
+        encoderConfig.MagnetSensor.MagnetOffset = kTurretZeroPosition / 360.0;
+
+        // Apply config
+        turretEncoder.getConfigurator().apply(encoderConfig);
+
+        // Tell TalonFX to use this encoder as its primary feedback
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.Feedback.FeedbackRemoteSensorID = turretEncoder.getDeviceID();
+        config.Feedback.FeedbackSensorSource = 
+        config.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;
+
+        // Apply directly to motor
+        turretMotor.getConfigurator().apply(config);
+    }
+
     private void configureTurretMotor() 
     {
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -59,10 +100,17 @@ public class SK26Turret extends SubsystemBase
         config.MotionMagic.MotionMagicCruiseVelocity = kCruiseVelocity;
         config.MotionMagic.MotionMagicAcceleration = kAcceleration;
 
+        config.Feedback.FeedbackRemoteSensorID = turretEncoder.getDeviceID();
+        config.Feedback.FeedbackSensorSource = com.ctre.phoenix6.signals.FeedbackSensorSourceValue.RemoteCANcoder;
+
+        config.Feedback.SensorToMechanismRatio = kTurretGearRatio;
+
         config.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
         config.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
-        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold = degreesToMotorRotations(kMaxAngleDegrees);
-        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold = degreesToMotorRotations(kMinAngleDegrees);
+        config.SoftwareLimitSwitch.ForwardSoftLimitThreshold =
+            kMaxAngleDegrees / 360.0;
+        config.SoftwareLimitSwitch.ReverseSoftLimitThreshold =
+            kMinAngleDegrees / 360.0;
 
         turretMotor.getConfigurator().apply(config);
         turretMotor.setNeutralMode(NeutralModeValue.Brake);
@@ -75,7 +123,7 @@ public class SK26Turret extends SubsystemBase
     {
         angleDegrees = clamp(angleDegrees, kMinAngleDegrees, kMaxAngleDegrees);
         lastTargetAngle = angleDegrees;
-        motionMagic.Position = degreesToMotorRotations(angleDegrees);
+        motionMagic.Position = angleDegrees / 360.0; // mechanism rotations
         turretMotor.setControl(motionMagic);
     }
 
@@ -132,18 +180,18 @@ public class SK26Turret extends SubsystemBase
     // Returns the current turret angle in degrees.
     public double getAngleDegrees()
     {
-        return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
+        return turretMotor.getPosition().getValueAsDouble() * 360.0;
     }
 
     // Conversion methods.
-    private static double degreesToMotorRotations(double degrees)
-    {
-        return degrees / kDegreesPerMotorRotation;
-    }
-    private static double motorRotationsToDegrees(double rotations)
-    {
-        return rotations * kDegreesPerMotorRotation;
-    }
+    // private static double degreesToMotorRotations(double degrees)
+    // {
+    //     return degrees / kDegreesPerMotorRotation;
+    // }
+    // private static double motorRotationsToDegrees(double rotations)
+    // {
+    //     return rotations * kDegreesPerMotorRotation;
+    // }
 
     // Clamps a value between a min and max.
     private static double clamp(double val, double min, double max)
@@ -152,10 +200,7 @@ public class SK26Turret extends SubsystemBase
     }
 
     // Sets the turret to its zero position.
-    public void zeroTurret()
-    {
-        turretMotor.setPosition(kTurretZeroPosition);
-    }
+    public void zeroTurret(){}
     
     // Manually rotates the turret at a given duty cycle.
     public void manualRotate(double dutyCycle)
@@ -169,6 +214,42 @@ public class SK26Turret extends SubsystemBase
         {
             holdPosition();
         }
+    }
+
+    // DC motor simulation for realistic turret stuff in SimGUI
+    private final DCMotorSim turretMotorSim =
+    new DCMotorSim(
+        LinearSystemId.createDCMotorSystem(
+            DCMotor.getKrakenX60Foc(1),
+            kTurretMOI,
+            kTurretGearRatio
+        ),
+        DCMotor.getKrakenX60Foc(1)
+    );
+
+    // Update simulation stuff periodically.. this better work smh
+    @Override
+    public void simulationPeriodic()
+    {
+        var simState = turretMotor.getSimState();
+
+        // Supply voltage from battery
+        simState.setSupplyVoltage(RobotController.getBatteryVoltage());
+
+        // Motor voltage commanded by TalonFX
+        var motorVoltage = simState.getMotorVoltageMeasure();
+
+        // Run physics model
+        turretMotorSim.setInputVoltage(motorVoltage.in(Units.Volts));
+        turretMotorSim.update(0.020);
+
+        // Feed rotor values back into TalonFX
+        simState.setRawRotorPosition(
+            turretMotorSim.getAngularPosition().times(kTurretGearRatio)
+        );
+        simState.setRotorVelocity(
+            turretMotorSim.getAngularVelocity().times(kTurretGearRatio)
+        );
     }
 
     @Override
