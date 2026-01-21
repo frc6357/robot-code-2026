@@ -62,6 +62,7 @@ public class SK26Turret extends SubsystemBase
         turretMotor = new TalonFX(kTurretMotor.ID);
 
         configureTurretMotor();
+        configureTurretEncoder();
         zeroTurret();
     }
 
