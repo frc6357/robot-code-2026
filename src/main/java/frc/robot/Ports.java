@@ -200,6 +200,7 @@ public class Ports
         
         private static final String busName = "";
         public static final CANPort kFixedLauncherMotor = new CANPort(50, busName);
+        public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
     }
 
 

@@ -9,18 +9,22 @@ import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
+import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
 
 public class SK26Launcher extends SubsystemBase {
 
     //initialize launcher motor
     TalonFX launchermotor;
+    TalonFX launchermotorFollower;
 
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
@@ -30,10 +34,14 @@ public class SK26Launcher extends SubsystemBase {
     public SK26Launcher() {
 
         launchermotor = new TalonFX(kFixedLauncherMotor.ID);
-        configMotor();
+        launchermotorFollower = new TalonFX(kFixedLauncherMotorFollower.ID);
+        launchermotorFollower.setControl(new Follower(launchermotor.getDeviceID(), MotorAlignmentValue.Opposed));
+
+        configMotor(launchermotor);
+        configMotor(launchermotorFollower);
     }
 
-    public void configMotor() {
+    public void configMotor(TalonFX motor) {
 
         //configures PID values onto the launcher motor
         TalonFXConfiguration config = new TalonFXConfiguration();
@@ -42,8 +50,8 @@ public class SK26Launcher extends SubsystemBase {
         config.Slot0.kD = kLauncherD;
         config.Slot0.kV = kLauncherV;
 
-        launchermotor.getConfigurator().apply(config);
-        launchermotor.setNeutralMode(NeutralModeValue.Brake);
+        motor.getConfigurator().apply(config);
+        motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
     public void startLauncher(double targetLaunchVelocity, String launchermotorStatus) {
