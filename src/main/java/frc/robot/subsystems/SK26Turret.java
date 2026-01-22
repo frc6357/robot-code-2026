@@ -22,17 +22,13 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.NeutralOut;
+import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
 // WPI-related imports
-import edu.wpi.first.math.system.plant.DCMotor;
-import edu.wpi.first.math.system.plant.LinearSystemId;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.simulation.DCMotorSim;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -102,41 +98,9 @@ public class SK26Turret extends SubsystemBase
         else
         { 
             // Sets a velocity to target via pid and supplies an average duty cycle in volts
-            turretMotor.setControl(new DutyCycleOut(turretSpeed));
+            turretMotor.setControl(new PositionDutyCycle(turretSpeed));
         }
     }
-
-    // Simulation
-    // private final DCMotorSim m_motorSimModel = new DCMotorSim(
-    // LinearSystemId.createDCMotorSystem(
-    //     DCMotor.getKrakenX60Foc(1), 
-    //     0.001, 
-    //     kGearRatio),
-    // DCMotor.getKrakenX60Foc(1)
-    // );
-
-    // @Override
-    // public void simulationPeriodic() 
-    // {
-    //     var talonFXSim = turretMotor.getSimState();
-
-    //     // set the supply voltage of the TalonFX
-    //     talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
-
-    //     // get the motor voltage of the TalonFX
-    //     var motorVoltage = talonFXSim.getMotorVoltageMeasure();
-
-    //     // use the motor voltage to calculate new position and velocity
-    //     // using WPILib's DCMotorSim class for physics simulation
-    //     m_motorSimModel.setInputVoltage(motorVoltage.in(Units.Volts));
-    //     m_motorSimModel.update(0.020); // assume 20 ms loop time
-
-    //     // apply the new rotor position and velocity to the TalonFX;
-    //     // note that this is rotor position/velocity (before gear ratio), but
-    //     // DCMotorSim returns mechanism position/velocity (after gear ratio)
-    //     talonFXSim.setRawRotorPosition(m_motorSimModel.getAngularPosition().times(kGearRatio));
-    //     talonFXSim.setRotorVelocity(m_motorSimModel.getAngularVelocity().times(kGearRatio));
-    // }
 
     public double getMotorSpeed() 
     {
