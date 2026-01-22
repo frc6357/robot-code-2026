@@ -57,11 +57,11 @@ public class SK26Turret extends SubsystemBase
     NeutralOut neutral = new NeutralOut();
 
     // PID Preferences
-    Pref<Double> turretkPPref = SKPreferences.attach("turretP", 0.01)
+    Pref<Double> turretkPPref = SKPreferences.attach("turretP", 1.0)
         .onChange((newValue) -> turretPID.setP(newValue));
     Pref<Double> turretkIPref = SKPreferences.attach("turretI", 0.0)
         .onChange((newValue) -> turretPID.setI(newValue));
-    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.0)
+    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.1)
         .onChange((newValue) -> turretPID.setD(newValue));
 
     public SK26Turret() 
@@ -83,6 +83,8 @@ public class SK26Turret extends SubsystemBase
             .withKD(turretkDPref.get());
 
         motorConfig.withSlot0(turretPID0);
+
+        turretMotor.setPosition(0.0);
     }
 
     public void setBrake() 

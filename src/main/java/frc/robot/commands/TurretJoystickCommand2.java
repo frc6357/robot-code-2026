@@ -12,7 +12,7 @@ public class TurretJoystickCommand2 extends Command {
     private SK26Turret turret;
     private Supplier<Double> joystickInput;
 
-    public TurretJoystickCommand2(SK26Turret turret, Supplier<Double> joystickInput) 
+    public TurretJoystickCommand2(SK26Turret turret) 
     {
         this.turret = turret;
         this.joystickInput = joystickInput;
