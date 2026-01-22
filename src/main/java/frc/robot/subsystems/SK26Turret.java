@@ -66,7 +66,7 @@ public class SK26Turret extends SubsystemBase
         turretMotor = new TalonFX(kTurretMotor.ID);
         motorConfig = new TalonFXConfiguration();
 
-        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 
         // PID Controller initialization
         turretPID = new PhoenixPIDController(kTurretP, kTurretI, kTurretD);
@@ -81,11 +81,6 @@ public class SK26Turret extends SubsystemBase
         motorConfig.withSlot0(turretPID0);
 
         turretMotor.setPosition(0.0);
-    }
-
-    public void setBrake() 
-    {
-        turretMotor.setControl(neutral);
     }
 
     public void runTurret(double turretSpeed) 
