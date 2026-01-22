@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherVelocity;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
 
@@ -184,9 +185,9 @@ public final class Konstants
         public static final double kShooterTolerance = 0.5; // +/- rps
         public static final double ktargetlaunchVelocity = 15; //meters per second
         public static final double kStopLauncher = 0; //velocity of stopped motor
-        public static final double kUnJamLauncherVelocity = 41.888*kWheelRadius; //Velocity of motor when unjamming
-        public static final double kUnJamLauncherRunTime = 0.15; //Time between rotating and stopping the motor during unjamming
+        public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
         public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
+        public static final double kUnJamLauncherVelocity = (1/kUnJamLauncherRunTime)*(2*Math.PI*kWheelRadius); //Velocity of motor when unjamming
     }
 
     public static final class ExampleConstants
