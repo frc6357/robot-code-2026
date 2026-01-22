@@ -158,12 +158,12 @@ public final class Konstants
 
         // Indexer unjam parameters
         public static final double kIndexerUnjamReverseRPS = -4.0;
-        public static final double kIndexerUnjamReverseDuration = 0.2;
+        public static final double kIndexerUnjamReverseDuration = 0.25;
 
-        public static final double kIndexerUnjamWaitDuration = 0.1;
+        public static final double kIndexerUnjamWaitDuration = 0.25;
 
         public static final double kIndexerUnjamForwardRPS = 5.0;
-        public static final double kIndexerUnjamForwardDuration = 0.3;
+        public static final double kIndexerUnjamForwardDuration = 0.25;
     }
 
     /** Constants that are used when defining filters for controllers */
