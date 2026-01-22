@@ -5,12 +5,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Konstants.pickupOBConstants.*;
 import static frc.robot.Ports.pickupOBPorts.*;
 
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkRelativeEncoder;
 
 public class SK26PickupOB extends SubsystemBase {
  //Declarations
@@ -23,11 +24,12 @@ public class SK26PickupOB extends SubsystemBase {
   SparkMax eaterMotor; 
 
   //Encoder
-  CANcoder encoder;
+  RelativeEncoder positionerEncoder;
+  RelativeEncoder eaterEncoder;
 
   //Limit Switches
-  //SparkLimitSwitch switch1;
-  //SparkLimitSwitch switch2;
+  SparkLimitSwitch forwardLimitSwitch;
+  SparkLimitSwitch reverseLimitSwitch;
 
 
   double motorCurrentPosition;
@@ -36,14 +38,21 @@ public class SK26PickupOB extends SubsystemBase {
   // Constructor 
   public SK26PickupOB() {
     //Initializations
+
     //positionerMotor = new TalonFX(kPositionerMotor.ID, kPositionerMotor.bus);
     //eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);
     positionerMotor = new SparkMax(kPositionerMotor.ID, MotorType.kBrushless);
     eaterMotor = new SparkMax(kEaterMotor.ID, MotorType.kBrushless);
 
+    positionerEncoder = positionerMotor.getEncoder();
+    eaterEncoder = eaterMotor.getEncoder();
+
     // Limit switches with REV
-    //forwardLimitSwitch = motorL.getForwardLimitSwitch();
-    //reverseLimitSwitch = motorL.getReverseLimitSwitch();
+    forwardLimitSwitch = positionerMotor.getForwardLimitSwitch();
+    reverseLimitSwitch = positionerMotor.getReverseLimitSwitch();
+
+     //forwardLimitSwitch.enableLimitSwitch(false);
+     //reverseLimitSwitch.enableLimitSwitch(false);
 
     motorCurrentPosition = kPositionerMotorMinPosition;
     motorTargetPosition = kPositionMotorMaxPosition;
@@ -75,7 +84,14 @@ public class SK26PickupOB extends SubsystemBase {
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    //SmartDashboard.putNumber("Velocity (RPMs)", getMotorSpeed());
+    SmartDashboard.putNumber("Positioner Velocity (RPMs)", positionerMotor.get());
+    SmartDashboard.putNumber("Eater Velocity (RPMs)", eaterMotor.get());
+
+    SmartDashboard.putBoolean("Forward Limit Switch", forwardLimitSwitch.isPressed());
+    SmartDashboard.putBoolean("Reverse Limit Switch", reverseLimitSwitch.isPressed());
+
+
+
   }
 
 }
