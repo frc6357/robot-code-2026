@@ -15,6 +15,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
@@ -96,10 +97,26 @@ public class SK26Launcher extends SubsystemBase {
     //Sends data to the Smart Dashboard
     @Override
     public void periodic() {
-        SmartDashboard.putString("Launcher: ", launchermotorStatus);
-        SmartDashboard.putBoolean("Is at launcher speed", isLauncherAtSpeed());
-        SmartDashboard.putNumber("Velocity", launchermotor.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("targetRPS", targetLaunchVelocity/(2*Math.PI*kWheelRadius));
+        SmartDashboard.putData("Static Launcher", this);
+    }
 
+    @Override
+    public void initSendable(SendableBuilder builder) {
+        builder.addStringProperty(
+            "Launcher Status", 
+            () -> launchermotorStatus,
+            null);
+        builder.addBooleanProperty(
+            "Is at launcher speed",
+            () -> isLauncherAtSpeed(),
+            null);
+        builder.addDoubleProperty(
+            "Launcher Velocity",
+            () -> launchermotor.getVelocity().getValueAsDouble(),
+            null);
+        builder.addDoubleProperty(
+            "Target RPS",
+            () -> targetLaunchVelocity/(2*Math.PI*kWheelRadius),
+            null);
     }
 }
