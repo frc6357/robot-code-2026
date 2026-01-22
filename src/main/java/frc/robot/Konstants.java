@@ -181,7 +181,7 @@ public final class Konstants
     public static final class LauncherConstants
     {
         // Launcher Speeds
-        public static final double kLauncherSpeed = 0.7;
+        public static final double kLauncherSpeed = 0.1;
         public static final double kLauncherStopSpeed = 0.0;
         public static final double shooterSpeedTolerance = 0.5; //Arbitrary tolerance, but it would be rotations/sec
 
@@ -195,12 +195,12 @@ public final class Konstants
     public static final class TurretConstants
     {
         // Turret position limits and tolerances
-        public static final double kTurretMinPosition = -170.0;
-        public static final double kTurretMaxPosition = 170.0;
+        public static final double kTurretMinPosition = -1000;
+        public static final double kTurretMaxPosition = 1000;
         public static final double kTurretAngleTolerance = 0.2;
 
         // Turret physical constants
-        public static final double kGearRatio = 3.0;
+        public static final double kGearRatio = 1.0;
         public static final double kDegrees = 360.0;
 
         // Turret PID

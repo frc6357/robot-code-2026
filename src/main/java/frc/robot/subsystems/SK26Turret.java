@@ -57,11 +57,11 @@ public class SK26Turret extends SubsystemBase
     NeutralOut neutral = new NeutralOut();
 
     // PID Preferences
-    Pref<Double> turretkPPref = SKPreferences.attach("turretP", 1.0)
+    Pref<Double> turretkPPref = SKPreferences.attach("turretP", 0.01)
         .onChange((newValue) -> turretPID.setP(newValue));
     Pref<Double> turretkIPref = SKPreferences.attach("turretI", 0.0)
         .onChange((newValue) -> turretPID.setI(newValue));
-    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.1)
+    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.0)
         .onChange((newValue) -> turretPID.setD(newValue));
 
     public SK26Turret() 
@@ -83,8 +83,6 @@ public class SK26Turret extends SubsystemBase
             .withKD(turretkDPref.get());
 
         motorConfig.withSlot0(turretPID0);
-        motorCurrentPosition = kTurretMinPosition;
-        motorTargetPosition = kTurretMaxPosition;
     }
 
     public void setBrake() 
@@ -94,7 +92,7 @@ public class SK26Turret extends SubsystemBase
 
     public void runTurret(double turretSpeed) 
     {
-        if(((getMotorPosition() > (kTurretMaxPosition - kTurretAngleTolerance)) || (getMotorPosition() < kTurretMinPosition - kTurretAngleTolerance)) && Math.signum(turretSpeed) > 0) 
+        if((getMotorPosition() > (kTurretMaxPosition - kTurretAngleTolerance)) && Math.signum(turretSpeed) > 0) 
         {
             stop();
             return;
@@ -107,36 +105,36 @@ public class SK26Turret extends SubsystemBase
     }
 
     // Simulation
-    private final DCMotorSim m_motorSimModel = new DCMotorSim(
-    LinearSystemId.createDCMotorSystem(
-        DCMotor.getKrakenX60Foc(1), 
-        0.001, 
-        kGearRatio),
-    DCMotor.getKrakenX60Foc(1)
-    );
+    // private final DCMotorSim m_motorSimModel = new DCMotorSim(
+    // LinearSystemId.createDCMotorSystem(
+    //     DCMotor.getKrakenX60Foc(1), 
+    //     0.001, 
+    //     kGearRatio),
+    // DCMotor.getKrakenX60Foc(1)
+    // );
 
-    @Override
-    public void simulationPeriodic() 
-    {
-        var talonFXSim = turretMotor.getSimState();
+    // @Override
+    // public void simulationPeriodic() 
+    // {
+    //     var talonFXSim = turretMotor.getSimState();
 
-        // set the supply voltage of the TalonFX
-        talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
+    //     // set the supply voltage of the TalonFX
+    //     talonFXSim.setSupplyVoltage(RobotController.getBatteryVoltage());
 
-        // get the motor voltage of the TalonFX
-        var motorVoltage = talonFXSim.getMotorVoltageMeasure();
+    //     // get the motor voltage of the TalonFX
+    //     var motorVoltage = talonFXSim.getMotorVoltageMeasure();
 
-        // use the motor voltage to calculate new position and velocity
-        // using WPILib's DCMotorSim class for physics simulation
-        m_motorSimModel.setInputVoltage(motorVoltage.in(Units.Volts));
-        m_motorSimModel.update(0.020); // assume 20 ms loop time
+    //     // use the motor voltage to calculate new position and velocity
+    //     // using WPILib's DCMotorSim class for physics simulation
+    //     m_motorSimModel.setInputVoltage(motorVoltage.in(Units.Volts));
+    //     m_motorSimModel.update(0.020); // assume 20 ms loop time
 
-        // apply the new rotor position and velocity to the TalonFX;
-        // note that this is rotor position/velocity (before gear ratio), but
-        // DCMotorSim returns mechanism position/velocity (after gear ratio)
-        talonFXSim.setRawRotorPosition(m_motorSimModel.getAngularPosition().times(kGearRatio));
-        talonFXSim.setRotorVelocity(m_motorSimModel.getAngularVelocity().times(kGearRatio));
-    }
+    //     // apply the new rotor position and velocity to the TalonFX;
+    //     // note that this is rotor position/velocity (before gear ratio), but
+    //     // DCMotorSim returns mechanism position/velocity (after gear ratio)
+    //     talonFXSim.setRawRotorPosition(m_motorSimModel.getAngularPosition().times(kGearRatio));
+    //     talonFXSim.setRotorVelocity(m_motorSimModel.getAngularVelocity().times(kGearRatio));
+    // }
 
     public double getMotorSpeed() 
     {
@@ -146,14 +144,14 @@ public class SK26Turret extends SubsystemBase
     public double getMotorPosition() 
     {
         double motorRotations = turretMotor.getPosition().getValueAsDouble(); // Rotations
-        double angle = motorRotations / kGearRatio * 360.0; // Degrees conversion
+        double angle = motorRotations / (kGearRatio * 360.0); // Degrees conversion
         return angle;
     }
 
     public double getTargetPosition() 
     {
         double targetMotorRotations = turretMotor.getClosedLoopReference().getValueAsDouble(); // Rotations
-        double angle = targetMotorRotations / kGearRatio * 360.0; // Degrees conversion
+        double angle = targetMotorRotations / (kGearRatio * 360.0); // Degrees conversion
         return angle;
     }
 

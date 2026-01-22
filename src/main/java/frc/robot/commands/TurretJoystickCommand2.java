@@ -7,14 +7,15 @@ import frc.robot.subsystems.SK26Turret;
 
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 
-public class TurretJoystickCommand extends Command {
+public class TurretJoystickCommand2 extends Command {
 
     private SK26Turret turret;
     private Supplier<Double> joystickInput;
 
-    public TurretJoystickCommand(SK26Turret turret) 
+    public TurretJoystickCommand2(SK26Turret turret, Supplier<Double> joystickInput) 
     {
         this.turret = turret;
+        this.joystickInput = joystickInput;
         
         addRequirements(turret);
     }
@@ -25,7 +26,7 @@ public class TurretJoystickCommand extends Command {
     @Override
     public void execute() 
     {
-        turret.runTurret(-kManualTurretSpeed);
+        turret.runTurret(kManualTurretSpeed);
     }
 
     @Override
