@@ -21,9 +21,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.NeutralOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
@@ -48,9 +46,6 @@ public class SK26Turret extends SubsystemBase
     double motorCurrentPosition;
     double target;
     boolean atTarget;
-    
-    // Simulation neutral declaration
-    NeutralOut neutral = new NeutralOut();
 
     // PID Preferences
     Pref<Double> turretkPPref = SKPreferences.attach("turretP", 1.0)
