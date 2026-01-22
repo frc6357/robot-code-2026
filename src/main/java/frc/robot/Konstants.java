@@ -195,12 +195,27 @@ public final class Konstants
     public static final class LightsConstants
     {
         public static final int kNumLedOnBot = 240;
-        public static final double kLightsBrightnessScalarOff = 0.0;
-        public static final double kLightsBrightnessScalarOn = 0.5;
+        public static final double kLightsOffBrightness = 0.0;
+        public static final double kLightsOnBrightness = 0.5;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
-    }
+
+        public static final int[] kColorRed     = {255, 0, 0};
+        public static final int[] kColorBlue    = {0, 0, 255};
+        public static final int[] kColorWhite   = {255, 255, 255};
+
+        // SK colors
+        public static final int[] kSKBlue1 = {81, 171, 185};
+        public static final int[] kSKBlue2 = {104, 185, 196};
+        public static final int[] kSKBlue3 = {144, 205, 217};
+        public static final int[] kSKBlue4 = {178, 219, 225};
+
+        public static final double kWaveSpeedCyclesPerSecond = 0.35;
+        public static final double waveSpatialCycles = 2.0;
+        public static final double waveColorCycleSec = 2.2;
+
+    }   
 
 
 

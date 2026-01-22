@@ -21,6 +21,8 @@ import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -86,9 +88,8 @@ public class Ports
         public static final FilteredAxis kMoveTargetX = new FilteredAxis(() -> kOperator.getRawAxis(kRightY.value)); 
         public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value)); 
 
-
         // Party mode and Teal Lights
-        public static final SKTrigger kPartyModeButton = new SKTrigger(kOperator, kStart.value, BUTTON);
+        public static final SKTrigger k_BlueWaveTrigger = new SKTrigger(kOperator, kStart.value, BUTTON);
 
         
         // Elevator buttons
@@ -149,10 +150,9 @@ public class Ports
     }
 
     public static class LightsPorts{
-        private static final String busName = "";
+        public static final CANBus canBus = CANBus.roboRIO();
     //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(30, busName); // CAN ID for the CANdle controller
-
+        public static final CANPort kCANdle = new CANPort(30, canBus.getName()); // CAN ID for the CANdle controller
     }
 
     public static class EndEffectorPorts
@@ -166,7 +166,6 @@ public class Ports
         public static final CANPort kLaserCanEndEffector = new CANPort(46, busName);
 
     }
-
 
     // public static class ExamplePorts
     // {
