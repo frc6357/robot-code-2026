@@ -39,7 +39,7 @@ public class TurretJoystickCommand extends Command
         double input = joystickAxis.getAsDouble();
 
         double angularVelocity = input * kManualTurretSpeed;
-        double newAngle = turret.getAngleDegrees() + angularVelocity * dt;
+        double newAngle = turret.getTargetAngleDegrees() + angularVelocity * dt;
         turret.setAngleDegrees(newAngle);
     }
 

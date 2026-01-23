@@ -80,6 +80,12 @@ public class SK26Turret extends SubsystemBase
         return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
     }
 
+    // Returns the current target angle in degrees
+    public double getTargetAngleDegrees()
+    {
+        return targetAngleDeg;
+    }
+
     // Check to see if the turret is actually where its target is
     public boolean atTarget()
     {

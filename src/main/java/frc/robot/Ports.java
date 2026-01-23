@@ -100,7 +100,7 @@ public class Ports
         public static final SKTrigger kPartyModeButton = new SKTrigger(kOperator, kStart.value, BUTTON);
 
         // Filtered axis (translation & rotation)
-        public static final FilteredAxis kTurretAxis = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value), new DeadbandFilter(kTurretDeadband));
+        public static final FilteredAxis kTurretAxis = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value));
         
         // Elevator buttons
         // Coral:

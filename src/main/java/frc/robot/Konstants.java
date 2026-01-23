@@ -200,16 +200,16 @@ public final class Konstants
         public static final double kTurretAngleTolerance = 0.2;
 
         // Turret physical constants
-        public static final double kGearRatio = 1.0;
+        public static final double kGearRatio = 12.8; // Motor rotations per turret rotation
         public static final double kDegrees = 360.0;
 
         // Turret PID
         public static final double kTurretP = 1.0;
         public static final double kTurretI = 0.0;
-        public static final double kTurretD = 0.0;
+        public static final double kTurretD = 0.015;
 
         // Turret extra constants
-        public static final double kManualTurretSpeed = 0.7; // Arbitrary
+        public static final double kManualTurretSpeed = 90.0; // Degrees per second at full joystick deflection
         public static final double kTurretDeadband = 0.05;
 
         // TODO slated for deletion in the future.
