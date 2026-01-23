@@ -29,6 +29,7 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
+import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.SK26Lights;
@@ -133,7 +134,7 @@ public class RobotContainer {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
-        buttonBinder.add(new SKLightsBinder(m_visionContainer, m_lightsContainer));
+        buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
