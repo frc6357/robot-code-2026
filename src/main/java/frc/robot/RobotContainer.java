@@ -133,6 +133,7 @@ public class RobotContainer {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
+        buttonBinder.add(new SKLightsBinder(m_visionContainer, m_lightsContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
