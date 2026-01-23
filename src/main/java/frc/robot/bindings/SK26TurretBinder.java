@@ -2,13 +2,12 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
-import frc.lib.utils.filters.Filter;
 import frc.robot.commands.TurretJoystickCommand;
 import frc.robot.subsystems.SK26Turret;
-import frc.robot.utils.filters.DeadbandFilter;
+import frc.lib.utils.filters.LinearDeadbandFilter;
 
 import static frc.robot.Konstants.TurretConstants.kTurretDeadband;
-import static frc.robot.Konstants.TurretConstants.kJoystickReversed;
+// import static frc.robot.Konstants.TurretConstants.kJoystickReversed;
 import static frc.robot.Ports.OperatorPorts.kTurretAxis;
 
 public class SK26TurretBinder implements CommandBinder
@@ -30,13 +29,13 @@ public class SK26TurretBinder implements CommandBinder
 
         SK26Turret turret = turretSubsystem.get();
 
-        double joystickGain = kJoystickReversed ? -1.0 : 1.0;
-        kTurretAxis.setFilter((Filter) new DeadbandFilter(kTurretDeadband, joystickGain));
+        // double joystickGain = kJoystickReversed ? -1.0 : 1.0;
+        kTurretAxis.setFilter(new LinearDeadbandFilter(kTurretDeadband, 1.0));
 
         turret.setDefaultCommand(
             new TurretJoystickCommand(
                 turret,
-                () -> kTurretAxis.getFilteredAxis()
+                () -> -kTurretAxis.getFilteredAxis() //TODO: Determine if axis should be inverted (it probably should)
             )
         );
     }
