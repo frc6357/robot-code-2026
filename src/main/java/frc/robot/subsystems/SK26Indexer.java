@@ -26,7 +26,7 @@ public class SK26Indexer extends SubsystemBase{
     TalonFXConfiguration config = new TalonFXConfiguration()
 
     // PID Configuration
-    .withSlot0(new Slot0Configs().withKP(50))
+    .withSlot0(new Slot0Configs().withKP(16.617))
 
     // this essentially sets the motor to a max current supply of 120 amps
     .withCurrentLimits(
@@ -81,9 +81,8 @@ public class SK26Indexer extends SubsystemBase{
         return run(() -> setIndexerVelocity(velocityRPS));
     }
 
-    // SPINDEXER STUFF
     // -----------------
-
+    // SPINDEXER STUFF
     // -----------------
     public void setSpindexerVelocity(double velocity) {
         targetSpindexerSpeed = velocity;
