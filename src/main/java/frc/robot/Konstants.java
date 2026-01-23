@@ -197,7 +197,7 @@ public final class Konstants
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -180;
         public static final double kTurretMaxPosition = 180;
-        public static final double kTurretAngleTolerance = 0.2;
+        public static final double kTurretAngleTolerance = 0.5;
 
         // Turret physical constants
         public static final double kGearRatio = 12.8; // Motor rotations per turret rotation
