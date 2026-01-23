@@ -8,7 +8,7 @@ import com.ctre.phoenix6.signals.RGBWColor;
 import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
 import com.ctre.phoenix6.signals.StripTypeValue;
 //import com.ctre.phoenix.led.CANdle.LEDStripType;
-import com.ctre.phoenix6.CANBus;
+//import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANdleConfiguration;
 import com.ctre.phoenix6.controls.SolidColor;
 //import com.ctre.phoenix6.configs.LEDConfigs;
@@ -166,13 +166,13 @@ public class SK26Lights extends SubsystemBase{
         candle.setControl(solidColor);
     }
 
-    // public void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
-    //     configs.LED.BrightnessScalar = kLightsOnBrightness;
-    //     strobe = new StrobeAnimation(startIndex, endIndex);
-    //     strobe.FrameRate = intervalMs;
-    //     strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
-    //     candle.setControl(strobe);
-    // }
+    public void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
+        configs.LED.BrightnessScalar = kLightsOnBrightness;
+        strobe = new StrobeAnimation(startIndex, endIndex);
+        strobe.FrameRate = intervalMs;
+        strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
+        candle.setControl(strobe);
+    }
 
     public void turnOffLights() {
         configs.LED.BrightnessScalar = kLightsOffBrightness;
