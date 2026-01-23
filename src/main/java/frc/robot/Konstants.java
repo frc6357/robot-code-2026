@@ -195,8 +195,8 @@ public final class Konstants
     public static final class TurretConstants
     {
         // Turret position limits and tolerances
-        public static final double kTurretMinPosition = -90;
-        public static final double kTurretMaxPosition = 90;
+        public static final double kTurretMinPosition = -180;
+        public static final double kTurretMaxPosition = 180;
         public static final double kTurretAngleTolerance = 0.2;
 
         // Turret physical constants
