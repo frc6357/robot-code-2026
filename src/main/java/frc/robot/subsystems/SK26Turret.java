@@ -1,134 +1,108 @@
 package frc.robot.subsystems;
 
-// Turret constant imports (from Konstants file)
-import static frc.robot.Konstants.TurretConstants.kTurretP;
-import static frc.robot.Konstants.TurretConstants.kTurretI;
-import static frc.robot.Konstants.TurretConstants.kTurretD;
-import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
-import static frc.robot.Konstants.TurretConstants.kTurretMaxPosition;
-import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
-import static frc.robot.Konstants.TurretConstants.kGearRatio;
-
-// Turret ports imports (from Ports file)
+// Imports from the robot
+import static frc.robot.Konstants.TurretConstants.*;
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 
-// Preferences (from Pref & SKPreferences files)
-import frc.robot.preferences.Pref;
-import frc.robot.preferences.SKPreferences;
-
-// Phoenix-related imports
+// Imports from (the goat) Phoenix
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.swerve.utility.PhoenixPIDController;
 
-// WPI-related imports
+// Imports from WPILib
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class SK26Turret extends SubsystemBase 
+public class SK26Turret extends SubsystemBase
 {
-    // Launcher motor delcaration
-    TalonFX turretMotor;
-    TalonFXConfiguration motorConfig;
-    MotorOutputConfigs outputConfigs;
+    // Motor objects
+    private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
+    private final TalonFXConfiguration motorConfig = new TalonFXConfiguration();
 
-    // Launcher PID controller declarations
-    PhoenixPIDController turretPID;
-    Slot0Configs turretPID0;
+    // Target angle (starts at 0.0)
+    private double targetAngleDeg = 0.0;
 
-    // Angle tracking declarations
-    double motorTargetPosition;
-    double motorCurrentPosition;
-    double target;
-    boolean atTarget;
-
-    // PID Preferences
-    Pref<Double> turretkPPref = SKPreferences.attach("turretP", 1.0)
-        .onChange((newValue) -> turretPID.setP(newValue));
-    Pref<Double> turretkIPref = SKPreferences.attach("turretI", 0.0)
-        .onChange((newValue) -> turretPID.setI(newValue));
-    Pref<Double> turretkDPref = SKPreferences.attach("turretD", 0.1)
-        .onChange((newValue) -> turretPID.setD(newValue));
-
-    public SK26Turret() 
+    public SK26Turret()
     {
-        // Motor initialization
-        turretMotor = new TalonFX(kTurretMotor.ID);
-        motorConfig = new TalonFXConfiguration();
+        // Motor output configs
+        MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
+        outputConfigs.NeutralMode = NeutralModeValue.Coast;
+        motorConfig.MotorOutput = outputConfigs;
 
-        motorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+        //PID configs
+        Slot0Configs slot0 = new Slot0Configs();
+        slot0.kP = kTurretP;
+        slot0.kI = kTurretI;
+        slot0.kD = kTurretD;
+        motorConfig.Slot0 = slot0;
 
-        // PID Controller initialization
-        turretPID = new PhoenixPIDController(kTurretP, kTurretI, kTurretD);
-        turretPID.reset();
-        turretPID.setTolerance(kTurretAngleTolerance);
+        // Soft limit configurations (no head snapping ideally)
+        SoftwareLimitSwitchConfigs softLimits = new SoftwareLimitSwitchConfigs();
 
-        turretPID0 = new Slot0Configs()
-            .withKP(turretkPPref.get())
-            .withKI(turretkIPref.get())
-            .withKD(turretkDPref.get());
+        softLimits.ForwardSoftLimitEnable = true;
+        softLimits.ReverseSoftLimitEnable = true;
 
-        motorConfig.withSlot0(turretPID0);
+        softLimits.ForwardSoftLimitThreshold = degreesToMotorRotations(kTurretMaxPosition);
 
+        softLimits.ReverseSoftLimitThreshold = degreesToMotorRotations(kTurretMinPosition);
+        motorConfig.SoftwareLimitSwitch = softLimits;
+
+        // Applying configs
+        turretMotor.getConfigurator().apply(motorConfig);
+
+        // Zero on boot (adjust for absolute encoder)
         turretMotor.setPosition(0.0);
     }
 
-    public void runTurret(double turretSpeed) 
+    // Move the turret to an absolute angle, in degrees
+    public void setAngleDegrees(double angleDeg)
     {
-        if((getMotorPosition() > (kTurretMaxPosition - kTurretAngleTolerance)) && Math.signum(turretSpeed) > 0) 
-        {
-            stop();
-            return;
-        }
-        else
-        { 
-            // Sets a velocity to target via pid and supplies an average duty cycle in volts
-            turretMotor.setControl(new PositionDutyCycle(turretSpeed));
-        }
+        angleDeg = MathUtil.clamp(angleDeg, kTurretMinPosition, kTurretMaxPosition);
+        targetAngleDeg = angleDeg;
+
+        turretMotor.setControl(new PositionDutyCycle(degreesToMotorRotations(angleDeg)));
     }
 
-    public double getMotorSpeed() 
-    {
-        return turretMotor.getVelocity().getValueAsDouble(); // Rotations / sec
-    }
-
-    public double getMotorPosition() 
-    {
-        double motorRotations = turretMotor.getPosition().getValueAsDouble(); // Rotations
-        double angle = motorRotations / (kGearRatio * 360.0); // Degrees conversion
-        return angle;
-    }
-
-    public double getTargetPosition() 
-    {
-        double targetMotorRotations = turretMotor.getClosedLoopReference().getValueAsDouble(); // Rotations
-        double angle = targetMotorRotations / (kGearRatio * 360.0); // Degrees conversion
-        return angle;
-    }
-
-    public void stop() 
+    // Stop turret motion (if needed, might delete later)
+    public void stop()
     {
         turretMotor.stopMotor();
     }
 
-    public boolean isAtTargetPosition() 
+    // Just returns the current angle degrees
+    public double getAngleDegrees()
     {
-        return Math.abs(getTargetPosition() - getMotorPosition()) <= kTurretAngleTolerance;
+        return motorRotationsToDegrees(turretMotor.getPosition().getValueAsDouble());
     }
 
-    @Override
-    public void periodic() 
+    // Check to see if the turret is actually where its target is
+    public boolean atTarget()
     {
-        motorCurrentPosition = getMotorPosition(); 
+        return Math.abs(getAngleDegrees() - targetAngleDeg) <= kTurretAngleTolerance;
+    }
 
-        SmartDashboard.putNumber("Turret Velocity", getMotorSpeed());
-        SmartDashboard.putNumber("Current Turret Position", getMotorPosition());
-        SmartDashboard.putNumber("Target Turret Position", getTargetPosition());
-        SmartDashboard.putBoolean("At Target Position", isAtTargetPosition());
+    // Unit conversion
+    private double degreesToMotorRotations(double degrees)
+    {
+        return (degrees / 360.0) * kGearRatio;
+    }
+    private double motorRotationsToDegrees(double rotations)
+    {
+        return (rotations / kGearRatio) * 360.0;
+    }
+
+
+    @Override
+    public void periodic()
+    {
+        SmartDashboard.putNumber("Turret Angle (deg)", getAngleDegrees());
+        SmartDashboard.putNumber("Turret Target (deg)", targetAngleDeg);
+        SmartDashboard.putBoolean("Turret At Target", atTarget());
+        SmartDashboard.putNumber("Turret Velocity (deg/s)", motorRotationsToDegrees(turretMotor.getVelocity().getValueAsDouble()));
     }
 }
