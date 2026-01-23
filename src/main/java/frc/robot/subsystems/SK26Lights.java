@@ -66,6 +66,7 @@ public class SK26Lights extends SubsystemBase{
         led = new AddressableLED(kLightsPWMHeader);
         ledBuffer = new AddressableLEDBuffer(kNumLedOnBot);
         led.setLength(ledBuffer.getLength());
+        led.start(); // start PWM addressable LED output
 
         // Configure CANdle
         configs = new CANdleConfiguration();
@@ -87,11 +88,13 @@ public class SK26Lights extends SubsystemBase{
     public void enableSKBlueWave() {
         skBlueWaveEnabled = true;
         configs.LED.BrightnessScalar = kLightsOnBrightness;
+        candle.getConfigurator().apply(configs); // push brightness change to CANdle
     }
 
     public void disableSKBlueWave() {
         skBlueWaveEnabled = false;
         configs.LED.BrightnessScalar = kLightsOffBrightness;
+        candle.getConfigurator().apply(configs); // push brightness change to CANdle
     }
 
     private static int lerpInt(int a, int b, double t) {
@@ -192,7 +195,7 @@ public class SK26Lights extends SubsystemBase{
         builder.addBooleanProperty(
             "SK Blue Wave Enabled", 
             () -> skBlueWaveEnabled, 
-            null);
+            (v) -> { if (v) enableSKBlueWave(); else disableSKBlueWave(); });
     }
 
     @Override

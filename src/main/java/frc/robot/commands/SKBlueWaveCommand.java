@@ -25,7 +25,7 @@ public class SKBlueWaveCommand extends Command {
 
     @Override
     public boolean isFinished(){
-        return false;
+        return true; // finish immediately after toggling
     }
 
     @Override

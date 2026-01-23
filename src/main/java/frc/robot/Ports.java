@@ -152,7 +152,7 @@ public class Ports
     public static class LightsPorts{
         public static final CANBus canBus = CANBus.roboRIO();
     //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(30, canBus.getName()); // CAN ID for the CANdle controller
+        public static final CANPort kCANdle = new CANPort(48, canBus.getName()); // CAN ID for the CANdle controller
     }
 
     public static class EndEffectorPorts
