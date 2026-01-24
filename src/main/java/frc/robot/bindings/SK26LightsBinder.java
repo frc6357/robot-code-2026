@@ -3,7 +3,7 @@ package frc.robot.bindings;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.SK26Lights;
-import frc.robot.commands.SKBlueWaveCommand;
+import frc.robot.commands.RequestSKBlueWave;
 
 import static frc.robot.Ports.OperatorPorts.k_BlueWaveTrigger;
 
@@ -22,7 +22,7 @@ public class SK26LightsBinder implements CommandBinder {
     @Override
     public void bindButtons() {
         lightsSubsystem.ifPresent(lights -> {
-            skBlueWave.onTrue(new SKBlueWaveCommand(lights));
+            skBlueWave.onTrue(new RequestSKBlueWave(lights));
         });
     }
 }

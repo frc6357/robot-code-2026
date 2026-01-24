@@ -33,7 +33,32 @@ import static frc.robot.Konstants.LightsConstants.kColorBlue;
 import static frc.robot.Konstants.LightsConstants.kColorWhite;
 import static frc.robot.Ports.LightsPorts.canBus;
 
-public class SK26Lights extends SubsystemBase{
+public class SK26Lights extends SubsystemBase {
+
+    /**
+     * Enum representing the different light effects with their priorities.
+     * Lower priority values are MORE important and will override higher values.
+     */
+    public enum LightEffect {
+        OFF(100),           // Lowest priority - default/idle state
+        SK_BLUE_WAVE(80),   // Idle animation
+        SOLID_BLUE(70),     // Alliance color
+        SOLID_RED(70),      // Alliance color
+        SOLID_WHITE(60),    // Auto mode indicator
+        RAINBOW(50),        // Celebration/special
+        STROBE_RED(20),     // Defense mode - high priority
+        STROBE_BLUE(20);    // Defense mode - high priority
+
+        private final int priority;
+
+        LightEffect(int priority) {
+            this.priority = priority;
+        }
+
+        public int getPriority() {
+            return priority;
+        }
+    }
     /*
      * White for auto
      * 
@@ -49,7 +74,9 @@ public class SK26Lights extends SubsystemBase{
     private final CANdle candle;
     private final CANdleConfiguration configs;
 
-    public boolean skBlueWaveEnabled = false;
+    // Effect management variables
+    private LightEffect requestedEffect = LightEffect.OFF;
+    private LightEffect activeEffect = LightEffect.OFF;
 
     StrobeAnimation strobe;
     SolidColor solidColor;
@@ -66,26 +93,87 @@ public class SK26Lights extends SubsystemBase{
         candle.getConfigurator().apply(configs);
     }
 
-    /*public void setAllLEDs(int[] colorRGB) {
-        for (int i = 0; i < ledBuffer.getLength(); i++) {
-            ledBuffer.setRGB(i, colorRGB[0], colorRGB[1], colorRGB[2]);
-        }
-        led.setData(ledBuffer);
-        led.start();
-    }*/
-
-    public void enableSKBlueWave() {
-        skBlueWaveEnabled = true;
-        configs.LED.BrightnessScalar = kLightsOnBrightness;
-        candle.getConfigurator().apply(configs);
+    // ==================== Effect Request Methods ====================
+    
+    /**
+     * Request to enable the SK Blue Wave effect.
+     */
+    public void requestSKBlueWave() {
+        requestedEffect = LightEffect.SK_BLUE_WAVE;
     }
 
-    public void disableSKBlueWave() {
-        skBlueWaveEnabled = false;
-        configs.LED.BrightnessScalar = kLightsOffBrightness;
-        candle.getConfigurator().apply(configs);
-        turnOffLights();
+    /**
+     * Request to turn off the lights.
+     */
+    public void requestOff() {
+        requestedEffect = LightEffect.OFF;
     }
+
+    /**
+     * Request to set the LEDs to solid red.
+     */
+    public void requestLEDRed() {
+        requestedEffect = LightEffect.SOLID_RED;
+    }
+
+    /**
+     * Request to set the LEDs to solid blue.
+     */
+    public void requestLEDBlue() {
+        requestedEffect = LightEffect.SOLID_BLUE;
+    }
+
+    /**
+     * Request to set the LEDs to solid white.
+     */
+    public void requestLEDWhite() {
+        requestedEffect = LightEffect.SOLID_WHITE;
+    }
+
+    /**
+     * Request to set the LEDs to rainbow animation.
+     */
+    public void requestRainbow() {
+        requestedEffect = LightEffect.RAINBOW;
+    }
+
+    /**
+     * Request to set the LEDs to strobe red (defense mode).
+     */
+    public void requestStrobeRed() {
+        requestedEffect = LightEffect.STROBE_RED;
+    }
+
+    /**
+     * Request to set the LEDs to strobe blue (defense mode).
+     */
+    public void requestStrobeBlue() {
+        requestedEffect = LightEffect.STROBE_BLUE;
+    }
+
+    /**
+     * Get the currently requested effect.
+     */
+    public LightEffect getRequestedEffect() {
+        return requestedEffect;
+    }
+
+    /**
+     * Get the currently active effect.
+     */
+    public LightEffect getActiveEffect() {
+        return activeEffect;
+    }
+
+    // ==================== Legacy Methods (for backward compatibility) ====================
+
+    // public void enableSKBlueWave() {
+    //     requestSKBlueWave();
+    // }
+
+    // public void disableSKBlueWave() {
+    //     requestOff();
+    // }
 
     private static int lerpInt(int a, int b, double t) {
         t = Math.max(0.0, Math.min(1.0, t));
@@ -186,26 +274,82 @@ public class SK26Lights extends SubsystemBase{
         candle.setControl(solidColor);
     }
 
-    public void update_LED_SKBlue() {
-        if (skBlueWaveEnabled) {
-            runSKBlueWave();
+    // ==================== Effect Execution Methods ====================
+
+    /**
+     * Applies the given effect to the LEDs.
+     * This method contains the logic to actually run each effect type.
+     */
+    private void applyEffect(LightEffect effect) {
+        switch (effect) {
+            case OFF:
+                turnOffLights();
+                break;
+            case SK_BLUE_WAVE:
+                runSKBlueWave();
+                break;
+            case SOLID_RED:
+                setLEDRed();
+                break;
+            case SOLID_BLUE:
+                setLEDBlue();
+                break;
+            case SOLID_WHITE:
+                setLEDWhite();
+                break;
+            case RAINBOW:
+                setRainbowAnimation();
+                break;
+            case STROBE_RED:
+                setStrobeAnimation(kColorRed, 0, kNumLedOnBot - 1, 100);
+                break;
+            case STROBE_BLUE:
+                setStrobeAnimation(kColorBlue, 0, kNumLedOnBot - 1, 100);
+                break;
+            default:
+                turnOffLights();
+                break;
+        }
+    }
+
+    /**
+     * Processes effect requests and applies the appropriate effect based on priority.
+     * Lower priority values are MORE important and will override higher values.
+     */
+    private void processEffectRequests() {
+        // Determine which effect should be active based on priority
+        // (lower priority value = higher importance)
+        LightEffect effectToApply = requestedEffect;
+
+        // Only apply if the effect has changed or if it's a continuous animation
+        boolean needsUpdate = (effectToApply != activeEffect) || 
+                              (effectToApply == LightEffect.SK_BLUE_WAVE); // SK Blue Wave needs continuous updates
+
+        if (needsUpdate) {
+            applyEffect(effectToApply);
+            activeEffect = effectToApply;
         }
     }
 
     @Override 
     public void initSendable(SendableBuilder builder) {
-        builder.addBooleanProperty(
-            "SK Blue Wave Enabled", 
-            () -> skBlueWaveEnabled, 
-            (v) -> { if (v) enableSKBlueWave(); else disableSKBlueWave(); });
+        builder.addStringProperty(
+            "Requested Effect",
+            () -> requestedEffect.name(),
+            null);
+        builder.addStringProperty(
+            "Active Effect",
+            () -> activeEffect.name(),
+            null);
     }
 
     @Override
     public void periodic() {
-
-        update_LED_SKBlue();
+        // Process effect requests and apply the appropriate effect
+        processEffectRequests();
 
         SmartDashboard.putData("Lights", this);
-
     }
+
+    
 }
