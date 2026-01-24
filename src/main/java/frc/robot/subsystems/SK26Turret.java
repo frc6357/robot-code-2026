@@ -82,6 +82,10 @@ public class SK26Turret extends SubsystemBase
         // ========== Sync Motor Encoder to Absolute Encoder ==========
         // Read the absolute turret position from CANcoder and set motor encoder to match
         syncMotorToAbsoluteEncoder();
+
+        // ========== Move to Zero on Boot ==========
+        // Command the turret to move to the zero position
+        setAngleDegrees(0.0);
     }
 
     /**
@@ -90,9 +94,8 @@ public class SK26Turret extends SubsystemBase
      */
     public void syncMotorToAbsoluteEncoder()
     {
-        // CANcoder returns position in rotations (-0.5 to +0.5 for absolute, or continuous)
-        // We want turret degrees, so multiply by 360
-        double absoluteTurretDegrees = turretEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
+        // Get the normalized absolute turret angle (-180 to +180)
+        double absoluteTurretDegrees = getAbsoluteAngleDegrees();
         
         // Set the motor encoder position to the equivalent motor rotations
         turretMotor.setPosition(degreesToMotorRotations(absoluteTurretDegrees));
@@ -103,11 +106,24 @@ public class SK26Turret extends SubsystemBase
 
     /**
      * Returns the absolute turret angle from the CANcoder (degrees).
+     * Normalized to the range -180 to +180.
      * This is the "ground truth" position.
      */
     public double getAbsoluteAngleDegrees()
     {
-        return turretEncoder.getAbsolutePosition().getValueAsDouble() * 360.0;
+        // CANcoder returns position in rotations (0 to 1 range after offset)
+        double rotations = turretEncoder.getAbsolutePosition().getValueAsDouble();
+        
+        // Convert to degrees (0 to 360)
+        double degrees = rotations * 360.0;
+        
+        // Normalize to -180 to +180 range
+        if (degrees > 180.0)
+        {
+            degrees -= 360.0;
+        }
+        
+        return degrees;
     }
 
     // Move the turret to an absolute angle, in degrees

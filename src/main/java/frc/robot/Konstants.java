@@ -205,7 +205,7 @@ public final class Konstants
 
         // CANcoder / Absolute Encoder constants
         // TODO: Measure this offset with turret physically at "zero" position
-        public static final double kTurretEncoderOffset = 0.0; // Rotations (-0.5 to +0.5)
+        public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5)
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
 
         // Turret PID
