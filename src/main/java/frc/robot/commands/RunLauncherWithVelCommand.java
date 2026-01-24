@@ -3,12 +3,12 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SK26Launcher;
 
-public class RunLauncherCommand extends Command {
+public class RunLauncherWithVelCommand extends Command {
 
     SK26Launcher launchermotor;
     double targetLaunchVelocity;
     
-    public RunLauncherCommand(SK26Launcher launchermotor, double targetLaunchVelocity) {
+    public RunLauncherWithVelCommand(SK26Launcher launchermotor, double targetLaunchVelocity) {
         this.launchermotor = launchermotor;
         this.targetLaunchVelocity = targetLaunchVelocity;
     }

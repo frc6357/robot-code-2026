@@ -77,9 +77,10 @@ public class SK26Launcher extends SubsystemBase {
         this.launcherMotorStatus = launcherMotorStatus;
     }
 
-    public void runLauncherRPS(double targetRPS, String launcherMotorStatus) {
+    public void runLauncherRPS(double targetMotorRPS, String launcherMotorStatus) {
 
-        launcherVelocityControl.Velocity = targetRPS;
+        this.targetMotorRPS = targetMotorRPS;
+        launcherVelocityControl.Velocity = targetMotorRPS;
         launchermotor.setControl(launcherVelocityControl);
         this.launcherMotorStatus = launcherMotorStatus;
     }
@@ -93,8 +94,8 @@ public class SK26Launcher extends SubsystemBase {
     }*/
     
     //unjams the motor to allow proper shooting
-    public void unJamLauncher(double speed) {
-        runLauncherExitVel(speed, "Unjamming");
+    public void unJamLauncher(double motorRPS) {
+        runLauncherRPS(motorRPS, "Unjamming");
     }
 
     //checks whether or not the motor is at the target speed
@@ -130,7 +131,7 @@ public class SK26Launcher extends SubsystemBase {
             null);
         builder.addDoubleProperty(
             "Launcher Velocity",
-            () -> launchermotor.getVelocity().getValueAsDouble(),
+            () -> launchermotor.getVelocity().getValueAsDouble()*(2*Math.PI*kWheelRadius),
             null);
         builder.addDoubleProperty(
             "Target RPS",

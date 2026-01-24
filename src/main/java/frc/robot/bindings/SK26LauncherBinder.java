@@ -3,24 +3,29 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.RunLauncherCommand;
+import frc.robot.commands.RunLauncherWithRPSCommand;
+import frc.robot.commands.RunLauncherWithVelCommand;
 import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
 import frc.robot.subsystems.SK26Launcher;
 
-import static frc.robot.Konstants.LauncherConstants.ktargetlaunchVelocity;
-import static frc.robot.Ports.OperatorPorts.kShoot;
+import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
+import static frc.robot.Konstants.LauncherConstants.kTargetlaunchVelocity;
+import static frc.robot.Ports.OperatorPorts.kShootExitVel;
+import static frc.robot.Ports.OperatorPorts.kShootRPS;
 import static frc.robot.Ports.OperatorPorts.kUnJam;
 
 public class SK26LauncherBinder implements CommandBinder {
 
     Optional<SK26Launcher> launcherSubsystem;
 
-    Trigger Shoot;
+    Trigger ShootExitVel;
+    Trigger ShootRPS;
     Trigger UnJam;
     
     public SK26LauncherBinder(Optional<SK26Launcher> launcherSubsystem) {
         this.launcherSubsystem = launcherSubsystem;
-        this.Shoot = kShoot.button;
+        this.ShootExitVel = kShootExitVel.button;
+        this.ShootRPS = kShootRPS.button;
         this.UnJam = kUnJam.button;
     }
 
@@ -31,7 +36,8 @@ public class SK26LauncherBinder implements CommandBinder {
 
             SK26Launcher launcher = launcherSubsystem.get();
 
-            Shoot.whileTrue(new RunLauncherCommand(launcher, ktargetlaunchVelocity));
+            ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
+            ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
             UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
         }
     }

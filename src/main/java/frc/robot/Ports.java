@@ -13,6 +13,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kLeftStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
@@ -130,8 +131,9 @@ public class Ports
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
 
-        public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
-        public static final SKTrigger kUnJam = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+        public static final SKTrigger kShootExitVel = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
+        public static final SKTrigger kShootRPS = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+        public static final SKTrigger kUnJam = new SKTrigger(kOperator, kX.value, BUTTON);
 
     }
 
@@ -199,7 +201,7 @@ public class Ports
     public static class LauncherPorts {
         
         private static final String busName = "";
-        public static final CANPort kFixedLauncherMotor = new CANPort(55, busName);
+        public static final CANPort kFixedLauncherMotor = new CANPort(50, busName);
         public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
     }
 

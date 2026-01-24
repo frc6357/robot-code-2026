@@ -7,7 +7,7 @@ import frc.robot.subsystems.SK26Launcher;
 
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherPauseTime;
-import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherVelocity;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRunTime;
 
 public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
@@ -21,7 +21,7 @@ public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
         addCommands(
             Commands.sequence(
                 //Reverses motor
-                Commands.runOnce(() -> launchermotor.unJamLauncher(-kUnJamLauncherVelocity)),
+                Commands.runOnce(() -> launchermotor.unJamLauncher(-kUnJamLauncherRPS)),
                 Commands.waitSeconds(kUnJamLauncherRunTime),
 
                 //Stops motor
@@ -29,7 +29,7 @@ public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
                 Commands.waitSeconds(kUnJamLauncherPauseTime),
 
                 //Runs motor
-                Commands.runOnce(() -> launchermotor.unJamLauncher(kUnJamLauncherVelocity)),
+                Commands.runOnce(() -> launchermotor.unJamLauncher(kUnJamLauncherRPS)),
                 Commands.waitSeconds(kUnJamLauncherRunTime),
 
                 //Stops motor
