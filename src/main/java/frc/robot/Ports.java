@@ -90,6 +90,7 @@ public class Ports
 
         // Party mode and Teal Lights
         public static final SKTrigger k_BlueWaveTrigger = new SKTrigger(kOperator, kStart.value, BUTTON);
+        public static final SKTrigger k_LeftBumperTrigger = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
 
         
         // Elevator buttons

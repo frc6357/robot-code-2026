@@ -214,16 +214,9 @@ public class SK26Lights extends SubsystemBase {
 
             int[] base = skBlueGradient(u);
 
-            double wave = 0.5 + 0.5 * Math.sin(2.0 * Math.PI * (travelPhase + x * waveSpatialCycles));
-            double bright = 0.35 + 0.65 * wave;
-
-            int r = (int) Math.round(base[0] * bright);
-            int g = (int) Math.round(base[1] * bright);
-            int b = (int) Math.round(base[2] * bright);
-
-            r = Math.max(0, Math.min(255, r));
-            g = Math.max(0, Math.min(255, g));
-            b = Math.max(0, Math.min(255, b));
+            int r = base[0];
+            int g = base[1];
+            int b = base[2];
 
             solidColor = new SolidColor(i, i);
             solidColor.Color = new RGBWColor(r, g, b, 0);
