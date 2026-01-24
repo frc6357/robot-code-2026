@@ -20,7 +20,7 @@ public class RunLauncherCommand extends Command {
 
     @Override
     public void execute() {
-        launchermotor.startLauncher(targetLaunchVelocity, "Launching");
+        launchermotor.runLauncherExitVel(targetLaunchVelocity, "Launching");
     }
 
     @Override

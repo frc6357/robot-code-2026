@@ -1,13 +1,16 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Konstants.LauncherConstants.kLauncherP;
-import static frc.robot.Konstants.LauncherConstants.kLauncherI;
-import static frc.robot.Konstants.LauncherConstants.kLauncherD;
+import static frc.robot.Konstants.LauncherConstants.Slot0;
+import static frc.robot.Konstants.LauncherConstants.Slot1;
+import static frc.robot.Konstants.LauncherConstants.kLauncherA;
 import static frc.robot.Konstants.LauncherConstants.kLauncherV;
+import static frc.robot.Konstants.LauncherConstants.kLauncherS;
 import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
 import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.Slot1Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.VelocityDutyCycle;
@@ -29,8 +32,8 @@ public class SK26Launcher extends SubsystemBase {
 
     //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
-    private double targetLaunchVelocity; //meters per second
-    private String launchermotorStatus = "Stopped";
+    private double targetMotorRPS;
+    private String launcherMotorStatus = "Stopped";
     
     public SK26Launcher() {
 
@@ -46,23 +49,39 @@ public class SK26Launcher extends SubsystemBase {
 
         //configures PID values onto the launcher motor
         TalonFXConfiguration config = new TalonFXConfiguration();
-        config.Slot0.kP = kLauncherP;
-        config.Slot0.kI = kLauncherI;
-        config.Slot0.kD = kLauncherD;
-        config.Slot0.kV = kLauncherV;
+        //First slot configuration
+        config.withSlot0(
+            new Slot0Configs()
+                .withKV(kLauncherV).withKA(kLauncherA).withKS(kLauncherS)
+                .withKP(Slot0.kP).withKI(Slot0.kI).withKD(Slot0.kD)
+        );
+
+        //Second slot configuration
+        config.withSlot1(
+            new Slot1Configs()
+                .withKV(kLauncherV).withKA(kLauncherA).withKS(kLauncherS)
+                .withKP(Slot1.kP).withKI(Slot1.kI).withKD(Slot1.kD)
+        );
 
         motor.getConfigurator().apply(config);
         motor.setNeutralMode(NeutralModeValue.Brake);
     }
 
-    public void startLauncher(double targetLaunchVelocity, String launchermotorStatus) {
+    public void runLauncherExitVel(double targetLaunchVelocity, String launcherMotorStatus) {
 
-        this.targetLaunchVelocity = targetLaunchVelocity;
         //Math is probably incredibly wrong but I tried
         double motorRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
+        targetMotorRPS = motorRPS;
         launcherVelocityControl.Velocity = motorRPS; 
         launchermotor.setControl(launcherVelocityControl); //makes launcher launch
-        this.launchermotorStatus = launchermotorStatus;
+        this.launcherMotorStatus = launcherMotorStatus;
+    }
+
+    public void runLauncherRPS(double targetRPS, String launcherMotorStatus) {
+
+        launcherVelocityControl.Velocity = targetRPS;
+        launchermotor.setControl(launcherVelocityControl);
+        this.launcherMotorStatus = launcherMotorStatus;
     }
 
     //for debugging the motor ONLY!!
@@ -75,23 +94,22 @@ public class SK26Launcher extends SubsystemBase {
     
     //unjams the motor to allow proper shooting
     public void unJamLauncher(double speed) {
-        startLauncher(speed, "Unjamming");
+        runLauncherExitVel(speed, "Unjamming");
     }
 
     //checks whether or not the motor is at the target speed
     public boolean isLauncherAtSpeed() {
 
         double motorRPS = launchermotor.getVelocity().getValueAsDouble();
-        double targetRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
-        return Math.abs(motorRPS - targetRPS) < kShooterTolerance;
+        return Math.abs(motorRPS - targetMotorRPS) < kShooterTolerance;
     }
 
     //Sets the motor speed to zero
     public void stopLauncher() {
 
         launchermotor.set(kStopLauncher);
-        targetLaunchVelocity = kStopLauncher;
-        launchermotorStatus = "Stopped";
+        targetMotorRPS = kStopLauncher;
+        launcherMotorStatus = "Stopped";
     }
 
     //Sends data to the Smart Dashboard
@@ -104,7 +122,7 @@ public class SK26Launcher extends SubsystemBase {
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty(
             "Launcher Status", 
-            () -> launchermotorStatus,
+            () -> launcherMotorStatus,
             null);
         builder.addBooleanProperty(
             "Is at launcher speed",
@@ -116,7 +134,7 @@ public class SK26Launcher extends SubsystemBase {
             null);
         builder.addDoubleProperty(
             "Target RPS",
-            () -> targetLaunchVelocity/(2*Math.PI*kWheelRadius),
+            () -> targetMotorRPS,
             null);
     }
 }

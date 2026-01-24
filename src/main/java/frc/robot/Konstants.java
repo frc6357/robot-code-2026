@@ -175,11 +175,10 @@ public final class Konstants
 
     public static final class LauncherConstants {
 
-        //initialize PID values... NOT FINAL
-        public static final double kLauncherP = 5;
-        public static final double kLauncherI = 0;
-        public static final double kLauncherD = 0;
-        public static final double kLauncherV = 0;
+        //initialize PID values
+        public static final double kLauncherA = 0.0;
+        public static final double kLauncherV = 0.093;
+        public static final double kLauncherS = 0.25;
 
         public static final double kWheelRadius = .075; //TEMPORARY
         public static final double kShooterTolerance = 0.5; // +/- rps
@@ -188,6 +187,17 @@ public final class Konstants
         public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
         public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
         public static final double kUnJamLauncherVelocity = (1/kUnJamLauncherRunTime)*(2*Math.PI*kWheelRadius); //Velocity of motor when unjamming
+
+        public static final class Slot0 {
+            public static final double kP = 1.8;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
+        public static final class Slot1 {
+            public static final double kP = 0.5;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
     }
 
     public static final class ExampleConstants
