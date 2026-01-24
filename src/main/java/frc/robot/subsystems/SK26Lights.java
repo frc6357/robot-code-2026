@@ -15,11 +15,8 @@ import com.ctre.phoenix6.controls.SolidColor;
 import com.ctre.phoenix6.controls.StrobeAnimation;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.Timer;
 
-import static frc.robot.Konstants.LightsConstants.kLightsPWMHeader;
 import static frc.robot.Konstants.LightsConstants.kNumLedOnBot;
 import static frc.robot.Konstants.LightsConstants.kSKBlue1;
 import static frc.robot.Konstants.LightsConstants.kSKBlue2;
@@ -49,9 +46,6 @@ public class SK26Lights extends SubsystemBase{
      * 
      */
 
-    private final AddressableLED led;
-    private final AddressableLEDBuffer ledBuffer;
-
     private final CANdle candle;
     private final CANdleConfiguration configs;
 
@@ -63,11 +57,6 @@ public class SK26Lights extends SubsystemBase{
     private static final int[][] SK_BLUES = new int[][] { kSKBlue1, kSKBlue2, kSKBlue3, kSKBlue4 };
 
     public SK26Lights() {
-        led = new AddressableLED(kLightsPWMHeader);
-        ledBuffer = new AddressableLEDBuffer(kNumLedOnBot);
-        led.setLength(ledBuffer.getLength());
-        led.start(); // start PWM addressable LED output
-
         // Configure CANdle
         configs = new CANdleConfiguration();
         configs.CANdleFeatures.StatusLedWhenActive = StatusLedWhenActiveValue.Disabled;
@@ -88,13 +77,14 @@ public class SK26Lights extends SubsystemBase{
     public void enableSKBlueWave() {
         skBlueWaveEnabled = true;
         configs.LED.BrightnessScalar = kLightsOnBrightness;
-        candle.getConfigurator().apply(configs); // push brightness change to CANdle
+        candle.getConfigurator().apply(configs);
     }
 
     public void disableSKBlueWave() {
         skBlueWaveEnabled = false;
         configs.LED.BrightnessScalar = kLightsOffBrightness;
-        candle.getConfigurator().apply(configs); // push brightness change to CANdle
+        candle.getConfigurator().apply(configs);
+        turnOffLights();
     }
 
     private static int lerpInt(int a, int b, double t) {
@@ -120,50 +110,60 @@ public class SK26Lights extends SubsystemBase{
     }
 
     private void runSKBlueWave() {
+        configs.LED.BrightnessScalar = kLightsOnBrightness;
+        candle.getConfigurator().apply(configs);
+
         double now = Timer.getFPGATimestamp();
 
         double colorPhase = (now / waveColorCycleSec);
-
         double travelPhase = now * kWaveSpeedCyclesPerSecond;
 
-        int n = ledBuffer.getLength();
+        int n = kNumLedOnBot;
         for (int i = 0; i < n; i++) {
-            double x = (double) i / Math.max(1, n - 1);
+            double x = (double) i / Math.max(1.0, (double) (n - 1));
 
             double u = colorPhase + (x * waveSpatialCycles) + travelPhase;
 
-            int[] rgb = skBlueGradient(u);
+            int[] base = skBlueGradient(u);
 
-            double pulse = 0.65 + 0.35 * Math.sin(2.0 * Math.PI * (travelPhase + x));
-            int r = (int) Math.round(rgb[0] * pulse);
-            int g = (int) Math.round(rgb[1] * pulse);
-            int b = (int) Math.round(rgb[2] * pulse);
+            double wave = 0.5 + 0.5 * Math.sin(2.0 * Math.PI * (travelPhase + x * waveSpatialCycles));
+            double bright = 0.35 + 0.65 * wave;
 
-            ledBuffer.setRGB(i, r, g, b);
+            int r = (int) Math.round(base[0] * bright);
+            int g = (int) Math.round(base[1] * bright);
+            int b = (int) Math.round(base[2] * bright);
+
+            r = Math.max(0, Math.min(255, r));
+            g = Math.max(0, Math.min(255, g));
+            b = Math.max(0, Math.min(255, b));
+
+            solidColor = new SolidColor(i, i);
+            solidColor.Color = new RGBWColor(r, g, b, 0);
+            candle.setControl(solidColor);
         }
-
-        led.setData(ledBuffer);
     }
 
     public void setLEDRed() {
-        setSolidColor(kColorRed, 0, ledBuffer.getLength() - 1);
+        setSolidColor(kColorRed, 0, kNumLedOnBot - 1);
     }
 
     public void setLEDBlue() {
-        setSolidColor(kColorBlue, 0, ledBuffer.getLength() - 1);
+        setSolidColor(kColorBlue, 0, kNumLedOnBot - 1);
     }
 
     public void setLEDWhite() {
-        setSolidColor(kColorWhite, 0, ledBuffer.getLength() - 1);
+        setSolidColor(kColorWhite, 0, kNumLedOnBot - 1);
     }
 
     public void setRainbowAnimation() {
         configs.LED.BrightnessScalar = kLightsOnBrightness;
-        candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, ledBuffer.getLength() - 1));
+        candle.getConfigurator().apply(configs);
+        candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, kNumLedOnBot - 1));
     }
 
     public void setSolidColor(int[] colorRGB, int startIndex, int endIndex) {
         configs.LED.BrightnessScalar = kLightsOnBrightness;
+        candle.getConfigurator().apply(configs);
         solidColor = new SolidColor(startIndex, endIndex);
         solidColor.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
         candle.setControl(solidColor);
@@ -171,6 +171,7 @@ public class SK26Lights extends SubsystemBase{
 
     public void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
         configs.LED.BrightnessScalar = kLightsOnBrightness;
+        candle.getConfigurator().apply(configs);
         strobe = new StrobeAnimation(startIndex, endIndex);
         strobe.FrameRate = intervalMs;
         strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
@@ -179,7 +180,8 @@ public class SK26Lights extends SubsystemBase{
 
     public void turnOffLights() {
         configs.LED.BrightnessScalar = kLightsOffBrightness;
-        solidColor = new SolidColor(0, ledBuffer.getLength() - 1);
+        candle.getConfigurator().apply(configs);
+        solidColor = new SolidColor(0, kNumLedOnBot - 1);
         solidColor.Color = new RGBWColor(0, 0, 0, 0);
         candle.setControl(solidColor);
     }
@@ -206,7 +208,4 @@ public class SK26Lights extends SubsystemBase{
         SmartDashboard.putData("Lights", this);
 
     }
-
-
 }
-
