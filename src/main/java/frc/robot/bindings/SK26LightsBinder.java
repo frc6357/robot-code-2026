@@ -1,10 +1,14 @@
 package frc.robot.bindings;
 
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.SK26Lights;
 import frc.robot.commands.RequestSKBlueWave;
 import frc.robot.commands.RequestLEDWhite;
+import static frc.robot.subsystems.SK26Lights.LightEffect;
 
+
+// import static frc.robot.Konstants.SystemConstants.kBrownoutTrigger;
 import static frc.robot.Ports.OperatorPorts.k_BlueWaveTrigger;
 import static frc.robot.Ports.OperatorPorts.k_LeftBumperTrigger;
 
@@ -24,9 +28,19 @@ public class SK26LightsBinder implements CommandBinder {
 
     @Override
     public void bindButtons() {
-        lightsSubsystem.ifPresent(lights -> {
-            skBlueWave.onTrue(new RequestSKBlueWave(lights));
-            leftBumper.onTrue(new RequestLEDWhite(lights));
-        });
+        if(lightsSubsystem.isEmpty()) {
+            return;
+        }
+        SK26Lights lights = lightsSubsystem.get();
+
+        skBlueWave.onTrue(new RequestSKBlueWave(lights).ignoringDisable(true));
+        leftBumper.onTrue(new RequestLEDWhite(lights).ignoringDisable(true));
+
+        // kBrownoutTrigger.onTrue(new InstantCommand(
+        //     () -> lights.requestEffect(LightEffect.BROWNOUT)
+        // ));
+        // kBrownoutTrigger.onFalse(new InstantCommand(
+        //     () -> lights.cancelEffect(LightEffect.BROWNOUT)
+        // ));
     }
 }

@@ -32,6 +32,9 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.GeneratedConstants;
 import frc.robot.subsystems.drive.SKTargetPoint;
 
@@ -191,6 +194,16 @@ public final class Konstants
          * acceleration will not cause the robot to tip over.*/
         public static final double kMaxFullSpeedElevatorHeight = 2.0;
     }
+    
+    public static final class SystemConstants
+    {
+        // Brownout detection
+        // public static final double kBrownoutVoltageThreshold = 7.0; // Voltage threshold for brownout detection
+        // public static final int kPdhCAN_ID = 63;
+        // public static final PowerDistribution PDH = new PowerDistribution(kPdhCAN_ID, ModuleType.kRev);
+        // public static final Trigger kBrownoutTrigger = new Trigger(() -> PDH.getVoltage() < kBrownoutVoltageThreshold);
+
+    }
 
     public static final class LightsConstants
     {
@@ -204,6 +217,12 @@ public final class Konstants
         public static final int[] kColorRed     = {255, 0, 0};
         public static final int[] kColorBlue    = {0, 0, 255};
         public static final int[] kColorWhite   = {255, 255, 255};
+        public static final int[] kColorGreen   = {0, 255, 0};
+        public static final int[] kColorYellow  = {255, 255, 0};
+        public static final int[] kColorPurple  = {128, 0, 128};
+        public static final int[] kColorOrange  = {255, 165, 0};
+        public static final int[] kColorBrown   = {150, 75, 0};
+        public static final int[] kColorSKBlue = {22, 173, 187}; //TODO: Is this actually going to show up as SK blue?
 
         // SK colors
         public static final int[] kSKBlue1 = {81, 171, 185};
@@ -211,9 +230,10 @@ public final class Konstants
         public static final int[] kSKBlue3 = {144, 205, 217};
         public static final int[] kSKBlue4 = {178, 219, 225};
 
-        public static final double kWaveSpeedCyclesPerSecond = 0.35;
-        public static final double waveSpatialCycles = 2.0;
-        public static final double waveColorCycleSec = 2.2;
+        // Wave animation constants - control the speed and appearance of the wave effect
+        public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)
+        public static final double kWaveSpatialCycles = 2.0; // How many complete wave patterns fit across the entire LED strip
+        public static final double kWaveColorCycleSec = 2.2; // How long it takes for the color gradient to cycle through all colors (seconds)
 
     }   
 
