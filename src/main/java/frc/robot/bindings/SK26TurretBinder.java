@@ -41,7 +41,7 @@ public class SK26TurretBinder implements CommandBinder
         kTurretAxis.setFilter(new LinearDeadbandFilter(kTurretDeadband, 1.0));
 
         LowAlgae.onTrue(new TurretTemporaryButtonCommand(90, turret));
-        HighAlgae.onTrue(new TurretTemporaryButtonCommand(-90, turret));
+        HighAlgae.onTrue(new TurretTemporaryButtonCommand(0.0, turret));
 
         turret.setDefaultCommand(
             new TurretJoystickCommand(
