@@ -36,21 +36,62 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SK26Lights extends SubsystemBase {
 
+    // -----------------------------
+    // LED color correction
+    // -----------------------------
+    // LED strips rarely match commanded RGB perfectly (channel imbalance + non-linear brightness).
+    // These values are meant to be tuned on the robot until white looks neutral.
+    private static final String kCalKeyRoot = "Lights/Cal/";
+    private static final String kCalGammaKey = kCalKeyRoot + "Gamma";
+    private static final String kCalRScaleKey = kCalKeyRoot + "RScale";
+    private static final String kCalGScaleKey = kCalKeyRoot + "GScale";
+    private static final String kCalBScaleKey = kCalKeyRoot + "BScale";
+
+    // Defaults (used to seed SmartDashboard entries)
+    private static final double kDefaultLedGamma = 2.2;
+    private static final double kDefaultLedRScale = 1.00;
+    private static final double kDefaultLedGScale = 0.78;
+    private static final double kDefaultLedBScale = 0.92;
+
+    private static int clamp255(int v) {
+        return Math.max(0, Math.min(255, v));
+    }
+
+    /** Applies per-channel scaling in linear space, then gamma correction (0..255). */
+    private static int correctChannel(int value0to255, double scale, double gamma) {
+        double x = Math.max(0.0, Math.min(1.0, value0to255 / 255.0));
+        x = Math.max(0.0, Math.min(1.0, x * scale));
+        x = Math.pow(x, gamma);
+        return clamp255((int) Math.round(x * 255.0));
+    }
+
+    private static RGBWColor correctedRGB(int[] rgb) {
+        double gamma = SmartDashboard.getNumber(kCalGammaKey, kDefaultLedGamma);
+        double rScale = SmartDashboard.getNumber(kCalRScaleKey, kDefaultLedRScale);
+        double gScale = SmartDashboard.getNumber(kCalGScaleKey, kDefaultLedGScale);
+        double bScale = SmartDashboard.getNumber(kCalBScaleKey, kDefaultLedBScale);
+
+        int rr = correctChannel(rgb[0], rScale, gamma);
+        int gg = correctChannel(rgb[1], gScale, gamma);
+        int bb = correctChannel(rgb[2], bScale, gamma);
+        return new RGBWColor(rr, gg, bb, 0);
+    }
+
     /**
-     * Enum representing the different light effects with their priorities.
-     * Lower priority values are MORE important and will override higher values.
+     * Available light effects.
+     * Lower priority values win (override higher values).
      */
     public static enum LightEffect {
-        OFF(100, false),           // Lowest priority - default/idle state
-        SK_BLUE_WAVE(70, true),    // Custom wave - needs continuous updates
-        SOLID_BLUE(50, false),     // Temporary overlay - higher priority than base
+        OFF(100, false),           // Default/idle
+        SK_BLUE_WAVE(70, true),    // Custom wave (updated every loop)
+        SOLID_BLUE(50, false),     // Temporary overlay
         SOLID_RED(50, false),      // Temporary overlay
         SOLID_GREEN(50, false),    // Temporary overlay
         SOLID_WHITE(70, false),    // Base effect
-        RAINBOW(70, false),        // Base effect (hardware animation)
-        STROBE_RED(50, false),     // Temporary overlay (hardware animation)
-        STROBE_BLUE(50, false),    // Temporary overlay (hardware animation)
-        BROWNOUT(0, false);        // Critical warning - highest priority
+        RAINBOW(70, false),        // Base effect (CANdle animation)
+        STROBE_RED(50, false),     // Temporary overlay (CANdle animation)
+        STROBE_BLUE(50, false),    // Temporary overlay (CANdle animation)
+        BROWNOUT(0, false);        // Critical warning
 
         private final int priority;
         private final boolean isCustomWave;
@@ -69,9 +110,7 @@ public class SK26Lights extends SubsystemBase {
         }
     }
 
-    /**
-     * Represents an effect request with an associated expiration time.
-     */
+    /** One queued effect request and its expiration time. */
     private static class EffectRequest {
         final LightEffect effect;
         final double expirationTime;
@@ -90,10 +129,10 @@ public class SK26Lights extends SubsystemBase {
         }
     }
 
-    // Sort by: timed effects first (they have priority), then by priority value (lower = more important)
+    // Sort order: timed requests first, then by priority (lower wins).
     private static final Comparator<EffectRequest> EFFECT_COMPARATOR = 
-        Comparator.comparing((EffectRequest req) -> req.isInfinite())  // false (timed) before true (infinite)
-                  .thenComparingInt(req -> req.effect.getPriority());  // then by priority (lower = better)
+        Comparator.comparing((EffectRequest req) -> req.isInfinite())
+                  .thenComparingInt(req -> req.effect.getPriority());
 
     private static final int[][] SK_BLUES = new int[][] { kSKBlue1, kSKBlue2, kSKBlue3, kSKBlue4 };
 
@@ -129,6 +168,12 @@ public class SK26Lights extends SubsystemBase {
     private SolidColor solidColor;
 
     public SK26Lights() {
+        // Seed calibration entries so they show up immediately on the dashboard.
+        SmartDashboard.setDefaultNumber(kCalGammaKey, kDefaultLedGamma);
+        SmartDashboard.setDefaultNumber(kCalRScaleKey, kDefaultLedRScale);
+        SmartDashboard.setDefaultNumber(kCalGScaleKey, kDefaultLedGScale);
+        SmartDashboard.setDefaultNumber(kCalBScaleKey, kDefaultLedBScale);
+
         configs = new CANdleConfiguration();
         configs.CANdleFeatures.StatusLedWhenActive = StatusLedWhenActiveValue.Disabled;
         configs.LED.BrightnessScalar = kLightsOnBrightness;
@@ -136,7 +181,7 @@ public class SK26Lights extends SubsystemBase {
         candle = new CANdle(kCANdle.ID, canBus);
         candle.getConfigurator().apply(configs);
         
-        // Initialize with OFF state
+        // Start with lights off.
         solidColor = new SolidColor(0, kNumLedOnBot - 1);
         solidColor.Color = new RGBWColor(0, 0, 0, 0);
         candle.setControl(solidColor);
@@ -150,18 +195,14 @@ public class SK26Lights extends SubsystemBase {
         }
     }
 
-    /**
-     * Stops any running hardware animation by setting a solid black color.
-     */
+    /** Stops any running CANdle animation by forcing a solid black output. */
     private void stopHardwareAnimation() {
         SolidColor stop = new SolidColor(0, kNumLedOnBot - 1);
         stop.Color = new RGBWColor(0, 0, 0, 0);
         candle.setControl(stop);
     }
 
-    /**
-     * Checks if an effect is a hardware animation that runs autonomously on the CANdle.
-     */
+    /** True if this effect runs as a CANdle-side animation (doesn't need periodic updates). */
     private boolean isHardwareAnimation(LightEffect effect) {
         return effect == LightEffect.RAINBOW || 
                effect == LightEffect.STROBE_RED || 
@@ -169,43 +210,33 @@ public class SK26Lights extends SubsystemBase {
                effect == LightEffect.BROWNOUT;
     }
 
-    /**
-     * Request a temporary effect that will overlay the base effect for a duration.
-     */
+    /** Requests an effect for a duration (seconds). Use POSITIVE_INFINITY for a base effect. */
     public void requestEffect(LightEffect effect, double timeoutSeconds) {
         double expirationTime = (timeoutSeconds == Double.POSITIVE_INFINITY) 
             ? Double.MAX_VALUE 
             : Timer.getFPGATimestamp() + timeoutSeconds;
         
-        // Remove any existing request for this same effect
+    // Replace any existing request for this effect.
         effectQueue.removeIf(req -> req.effect == effect);
         
         effectQueue.add(new EffectRequest(effect, expirationTime));
     }
     
-    /**
-     * Request an infinite (base) effect.
-     */
+    /** Requests an infinite (base) effect. */
     public void requestEffect(LightEffect effect) {
         requestEffect(effect, Double.POSITIVE_INFINITY);
     }
 
-    /**
-     * Sets the base effect, clearing any previous base effects.
-     * Temporary effects will still overlay this.
-     */
+    /** Sets the base effect (clears any previous base effect). */
     public void setBaseEffect(LightEffect effect) {
-        // Remove all infinite effects (previous base effects)
+        // Remove previous base effects.
         effectQueue.removeIf(EffectRequest::isInfinite);
         
-        // Add the new base effect
+        // Add the new base effect.
         requestEffect(effect, Double.POSITIVE_INFINITY);
     }
 
-    /**
-     * Adds a temporary overlay effect with a duration.
-     * When it expires, the base effect will show again.
-     */
+    /** Adds a temporary overlay effect for a duration (seconds). */
     public void addTemporaryEffect(LightEffect effect, double durationSeconds) {
         requestEffect(effect, durationSeconds);
     }
@@ -313,7 +344,7 @@ public class SK26Lights extends SubsystemBase {
     private void setSolidColor(int[] colorRGB, int startIndex, int endIndex) {
         setBrightnessIfChanged(kLightsOnBrightness);
         solidColor = new SolidColor(startIndex, endIndex);
-        solidColor.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
+        solidColor.Color = correctedRGB(colorRGB);
         candle.setControl(solidColor);
     }
 
@@ -321,7 +352,7 @@ public class SK26Lights extends SubsystemBase {
         setBrightnessIfChanged(kLightsOnBrightness);
         strobe = new StrobeAnimation(startIndex, endIndex);
         strobe.FrameRate = intervalMs;
-        strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
+        strobe.Color = correctedRGB(colorRGB);
         candle.setControl(strobe);
     }
 
@@ -338,7 +369,7 @@ public class SK26Lights extends SubsystemBase {
             int[] base = skBlueGradient(wavePhase);
 
             solidColor = new SolidColor(i, i);
-            solidColor.Color = new RGBWColor(base[0], base[1], base[2], 0);
+            solidColor.Color = correctedRGB(base);
             candle.setControl(solidColor);
         }
     }
@@ -365,11 +396,9 @@ public class SK26Lights extends SubsystemBase {
         SmartDashboard.putData("Lights", this);
     }
 
-    /**
-     * Applies the given effect to the LEDs.
-     */
+    /** Applies the requested effect. */
     private void applyEffect(LightEffect effect, boolean isNewEffect) {
-        // If switching from a hardware animation to something else, stop it first
+        // If switching away from a CANdle animation, stop it first.
         if (isNewEffect && isHardwareAnimation(activeEffect)) {
             stopHardwareAnimation();
         }
@@ -420,21 +449,21 @@ public class SK26Lights extends SubsystemBase {
     }
 
     /**
-     * Processes effect requests from the queue and applies the highest priority non-expired effect.
-     * Expired effects are automatically removed, allowing base effects to show through.
+     * Processes the request queue and applies the current highest-priority effect.
+     * Expired requests are removed automatically.
      */
     private void processEffectRequests() {
-        // Remove all expired effects from the queue
+        // Remove expired requests.
         effectQueue.removeIf(EffectRequest::isExpired);
 
-        // Get the highest priority effect from the queue (or default to OFF if empty)
+    // Pick the highest-priority request, or OFF if there isn't one.
         EffectRequest topRequest = effectQueue.peek();
         LightEffect effectToApply = (topRequest != null) ? topRequest.effect : LightEffect.OFF;
 
-        // Check if this is a new effect
+    // Detect effect transitions.
         boolean isNewEffect = (effectToApply != activeEffect);
 
-        // Apply if: new effect, OR it's a custom wave that needs continuous updates
+        // Apply on change, or continuously for custom waves.
         if (isNewEffect || effectToApply.isCustomWave()) {
             applyEffect(effectToApply, isNewEffect);
             activeEffect = effectToApply;

@@ -6,6 +6,7 @@ import frc.robot.subsystems.SK26Lights;
 import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
+import static frc.robot.Ports.OperatorPorts.kXbutton;
 import static frc.robot.Ports.OperatorPorts.k_BlueWaveTrigger;
 import static frc.robot.Ports.OperatorPorts.k_LeftBumperTrigger;
 
@@ -50,6 +51,10 @@ public class SK26LightsBinder implements CommandBinder {
         
         kYbutton.button.onTrue(new InstantCommand(
             () -> lights.requestLEDGreen(2.0)
+        ).ignoringDisable(true));
+
+        kXbutton.button.onTrue(new InstantCommand(
+            () -> lights.requestRainbow()
         ).ignoringDisable(true));
     }
 }
