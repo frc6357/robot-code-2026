@@ -203,6 +203,11 @@ public final class Konstants
         public static final double kGearRatio = 12.8; // Motor rotations per turret rotation
         public static final double kDegrees = 360.0;
 
+        // CANcoder / Absolute Encoder constants
+        // TODO: Measure this offset with turret physically at "zero" position
+        public static final double kTurretEncoderOffset = 0.0; // Rotations (-0.5 to +0.5)
+        public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+
         // Turret PID
         public static final double kTurretP = 1.0;
         public static final double kTurretI = 0.0;
