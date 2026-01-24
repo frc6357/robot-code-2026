@@ -207,7 +207,7 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int kNumLedOnBot = 240;
+        public static final int kNumLedOnBot = 60;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
 
@@ -226,9 +226,9 @@ public final class Konstants
 
         // SK colors
         public static final int[] kSKBlue1 = {81, 171, 185};
-        public static final int[] kSKBlue2 = {104, 185, 196};
+        public static final int[] kSKBlue2 = {124, 222, 210};
         public static final int[] kSKBlue3 = {144, 205, 217};
-        public static final int[] kSKBlue4 = {178, 219, 225};
+        public static final int[] kSKBlue4 = {42, 116, 128};
 
         // Wave animation constants - control the speed and appearance of the wave effect
         public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)

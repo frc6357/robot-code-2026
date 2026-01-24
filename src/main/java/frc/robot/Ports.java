@@ -15,6 +15,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
@@ -101,10 +102,11 @@ public class Ports
         // public static final SKTrigger kMiddleBranch = new SKTrigger(kOperator, kB.value, BUTTON);
         // public static final SKTrigger kTopBranch = new SKTrigger(kOperator, kY.value, BUTTON);
         // Algae:
-        public static final SKTrigger kFloorAlgae = new SKTrigger(kOperator, kA.value, BUTTON);
-        public static final SKTrigger kLowAlgae = new SKTrigger(kOperator, kB.value, BUTTON);
-        public static final SKTrigger kHighAlgae = new SKTrigger(kOperator, kY.value, BUTTON);
-        public static final SKTrigger kNetPos = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        public static final SKTrigger kAbutton = new SKTrigger(kOperator, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kOperator, kB.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kOperator, kY.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kOperator, kX.value, BUTTON);
+
 
         // End Effector buttons
         // Angles:
