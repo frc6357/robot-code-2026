@@ -18,6 +18,7 @@ public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
     public LauncherUnJamCommandGroup(SK26Launcher launchermotor) {
 
         addRequirements(launchermotor);
+        //Makes motor rotate in reverse and forward to unjam any stuck game pieces
         addCommands(
             Commands.sequence(
                 //Reverses motor

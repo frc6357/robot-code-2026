@@ -25,7 +25,8 @@ public class RunLauncherWithRPSCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        launchermotor.stopLauncher();
+        //launchermotor.stopLauncher();
+        launchermotor.coastLauncher(); //makes the launcher quickly relaunchable
     }
 
     @Override
