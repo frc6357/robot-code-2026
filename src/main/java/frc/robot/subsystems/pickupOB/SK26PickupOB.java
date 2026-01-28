@@ -78,12 +78,24 @@ public class SK26PickupOB extends SubsystemBase {
   public void runEaterMotorReverse() {
     eaterMotor.set(-kEaterMotorSpeed);
   }
+
+  public void limitStopPositioner() {
+    if (forwardLimitSwitch.isPressed() || reverseLimitSwitch.isPressed()) {
+      stopPositionerMotor();
+    }
+  }
+
   
 
   //Function ideas, getspeed, get position, stop, setspeed,
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+
+    if (forwardLimitSwitch.isPressed() || reverseLimitSwitch.isPressed()) {
+      stopPositionerMotor();
+    }
+
     SmartDashboard.putNumber("Positioner Velocity (RPMs)", positionerMotor.get());
     SmartDashboard.putNumber("Eater Velocity (RPMs)", eaterMotor.get());
 
@@ -95,3 +107,5 @@ public class SK26PickupOB extends SubsystemBase {
   }
 
 }
+
+// 

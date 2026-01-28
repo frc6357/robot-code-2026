@@ -23,13 +23,13 @@ public class OBPickupEatCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    eat.runEaterMotor();
+    eat.runEaterMotor(); //defined in subsystem
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    eat.stopEaterMotor();
+    eat.stopEaterMotor(); //defined in subsystem
   }
 
   // Returns true when the command should end.

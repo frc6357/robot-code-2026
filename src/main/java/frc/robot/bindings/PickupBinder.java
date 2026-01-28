@@ -40,7 +40,7 @@ public class PickupBinder implements CommandBinder {
             retract.whileTrue(new OBPickupRetractCommand(subsys));
             eat.whileTrue(new OBPickupEatCommand(subsys));
             spit.whileTrue(new OBPickupSpitCommand(subsys));
-            //stop = whileTrue(new OBStopCommand(subsys));
+            //stop = onTrue(new OBStopCommand(subsys));
         }
     }
 }

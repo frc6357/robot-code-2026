@@ -15,7 +15,7 @@ public class OBPickupSpitCommand extends Command {
     addRequirements(spit);
   }
 
-  // Called when the command is initially scheduled.
+  // Called when th e command is initially scheduled.
   @Override
   public void initialize() {}
 
