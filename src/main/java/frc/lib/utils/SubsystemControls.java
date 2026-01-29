@@ -12,6 +12,7 @@ public class SubsystemControls
     private final boolean swerve;
     private final boolean vision;
     private final boolean turret;
+    private final boolean launcher;
 
      /**  
      * @param swerve
@@ -22,12 +23,14 @@ public class SubsystemControls
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,
-        @JsonProperty(required = true, value = "turret")      boolean turret
+        @JsonProperty(required = true, value = "turret")      boolean turret,
+        @JsonProperty(required = true, value = "launcher")     boolean launcher
     )
     {
         this.swerve = swerve;
         this.vision = vision;
         this.turret = turret;
+        this.launcher = launcher;
     }
 
 
@@ -46,5 +49,8 @@ public class SubsystemControls
     }
     public boolean isTurretPresent() {
         return turret;
+    }
+    public boolean isLauncherPresent() {
+        return launcher;
     }
 }

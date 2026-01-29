@@ -6,6 +6,7 @@ package frc.robot;
 
 import java.io.File;
 import java.io.IOException;
+//import java.lang.StackWalker.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,10 +28,12 @@ import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26TurretBinder;
+import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
+import frc.robot.subsystems.SK26Launcher;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
@@ -56,10 +59,12 @@ public class RobotContainer {
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
+  public Optional<SK26Launcher> m_launcherContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
   public static SK26Turret m_turretInstance;
+  public static SK26Launcher m_launcherInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -114,8 +119,10 @@ public class RobotContainer {
                 m_turretContainer = Optional.of(new SK26Turret());
                 m_turretInstance = m_turretContainer.get();
             }
-
-
+            if(subsystems.isLauncherPresent()) {
+                m_launcherContainer = Optional.of(new SK26Launcher());
+                m_launcherInstance = m_launcherContainer.get();
+            }
         }
         catch (IOException e)
         {
@@ -132,6 +139,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SK26LauncherBinder(m_launcherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));

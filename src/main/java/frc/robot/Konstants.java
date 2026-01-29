@@ -6,6 +6,7 @@ import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
 
@@ -205,20 +206,6 @@ public final class Konstants
         public static final double kFeederStop = 0.0;
     }
 
-    public static final class LauncherConstants
-    {
-        // Launcher Speeds
-        public static final double kLauncherSpeed = 0.1;
-        public static final double kLauncherStopSpeed = 0.0;
-        public static final double shooterSpeedTolerance = 0.5; //Arbitrary tolerance, but it would be rotations/sec
-
-        // Physical Constants
-        public static final double kWheelRadiusMeters = 0.0; //TODO Change these when it's given to us
-        public static final double kShooterEfficiency = 0.0; //Friction factor
-        public static final double kGearRatioShooter = 0.0;
-
-    }
-
     public static final class TurretConstants
     {
         // Turret position limits and tolerances
@@ -246,6 +233,34 @@ public final class Konstants
     }
 
 
+    public static final class LauncherConstants {
+
+        //initialize PID values
+        public static final double kLauncherA = 0.0;
+        public static final double kLauncherV = 0.093;
+        public static final double kLauncherS = 0.25;
+
+        public static final double kWheelRadius = .0508; //TEMPORARY
+        public static final double kShooterTolerance = 0.5; // +/- rps
+        public static final double kTargetlaunchVelocity = 5; //meters per second
+        public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
+        public static final double kCoastLauncherRPS = 0.25; //RPS of launcher when waiting to shoots
+        public static final double kStopLauncher = 0; // velocity/motorRPS of stopped motor
+        public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
+        public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
+        public static final double kUnJamLauncherRPS = 1/kUnJamLauncherRunTime; //Velocity of motor when unjamming
+
+        public static final class Slot0 {
+            public static final double kP = 1.8;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
+        public static final class Slot1 {
+            public static final double kP = 0.5;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
+    }
 
     public static final class ExampleConstants
     {

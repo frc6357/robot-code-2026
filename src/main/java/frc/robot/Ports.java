@@ -15,6 +15,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kLeftStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
@@ -97,7 +98,7 @@ public class Ports
         
         // Elevator buttons
         // Coral:
-        public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+        //public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         //public static final SKTrigger kTrough = new SKTrigger(kOperator, kX.value, BUTTON);
         //public static final SKTrigger kLowBranch = new SKTrigger(kOperator, kA.value, BUTTON);
         // public static final SKTrigger kMiddleBranch = new SKTrigger(kOperator, kB.value, BUTTON);
@@ -116,7 +117,7 @@ public class Ports
         public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
         // Rollers:
         public static final SKTrigger kIntake = new SKTrigger(kOperator, kRightTrigger.value, AXIS);
-        public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
+        //public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
 
         // Misc.
         public static final SKTrigger kZeroPositionOperator  = new SKTrigger(kOperator, kStart.value, BUTTON);
@@ -126,7 +127,11 @@ public class Ports
         public static final SKTrigger resetencoder = new SKTrigger(kOperator, kRightStick.value, BUTTON);
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
-        
+
+        public static final SKTrigger kShootExitVel = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
+        public static final SKTrigger kShootRPS = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
+        public static final SKTrigger kUnJam = new SKTrigger(kOperator, kX.value, BUTTON);
+
     }
 
     /*
@@ -171,9 +176,11 @@ public class Ports
 
     }
 
-    public static class LauncherPorts
-    {
+    public static class LauncherPorts {
+        
         private static final String busName = "";
+        public static final CANPort kFixedLauncherMotor = new CANPort(50, busName);
+        public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
         public static final CANPort kTurretMotor = new CANPort(55, busName);
         public static final CANPort kTurretEncoder = new CANPort(57, busName);
         public static final CANPort kLauncherMotor = new CANPort(56, busName);
