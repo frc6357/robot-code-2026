@@ -1,6 +1,6 @@
 {
     "swerve": true,
-    "vision": true,
-    "turret": false,
-    "launcher": false
+    "vision": false,
+    "turret": true,
+    "launcher": true
 }
