@@ -7,7 +7,6 @@ import frc.lib.utils.Field;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TargetPointConstants.targetPoints;
 
-import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 
