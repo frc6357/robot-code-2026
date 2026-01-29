@@ -79,7 +79,9 @@ public class SKVision extends SubsystemBase {
     ) {}
 
     public SKVision(Optional<SKSwerve> m_swerve) {
-        this.m_swerve = m_swerve.get();
+        this.m_swerve = m_swerve.orElseThrow(
+            () -> new IllegalArgumentException("SKSwerve is required for SKVision")
+        );
 
         startupLimelights();
     }
@@ -310,11 +312,12 @@ public class SKVision extends SubsystemBase {
     public void autonResetPoseToVision() {
         boolean reject = true;
         boolean firstSuccess = false;
-        double batchSize = 5;
+        int batchSize = 5;
+        int endIndex = Math.max(0, multiCamPoses.size() - batchSize);
         /* Starting at the most recent auton pose estimation, analyze the next [batchSize]
         poses and see if they can be succesfully added to the robot's pose estimator
         */ 
-        for (int i = multiCamPoses.size() - 1; i > (multiCamPoses.size() - batchSize) - 1; i--) {
+        for (int i = multiCamPoses.size() - 1; i > endIndex - 1; i--) {
             Trio<Pose3d, Pose2d, Double> poseInfo = multiCamPoses.get(i);
             boolean success =
                     resetPoseToVision(

@@ -134,46 +134,11 @@ public class Ports
 
     }
 
-    /*
-     * Defines all the ports needed to create sensors and actuators for the drivetrain.
-     */
-
-    public static class DrivePorts
-    {
-
-    }
-    
-    public static class ClimbPorts
-    {
-        private static final String busName = kCANivoreName;
-        public static final CANPort kClimbMotor = new CANPort(62, busName);
-        
-    }
-
-    public static class ElevatorPorts
-    {
-        private static final String busName = "";
-        public static final CANPort kRightElevatorMotor = new CANPort(41, busName);
-        //public static final CANPort kLeftElevatorMotor = new CANPort(42, busName);
-    }
-
     public static class LightsPorts
-    {
-    private static final String busName = "";
-    //assign an ID of 48 to the CANdle
-    public static final CANPort kCANdle = new CANPort(48, busName);
-    }
-
-    public static class EndEffectorPorts
     {
         private static final String busName = "";
         //assign an ID of 48 to the CANdle
         public static final CANPort kCANdle = new CANPort(48, busName);
-    
-        public static final CANPort kEndEffectorArmMotor = new CANPort(33, busName);
-        public static final CANPort kEndEffectorRollerMotor = new CANPort(34, busName);
-        public static final CANPort kLaserCanEndEffector = new CANPort(46, busName);
-
     }
 
     public static class LauncherPorts {
@@ -183,7 +148,6 @@ public class Ports
         public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
         public static final CANPort kTurretMotor = new CANPort(55, busName);
         public static final CANPort kTurretEncoder = new CANPort(57, busName);
-        public static final CANPort kLauncherMotor = new CANPort(56, busName);
     }
 
 

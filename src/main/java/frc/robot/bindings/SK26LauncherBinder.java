@@ -36,6 +36,7 @@ public class SK26LauncherBinder implements CommandBinder {
 
             SK26Launcher launcher = launcherSubsystem.get();
 
+            //TODO: Use the Trigger methods of ".and()", ".or()", and ".negate()" to make this cleaner and not access the boolean on initial runtime
             if(ShootExitVel.getAsBoolean() && UnJam.getAsBoolean()) {
                 ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
             } else if(ShootRPS.getAsBoolean() && UnJam.getAsBoolean()) {

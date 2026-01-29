@@ -85,9 +85,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    //autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
+    autoCommandSelector = AutoBuilder.buildAutoChooser();
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    //SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
