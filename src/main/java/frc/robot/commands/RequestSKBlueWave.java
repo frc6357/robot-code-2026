@@ -16,7 +16,7 @@ public class RequestSKBlueWave extends Command {
 
     @Override
     public void initialize(){
-        Subsystem.requestSKBlueWave();
+        Subsystem.setBreathingSKBlue();
     }
 
     @Override

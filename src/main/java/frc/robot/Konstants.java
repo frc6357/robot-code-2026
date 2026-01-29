@@ -34,6 +34,7 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.GeneratedConstants;
 import frc.robot.subsystems.drive.SKTargetPoint;
@@ -214,21 +215,7 @@ public final class Konstants
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
 
-        public static final int[] kColorRed     = {255, 0, 0};
-        public static final int[] kColorBlue    = {0, 0, 255};
-        public static final int[] kColorWhite   = {255, 255, 255};
-        public static final int[] kColorGreen   = {0, 255, 0};
-        public static final int[] kColorYellow  = {255, 255, 0};
-        public static final int[] kColorPurple  = {128, 0, 128};
-        public static final int[] kColorOrange  = {255, 165, 0};
-        public static final int[] kColorBrown   = {150, 75, 0};
-        public static final int[] kColorSKBlue = {22, 173, 187}; //TODO: Is this actually going to show up as SK blue?
-
-        // SK colors
-        public static final int[] kSKBlue1 = {81, 171, 185};
-        public static final int[] kSKBlue2 = {124, 222, 210};
-        public static final int[] kSKBlue3 = {144, 205, 217};
-        public static final int[] kSKBlue4 = {42, 116, 128};
+        public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
 
         // Wave animation constants - control the speed and appearance of the wave effect
         public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)

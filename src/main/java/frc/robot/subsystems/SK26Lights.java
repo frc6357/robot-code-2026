@@ -1,443 +1,170 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Konstants.LightsConstants.kColorBlue;
-import static frc.robot.Konstants.LightsConstants.kColorBrown;
-import static frc.robot.Konstants.LightsConstants.kColorGreen;
-import static frc.robot.Konstants.LightsConstants.kColorRed;
-import static frc.robot.Konstants.LightsConstants.kColorWhite;
-import static frc.robot.Konstants.LightsConstants.kLightsOffBrightness;
-import static frc.robot.Konstants.LightsConstants.kLightsOnBrightness;
-import static frc.robot.Konstants.LightsConstants.kNumLedOnBot;
-import static frc.robot.Konstants.LightsConstants.kSKBlue1;
-import static frc.robot.Konstants.LightsConstants.kSKBlue2;
-import static frc.robot.Konstants.LightsConstants.kSKBlue3;
-import static frc.robot.Konstants.LightsConstants.kSKBlue4;
-import static frc.robot.Konstants.LightsConstants.kWaveColorCycleSec;
-import static frc.robot.Konstants.LightsConstants.kWaveSpatialCycles;
-import static frc.robot.Konstants.LightsConstants.kWaveSpeedCyclesPerSecond;
-import static frc.robot.Ports.LightsPorts.canBus;
-import static frc.robot.Ports.LightsPorts.kCANdle;
+import static edu.wpi.first.units.Units.*;
 
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.Map;
 
-import com.ctre.phoenix6.configs.CANdleConfiguration;
-import com.ctre.phoenix6.controls.SolidColor;
-import com.ctre.phoenix6.controls.StrobeAnimation;
-import com.ctre.phoenix6.hardware.CANdle;
-import com.ctre.phoenix6.signals.RGBWColor;
-import com.ctre.phoenix6.signals.StatusLedWhenActiveValue;
-import com.ctre.phoenix6.signals.StripTypeValue;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.AddressableLED;
+import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.utils.SubsystemControls;
 
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+import static frc.robot.Konstants.LightsConstants.kLightsPWMHeader;
+import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
+
+import static frc.robot.Konstants.LightsConstants.kSKBlue;
+
 public class SK26Lights extends SubsystemBase {
 
-    /**
-     * Enum representing the different light effects with their priorities.
-     * Lower priority values are MORE important and will override higher values.
-     */
-    public static enum LightEffect {
-        OFF(100, false),           // Lowest priority - default/idle state
-        SK_BLUE_WAVE(70, true),    // Custom wave - needs continuous updates
-        SOLID_BLUE(50, false),     // Temporary overlay - higher priority than base
-        SOLID_RED(50, false),      // Temporary overlay
-        SOLID_GREEN(50, false),    // Temporary overlay
-        SOLID_WHITE(70, false),    // Base effect
-        RAINBOW(70, false),        // Base effect (hardware animation)
-        STROBE_RED(50, false),     // Temporary overlay (hardware animation)
-        STROBE_BLUE(50, false),    // Temporary overlay (hardware animation)
-        BROWNOUT(0, false);        // Critical warning - highest priority
+    // LED strip density (LEDs per meter)
+    private static final Distance kLedSpacing = Meters.of(1 / kLEDBufferLength);
 
-        private final int priority;
-        private final boolean isCustomWave;
+    // Hardware objects
+    private final AddressableLED m_led;
+    private final AddressableLEDBuffer m_buffer;
 
-        LightEffect(int priority, boolean isCustomWave) {
-            this.priority = priority;
-            this.isCustomWave = isCustomWave;
-        }
+    // Pre-defined patterns
+    private final LEDPattern m_off = LEDPattern.solid(Color.kBlack);
+    private final LEDPattern m_white = LEDPattern.solid(Color.kWhite);
+    private final LEDPattern m_solidGreen = LEDPattern.solid(Color.kGreen);
+    private final LEDPattern m_solidRed = LEDPattern.solid(Color.kRed);
+    private final LEDPattern m_solidBlue = LEDPattern.solid(Color.kBlue);
+    private final LEDPattern m_solidYellow = LEDPattern.solid(Color.kYellow);
+    private final LEDPattern m_solidOrange = LEDPattern.solid(Color.kOrange);
 
-        public int getPriority() {
-            return priority;
-        }
-
-        public boolean isCustomWave() {
-            return isCustomWave;
-        }
-    }
-
-    /**
-     * Represents an effect request with an associated expiration time.
-     */
-    private static class EffectRequest {
-        final LightEffect effect;
-        final double expirationTime;
-
-        EffectRequest(LightEffect effect, double expirationTime) {
-            this.effect = effect;
-            this.expirationTime = expirationTime;
-        }
-
-        boolean isExpired() {
-            return Timer.getFPGATimestamp() >= expirationTime;
-        }
-
-        boolean isInfinite() {
-            return expirationTime == Double.MAX_VALUE;
-        }
-    }
-
-    // Sort by: timed effects first (they have priority), then by priority value (lower = more important)
-    private static final Comparator<EffectRequest> EFFECT_COMPARATOR = 
-        Comparator.comparing((EffectRequest req) -> req.isInfinite())  // false (timed) before true (infinite)
-                  .thenComparingInt(req -> req.effect.getPriority());  // then by priority (lower = better)
-
-    private static final int[][] SK_BLUES = new int[][] { kSKBlue1, kSKBlue2, kSKBlue3, kSKBlue4 };
-
-    private static int lerpInt(int startValue, int endValue, double blendFactor) {
-        blendFactor = Math.max(0.0, Math.min(1.0, blendFactor));
-        return (int) Math.round(startValue + (endValue - startValue) * blendFactor);
-    }
-
-    private static int[] blendRGB(int[] color0, int[] color1, double blendFactor) {
-        return new int[] {
-            lerpInt(color0[0], color1[0], blendFactor),
-            lerpInt(color0[1], color1[1], blendFactor),
-            lerpInt(color0[2], color1[2], blendFactor)
-        };
-    }
+    private final LEDPattern m_SKBlue = LEDPattern.solid(kSKBlue);
     
-    private static int[] skBlueGradient(double normalizedPhase) {
-        normalizedPhase = normalizedPhase - Math.floor(normalizedPhase);
-        double scaledPhase = normalizedPhase * SK_BLUES.length;
-        int colorIndex0 = (int) Math.floor(scaledPhase) % SK_BLUES.length;
-        int colorIndex1 = (colorIndex0 + 1) % SK_BLUES.length;
-        double colorBlendFactor = scaledPhase - Math.floor(scaledPhase);
-        return blendRGB(SK_BLUES[colorIndex0], SK_BLUES[colorIndex1], colorBlendFactor);
-    }
+    // Rainbow pattern
+    private final LEDPattern m_rainbow = LEDPattern.rainbow(255, 128);
+    private final LEDPattern m_scrollingRainbow = 
+        m_rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
+    
 
-    private final CANdle candle;
-    private final CANdleConfiguration configs;
-    private final PriorityQueue<EffectRequest> effectQueue = new PriorityQueue<>(EFFECT_COMPARATOR);
-    private LightEffect activeEffect = LightEffect.OFF;
-    private double currentBrightness = kLightsOnBrightness;
+    // Blinking patterns for alerts
+    private final LEDPattern m_blinkingRed = m_solidRed.blink(Seconds.of(0.25));
+    private final LEDPattern m_blinkingYellow = m_solidYellow.blink(Seconds.of(0.5));
+    private final LEDPattern m_blinkingGreen = m_solidGreen.blink(Seconds.of(0.25));
 
-    private StrobeAnimation strobe;
-    private SolidColor solidColor;
+    // Breathing patterns
+    private final LEDPattern m_breathingSKBlue = m_SKBlue.breathe(Seconds.of(2));
+
+    public String LEDStatus = "Off";
 
     public SK26Lights() {
-        configs = new CANdleConfiguration();
-        configs.CANdleFeatures.StatusLedWhenActive = StatusLedWhenActiveValue.Disabled;
-        configs.LED.BrightnessScalar = kLightsOnBrightness;
-        configs.LED.StripType = StripTypeValue.GRB;
-        candle = new CANdle(kCANdle.ID, canBus);
-        candle.getConfigurator().apply(configs);
-        
-        // Initialize with OFF state
-        solidColor = new SolidColor(0, kNumLedOnBot - 1);
-        solidColor.Color = new RGBWColor(0, 0, 0, 0);
-        candle.setControl(solidColor);
-    }
+        m_led = new AddressableLED(kLightsPWMHeader);
+        m_buffer = new AddressableLEDBuffer(kLEDBufferLength);
+        m_led.setLength(kLEDBufferLength);
+        m_led.start();
 
-    private void setBrightnessIfChanged(double brightness) {
-        if (currentBrightness != brightness) {
-            currentBrightness = brightness;
-            configs.LED.BrightnessScalar = brightness;
-            candle.getConfigurator().apply(configs);
-        }
+        // Set default command to turn LEDs off
+        setDefaultCommand(runPattern(m_off).withName("LEDs Off"));
     }
 
     /**
-     * Stops any running hardware animation by setting a solid black color.
+     * Creates a command that runs a pattern on the LED strip.
+     *
+     * @param pattern the LED pattern to run
+     * @return a command that applies the pattern
      */
-    private void stopHardwareAnimation() {
-        SolidColor stop = new SolidColor(0, kNumLedOnBot - 1);
-        stop.Color = new RGBWColor(0, 0, 0, 0);
-        candle.setControl(stop);
+    public Command runPattern(LEDPattern pattern) {
+        return run(() -> pattern.applyTo(m_buffer));
     }
 
-    /**
-     * Checks if an effect is a hardware animation that runs autonomously on the CANdle.
-     */
-    private boolean isHardwareAnimation(LightEffect effect) {
-        return effect == LightEffect.RAINBOW || 
-               effect == LightEffect.STROBE_RED || 
-               effect == LightEffect.STROBE_BLUE || 
-               effect == LightEffect.BROWNOUT;
+    // ==================== Pattern Commands ====================
+
+    /** Command to turn LEDs off */
+    public Command setOff() {
+        LEDStatus = "Off";
+        return runPattern(m_off).withName("LEDs Off");
     }
 
-    /**
-     * Request a temporary effect that will overlay the base effect for a duration.
-     */
-    public void requestEffect(LightEffect effect, double timeoutSeconds) {
-        double expirationTime = (timeoutSeconds == Double.POSITIVE_INFINITY) 
-            ? Double.MAX_VALUE 
-            : Timer.getFPGATimestamp() + timeoutSeconds;
-        
-        // Remove any existing request for this same effect
-        effectQueue.removeIf(req -> req.effect == effect);
-        
-        effectQueue.add(new EffectRequest(effect, expirationTime));
-    }
-    
-    /**
-     * Request an infinite (base) effect.
-     */
-    public void requestEffect(LightEffect effect) {
-        requestEffect(effect, Double.POSITIVE_INFINITY);
+    public Command setSolidWhite() {
+        LEDStatus = "White";
+        return runPattern(m_white).withName("LEDs White");
     }
 
-    /**
-     * Sets the base effect, clearing any previous base effects.
-     * Temporary effects will still overlay this.
-     */
-    public void setBaseEffect(LightEffect effect) {
-        // Remove all infinite effects (previous base effects)
-        effectQueue.removeIf(EffectRequest::isInfinite);
-        
-        // Add the new base effect
-        requestEffect(effect, Double.POSITIVE_INFINITY);
+    /** Command to set LEDs to solid green (e.g., ready/aligned) */
+    public Command setSolidGreen() {
+        LEDStatus = "Green";
+        return runPattern(m_solidGreen).withName("Solid Green");
     }
 
-    /**
-     * Adds a temporary overlay effect with a duration.
-     * When it expires, the base effect will show again.
-     */
-    public void addTemporaryEffect(LightEffect effect, double durationSeconds) {
-        requestEffect(effect, durationSeconds);
+    /** Command to set LEDs to solid red (e.g., error/not ready) */
+    public Command setSolidRed() {
+        LEDStatus = "Red";
+        return runPattern(m_solidRed).withName("Solid Red");
     }
 
-    public void cancelEffect(LightEffect effect) {
-        effectQueue.removeIf(req -> req.effect == effect);
+    /** Command to set LEDs to solid blue */
+    public Command setSolidBlue() {
+        LEDStatus = "Blue";
+        return runPattern(m_solidBlue).withName("Solid Blue");
     }
 
-    public void clearAllEffects() {
-        effectQueue.clear();
+    /** Command to set LEDs to solid yellow (e.g., warning) */
+    public Command setSolidYellow() {
+        LEDStatus = "Yellow";
+        return runPattern(m_solidYellow).withName("Solid Yellow");
     }
 
-    public void requestSKBlueWave() {
-        setBaseEffect(LightEffect.SK_BLUE_WAVE);
+    /** Command to set LEDs to solid orange (e.g., game piece detected) */
+    public Command setSolidOrange() {
+        LEDStatus = "Orange";
+        return runPattern(m_solidOrange).withName("Solid Orange");
     }
 
-    public void requestOff() {
-        setBaseEffect(LightEffect.OFF);
+    /** Command to display scrolling rainbow */
+    public Command setRainbow() {
+        LEDStatus = "Rainbow";
+        return runPattern(m_scrollingRainbow).withName("Rainbow");
     }
 
-    public void forceOff() {
-        clearAllEffects();
-        stopHardwareAnimation();
-        activeEffect = LightEffect.OFF;
-        setBrightnessIfChanged(kLightsOffBrightness);
-        solidColor = new SolidColor(0, kNumLedOnBot - 1);
-        solidColor.Color = new RGBWColor(0, 0, 0, 0);
-        candle.setControl(solidColor);
+    /** Command to display blinking red (e.g., critical alert) */
+    public Command setBlinkingRed() {
+        LEDStatus = "Blinking Red";
+        return runPattern(m_blinkingRed).withName("Blinking Red");
     }
 
-    public void requestLEDRed(double timeoutSeconds) {
-        addTemporaryEffect(LightEffect.SOLID_RED, timeoutSeconds);
+    /** Command to display blinking yellow (e.g., warning) */
+    public Command setBlinkingYellow() {
+        LEDStatus = "Blinking Yellow";
+        return runPattern(m_blinkingYellow).withName("Blinking Yellow");
     }
 
-    public void requestLEDBlue(double timeoutSeconds) {
-        addTemporaryEffect(LightEffect.SOLID_BLUE, timeoutSeconds);
+    /** Command to display blinking green (e.g., action complete) */
+    public Command setBlinkingGreen() {
+        LEDStatus = "Blinking Green";
+        return runPattern(m_blinkingGreen).withName("Blinking Green");
     }
 
-    public void requestLEDGreen(double timeoutSeconds) {
-        addTemporaryEffect(LightEffect.SOLID_GREEN, timeoutSeconds);
-    }
-
-    public void requestLEDWhite() {
-        setBaseEffect(LightEffect.SOLID_WHITE);
-    }
-
-    public void requestRainbow() {
-        setBaseEffect(LightEffect.RAINBOW);
-    }
-
-    public void requestStrobeRed(double timeoutSeconds) {
-        addTemporaryEffect(LightEffect.STROBE_RED, timeoutSeconds);
-    }
-
-    public void requestStrobeBlue(double timeoutSeconds) {
-        addTemporaryEffect(LightEffect.STROBE_BLUE, timeoutSeconds);
-    }
-
-    public void requestBrownout() {
-        addTemporaryEffect(LightEffect.BROWNOUT, Double.POSITIVE_INFINITY);
-    }
-
-    public void cancelBrownout() {
-        cancelEffect(LightEffect.BROWNOUT);
-    }
-
-    public LightEffect getHighestPriorityEffect() {
-        effectQueue.removeIf(EffectRequest::isExpired);
-        EffectRequest top = effectQueue.peek();
-        return (top != null) ? top.effect : LightEffect.OFF;
-    }
-
-    public LightEffect getActiveEffect() {
-        return activeEffect;
-    }
-
-    private void turnOffLights() {
-        setBrightnessIfChanged(kLightsOffBrightness);
-        solidColor = new SolidColor(0, kNumLedOnBot - 1);
-        solidColor.Color = new RGBWColor(0, 0, 0, 0);
-        candle.setControl(solidColor);
-    }
-
-    private void setLEDRed() {
-        setSolidColor(kColorRed, 0, kNumLedOnBot - 1);
-    }
-
-    private void setLEDBlue() {
-        setSolidColor(kColorBlue, 0, kNumLedOnBot - 1);
-    }
-
-    private void setLEDWhite() {
-        setSolidColor(kColorWhite, 0, kNumLedOnBot - 1);
-    }
-
-    private void setLEDGreen() {
-        setSolidColor(kColorGreen, 0, kNumLedOnBot - 1);
-    }
-
-    private void setRainbowAnimation() {
-        setBrightnessIfChanged(kLightsOnBrightness);
-        candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, kNumLedOnBot - 1));
-    }
-
-    private void setSolidColor(int[] colorRGB, int startIndex, int endIndex) {
-        setBrightnessIfChanged(kLightsOnBrightness);
-        solidColor = new SolidColor(startIndex, endIndex);
-        solidColor.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
-        candle.setControl(solidColor);
-    }
-
-    private void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
-        setBrightnessIfChanged(kLightsOnBrightness);
-        strobe = new StrobeAnimation(startIndex, endIndex);
-        strobe.FrameRate = intervalMs;
-        strobe.Color = new RGBWColor(colorRGB[0], colorRGB[1], colorRGB[2], 0);
-        candle.setControl(strobe);
-    }
-
-    private void runSKBlueWave() {
-        setBrightnessIfChanged(kLightsOnBrightness);
-
-        double now = Timer.getFPGATimestamp();
-        double colorPhase = (now / kWaveColorCycleSec);
-        double travelPhase = now * kWaveSpeedCyclesPerSecond;
-
-        for (int i = 0; i < kNumLedOnBot; i++) {
-            double normalizedLEDPosition = (double) i / Math.max(1.0, (double) (kNumLedOnBot - 1));
-            double wavePhase = colorPhase + (normalizedLEDPosition * kWaveSpatialCycles) + travelPhase;
-            int[] base = skBlueGradient(wavePhase);
-
-            solidColor = new SolidColor(i, i);
-            solidColor.Color = new RGBWColor(base[0], base[1], base[2], 0);
-            candle.setControl(solidColor);
-        }
+    /** Command to display breathing blue (e.g., idle/standby) */
+    public Command setBreathingSKBlue() {
+        LEDStatus = "Breathing SKBlue";
+        return runPattern(m_breathingSKBlue).withName("Breathing Blue");
     }
 
     @Override 
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty(
-            "Highest Priority Effect",
-            () -> getHighestPriorityEffect().name(),
-            null);
-        builder.addStringProperty(
-            "Active Effect",
-            () -> activeEffect.name(),
-            null);
-        builder.addIntegerProperty(
-            "Queue Size",
-            () -> effectQueue.size(),
+            "LED Status",
+            () -> LEDStatus,
             null);
     }
 
     @Override
     public void periodic() {
-        processEffectRequests();
+        m_led.setData(m_buffer);
         SmartDashboard.putData("Lights", this);
     }
 
-    /**
-     * Applies the given effect to the LEDs.
-     */
-    private void applyEffect(LightEffect effect, boolean isNewEffect) {
-        // If switching from a hardware animation to something else, stop it first
-        if (isNewEffect && isHardwareAnimation(activeEffect)) {
-            stopHardwareAnimation();
-        }
-
-        switch (effect) {
-            case OFF:
-                turnOffLights();
-                break;
-            case SK_BLUE_WAVE:
-                runSKBlueWave();
-                break;
-            case SOLID_RED:
-                setLEDRed();
-                break;
-            case SOLID_BLUE:
-                setLEDBlue();
-                break;
-            case SOLID_GREEN:
-                setLEDGreen();
-                break;
-            case SOLID_WHITE:
-                setLEDWhite();
-                break;
-            case RAINBOW:
-                if (isNewEffect) {
-                    setRainbowAnimation();
-                }
-                break;
-            case STROBE_RED:
-                if (isNewEffect) {
-                    setStrobeAnimation(kColorRed, 0, kNumLedOnBot - 1, 100);
-                }
-                break;
-            case STROBE_BLUE:
-                if (isNewEffect) {
-                    setStrobeAnimation(kColorBlue, 0, kNumLedOnBot - 1, 100);
-                }
-                break;
-            case BROWNOUT:
-                if (isNewEffect) {
-                    setStrobeAnimation(kColorBrown, 0, kNumLedOnBot - 1, 500);
-                }
-                break;
-            default:
-                turnOffLights();
-                break;
-        }
-    }
-
-    /**
-     * Processes effect requests from the queue and applies the highest priority non-expired effect.
-     * Expired effects are automatically removed, allowing base effects to show through.
-     */
-    private void processEffectRequests() {
-        // Remove all expired effects from the queue
-        effectQueue.removeIf(EffectRequest::isExpired);
-
-        // Get the highest priority effect from the queue (or default to OFF if empty)
-        EffectRequest topRequest = effectQueue.peek();
-        LightEffect effectToApply = (topRequest != null) ? topRequest.effect : LightEffect.OFF;
-
-        // Check if this is a new effect
-        boolean isNewEffect = (effectToApply != activeEffect);
-
-        // Apply if: new effect, OR it's a custom wave that needs continuous updates
-        if (isNewEffect || effectToApply.isCustomWave()) {
-            applyEffect(effectToApply, isNewEffect);
-            activeEffect = effectToApply;
-        }
-    }
 }
