@@ -7,6 +7,7 @@ import static frc.robot.Konstants.LauncherConstants.kLauncherV;
 import static frc.robot.Konstants.LauncherConstants.kLauncherS;
 import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
 import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
+import static frc.robot.Konstants.LauncherConstants.kCoastLauncherRPS;
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -30,17 +31,18 @@ public class SK26Launcher extends SubsystemBase {
     TalonFX launchermotor;
     TalonFX launchermotorFollower;
 
-    //some other variables
     private final VelocityDutyCycle launcherVelocityControl = new VelocityDutyCycle(0);
     private double targetMotorRPS;
     private String launcherMotorStatus = "Stopped";
     
     public SK26Launcher() {
 
+        //defines motor objects
         launchermotor = new TalonFX(kFixedLauncherMotor.ID);
         launchermotorFollower = new TalonFX(kFixedLauncherMotorFollower.ID);
         launchermotorFollower.setControl(new Follower(launchermotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
+        //configures motors
         configMotor(launchermotor);
         configMotor(launchermotorFollower);
     }
@@ -64,19 +66,20 @@ public class SK26Launcher extends SubsystemBase {
         );
 
         motor.getConfigurator().apply(config);
-        motor.setNeutralMode(NeutralModeValue.Brake);
+        motor.setNeutralMode(NeutralModeValue.Brake); //Makes motor brake when no power is applied
     }
 
+    //Runs the launcher motor to a certain target launch velocity (m/s)
     public void runLauncherExitVel(double targetLaunchVelocity, String launcherMotorStatus) {
 
-        //Math is probably incredibly wrong but I tried
-        double motorRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius);
+        double motorRPS = targetLaunchVelocity/(2*Math.PI*kWheelRadius); //Converts m/s to RPS
         targetMotorRPS = motorRPS;
         launcherVelocityControl.Velocity = motorRPS; 
         launchermotor.setControl(launcherVelocityControl); //makes launcher launch
         this.launcherMotorStatus = launcherMotorStatus;
     }
 
+    //Runs the launcher motor to a certain target motor RPS
     public void runLauncherRPS(double targetMotorRPS, String launcherMotorStatus) {
 
         this.targetMotorRPS = targetMotorRPS;
@@ -85,7 +88,7 @@ public class SK26Launcher extends SubsystemBase {
         this.launcherMotorStatus = launcherMotorStatus;
     }
 
-    //for debugging the motor ONLY!!
+    //Debugging stuffs
     //Starts the launcher motor to certain target launch velocity
     /*public void startLauncher(double targetLaunchVelocity) {
         this.targetLaunchVelocity = targetLaunchVelocity;
@@ -102,7 +105,7 @@ public class SK26Launcher extends SubsystemBase {
     public boolean isLauncherAtSpeed() {
 
         double motorRPS = launchermotor.getVelocity().getValueAsDouble();
-        return Math.abs(motorRPS - targetMotorRPS) < kShooterTolerance;
+        return Math.abs(motorRPS - targetMotorRPS) < kShooterTolerance; //Checks if the motor RPS is within the tolerance of the target RPS
     }
 
     //Sets the motor speed to zero
@@ -113,12 +116,22 @@ public class SK26Launcher extends SubsystemBase {
         launcherMotorStatus = "Stopped";
     }
 
-    //Sends data to the Smart Dashboard
+    //Slows down the launcher to a very low speed while waiting to shoot
+    public void coastLauncher() {
+
+        targetMotorRPS = kCoastLauncherRPS;
+        launcherVelocityControl.Velocity = targetMotorRPS;
+        launchermotor.setControl(launcherVelocityControl);
+        launcherMotorStatus = "Waiting to Shoot";
+    }
+
+    //Sends subsystem to the Smart Dashboard
     @Override
     public void periodic() {
         SmartDashboard.putData("Static Launcher", this);
     }
 
+    //Sends data to the Smart Dashboard
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty(
