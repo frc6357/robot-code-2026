@@ -26,7 +26,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
 import frc.robot.subsystems.drive.SKSwerve;
@@ -39,6 +41,8 @@ import frc.robot.subsystems.vision.SKVision;
  * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
+public class RobotContainer
+{
 public class RobotContainer {
 
     // private final Telemetry logger = new Telemetry(TunerConstants.kSpeedAt12Volts.in(MetersPerSecond)); // "MaxSpeed"
@@ -53,9 +57,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<SK26Turret> m_turretContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static SK26Turret m_turretInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -76,9 +82,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
+    //autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    //SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
@@ -106,6 +112,10 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            if(subsystems.isTurretPresent()) {
+                m_turretContainer = Optional.of(new SK26Turret());
+                m_turretInstance = m_turretContainer.get();
+            }
 
 
         }
@@ -124,6 +134,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add(new SK26TurretBinder(m_turretContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         // Traversing through all the binding classes to actually bind the buttons

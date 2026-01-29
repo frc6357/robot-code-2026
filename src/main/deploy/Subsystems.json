@@ -1,4 +1,5 @@
 {
     "swerve": true,
-    "vision": true
+    "vision": true,
+    "turret": false
 }

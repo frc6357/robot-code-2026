@@ -199,6 +199,53 @@ public final class Konstants
         public static final double kLightsOnBrightness = 0.5;
     }
 
+    public static final class IndexerConstants
+    {
+        public static final double kFeederSpeed = 0.7;
+        public static final double kFeederStop = 0.0;
+    }
+
+    public static final class LauncherConstants
+    {
+        // Launcher Speeds
+        public static final double kLauncherSpeed = 0.1;
+        public static final double kLauncherStopSpeed = 0.0;
+        public static final double shooterSpeedTolerance = 0.5; //Arbitrary tolerance, but it would be rotations/sec
+
+        // Physical Constants
+        public static final double kWheelRadiusMeters = 0.0; //TODO Change these when it's given to us
+        public static final double kShooterEfficiency = 0.0; //Friction factor
+        public static final double kGearRatioShooter = 0.0;
+
+    }
+
+    public static final class TurretConstants
+    {
+        // Turret position limits and tolerances
+        public static final double kTurretMinPosition = -180;
+        public static final double kTurretMaxPosition = 180;
+        public static final double kTurretAngleTolerance = 0.5;
+
+        // CANcoder / Absolute Encoder constants
+        public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5)
+        public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+        public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations per 1 turret rotation
+
+        // Motor direction - set true if motor spins opposite to expected
+        public static final boolean kTurretMotorInverted = true;
+
+        // Turret PID (WPILib PIDController - input in degrees, output is duty cycle)
+        public static final double kTurretP = 0.02; // Start conservative - increase as needed
+        public static final double kTurretI = 0.0;
+        public static final double kTurretD = 0.001;
+        public static final double kMaxTurretOutput = 0.5; // Max duty cycle (0-1)
+
+        // Turret extra constants
+        public static final double kManualTurretSpeed = 90.0; // Degrees per second at full joystick deflection
+        public static final double kTurretDeadband = 0.05;
+    }
+
+
 
     public static final class ExampleConstants
     {

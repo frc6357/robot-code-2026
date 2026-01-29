@@ -1,5 +1,6 @@
 package frc.robot;
 
+import static frc.robot.Konstants.TurretConstants.kTurretDeadband;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
@@ -24,6 +25,7 @@ import static frc.robot.Konstants.DriveConstants.kPigeonID;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
+import frc.lib.utils.filters.DeadbandFilter;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 
@@ -90,6 +92,8 @@ public class Ports
         // Party mode and Teal Lights
         public static final SKTrigger kPartyModeButton = new SKTrigger(kOperator, kStart.value, BUTTON);
 
+        // Filtered axis (translation & rotation)
+        public static final FilteredAxis kTurretAxis = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value));
         
         // Elevator buttons
         // Coral:
@@ -165,6 +169,14 @@ public class Ports
         public static final CANPort kEndEffectorRollerMotor = new CANPort(34, busName);
         public static final CANPort kLaserCanEndEffector = new CANPort(46, busName);
 
+    }
+
+    public static class LauncherPorts
+    {
+        private static final String busName = "";
+        public static final CANPort kTurretMotor = new CANPort(55, busName);
+        public static final CANPort kTurretEncoder = new CANPort(57, busName);
+        public static final CANPort kLauncherMotor = new CANPort(56, busName);
     }
 
 
