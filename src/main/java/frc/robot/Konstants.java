@@ -200,6 +200,10 @@ public final class Konstants
             public static final double kI = 0;
             public static final double kD = 0;
         }
+
+        public static final class BangBangLauncher {
+            
+        }
     }
 
     public static final class ExampleConstants

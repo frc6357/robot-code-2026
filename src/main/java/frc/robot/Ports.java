@@ -33,6 +33,8 @@ import static frc.robot.Konstants.SwerveConstants.kFrontRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;

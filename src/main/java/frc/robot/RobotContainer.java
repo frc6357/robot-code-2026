@@ -26,10 +26,11 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
-import frc.robot.bindings.SK26LauncherBinder;
+// import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SKSwerveBinder;
-import frc.robot.subsystems.SK26Launcher;
+// import frc.robot.subsystems.SK26Launcher;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.vision.SKVision;
 
 
@@ -53,11 +54,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
-  public Optional<SK26Launcher> m_launcherContainer = Optional.empty();
+  public Optional<BangBangLauncher> m_launcherContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
-  public static SK26Launcher m_launcherInstance;
+  public static BangBangLauncher m_launcherInstance;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -107,7 +108,7 @@ public class RobotContainer {
                 m_visionInstance = m_visionContainer.get();
             }
             if(subsystems.isLauncherPresent()) {
-                m_launcherContainer = Optional.of(new SK26Launcher());
+                m_launcherContainer = Optional.of(new BangBangLauncher());
                 m_launcherInstance = m_launcherContainer.get();
             }
         }
@@ -126,7 +127,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add(new SK26LauncherBinder(m_launcherContainer));
+        // buttonBinders.add(new SK26LauncherBinder(m_launcherContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
