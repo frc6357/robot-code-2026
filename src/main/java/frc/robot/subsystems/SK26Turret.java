@@ -61,12 +61,13 @@ public class SK26Turret extends SubsystemBase
         // ========== Motor Configuration ==========
         TalonFXConfiguration motorConfig = new TalonFXConfiguration();
         MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
-        outputConfigs.NeutralMode = NeutralModeValue.Brake;
+        outputConfigs.NeutralMode = NeutralModeValue.Coast;
         motorConfig.MotorOutput = outputConfigs;
         turretMotor.getConfigurator().apply(motorConfig);
 
         // ========== PID Configuration ==========
         pidController.setTolerance(kTurretAngleTolerance);
+        pidController.setIZone(8); // 5 degrees
 
         // ========== Initialize ==========
         // Set initial target to current position (don't move on boot)
@@ -130,7 +131,7 @@ public class SK26Turret extends SubsystemBase
     {
         // ========== Run PID Loop ==========
         double currentAngle = getAngleDegrees();
-        double output = pidController.calculate(currentAngle);
+        double output = (atTarget() ? 0.0 : pidController.calculate(currentAngle));
         
         // Clamp output for safety
         output = MathUtil.clamp(output, -kMaxTurretOutput, kMaxTurretOutput);

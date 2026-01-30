@@ -1,6 +1,6 @@
 package frc.robot;
 
-import static frc.robot.Konstants.TurretConstants.kTurretDeadband;
+import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;

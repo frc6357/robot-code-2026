@@ -208,14 +208,14 @@ public final class Konstants
         public static final boolean kTurretMotorInverted = true;
 
         // Turret PID (WPILib PIDController - input is degrees, output is duty cycle)
-        public static final double kTurretP = 0.0025; //.015
-        public static final double kTurretI = 0.0;
-        public static final double kTurretD = 0.00005; //0.0005
+        public static final double kTurretP = 0.00375; //.015
+        public static final double kTurretI = 0.016;
+        public static final double kTurretD = 0.00005; //0.00005
         public static final double kMaxTurretOutput = 0.4; // Max duty cycle (0-1) for safety
 
         // Turret extra constants
-        public static final double kManualTurretSpeed = 90.0; // Degrees per second at full joystick deflection
-        public static final double kTurretDeadband = 0.05;
+        public static final double kManualTurretSpeed = 720.0; // Degrees per second at full joystick deflection
+        public static final double kTurretJoystickDeadband = 0.15;
     }
 
 
