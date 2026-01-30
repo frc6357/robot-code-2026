@@ -45,8 +45,8 @@ public class Ports
         public static final FilteredAxis kVelocityOmegaPort = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // Vision subsystem enable/disable
-        public static final SKTrigger kVisionOff = new SKTrigger(kDriver, 180, POV);
-        public static final SKTrigger kVisionOn = new SKTrigger(kDriver, 0, POV);
+        //public static final SKTrigger kVisionOff = new SKTrigger(kDriver, 180, POV);
+       // public static final SKTrigger kVisionOn = new SKTrigger(kDriver, 0, POV);
 
         // Vision Driving buttons
         public static final SKTrigger kResetPoseToVision = new SKTrigger(kDriver, kB.value, BUTTON);
@@ -62,10 +62,10 @@ public class Ports
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
 
         //Intake (OB) Ports, exact buttons to be decided
-        public static final SKTrigger positionExtendButton = new SKTrigger(kDriver, 270, POV);
-        public static final SKTrigger positionRetractButton = new SKTrigger(kDriver, 90, POV);
-        public static final SKTrigger eaterEatButton = new SKTrigger(kDriver, 270, POV);
-        public static final SKTrigger eaterSpitButton = new SKTrigger(kDriver, 90, POV);
+        public static final SKTrigger positionExtendButton = new SKTrigger(kDriver, 90, POV);
+        public static final SKTrigger positionRetractButton = new SKTrigger(kDriver, 270, POV);
+        public static final SKTrigger eaterEatButton = new SKTrigger(kDriver, 0, POV);
+        public static final SKTrigger eaterSpitButton = new SKTrigger(kDriver, 180, POV);
 
         //Should be redundant
         //public static final SKTrigger climbStopButton = new SKTrigger(kDriver, 90, POV);
@@ -117,10 +117,10 @@ public class Ports
 
         // End Effector buttons
         // Angles:
-        public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);
-        public static final SKTrigger kMiddleBranchEffector = new SKTrigger(kOperator, 90, POV);
-        public static final SKTrigger kLowBranchEffector = new SKTrigger(kOperator, 180, POV);
-        public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
+       // public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);
+       // public static final SKTrigger kMiddleBranchEffector = new SKTrigger(kOperator, 90, POV);
+       // public static final SKTrigger kLowBranchEffector = new SKTrigger(kOperator, 180, POV);
+       // public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
         // Rollers:
         public static final SKTrigger kIntake = new SKTrigger(kOperator, kRightTrigger.value, AXIS);
         public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);

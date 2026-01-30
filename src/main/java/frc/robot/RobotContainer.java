@@ -66,7 +66,6 @@ public class RobotContainer {
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
 
-  SendableChooser<Command> autoCommandSelector;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer()
@@ -80,9 +79,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
-    //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    SmartDashboard.putData("Select an Auto", autoCommandSelector);
+
   }
   
   /**
@@ -147,19 +144,8 @@ public class RobotContainer {
     {
     }
 
-    /**
-     * Use this to pass the autonomous command to the main {@link Robot} class.
-     * <p>
-     * This method loads the auto when it is called, however, it is recommended
-     * to first load your paths/autos when code starts, then return the
-     * pre-loaded auto/path.
-     *
-     * @return the command to run in autonomous
-     */
-    public Command getAutonomousCommand()
-    {
-        return Commands.sequence(Commands.waitSeconds(0.01), autoCommandSelector.getSelected());
-    }
+    
+   
 
     public void testPeriodic()
     {
