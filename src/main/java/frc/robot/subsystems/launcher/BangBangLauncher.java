@@ -65,7 +65,7 @@ public class BangBangLauncher extends SubsystemBase{
     boolean tooFarForTorqueCurrent;
 
     // Preferences
-    private Pref<Double> torqueCurrentOutput = SKPreferences.attach("TorqueCurrent Output (A)", 60.0);
+    private Pref<Double> torqueCurrentOutput = SKPreferences.attach("TorqueCurrent Output (A)", 54.0);
     private Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("TorqueCurrentControl Tolerance (rps)", 0.85);
     private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("TorqueCurrentControl Debounce (sec)", 0.025)
         .onChange(
