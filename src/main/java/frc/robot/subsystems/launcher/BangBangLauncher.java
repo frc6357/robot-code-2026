@@ -21,14 +21,17 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
+import lombok.Getter;
 
 public class BangBangLauncher extends SubsystemBase{
     private TalonFX mainMotor;
@@ -48,26 +51,41 @@ public class BangBangLauncher extends SubsystemBase{
             new TorqueCurrentConfigs()
                 .withTorqueNeutralDeadband(Amps.of(4))
         );
+    private TalonFXConfiguration followerMotorConfig = new TalonFXConfiguration()
+        .withMotorOutput(
+            new MotorOutputConfigs()
+                .withInverted(InvertedValue.CounterClockwise_Positive)
+                .withNeutralMode(NeutralModeValue.Coast)
+        );
 
-    private boolean atGoal;
+    @Getter
+    boolean atGoal;
 
-    Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("TorqueCurrentControl Tolerance (rps)", 0.85);
-    Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("TorqueCurrentControl Debounce (sec)", 0.025)
+    @Getter
+    boolean tooFarForTorqueCurrent;
+
+    // Preferences
+    private Pref<Double> torqueCurrentOutput = SKPreferences.attach("TorqueCurrent Output (A)", 60.0);
+    private Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("TorqueCurrentControl Tolerance (rps)", 0.85);
+    private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("TorqueCurrentControl Debounce (sec)", 0.025)
         .onChange(
             (newDebounce) -> {torqueCurrentDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);}
         );
-    Pref<Double> atGoalDebounce = SKPreferences.attach("AtGoalVelocity Debounce (sec)", 0.2);
-    Pref<Double> torqueCurrentOutput = SKPreferences.attach("TorqueCurrent Output (A)", 60.0);
-    Pref<Double> dutyCycleOutput = SKPreferences.attach("DutyCycle Output (%)", 0.35);
+    private Pref<Double> dutyCycleFF = SKPreferences.attach("DutyCycle FF (%/rps)", 0.01489);
+    private Pref<Double> atGoalDebounce = SKPreferences.attach("AtGoalVelocity Debounce (sec)", 0.2)
+        .onChange((newDebounce) -> {atGoalDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);});
 
+    // Signal Debouncers
     private Debouncer torqueCurrentDebouncer =
         new Debouncer(torqueCurrentControlDebounce.get(), DebounceType.kFalling);
     private Debouncer atGoalDebouncer = new Debouncer(atGoalDebounce.get(), DebounceType.kFalling);
 
     private boolean isTorqueCurrentRunning = false;
 
-    private ControlMode activeMode = ControlMode.COAST;
-    private AngularVelocity targetVelocity;
+    @Getter
+    ControlMode activeMode = ControlMode.COAST;
+    
+    private AngularVelocity targetVelocity = RotationsPerSecond.zero();
 
     private DutyCycleOut dutyCycleBangBang = new DutyCycleOut(0);
     private TorqueCurrentFOC torqueCurrentBangBang = new TorqueCurrentFOC(0);
@@ -78,8 +96,17 @@ public class BangBangLauncher extends SubsystemBase{
         mainMotor = new TalonFX(kFixedLauncherMotor.ID, CANBus.roboRIO());
         followingMotor = new TalonFX(kFixedLauncherMotorFollower.ID, CANBus.roboRIO());
 
-        mainMotor.getConfigurator().apply(mainMotorConfig);
-        followingMotor.getConfigurator().apply(mainMotorConfig);
+        var mainMotorStatus = mainMotor.getConfigurator().apply(mainMotorConfig);
+        var followerMotorStatus = followingMotor.getConfigurator().apply(followerMotorConfig);
+
+        if(!mainMotorStatus.isOK()) {
+            DriverStation.reportError(
+                "Main motor config failed: " + mainMotorStatus, false);
+        }
+        if(!followerMotorStatus.isOK()) {
+            DriverStation.reportError(
+                "Follower motor config failed: " + followerMotorStatus, false);
+        }
 
         followingMotor.setControl(followerControl);
     }
@@ -88,10 +115,12 @@ public class BangBangLauncher extends SubsystemBase{
     public void periodic() {
         switch(activeMode) {
             case DUTY_CYCLE_BANG_BANG:
-                mainMotor.setControl(dutyCycleBangBang.withEnableFOC(true).withOutput(dutyCycleOutput.get()));
+                mainMotor.setControl(dutyCycleBangBang.withEnableFOC(true).withOutput(
+                    MathUtil.clamp(targetVelocity.in(RotationsPerSecond) * dutyCycleFF.get(), -0.75, 0.75)));
                 break;
             case TORQUE_CURRENT_BANG_BANG:
-                mainMotor.setControl(torqueCurrentBangBang.withOutput(torqueCurrentOutput.get()));
+                mainMotor.setControl(torqueCurrentBangBang.withOutput(
+                    Math.signum(targetVelocity.minus(getVelocity()).in(RotationsPerSecond)) * torqueCurrentOutput.get()));
                 break;
             case COAST:
                 mainMotor.setControl(coastControl);
@@ -99,12 +128,21 @@ public class BangBangLauncher extends SubsystemBase{
         }
     }
 
+    /**
+     * Runs the flywheel at a given velocity.
+     * @param rotationsPerSecond The target velocity in rotations per second.
+     */
     private void runVelocity(double rotationsPerSecond) {
         boolean inTolerance =
             Math.abs(getVelocity().in(RotationsPerSecond) - rotationsPerSecond)
                 <= torqueCurrentControlTolerance.get();
-        boolean runTorqueCurrent = torqueCurrentDebouncer.calculate(inTolerance);
+        boolean tooFar = 
+            Math.abs(getVelocity().in(RotationsPerSecond) - rotationsPerSecond)
+                > 16 * torqueCurrentControlTolerance.get(); // Ooooooo magic number 16
+        boolean runTorqueCurrent = torqueCurrentDebouncer.calculate(!inTolerance && !tooFar);
+
         atGoal = atGoalDebouncer.calculate(inTolerance);
+        tooFarForTorqueCurrent = tooFar;
 
         isTorqueCurrentRunning = runTorqueCurrent;
 
@@ -126,16 +164,20 @@ public class BangBangLauncher extends SubsystemBase{
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addBooleanProperty("AtGoal", () -> atGoal, null);
-        builder.addDoubleProperty("Target Velocity (rps)", () -> targetVelocity.in(RotationsPerSecond), null);
+        builder.addDoubleProperty(
+            "Target Velocity (rps)", 
+            () -> targetVelocity.in(RotationsPerSecond), 
+            (newTarget) -> runVelocity(newTarget));
         builder.addDoubleProperty("Current Velocity (rps)", () -> getVelocity().in(RotationsPerSecond), null);
         builder.addStringProperty("Control Mode", () -> activeMode.toString(), null);
+        builder.addBooleanProperty("Too Far", () -> tooFarForTorqueCurrent, null);
     }
 
-    private AngularVelocity getVelocity() {
+    public AngularVelocity getVelocity() {
         return mainMotor.getVelocity().getValue();
     }
 
-    private enum ControlMode {
+    public enum ControlMode {
         DUTY_CYCLE_BANG_BANG,
         TORQUE_CURRENT_BANG_BANG,
         COAST
