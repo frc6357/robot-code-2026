@@ -117,10 +117,10 @@ public class Ports
 
         // End Effector buttons
         // Angles:
-       // public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);
-       // public static final SKTrigger kMiddleBranchEffector = new SKTrigger(kOperator, 90, POV);
-       // public static final SKTrigger kLowBranchEffector = new SKTrigger(kOperator, 180, POV);
-       // public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
+       public static final SKTrigger kTopBranchEffector = new SKTrigger(kOperator, 0, POV);
+       public static final SKTrigger kMiddleBranchEffector = new SKTrigger(kOperator, 90, POV);
+       public static final SKTrigger kLowBranchEffector = new SKTrigger(kOperator, 180, POV);
+       public static final SKTrigger kTroughEffector = new SKTrigger(kOperator, 270, POV);
         // Rollers:
         public static final SKTrigger kIntake = new SKTrigger(kOperator, kRightTrigger.value, AXIS);
         public static final SKTrigger kShoot = new SKTrigger(kOperator, kLeftTrigger.value, AXIS);
@@ -182,6 +182,7 @@ public class Ports
     {
         //bus name is null
         private static final String busName = "";
+        public static final CANPort kCANdle = new CANPort(48, busName);
 
         //assign a motor ID [PLACEHOLDERS}
         public static final CANPort kPositionerMotor = new CANPort(59, busName); 
