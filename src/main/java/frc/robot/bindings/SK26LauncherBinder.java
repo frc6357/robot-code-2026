@@ -3,6 +3,8 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 // import frc.robot.commands.RunLauncherWithRPSCommand;
 // import frc.robot.commands.RunLauncherWithVelCommand;
 // import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
@@ -24,6 +26,8 @@ public class SK26LauncherBinder implements CommandBinder {
     Trigger ShootExitVel;
     Trigger ShootRPS;
     Trigger UnJam;
+
+    Pref<Double> kShootVelocity = SKPreferences.attach("BBLauncher/ManualShootVelocity (rps)", 24.5);
     
     public SK26LauncherBinder(Optional<BangBangLauncher> launcherSubsystem) {
         this.launcherSubsystem = launcherSubsystem;
@@ -50,7 +54,7 @@ public class SK26LauncherBinder implements CommandBinder {
             //     UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
             // }
 
-            ShootRPS.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(24.5 / 2)));
+            ShootRPS.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
         }
     }
     
