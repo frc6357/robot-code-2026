@@ -27,6 +27,8 @@ public class TurretJoystickCommand extends Command
     public void initialize()
     {
         lastTimestamp = Timer.getFPGATimestamp();
+        // Sync target to actual position to prevent jumping when command starts
+        turret.setAngleDegrees(turret.getAngleDegrees());
     }
 
     @Override
@@ -35,6 +37,9 @@ public class TurretJoystickCommand extends Command
         double now = Timer.getFPGATimestamp();
         double dt = now - lastTimestamp;
         lastTimestamp = now;
+
+        // Cap dt to prevent large jumps (e.g., on first execute after initialize)
+        dt = Math.min(dt, 0.050); // Max 50ms
 
         double input = joystickAxis.getAsDouble();
 

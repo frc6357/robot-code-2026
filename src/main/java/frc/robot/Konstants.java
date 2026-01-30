@@ -195,23 +195,23 @@ public final class Konstants
     public static final class TurretConstants
     {
         // Turret position limits and tolerances
-        public static final double kTurretMinPosition = -180;
-        public static final double kTurretMaxPosition = 180;
+        public static final double kTurretMinPosition = -170.0;
+        public static final double kTurretMaxPosition = 170.0;
         public static final double kTurretAngleTolerance = 0.5;
 
-        // Turret physical constants
-        public static final double kGearRatio = 12.8; // Motor rotations per turret rotation
-        public static final double kDegrees = 360.0;
-
         // CANcoder / Absolute Encoder constants
-        // TODO: Measure this offset with turret physically at "zero" position
         public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5)
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+        public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
-        // Turret PID
-        public static final double kTurretP = 1.0;
+        // Motor direction - set true if motor spins opposite to encoder direction
+        public static final boolean kTurretMotorInverted = true;
+
+        // Turret PID (WPILib PIDController - input is degrees, output is duty cycle)
+        public static final double kTurretP = 0.0025; //.015
         public static final double kTurretI = 0.0;
-        public static final double kTurretD = 0.015;
+        public static final double kTurretD = 0.00005; //0.0005
+        public static final double kMaxTurretOutput = 0.4; // Max duty cycle (0-1) for safety
 
         // Turret extra constants
         public static final double kManualTurretSpeed = 90.0; // Degrees per second at full joystick deflection
