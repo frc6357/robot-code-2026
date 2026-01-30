@@ -36,15 +36,10 @@ public class SK26LauncherBinder implements CommandBinder {
 
             SK26Launcher launcher = launcherSubsystem.get();
 
-            if(ShootExitVel.getAsBoolean() && UnJam.getAsBoolean()) {
-                ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
-            } else if(ShootRPS.getAsBoolean() && UnJam.getAsBoolean()) {
-                ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
-            } else {
-                ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
-                ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
-                UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
-            }
+            ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
+            ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
+            UnJam.and(ShootRPS.negate()).and(ShootExitVel.negate())
+                .whileTrue(new LauncherUnJamCommandGroup(launcher));
         }
     }
     
