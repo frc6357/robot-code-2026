@@ -215,7 +215,11 @@ public final class Konstants
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
 
+        public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
+        public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
         public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
+        public static final Color kSKDarkBlue = new Color(0 / 255.0, 118 / 255.0, 133 / 255.0);
+
 
         // Wave animation constants - control the speed and appearance of the wave effect
         public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)

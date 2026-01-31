@@ -21,6 +21,7 @@ import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
+import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 import com.ctre.phoenix6.CANBus;
 
@@ -90,11 +91,12 @@ public class Ports
         public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value)); 
 
         // Party mode and Teal Lights
-        public static final SKTrigger k_BlueWaveTrigger = new SKTrigger(kOperator, kStart.value, BUTTON);
+        public static final SKTrigger k_Start = new SKTrigger(kOperator, kStart.value, BUTTON);
         public static final SKTrigger k_LeftBumperTrigger = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
-        public static final SKTrigger k_BreathingBlueTrigger = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        public static final SKTrigger k_RightBumperTrigger = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        public static final SKTrigger k_Off = new SKTrigger(kOperator, kX.value, BUTTON);
+        public static final SKTrigger k_LeftTrigger = new SKTrigger(kOperator, kBack.value, BUTTON);
 
-        
         // Elevator buttons
         // Coral:
         public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
