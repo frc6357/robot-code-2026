@@ -18,11 +18,13 @@ public class SK26LightsBinder implements CommandBinder {
     private final Optional<SK26Lights> lightsSubsystem;
     private final Trigger skBlueWave;
     private final Trigger leftBumper;
+    //private final Trigger intakeReady;
 
     public SK26LightsBinder(Optional<SK26Lights> lightsSubsystem) {
         this.lightsSubsystem = lightsSubsystem;
         this.skBlueWave = k_BlueWaveTrigger.button;
         this.leftBumper = k_LeftBumperTrigger.button;
+        //this.intakeReady = new Trigger(() -> intake.isReady());
     }
 
     @Override
@@ -33,6 +35,9 @@ public class SK26LightsBinder implements CommandBinder {
         SK26Lights lights = lightsSubsystem.get();
 
         leftBumper.onTrue(new RequestLEDWhite(lights).ignoringDisable(true));
+        // intakeReady.onTrue(new InstantCommand(
+        //     () -> lights.requestEffect(LightEffect.HOPPER_DISPLAY)
+        // ));
 
         // kBrownoutTrigger.onTrue(new InstantCommand(
         //     () -> lights.requestEffect(LightEffect.BROWNOUT)

@@ -394,6 +394,9 @@ public class SK26Lights extends SubsystemBase {
         candle.setControl(strobe);
     }
 
+    /**
+     * Turns off all the lights immediately.
+     */
     public void turnOffLights() {
         setBrightnessIfChanged(kLightsOffBrightness);
         solidColor = new SolidColor(0, kNumLedOnBot - 1);
@@ -401,6 +404,10 @@ public class SK26Lights extends SubsystemBase {
         candle.setControl(solidColor);
     }
 
+    /**
+     * Sets the LED display to represent the hopper's fullness.
+     * The number of LEDs lit corresponds to the amount of fuel in the hopper.
+     */
     public void setHopperDisplay() {
         setSolidColor(kFuelColor, 0, (int) Math.ceil(kNumLedOnBot - 1 /* multiplied by hopper's fullness */)); //TODO: add getter for hopper fullness
     }
