@@ -2,11 +2,9 @@ package frc.robot.subsystems;
 
 import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.AbsoluteEncoder;
 
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
@@ -17,6 +15,7 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.Konstants.ClimbConstants.kCLimbMax;
 import static frc.robot.Konstants.ClimbConstants.kClimbD;
+import static frc.robot.Konstants.ClimbConstants.kClimbV;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -28,7 +27,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Climb extends SubsystemBase
 {
 
-    SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
+    TalonFX climbMotor; // figure out if actually spark. depends on what motor is being used.
     DigitalInput cLimitSwitch;
 
     final double motorRatio = 0.0; //change once we know gear ratio
@@ -37,7 +36,7 @@ public class Climb extends SubsystemBase
     double cTargetHieight = 0.0;
     double cCurrentHeight = 0.0;
 
-    SparkFlexConfig climbConfig;
+    TalonFXConfiguration climbConfig;
 
     public AbsoluteEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
 
@@ -47,16 +46,17 @@ public class Climb extends SubsystemBase
 
     public Climb()
     {
-        climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
-        cEncoder = climbMotor.getAbsoluteEncoder();
+        climbMotor = new TalonFX(kClimbMotor.ID);
+        //cEncoder = climbMotor.getAbsoluteEncoder();// figure out how to do encoder
         cLimitSwitch = new DigitalInput(0);
 
-        climbConfig = new SparkFlexConfig();
+        climbConfig = new TalonFXConfiguration();
+        climbConfig.Slot0.kP = kClimbP;
+        climbConfig.Slot0.kI = kClimbI;
+        climbConfig.Slot0.kD = kClimbD;
+        climbConfig.Slot0.kV = kClimbV;
 
-        climbConfig.smartCurrentLimit(80) // need to test?
-            .idleMode(IdleMode.kBrake)
-            .inverted(false); // determine actual direction for motor spin
-        climbConfig.closedLoop.pid(kClimbP, kClimbI, kClimbD);
+        climbMotor.getConfigurator().apply(climbConfig);
     }
 
 

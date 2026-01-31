@@ -72,8 +72,7 @@ public class Ports
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
 
         //Climb buttons
-        public static final SKTrigger climbUpButton = new SKTrigger(kDriver, 270, POV);
-        public static final SKTrigger climbDownButton = new SKTrigger(kDriver, 90, POV);
+        
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -110,10 +109,10 @@ public class Ports
         // public static final SKTrigger kMiddleBranch = new SKTrigger(kOperator, kB.value, BUTTON);
         // public static final SKTrigger kTopBranch = new SKTrigger(kOperator, kY.value, BUTTON);
         // Algae:
-        public static final SKTrigger kFloorAlgae = new SKTrigger(kOperator, kA.value, BUTTON);
-        public static final SKTrigger kLowAlgae = new SKTrigger(kOperator, kB.value, BUTTON);
-        public static final SKTrigger kHighAlgae = new SKTrigger(kOperator, kY.value, BUTTON);
-        public static final SKTrigger kNetPos = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        //public static final SKTrigger kFloorAlgae = new SKTrigger(kOperator, kA.value, BUTTON);
+        //public static final SKTrigger kLowAlgae = new SKTrigger(kOperator, kB.value, BUTTON);
+        //public static final SKTrigger kHighAlgae = new SKTrigger(kOperator, kY.value, BUTTON);
+        //public static final SKTrigger kNetPos = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
 
         // End Effector buttons
         // Angles:
@@ -133,7 +132,9 @@ public class Ports
         public static final SKTrigger resetencoder = new SKTrigger(kOperator, kRightStick.value, BUTTON);
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
-        
+        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, 270, POV);
+        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, 90, POV);
+        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
     }
 
     /*
