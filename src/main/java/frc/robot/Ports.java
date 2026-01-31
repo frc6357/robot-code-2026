@@ -1,6 +1,6 @@
 package frc.robot;
 
-import static frc.robot.Konstants.TurretConstants.kTurretDeadband;
+import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
@@ -26,7 +26,6 @@ import static frc.robot.Konstants.DriveConstants.kPigeonID;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
-import frc.lib.utils.filters.DeadbandFilter;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 
@@ -103,6 +102,7 @@ public class Ports
         //public static final SKTrigger kLowBranch = new SKTrigger(kOperator, kA.value, BUTTON);
         // public static final SKTrigger kMiddleBranch = new SKTrigger(kOperator, kB.value, BUTTON);
         // public static final SKTrigger kTopBranch = new SKTrigger(kOperator, kY.value, BUTTON);
+        public static final SKTrigger kIntakePos = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         // Algae:
         public static final SKTrigger kFloorAlgae = new SKTrigger(kOperator, kA.value, BUTTON);
         public static final SKTrigger kLowAlgae = new SKTrigger(kOperator, kB.value, BUTTON);

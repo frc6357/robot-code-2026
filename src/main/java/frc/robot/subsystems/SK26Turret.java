@@ -5,7 +5,7 @@ import static frc.robot.Konstants.TurretConstants.*;
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 import static frc.robot.Ports.LauncherPorts.kTurretEncoder;
 
-// Imports from (the goat) Phoenix
+// Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
@@ -22,22 +22,26 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+/**
+ * Turret subsystem using CANcoder absolute encoder as the ONLY position feedback.
+ * Encoder has 2:1 gear ratio (2 encoder rotations = 1 turret rotation).
+ * Turret range: -180 to +180 degrees.
+ */
 public class SK26Turret extends SubsystemBase
 {
-    // Motor objects
+    // Motor
     private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
-    private final TalonFXConfiguration motorConfig = new TalonFXConfiguration();
 
     // Absolute encoder (CANcoder) - the ONLY position feedback source
     private final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
 
-    // WPILib PID controller (uses CANcoder feedback, not motor encoder)
+    // WPILib PID controller (runs in periodic, uses CANcoder feedback)
     private final PIDController pidController = new PIDController(kTurretP, kTurretI, kTurretD);
 
     // Motor output control
     private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
 
-    // Target angle (starts at 0.0)
+    // Target angle in degrees
     private double targetAngleDeg = 0.0;
 
     public SK26Turret()
@@ -46,9 +50,7 @@ public class SK26Turret extends SubsystemBase
         CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
         
         MagnetSensorConfigs magnetConfig = new MagnetSensorConfigs();
-        // Set the magnet offset so that 0 corresponds to turret "forward"
         magnetConfig.MagnetOffset = kTurretEncoderOffset;
-        // Set sensor direction (adjust if encoder reads backwards)
         magnetConfig.SensorDirection = kTurretEncoderInverted 
             ? SensorDirectionValue.Clockwise_Positive 
             : SensorDirectionValue.CounterClockwise_Positive;
@@ -57,27 +59,42 @@ public class SK26Turret extends SubsystemBase
         turretEncoder.getConfigurator().apply(encoderConfig);
 
         // ========== Motor Configuration ==========
-        // Motor output configs (no internal PID - we use external PID with CANcoder)
+        TalonFXConfiguration motorConfig = new TalonFXConfiguration();
         MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
         outputConfigs.NeutralMode = NeutralModeValue.Coast;
         motorConfig.MotorOutput = outputConfigs;
-
-        // Applying configs
         turretMotor.getConfigurator().apply(motorConfig);
 
         // ========== PID Configuration ==========
-        // Set tolerance for "at target" check
         pidController.setTolerance(kTurretAngleTolerance);
-        // Enable continuous input for wrapping (-180 to 180)
-        pidController.enableContinuousInput(-180.0, 180.0);
+        pidController.setIZone(8); // 5 degrees
 
-        // ========== Move to Zero on Boot ==========
-        // Set target to zero position
-        targetAngleDeg = 0.0;
+        // ========== Initialize ==========
+        // Set initial target to current position (don't move on boot)
+        targetAngleDeg = getAngleDegrees();
         pidController.setSetpoint(targetAngleDeg);
     }
 
-    // Move the turret to an absolute angle, in degrees
+    /**
+     * Returns the current turret angle from the CANcoder (degrees).
+     * Accounts for 2:1 gear ratio (2 encoder rotations = 1 turret rotation).
+     * Range: -180 to +180 degrees.
+     */
+    public double getAngleDegrees()
+    {
+        // Use continuous position to track across full range
+        double encoderRotations = turretEncoder.getPosition().getValueAsDouble();
+        
+        // 2:1 ratio: turret degrees = encoder rotations * (360 / 2) = encoder rotations * 180
+        double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
+        
+        return turretDegrees;
+    }
+
+    /**
+     * Command the turret to move to a specific angle.
+     * @param angleDeg Target angle in degrees (-180 to +180)
+     */
     public void setAngleDegrees(double angleDeg)
     {
         angleDeg = MathUtil.clamp(angleDeg, kTurretMinPosition, kTurretMaxPosition);
@@ -85,81 +102,78 @@ public class SK26Turret extends SubsystemBase
         pidController.setSetpoint(targetAngleDeg);
     }
 
-    // Stop turret motion
-    public void stop()
+    /**
+     * Command the turret to move to a specific angle, wrapping around if it exceeds limits.
+     * If angle goes past +170, it wraps to -170 (and vice versa).
+     * @param angleDeg Target angle in degrees
+     */
+    public void setAngleDegreesWrapped(double angleDeg)
     {
-        turretMotor.stopMotor();
-    }
-
-    // Returns the current turret angle from the CANcoder (degrees)
-    // This is now the ONLY source of position feedback
-    public double getAngleDegrees()
-    {
-        return getAbsoluteAngleDegrees();
+        // Calculate the total range (from -170 to +170 = 340 degrees)
+        double range = kTurretMaxPosition - kTurretMinPosition;
+        
+        // Wrap the angle if it exceeds limits
+        while (angleDeg > kTurretMaxPosition)
+        {
+            angleDeg -= range;
+        }
+        while (angleDeg < kTurretMinPosition)
+        {
+            angleDeg += range;
+        }
+        
+        targetAngleDeg = angleDeg;
+        pidController.setSetpoint(targetAngleDeg);
     }
 
     /**
-     * Returns the absolute turret angle from the CANcoder (degrees).
-     * Normalized to the range -180 to +180.
-     * Accounts for the 2:1 encoder gear ratio.
+     * Returns the current target angle in degrees.
      */
-    public double getAbsoluteAngleDegrees()
-    {
-        // CANcoder returns position in rotations
-        double encoderRotations = turretEncoder.getAbsolutePosition().getValueAsDouble();
-        
-        // Account for 2:1 gear ratio: 2 encoder rotations = 1 turret rotation
-        // So turret rotations = encoder rotations / 2
-        double turretRotations = encoderRotations / kEncoderGearRatio;
-        
-        // Convert to degrees (0 to 360)
-        double degrees = turretRotations * 360.0;
-        
-        // Normalize to -180 to +180 range
-        if (degrees > 180.0)
-        {
-            degrees -= 360.0;
-        }
-        
-        return degrees;
-    }
-
-    // Returns the current target angle in degrees
     public double getTargetAngleDegrees()
     {
         return targetAngleDeg;
     }
 
-    // Check to see if the turret is at its target position
+    /**
+     * Check if the turret is at its target position.
+     */
     public boolean atTarget()
     {
         return pidController.atSetpoint();
+    }
+
+    /**
+     * Stop the turret motor.
+     */
+    public void stop()
+    {
+        turretMotor.stopMotor();
     }
 
     @Override
     public void periodic()
     {
         // ========== Run PID Loop ==========
-        // Calculate motor output based on CANcoder position feedback
-        double currentAngle = getAbsoluteAngleDegrees();
-        double output = pidController.calculate(currentAngle);
+        double currentAngle = getAngleDegrees();
+        double output = (atTarget() ? 0.0 : pidController.calculate(currentAngle));
         
-        // Clamp output to safe range
+        // Clamp output for safety
         output = MathUtil.clamp(output, -kMaxTurretOutput, kMaxTurretOutput);
         
-        // Invert output if motor direction is reversed relative to encoder
+        // Invert if needed
         if (kTurretMotorInverted)
         {
             output = -output;
         }
         
-        // Apply output to motor
+        // Apply to motor
         turretMotor.setControl(dutyCycleControl.withOutput(output));
 
         // ========== Dashboard ==========
         SmartDashboard.putNumber("Turret Angle (deg)", currentAngle);
         SmartDashboard.putNumber("Turret Target (deg)", targetAngleDeg);
-        SmartDashboard.putBoolean("Turret At Target", atTarget());
+        SmartDashboard.putNumber("Turret Error (deg)", targetAngleDeg - currentAngle);
         SmartDashboard.putNumber("Turret Output", output);
+        SmartDashboard.putBoolean("Turret At Target", atTarget());
     }
 }

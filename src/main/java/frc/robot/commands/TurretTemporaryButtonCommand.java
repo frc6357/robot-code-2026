@@ -1,12 +1,7 @@
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SK26Turret;
-
-import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 
 public class TurretTemporaryButtonCommand extends Command
 {
@@ -33,7 +28,9 @@ public class TurretTemporaryButtonCommand extends Command
     }
 
     @Override
-    public void end(boolean interrupted){}
+    public void end(boolean interrupted){
+
+    }
 
     @Override
     public boolean isFinished()
