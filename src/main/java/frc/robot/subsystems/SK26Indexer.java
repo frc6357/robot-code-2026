@@ -7,6 +7,7 @@ import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -16,6 +17,8 @@ import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.IndexerPorts.kSpindexerMotor;
+import static frc.robot.Ports.Sensors.tofSensor;
+import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 
 // Subsystem for the SK26 Indexer mechanism
 public class SK26Indexer extends SubsystemBase{
@@ -119,8 +122,13 @@ public class SK26Indexer extends SubsystemBase{
         setSpindexerVelocity(speed);
     }
     
-    
+    public double getFullness() {
+        return kIndexerHeight.minus(getTofDistance()).div(kIndexerHeight).baseUnitMagnitude();
+    }
 
+    private Distance getTofDistance() {
+        return tofSensor.getDistance().refresh().getValue();
+    }
 
     @Override
     public void periodic() {

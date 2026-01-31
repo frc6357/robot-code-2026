@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -30,6 +31,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
 import frc.robot.subsystems.drive.GeneratedConstants;
@@ -164,6 +166,8 @@ public final class Konstants
 
         public static final double kIndexerUnjamForwardRPS = 5.0;
         public static final double kIndexerUnjamForwardDuration = 0.25;
+
+        public static final Distance kIndexerHeight = Inches.of(18);
     }
 
     /** Constants that are used when defining filters for controllers */

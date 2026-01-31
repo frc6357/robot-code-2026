@@ -32,6 +32,11 @@ import static frc.robot.Konstants.SwerveConstants.kFrontRightDriveMotorID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightEncoderID;
 import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
 
+import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.ToFParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -203,6 +208,17 @@ public class Ports
         private static final String busName = "";
         public static final CANPort kIndexerMotor = new CANPort(55, busName);
         public static final CANPort kSpindexerMotor = new CANPort(41, busName);
+    }
+
+    public static class Sensors {
+        public static CANrange tofSensor = new CANrange(/*kCANrangeID*/3, CANBus.roboRIO());
+        private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+
+        /* Sensor configurating */
+        static {
+            tofSensor.getConfigurator().apply(tofConfig);
+        }
     }
 
 
