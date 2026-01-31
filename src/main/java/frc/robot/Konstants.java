@@ -184,7 +184,7 @@ public final class Konstants
         public static final double kShooterTolerance = 0.5; // +/- rps
         public static final double kTargetlaunchVelocity = 5; //meters per second
         public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
-        public static final double kCoastLauncherRPS = 0.25; //RPS of launcher when waiting to shoots
+        public static final double kIdleLauncherRPS = 0.25; //RPS of launcher when waiting to shoots
         public static final double kStopLauncher = 0; // velocity/motorRPS of stopped motor
         public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
         public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
