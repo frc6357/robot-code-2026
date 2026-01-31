@@ -60,7 +60,7 @@ public class SK26LightsBinder implements CommandBinder {
 
         kAbutton.button.onTrue(lights.setSolidRed().ignoringDisable(true));
         kBbutton.button.onTrue(lights.setSolidBlue().ignoringDisable(true));
-        kYbutton.button.onTrue(lights.setSolidGreen().ignoringDisable(true));
+        kYbutton.button.onTrue(lights.setBreathingSKBlue().ignoringDisable(true));
 
         // State-based LED changes (fires on transition)
         // DS disconnected → Breathing Blue
