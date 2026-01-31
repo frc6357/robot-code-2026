@@ -4,6 +4,7 @@ import static frc.robot.Konstants.LightsConstants.kColorBlue;
 import static frc.robot.Konstants.LightsConstants.kColorBrown;
 import static frc.robot.Konstants.LightsConstants.kColorRed;
 import static frc.robot.Konstants.LightsConstants.kColorWhite;
+import static frc.robot.Konstants.LightsConstants.kFuelColor;
 import static frc.robot.Konstants.LightsConstants.kLightsOffBrightness;
 import static frc.robot.Konstants.LightsConstants.kLightsOnBrightness;
 import static frc.robot.Konstants.LightsConstants.kNumLedOnBot;
@@ -48,29 +49,29 @@ public class SK26Lights extends SubsystemBase {
      */
     public static enum LightEffect {
         OFF(100, false),           // Lowest priority - default/idle state
-        SK_BLUE_WAVE(70, true),    // Idle animation
         SOLID_BLUE(70, false),     // Alliance color
         SOLID_RED(70, false),      // Alliance color
         RAINBOW(70, false),        // Celebration/special
         STROBE_RED(70, false),     // Defense mode - high priority
         STROBE_BLUE(70, false),    // Defense mode - high priority
         SOLID_WHITE(70, false),    // Auto mode indicator
+        HOPPER_DISPLAY(70, true),  // Custom effect for hopper status
         BROWNOUT(0, false);        // Critical warning for brownout - highest priority
 
         private final int priority;
-        private final boolean isCustomWave;
+        private final boolean isCustomEffect;
 
-        LightEffect(int priority, boolean isCustomWave) {
+        LightEffect(int priority, boolean isCustomEffect) {
             this.priority = priority;
-            this.isCustomWave = isCustomWave;
+            this.isCustomEffect = isCustomEffect;
         }
 
         public int getPriority() {
             return priority;
         }
 
-        public boolean isCustomWave() {
-            return isCustomWave;
+        public boolean isCustomEffect() {
+            return isCustomEffect;
         }
     }
 
@@ -112,61 +113,7 @@ public class SK26Lights extends SubsystemBase {
     private static final Comparator<EffectRequest> EFFECT_COMPARATOR = 
         Comparator.comparing((EffectRequest req) -> req.isInfinite()) // false (timed) comes before true (infinite)
                   .thenComparingInt(req -> req.effect.getPriority());
-
-    private static final int[][] SK_BLUES = new int[][] { kSKBlue1, kSKBlue2, kSKBlue3, kSKBlue4 };
-    /**
-     * Linear interpolation between two integer values.
-     * @param startValue the starting value
-     * @param endValue the ending value
-     * @param blendFactor interpolation factor in range [0, 1] where 0 = startValue and 1 = endValue
-     * @return interpolated value
-     */
-    private static int lerpInt(int startValue, int endValue, double blendFactor) {
-        // Clamp blend factor to [0, 1] range to ensure valid interpolation
-        blendFactor = Math.max(0.0, Math.min(1.0, blendFactor));
-        // Calculate interpolated value: (1-t)*start + t*end
-        return (int) Math.round(startValue + (endValue - startValue) * blendFactor);
-    }
-
-    /**
-     * Blends two RGB colors together using linear interpolation.
-     * @param color0 the first RGB color [R, G, B]
-     * @param color1 the second RGB color [R, G, B]
-     * @param blendFactor interpolation factor where 0 = color0 and 1 = color1
-     * @return blended RGB color [R, G, B]
-     */
-    private static int[] blendRGB(int[] color0, int[] color1, double blendFactor) {
-        // Interpolate each color channel independently
-        return new int[] {
-            lerpInt(color0[0], color1[0], blendFactor),  // Red channel
-            lerpInt(color0[1], color1[1], blendFactor),  // Green channel
-            lerpInt(color0[2], color1[2], blendFactor)   // Blue channel
-        };
-    }
     
-    /**
-     * Generates a color from the SK blue gradient by cycling through all SK blue shades.
-     * @param normalizedPhase a value representing position in the color cycle (wrapped to [0, 1])
-     * @return RGB color array sampled from the SK blue gradient
-     */
-    private static int[] skBlueGradient(double normalizedPhase) {
-        // Wrap phase to [0, 1) to create cyclic behavior
-        normalizedPhase = normalizedPhase - Math.floor(normalizedPhase);
-        
-        // Scale phase to span across all 4 SK blue colors
-        double scaledPhase = normalizedPhase * SK_BLUES.length;
-        
-        // Find the two adjacent color indices to blend between
-        int colorIndex0 = (int) Math.floor(scaledPhase) % SK_BLUES.length;
-        int colorIndex1 = (colorIndex0 + 1) % SK_BLUES.length;
-        
-        // Calculate blend factor between the two colors
-        double colorBlendFactor = scaledPhase - Math.floor(scaledPhase);
-        
-        // Return the blended color
-        return blendRGB(SK_BLUES[colorIndex0], SK_BLUES[colorIndex1], colorBlendFactor);
-    }
-
     private final CANdle candle;
     private final CANdleConfiguration configs;
 
@@ -259,21 +206,6 @@ public class SK26Lights extends SubsystemBase {
      */
     public void clearAllEffects() {
         effectQueue.clear();
-    }
-
-    /**
-     * Request to enable the SK Blue Wave effect.
-     */
-    public void requestSKBlueWave() {
-        requestEffect(LightEffect.SK_BLUE_WAVE);
-    }
-
-    /**
-     * Request to enable the SK Blue Wave effect with a timeout.
-     * @param timeoutSeconds how long the effect should last
-     */
-    public void requestSKBlueWave(double timeoutSeconds) {
-        requestEffect(LightEffect.SK_BLUE_WAVE, timeoutSeconds);
     }
 
     /**
@@ -469,6 +401,10 @@ public class SK26Lights extends SubsystemBase {
         candle.setControl(solidColor);
     }
 
+    public void setHopperDisplay() {
+        setSolidColor(kFuelColor, 0, (int) Math.ceil(kNumLedOnBot - 1 /* multiplied by hopper's fullness */)); //TODO: add getter for hopper fullness
+    }
+
     @Override 
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty(
@@ -495,32 +431,6 @@ public class SK26Lights extends SubsystemBase {
         SmartDashboard.putData("Lights", this);
     }
 
-    private void runSKBlueWave() {
-        setBrightnessIfChanged(kLightsOnBrightness);
-
-        double now = Timer.getFPGATimestamp();
-
-        // Controls which color in the SK blue gradient is displayed (cycles through all shades every kWaveColorCycleSec)
-        double colorPhase = (now / kWaveColorCycleSec);
-        
-        // Controls how far the wave has traveled along the LED strip (animates the wave motion)
-        double travelPhase = now * kWaveSpeedCyclesPerSecond;
-
-        for (int i = 0; i < kNumLedOnBot; i++) {
-            // Normalize LED index to [0, 1] range for spatial wave calculations
-            double normalizedLEDPosition = (double) i / Math.max(1.0, (double) (kNumLedOnBot - 1));
-
-            // Combine color cycle, spatial position, and wave travel to get this LED's position in the wave
-            double wavePhase = colorPhase + (normalizedLEDPosition * kWaveSpatialCycles) + travelPhase;
-
-            int[] base = skBlueGradient(wavePhase);
-
-            solidColor = new SolidColor(i, i);
-            solidColor.Color = new RGBWColor(base[0], base[1], base[2], 0);
-            candle.setControl(solidColor);
-        }
-    }
-
     /**
      * Applies the given effect to the LEDs.
      * This method contains the logic to actually run each effect type.
@@ -529,9 +439,6 @@ public class SK26Lights extends SubsystemBase {
         switch (effect) {
             case OFF:
                 turnOffLights();
-                break;
-            case SK_BLUE_WAVE:
-                runSKBlueWave();
                 break;
             case SOLID_RED:
                 setLEDRed();
@@ -550,6 +457,9 @@ public class SK26Lights extends SubsystemBase {
                 break;
             case STROBE_BLUE:
                 setStrobeAnimation(kColorBlue, 0, kNumLedOnBot - 1, 100);
+                break;
+            case HOPPER_DISPLAY:
+                setHopperDisplay();
                 break;
             case BROWNOUT:
                 setStrobeAnimation(kColorBrown, 0, kNumLedOnBot - 1, 500);
@@ -573,7 +483,7 @@ public class SK26Lights extends SubsystemBase {
         LightEffect effectToApply = (topRequest != null) ? topRequest.effect : LightEffect.OFF;
 
         // Only apply if the effect has changed or if it's a continuous animation that needs updating
-        boolean needsUpdate = (effectToApply != activeEffect) || effectToApply.isCustomWave();
+        boolean needsUpdate = (effectToApply != activeEffect) || effectToApply.isCustomEffect();
 
         if (needsUpdate) {
             applyEffect(effectToApply);

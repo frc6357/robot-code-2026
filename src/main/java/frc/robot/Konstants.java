@@ -219,6 +219,7 @@ public final class Konstants
         public static final int[] kColorWhite   = {255, 255, 255};
         public static final int[] kColorGreen   = {0, 255, 0};
         public static final int[] kColorYellow  = {255, 255, 0};
+        public static final int[] kFuelColor = {235, 205, 0};
         public static final int[] kColorPurple  = {128, 0, 128};
         public static final int[] kColorOrange  = {255, 165, 0};
         public static final int[] kColorBrown   = {150, 75, 0};
