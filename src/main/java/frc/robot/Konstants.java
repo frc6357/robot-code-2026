@@ -200,7 +200,7 @@ public final class Konstants
         public static final double kTurretAngleTolerance = 0.5;
 
         // CANcoder / Absolute Encoder constants
-        public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5)
+        public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5) //-0.111
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
@@ -214,7 +214,7 @@ public final class Konstants
         public static final double kMaxTurretOutput = 0.4; // Max duty cycle (0-1) for safety
 
         // Turret extra constants
-        public static final double kManualTurretSpeed = 720.0; // Degrees per second at full joystick deflection
+        public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
         public static final double kTurretJoystickDeadband = 0.15;
     }
 

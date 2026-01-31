@@ -103,6 +103,30 @@ public class SK26Turret extends SubsystemBase
     }
 
     /**
+     * Command the turret to move to a specific angle, wrapping around if it exceeds limits.
+     * If angle goes past +170, it wraps to -170 (and vice versa).
+     * @param angleDeg Target angle in degrees
+     */
+    public void setAngleDegreesWrapped(double angleDeg)
+    {
+        // Calculate the total range (from -170 to +170 = 340 degrees)
+        double range = kTurretMaxPosition - kTurretMinPosition;
+        
+        // Wrap the angle if it exceeds limits
+        while (angleDeg > kTurretMaxPosition)
+        {
+            angleDeg -= range;
+        }
+        while (angleDeg < kTurretMinPosition)
+        {
+            angleDeg += range;
+        }
+        
+        targetAngleDeg = angleDeg;
+        pidController.setSetpoint(targetAngleDeg);
+    }
+
+    /**
      * Returns the current target angle in degrees.
      */
     public double getTargetAngleDegrees()
