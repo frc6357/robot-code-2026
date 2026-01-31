@@ -5,7 +5,9 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.utils.SKTrigger;
 import frc.robot.commands.ClimbButtonCommand;
+import frc.robot.commands.ClimbDownCommand;
 import frc.robot.commands.ClimbManualCommand;
+import frc.robot.commands.ClimbUpCommand;
 import frc.robot.subsystems.Climb;
 
 import static frc.robot.Ports.OperatorPorts.climbGoButton;
@@ -37,7 +39,8 @@ public class ClimbBinder {
             Climb climb = climbSubsystem.get();
 
             t1Button.whileTrue(new ClimbButtonCommand(kTOne, climb));
-            //upButton.whileTrue(new ClimbManualCommand(270.0, climb));
+            upButton.whileTrue(new ClimbUpCommand(climb));
+            downButton.whileTrue(new ClimbDownCommand(climb));
         }
     }
 }
