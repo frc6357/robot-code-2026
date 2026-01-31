@@ -34,9 +34,11 @@ import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.DigitalInputsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -211,14 +213,24 @@ public class Ports
     }
 
     public static class Sensors {
-        public static CANrange tofSensor = new CANrange(/*kCANrangeID*/3, CANBus.roboRIO());
+        private static final String busName = "";
+        public static final CANPort kCANrange = new CANPort(70, busName);
+        public static final CANPort kLauncherSensor = new CANPort(71, busName);
+        public static final CANPort kIntakeSensor = new CANPort(72, busName);
+
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
 
         /* Sensor configurating */
         static {
             tofSensor.getConfigurator().apply(tofConfig);
         }
+
+
     }
 
 

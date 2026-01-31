@@ -18,6 +18,8 @@ import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.IndexerPorts.kSpindexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
+import static frc.robot.Ports.Sensors.launcherSensor;
+import static frc.robot.Ports.Sensors.intakeSensor;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 
 // Subsystem for the SK26 Indexer mechanism
@@ -46,6 +48,12 @@ public class SK26Indexer extends SubsystemBase{
     // Target speed for the indexer motor in RPS
     double targetIndexerSpeed = 0.0;
     double targetSpindexerSpeed = 0.0;
+
+    //Sensor values
+    public int numBallsInIndexer = 0;
+    public int totalNumBallsLaunched = 0;
+    public boolean lastLauncherSensorState;
+    public boolean lastIntakeSensorState;
 
     // Constructor
     public SK26Indexer() 
@@ -130,9 +138,64 @@ public class SK26Indexer extends SubsystemBase{
         return tofSensor.getDistance().refresh().getValue();
     }
 
+    /**
+     * Updates {@link #numBallsInIndexer} when a ball is detected leaving the launcher.
+     *
+     * <p>This method reads {@code launcherSensor} and looks for a <b>falling edge</b>
+     * (sensor state transitions from {@code true} to {@code false}). When that edge is seen,
+     * it assumes a ball has just passed the sensor / been launched and decrements
+     * {@link #numBallsInIndexer}.
+     *
+     * <p>Notes/assumptions:
+     * <ul>
+     *   <li>{@link #lastLauncherSensorState} must be maintained between calls; call this periodically.</li>
+     *   <li>The edge direction depends on whether the beam break is active-high or active-low.
+     *       If counts are inverted, swap the edge check accordingly.</li>
+     * </ul>
+     */
+    private void checkIfBallLaunched() {
+        boolean currentState = launcherSensor.get(); // Read sensor
+    
+        // Check for falling edge (state changes from true to false)
+        if (lastLauncherSensorState && !currentState) {
+            numBallsInIndexer--; // decreases how many balls are in the indexer
+            totalNumBallsLaunched++; // increases how many total balls have been launched in a match
+        }
+        lastLauncherSensorState = currentState; // Update last state
+    }
+
+    /**
+     * Updates {@link #numBallsInIndexer} when a ball is detected entering the robot (intaked).
+     *
+     * <p>This method reads {@code intakeSensor} and looks for a <b>falling edge</b>
+     * (sensor state transitions from {@code true} to {@code false}). When that edge is seen,
+     * it assumes a ball has just crossed the intake sensor and increments
+     * {@link #numBallsInIndexer}.
+     *
+     * <p>Notes/assumptions:
+     * <ul>
+     *   <li>{@link #lastIntakeSensorState} must be maintained between calls; call this periodically.</li>
+     *   <li>The edge direction depends on whether the beam break is active-high or active-low.
+     *       If counts are inverted, swap the edge check accordingly.</li>
+     *   <li>If the sensor chatters, consider adding a small debounce (WPILib {@code Debouncer}).</li>
+     * </ul>
+     */
+    private void checkIfBallIntaked() {
+        boolean currentState = intakeSensor.get(); // Read sensor
+
+        // Check for falling edge (state changes from true to false)
+        if(lastIntakeSensorState && !currentState) {
+            numBallsInIndexer++; //Increases how many balls are in the indexer
+        }
+        lastIntakeSensorState = currentState;
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putData("Indexer", this);
+
+        checkIfBallLaunched();
+        checkIfBallIntaked();
     }
 
     @Override 
