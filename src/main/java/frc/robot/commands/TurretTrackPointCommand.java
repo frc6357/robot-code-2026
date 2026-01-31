@@ -29,8 +29,8 @@ public class TurretTrackPointCommand extends Command
         this.turret = turret;
         this.drive = drive;
         this.targetPoint = targetPoint;
-
-        addRequirements(turret);
+    
+        addRequirements(turret, drive);
     }
 
     @Override

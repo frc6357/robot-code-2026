@@ -208,6 +208,20 @@ public final class Konstants
 
     public static final class TurretConstants
     {
+        public static enum TurretPosition
+        {
+            /** Set the turret angle to 90 degrees **/
+            kTurretLeftPosition(90.0),
+            /** Set the turret angle to 0 degrees **/
+            kTurretZeroPosition(0.0);
+
+            public final double angle;
+            TurretPosition(double angle)
+            {
+                this.angle = angle;
+            }
+        }
+
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;

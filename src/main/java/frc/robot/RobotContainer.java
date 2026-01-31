@@ -140,7 +140,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SK26LauncherBinder(m_launcherContainer));
-        buttonBinders.add(new SK26TurretBinder(m_turretContainer));
+        buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         // Traversing through all the binding classes to actually bind the buttons
