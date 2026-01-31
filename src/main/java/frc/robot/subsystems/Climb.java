@@ -4,6 +4,7 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.AbsoluteEncoder;
 
@@ -17,6 +18,7 @@ import static frc.robot.Konstants.ClimbConstants.kCLimbMax;
 import static frc.robot.Konstants.ClimbConstants.kClimbD;
 import static frc.robot.Konstants.ClimbConstants.kClimbV;
 
+import edu.wpi.first.util.sendable.Sendable;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -38,7 +40,7 @@ public class Climb extends SubsystemBase
 
     TalonFXConfiguration climbConfig;
 
-    public AbsoluteEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
+    public CANcoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
 
     SparkClosedLoopController cpid;
 
@@ -69,7 +71,7 @@ public class Climb extends SubsystemBase
     // stops the motor by setting the speed to 0
     public void stopMotor()
     {
-        climbMotor.set(0);
+        climbMotor.stopMotor();
     }
 
     // checks if the climb is at the target height
@@ -94,7 +96,7 @@ public class Climb extends SubsystemBase
     // gets the current position of the climb
     public double getClimbPosition()
     {
-        return cEncoder.getPosition() * climbFactor;
+        return 25.0;//cEncoder.getPosition() * climbFactor;
     }
 
     // chacks the limit switch to see if it is true or false
@@ -115,7 +117,7 @@ public class Climb extends SubsystemBase
     // gets the current position of the encoder
     public double getEncoderPos()
     {
-        return cEncoder.getPosition();
+        return 25.0;//cEncoder.getPosition();
     }
 
     // hold command, may be necessary to ensure the robot doesnt get pulled back down by gravity
@@ -147,5 +149,6 @@ public class Climb extends SubsystemBase
     public void teleopPeriodic()
     {
         SmartDashboard.putBoolean("Limit Switch", isSwitchPressed());
+        SmartDashboard.putData("Encoder Pos", (Sendable) cEncoder.getPosition());
     }
 }
