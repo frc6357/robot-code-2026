@@ -50,7 +50,7 @@ public class SK26TurretBinder implements CommandBinder
         turret.setDefaultCommand(
             new TurretJoystickCommand(
                 turret,
-                () -> -slewLimiter.calculate(kTurretAxis.getFilteredAxis()) //TODO: Determine if axis should be inverted (it probably should)
+                () -> -slewLimiter.calculate(kTurretAxis.getFilteredAxis())
             )
         );
     }
