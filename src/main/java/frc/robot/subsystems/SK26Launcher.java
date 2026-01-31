@@ -129,9 +129,10 @@ public class SK26Launcher extends SubsystemBase {
         runLauncherRPS(motorRPS, "Unjamming");
     }
 
-    //checks whether or not the motor is at the target speed
     /**
-     * @return boolean of whether or not the motor is within the tolerance range of the target rps
+     * Checks if the launcher motor is close to the target speed.
+     *
+     * @return true if the current motor RPS is within {@link #kShooterTolerance} of {@link #targetMotorRPS}
      */
     public boolean isLauncherAtSpeed() {
 
@@ -139,7 +140,9 @@ public class SK26Launcher extends SubsystemBase {
         return Math.abs(motorRPS - targetMotorRPS) < kShooterTolerance; //Checks if the motor RPS is within the tolerance of the target RPS
     }
 
-    //Sets the motor speed to zero
+    /**
+     * Stops the launcher motor and updates {@link #launcherMotorStatus} to "stopped".
+     */
     public void stopLauncher() {
 
         launchermotor.set(kStopLauncher);
