@@ -1,6 +1,5 @@
 package frc.robot;
 
-import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
@@ -20,8 +19,6 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
-import static frc.robot.Konstants.kCANivoreName;
-import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
@@ -85,8 +82,8 @@ public class Ports
         * public static final FilteredAxis kExampleRawAxis = new FilteredAxis(() -> kOperator.getRawAxis(kLeftY.value));
         */
 
-        public static final FilteredAxis kMoveTargetX = new FilteredAxis(() -> kOperator.getRawAxis(kRightY.value)); 
-        public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value)); 
+        public static final FilteredAxis kMoveTargetX = new FilteredAxis(() -> kOperator.getRawAxis(kLeftY.value)); 
+        public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kLeftX.value)); 
 
 
         // Party mode and Teal Lights
