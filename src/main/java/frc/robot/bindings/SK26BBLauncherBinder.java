@@ -14,10 +14,10 @@ import frc.robot.subsystems.launcher.BangBangLauncher;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
 import static frc.robot.Konstants.LauncherConstants.kTargetlaunchVelocity;
-import static frc.robot.Ports.OperatorPorts.kIntake;
-import static frc.robot.Ports.OperatorPorts.kShootExitVel;
-import static frc.robot.Ports.OperatorPorts.kShootRPS;
-import static frc.robot.Ports.OperatorPorts.kUnJam;
+import static frc.robot.Ports.OperatorPorts.kRTrigger;
+import static frc.robot.Ports.OperatorPorts.kLTrigger;
+import static frc.robot.Ports.OperatorPorts.kLBbutton;
+import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 public class SK26BBLauncherBinder implements CommandBinder {
 
@@ -31,9 +31,9 @@ public class SK26BBLauncherBinder implements CommandBinder {
     
     public SK26BBLauncherBinder(Optional<BangBangLauncher> launcherSubsystem) {
         this.launcherSubsystem = launcherSubsystem;
-        this.ShootExitVel = kShootExitVel.button;
-        this.ShootRPS = kIntake.button;
-        this.UnJam = kUnJam.button;
+        this.ShootExitVel = kLTrigger.button;
+        this.ShootRPS = kRTrigger.button;
+        this.UnJam = kXbutton.button;
     }
 
     @Override

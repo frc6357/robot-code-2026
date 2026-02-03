@@ -8,15 +8,19 @@ import frc.robot.commands.TurretTemporaryButtonCommand;
 import frc.robot.commands.TurretTrackPointCommand;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.lib.utils.Field;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TargetPointConstants.targetPoints;
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
-import static frc.robot.Ports.OperatorPorts.kTurretAxis;
-import static frc.robot.Ports.OperatorPorts.kLowAlgae;
-import static frc.robot.Ports.OperatorPorts.kHighAlgae;
+import static frc.robot.Ports.OperatorPorts.kRightStickX;
+import static frc.robot.Ports.OperatorPorts.kAbutton;
+import static frc.robot.Ports.OperatorPorts.kBbutton;
+import static frc.robot.Ports.OperatorPorts.kYbutton;
 
 public class SK26TurretBinder implements CommandBinder
 {
@@ -30,8 +34,6 @@ public class SK26TurretBinder implements CommandBinder
     {
         this.turretSubsystem = turretSubsystem;
         this.swerveSubsystem = swerveSubsystem;
-        this.LowAlgae = kLowAlgae.button;
-        this.HighAlgae = kHighAlgae.button;
         slewLimiter = new SlewRateLimiter(kManualTurretSpeed * 1.75);
     }
 
@@ -46,10 +48,16 @@ public class SK26TurretBinder implements CommandBinder
         SK26Turret turret = turretSubsystem.get();
         SKSwerve swerve = swerveSubsystem.get();
 
-        kTurretAxis.setFilter(new LinearDeadbandFilter(kTurretJoystickDeadband, 1.0));
+        kRightStickX.setFilter(new LinearDeadbandFilter(kTurretJoystickDeadband, 1.0));
 
-        LowAlgae.whileTrue(new TurretTemporaryButtonCommand(90, turret));
-        HighAlgae.whileTrue(new TurretTemporaryButtonCommand(0.0, turret));
+        kBbutton.button.whileTrue(new TurretTemporaryButtonCommand(90, turret));
+        kYbutton.button.whileTrue(new TurretTemporaryButtonCommand(0.0, turret));
+        kAbutton.button.whileTrue(new TurretTrackPointCommand(
+            turret, 
+            swerve, 
+            Field.isBlue() ? targetPoints[kBlueHub.ordinal()] : targetPoints[kRedHub.ordinal()]
+        ));
+
 
         // Default command: continuously track the operator-controlled target point
         turret.setDefaultCommand(
