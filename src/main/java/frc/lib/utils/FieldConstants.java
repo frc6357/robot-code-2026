@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
  * perspective of the blue alliance station
  */
 public class FieldConstants {
-  public static final FieldType fieldType = FieldType.WELDED;
+  public static final FieldType fieldType = FieldType.ANDYMARK;
 
   // AprilTag related constants
   public static final int aprilTagCount = AprilTagLayoutType.OFFICIAL.getLayout().getTags().size();
@@ -49,9 +49,9 @@ public class FieldConstants {
         AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(26).get().getX() + Hub.width / 2.0;
     public static final double neutralZoneNear = center - Units.inchesToMeters(120);
     public static final double neutralZoneFar = center + Units.inchesToMeters(120);
-    public static final double oppHubCenter =
+    public static final double redHubCenter =
         AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(4).get().getX() + Hub.width / 2.0;
-    public static final double oppAllianceZone =
+    public static final double redAllianceZone =
         AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(10).get().getX();
   }
 
@@ -110,19 +110,19 @@ public class FieldConstants {
         new Translation2d(topCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
 
     // Relevant reference points on the opposite side
-    public static final Translation3d oppTopCenterPoint =
+    public static final Translation3d redTopCenterPoint =
         new Translation3d(
             AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(4).get().getX() + width / 2.0,
             fieldWidth / 2.0,
             height);
-    public static final Translation2d oppNearLeftCorner =
-        new Translation2d(oppTopCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 + width / 2.0);
-    public static final Translation2d oppNearRightCorner =
-        new Translation2d(oppTopCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 - width / 2.0);
-    public static final Translation2d oppFarLeftCorner =
-        new Translation2d(oppTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 + width / 2.0);
-    public static final Translation2d oppFarRightCorner =
-        new Translation2d(oppTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
+    public static final Translation2d redNearLeftCorner =
+        new Translation2d(redTopCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 + width / 2.0);
+    public static final Translation2d redNearRightCorner =
+        new Translation2d(redTopCenterPoint.getX() - width / 2.0, fieldWidth / 2.0 - width / 2.0);
+    public static final Translation2d redFarLeftCorner =
+        new Translation2d(redTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 + width / 2.0);
+    public static final Translation2d redFarRightCorner =
+        new Translation2d(redTopCenterPoint.getX() + width / 2.0, fieldWidth / 2.0 - width / 2.0);
 
     // Hub faces
     public static final Pose2d nearFace =
@@ -152,12 +152,12 @@ public class FieldConstants {
     public static final Translation2d farRightCorner = Hub.farLeftCorner;
 
     // Relevant reference points on opposing side
-    public static final Translation2d oppNearLeftCorner =
+    public static final Translation2d redNearLeftCorner =
         new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppNearRightCorner = Hub.oppNearLeftCorner;
-    public static final Translation2d oppFarLeftCorner =
+    public static final Translation2d redNearRightCorner = Hub.redNearLeftCorner;
+    public static final Translation2d redFarLeftCorner =
         new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppFarRightCorner = Hub.oppFarLeftCorner;
+    public static final Translation2d redFarRightCorner = Hub.redFarLeftCorner;
   }
 
   /** Right Bump related constants */
@@ -176,12 +176,12 @@ public class FieldConstants {
     public static final Translation2d farRightCorner = Hub.farLeftCorner;
 
     // Relevant reference points on opposing side
-    public static final Translation2d oppNearLeftCorner =
+    public static final Translation2d redNearLeftCorner =
         new Translation2d(LinesVertical.hubCenter + width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppNearRightCorner = Hub.oppNearLeftCorner;
-    public static final Translation2d oppFarLeftCorner =
+    public static final Translation2d redNearRightCorner = Hub.redNearLeftCorner;
+    public static final Translation2d redFarLeftCorner =
         new Translation2d(LinesVertical.hubCenter - width / 2, Units.inchesToMeters(255));
-    public static final Translation2d oppFarRightCorner = Hub.oppFarLeftCorner;
+    public static final Translation2d redFarRightCorner = Hub.redFarLeftCorner;
   }
 
   /** Left Trench related constants */
@@ -200,10 +200,10 @@ public class FieldConstants {
         new Translation3d(LinesVertical.hubCenter, fieldWidth - openingWidth, openingHeight);
 
     // Relevant reference points on opposing side
-    public static final Translation3d oppOpeningTopLeft =
-        new Translation3d(LinesVertical.oppHubCenter, fieldWidth, openingHeight);
-    public static final Translation3d oppOpeningTopRight =
-        new Translation3d(LinesVertical.oppHubCenter, fieldWidth - openingWidth, openingHeight);
+    public static final Translation3d redOpeningTopLeft =
+        new Translation3d(LinesVertical.redHubCenter, fieldWidth, openingHeight);
+    public static final Translation3d redOpeningTopRight =
+        new Translation3d(LinesVertical.redHubCenter, fieldWidth - openingWidth, openingHeight);
   }
 
   public static class RightTrench {
@@ -222,10 +222,10 @@ public class FieldConstants {
         new Translation3d(LinesVertical.hubCenter, 0, openingHeight);
 
     // Relevant reference points on opposing side
-    public static final Translation3d oppOpeningTopLeft =
-        new Translation3d(LinesVertical.oppHubCenter, openingWidth, openingHeight);
-    public static final Translation3d oppOpeningTopRight =
-        new Translation3d(LinesVertical.oppHubCenter, 0, openingHeight);
+    public static final Translation3d redOpeningTopLeft =
+        new Translation3d(LinesVertical.redHubCenter, openingWidth, openingHeight);
+    public static final Translation3d redOpeningTopRight =
+        new Translation3d(LinesVertical.redHubCenter, 0, openingHeight);
   }
 
   /** Tower related constants */
@@ -262,17 +262,17 @@ public class FieldConstants {
                 - Units.inchesToMeters(0.75));
 
     // Relevant reference points on opposing side
-    public static final Translation2d oppCenterPoint =
+    public static final Translation2d redCenterPoint =
         new Translation2d(
             fieldLength - frontFaceX,
             AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(15).get().getY());
-    public static final Translation2d oppLeftUpright =
+    public static final Translation2d redLeftUpright =
         new Translation2d(
             fieldLength - frontFaceX,
             (AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(15).get().getY())
                 + innerOpeningWidth / 2
                 + Units.inchesToMeters(0.75));
-    public static final Translation2d oppRightUpright =
+    public static final Translation2d redRightUpright =
         new Translation2d(
             fieldLength - frontFaceX,
             (AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(15).get().getY())
@@ -305,6 +305,8 @@ public class FieldConstants {
     // Relevant reference points on alliance side
     public static final Translation2d centerPoint =
         new Translation2d(0, AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(29).get().getY());
+    public static final Translation2d redCenterPoint =
+        new Translation2d(fieldLength, AprilTagLayoutType.OFFICIAL.getLayout().getTagPose(13).get().getY());
   }
 
   @RequiredArgsConstructor
