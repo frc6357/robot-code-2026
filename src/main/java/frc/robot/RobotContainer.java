@@ -27,13 +27,14 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
-// import frc.robot.subsystems.SK26Launcher;
+import frc.robot.subsystems.SK26Launcher;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.vision.SKVision;
@@ -60,12 +61,15 @@ public class RobotContainer {
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
-  public Optional<BangBangLauncher> m_launcherContainer = Optional.empty();
+  public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
+  public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
+
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
   public static SK26Turret m_turretInstance;
-  public static BangBangLauncher m_launcherInstance;
+  public static BangBangLauncher m_BBlauncherInstance;
+  public static SK26Launcher m_standardLauncherInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -120,9 +124,13 @@ public class RobotContainer {
                 m_turretContainer = Optional.of(new SK26Turret());
                 m_turretInstance = m_turretContainer.get();
             }
+            if(subsystems.isBangBangLauncherPresent()) {
+                m_BBLauncherContainer = Optional.of(new BangBangLauncher());
+                m_BBlauncherInstance = m_BBLauncherContainer.get();
+            }
             if(subsystems.isLauncherPresent()) {
-                m_launcherContainer = Optional.of(new BangBangLauncher());
-                m_launcherInstance = m_launcherContainer.get();
+                m_StandardLauncherContainer = Optional.of(new SK26Launcher());
+                m_standardLauncherInstance = m_StandardLauncherContainer.get();
             }
         }
         catch (IOException e)
@@ -140,9 +148,10 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add(new SK26LauncherBinder(m_launcherContainer));
+        buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
+        buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
