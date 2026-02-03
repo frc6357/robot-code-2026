@@ -2,5 +2,6 @@
     "swerve": true,
     "vision": false,
     "turret": true,
-    "launcher": false
+    "launcher": false,
+    "bangbanglauncher": false
 }
