@@ -16,7 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
-import static frc.robot.Ports.IndexerPorts.kSpindexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 import static frc.robot.Ports.Sensors.intakeSensor;
@@ -25,7 +24,6 @@ import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 // Subsystem for the SK26 Indexer mechanism
 public class SK26Indexer extends SubsystemBase{
     private final TalonFX indexerMotor;
-    private final TalonFX spindexerMotor;
 
     // Configuration for the TalonFX motor controller
     TalonFXConfiguration config = new TalonFXConfiguration()
@@ -47,7 +45,6 @@ public class SK26Indexer extends SubsystemBase{
 
     // Target speed for the indexer motor in RPS
     double targetIndexerSpeed = 0.0;
-    double targetSpindexerSpeed = 0.0;
 
     //Sensor values
     public int numBallsInIndexer = 0;
@@ -59,13 +56,10 @@ public class SK26Indexer extends SubsystemBase{
     public SK26Indexer() 
     {
         indexerMotor = new TalonFX(kIndexerMotor.ID);
-        spindexerMotor = new TalonFX(kSpindexerMotor.ID);
 
         indexerMotor.setNeutralMode(NeutralModeValue.Brake);
-        spindexerMotor.setNeutralMode(NeutralModeValue.Brake);
 
         indexerMotor.getConfigurator().apply(config);
-        spindexerMotor.getConfigurator().apply(config);
     }
 
     
@@ -92,22 +86,9 @@ public class SK26Indexer extends SubsystemBase{
         return run(() -> setIndexerVelocity(velocityRPS));
     }
 
-    // -----------------
-    // SPINDEXER STUFF
-    // -----------------
-    public void setSpindexerVelocity(double velocity) {
-        targetSpindexerSpeed = velocity;
-        spindexerMotor.setControl(new VelocityVoltage(velocity));
-    }
-    
-    public Command setSpindexerVelCommand(double velocityRPS) {
-        return run(() -> setSpindexerVelocity(velocityRPS));
-    }
-
     public void idleIndexer() {
         setIsIdle();
         setIndexerVelocity(kIndexerIdleRPS);
-        setSpindexerVelocity(kIndexerIdleRPS);
     }
 
     /**
@@ -117,7 +98,6 @@ public class SK26Indexer extends SubsystemBase{
     public void feedFuel(double indexerFeedRPS) {
         setIsFeeding();
         setIndexerVelocity(indexerFeedRPS);
-        setSpindexerVelocity(indexerFeedRPS);
     }
     
     /**
@@ -127,7 +107,6 @@ public class SK26Indexer extends SubsystemBase{
     public void unjamIndexer(double speed) {
         setIsUnjamming();
         setIndexerVelocity(speed);
-        setSpindexerVelocity(speed);
     }
     
     public double getFullness() {
@@ -204,11 +183,6 @@ public class SK26Indexer extends SubsystemBase{
             "Indexer Motor Speed (RPS)", 
             () -> indexerMotor.getVelocity().getValueAsDouble(),
             null);
-
-        builder.addDoubleProperty(
-            "Spindexer Motor Speed (RPS)", 
-            () -> spindexerMotor.getVelocity().getValueAsDouble(),
-            null);
         
         builder.addStringProperty(
             "Status", 
@@ -217,11 +191,6 @@ public class SK26Indexer extends SubsystemBase{
 
         builder.addDoubleProperty(
             "Target Indexer Motor Speed (RPS)", 
-            () -> targetIndexerSpeed, 
-            null);
-
-        builder.addDoubleProperty(
-            "Target Spindexer Motor Speed (RPS)", 
             () -> targetIndexerSpeed, 
             null);
     }

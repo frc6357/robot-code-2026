@@ -209,14 +209,13 @@ public class Ports
     {
         private static final String busName = "";
         public static final CANPort kIndexerMotor = new CANPort(55, busName);
-        public static final CANPort kSpindexerMotor = new CANPort(41, busName);
     }
 
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(70, busName);
-        public static final CANPort kLauncherSensor = new CANPort(71, busName);
-        public static final CANPort kIntakeSensor = new CANPort(72, busName);
+        public static final CANPort kLauncherSensor = new CANPort(10, busName);
+        public static final CANPort kIntakeSensor = new CANPort(11, busName);
 
         public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()

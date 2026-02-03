@@ -33,10 +33,9 @@ public class SK26IndexerBinder implements CommandBinder{
     public void bindButtons(){
         if (indexerSubsystem.isPresent()){
             SK26Indexer indexer = indexerSubsystem.get();
-            SK26Indexer spindexer = indexerSubsystem.get();
 
             IndexFeed.whileTrue(new IndexerFeedCommand(indexer));
-            IndexUnjam.whileTrue(new UnjamCommand(indexer, spindexer));
+            IndexUnjam.whileTrue(new UnjamCommand(indexer));
         }
     }
 }
