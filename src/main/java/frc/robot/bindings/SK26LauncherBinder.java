@@ -3,29 +3,36 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.RunLauncherWithRPSCommand;
-import frc.robot.commands.RunLauncherWithVelCommand;
-import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
-import frc.robot.subsystems.SK26Launcher;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
+// import frc.robot.commands.RunLauncherWithRPSCommand;
+// import frc.robot.commands.RunLauncherWithVelCommand;
+// import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
+// import frc.robot.subsystems.SK26Launcher;
+import frc.robot.subsystems.launcher.BangBangLauncher;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
 import static frc.robot.Konstants.LauncherConstants.kTargetlaunchVelocity;
+import static frc.robot.Ports.OperatorPorts.kIntake;
 import static frc.robot.Ports.OperatorPorts.kShootExitVel;
 import static frc.robot.Ports.OperatorPorts.kShootRPS;
 import static frc.robot.Ports.OperatorPorts.kUnJam;
 
 public class SK26LauncherBinder implements CommandBinder {
 
-    Optional<SK26Launcher> launcherSubsystem;
+    Optional<BangBangLauncher> launcherSubsystem;
 
     Trigger ShootExitVel;
     Trigger ShootRPS;
     Trigger UnJam;
+
+    Pref<Double> kShootVelocity = SKPreferences.attach("BBLauncher/ManualShootVelocity (rps)", 24.5);
     
-    public SK26LauncherBinder(Optional<SK26Launcher> launcherSubsystem) {
+    public SK26LauncherBinder(Optional<BangBangLauncher> launcherSubsystem) {
         this.launcherSubsystem = launcherSubsystem;
         this.ShootExitVel = kShootExitVel.button;
-        this.ShootRPS = kShootRPS.button;
+        this.ShootRPS = kIntake.button;
         this.UnJam = kUnJam.button;
     }
 
@@ -34,7 +41,8 @@ public class SK26LauncherBinder implements CommandBinder {
         
         if(launcherSubsystem.isPresent()) {
 
-            SK26Launcher launcher = launcherSubsystem.get();
+            // SK26Launcher launcher = launcherSubsystem.get();
+            BangBangLauncher launcher = launcherSubsystem.get();
 
             //TODO: Use the Trigger methods of ".and()", ".or()", and ".negate()" to make this cleaner and not access the boolean on initial runtime
             if(ShootExitVel.getAsBoolean() && UnJam.getAsBoolean()) {

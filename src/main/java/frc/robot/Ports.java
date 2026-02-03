@@ -20,6 +20,8 @@ import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 
+import com.ctre.phoenix6.CANBus;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;

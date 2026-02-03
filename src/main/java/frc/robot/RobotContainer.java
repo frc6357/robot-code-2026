@@ -33,8 +33,9 @@ import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
-import frc.robot.subsystems.SK26Launcher;
+// import frc.robot.subsystems.SK26Launcher;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.vision.SKVision;
 
 
@@ -59,12 +60,12 @@ public class RobotContainer {
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
-  public Optional<SK26Launcher> m_launcherContainer = Optional.empty();
+  public Optional<BangBangLauncher> m_launcherContainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
   public static SK26Turret m_turretInstance;
-  public static SK26Launcher m_launcherInstance;
+  public static BangBangLauncher m_launcherInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -120,7 +121,7 @@ public class RobotContainer {
                 m_turretInstance = m_turretContainer.get();
             }
             if(subsystems.isLauncherPresent()) {
-                m_launcherContainer = Optional.of(new SK26Launcher());
+                m_launcherContainer = Optional.of(new BangBangLauncher());
                 m_launcherInstance = m_launcherContainer.get();
             }
         }
