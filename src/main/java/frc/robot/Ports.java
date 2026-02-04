@@ -34,7 +34,6 @@ import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
-import com.ctre.phoenix6.configs.DigitalInputsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
@@ -181,7 +180,7 @@ public class Ports
 
     public static class ElevatorPorts
     {
-        private static final String busName = "";
+        //private static final String busName = "";
         //public static final CANPort kRightElevatorMotor = new CANPort(41, busName);
         //public static final CANPort kLeftElevatorMotor = new CANPort(42, busName);
     }
@@ -215,15 +214,17 @@ public class Ports
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(70, busName);
-        public static final CANPort kLauncherSensor = new CANPort(71, busName);
-        public static final CANPort kIntakeSensor = new CANPort(72, busName);
+        public static final CANPort kLauncherSensor = new CANPort(10, busName);
+        public static final CANPort kIntakeSensor1 = new CANPort(11, busName);
+        public static final CANPort kIntakeSensor2 = new CANPort(12, busName);
 
         public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
 
         public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
-        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
+        public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
+        public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
 
         /* Sensor configurating */
         static {

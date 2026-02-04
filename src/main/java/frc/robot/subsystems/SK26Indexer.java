@@ -19,7 +19,8 @@ import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.IndexerPorts.kSpindexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
-import static frc.robot.Ports.Sensors.intakeSensor;
+import static frc.robot.Ports.Sensors.intakeSensor1;
+import static frc.robot.Ports.Sensors.intakeSensor2;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 
 // Subsystem for the SK26 Indexer mechanism
@@ -53,7 +54,8 @@ public class SK26Indexer extends SubsystemBase{
     public int numBallsInIndexer = 0;
     public int totalNumBallsLaunched = 0;
     public boolean lastLauncherSensorState;
-    public boolean lastIntakeSensorState;
+    public boolean lastIntakeSensorState1;
+    public boolean lastIntakeSensorState2;
 
     // Constructor
     public SK26Indexer() 
@@ -130,10 +132,19 @@ public class SK26Indexer extends SubsystemBase{
         setSpindexerVelocity(speed);
     }
     
+    /**
+     * Calculates and returns the fullness of the indexer as a value between 0.0 and 1.0.
+     * @return The fullness of the indexer, where 0.0 is empty and 1.0 is full.
+     */
     public double getFullness() {
         return kIndexerHeight.minus(getTofDistance()).div(kIndexerHeight).baseUnitMagnitude();
     }
 
+    /**
+     * Gets the current distance reading from the CANrange time-of-flight sensor.
+     *
+     * @return the measured distance as a {@link edu.wpi.first.units.measure.Distance}
+     */
     private Distance getTofDistance() {
         return tofSensor.getDistance().refresh().getValue();
     }
@@ -174,20 +185,25 @@ public class SK26Indexer extends SubsystemBase{
      *
      * <p>Notes/assumptions:
      * <ul>
-     *   <li>{@link #lastIntakeSensorState} must be maintained between calls; call this periodically.</li>
+     *   <li>{@link #lastIntakeSensorState1} must be maintained between calls; call this periodically.</li>
      *   <li>The edge direction depends on whether the beam break is active-high or active-low.
      *       If counts are inverted, swap the edge check accordingly.</li>
      *   <li>If the sensor chatters, consider adding a small debounce (WPILib {@code Debouncer}).</li>
      * </ul>
      */
     private void checkIfBallIntaked() {
-        boolean currentState = intakeSensor.get(); // Read sensor
+        boolean currentState1 = intakeSensor1.get(); // Read sensor
+        boolean currentState2 = intakeSensor2.get(); // Read second sensor
 
         // Check for falling edge (state changes from true to false)
-        if(lastIntakeSensorState && !currentState) {
+        if(lastIntakeSensorState1 && !currentState1) {
             numBallsInIndexer++; //Increases how many balls are in the indexer
         }
-        lastIntakeSensorState = currentState;
+        if(lastIntakeSensorState2 && !currentState2) {
+            numBallsInIndexer++;
+        }
+        lastIntakeSensorState1 = currentState1;
+        lastIntakeSensorState2 = currentState2;
     }
 
     @Override
@@ -223,6 +239,16 @@ public class SK26Indexer extends SubsystemBase{
         builder.addDoubleProperty(
             "Target Spindexer Motor Speed (RPS)", 
             () -> targetIndexerSpeed, 
+            null);
+
+        builder.addIntegerProperty(
+            "Number of Balls in Indexer",
+            () -> numBallsInIndexer,
+            null);
+
+        builder.addIntegerProperty(
+            "Number of Balls Intaked",
+            () -> totalNumBallsLaunched,
             null);
     }
 }
