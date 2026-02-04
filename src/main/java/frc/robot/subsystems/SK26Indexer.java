@@ -1,11 +1,14 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -13,7 +16,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
@@ -22,64 +24,75 @@ import static frc.robot.Ports.Sensors.intakeSensor;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 
 // Subsystem for the SK26 Indexer mechanism
-public class SK26Indexer extends SubsystemBase{
-    private final TalonFX indexerMotor;
-
-    // Configuration for the TalonFX motor controller
-    TalonFXConfiguration config = new TalonFXConfiguration()
-
-    // PID Configuration
-    .withSlot0(new Slot0Configs().withKP(16.617))
-
-    // this essentially sets the motor to a max current supply of 120 amps
-    .withCurrentLimits(
-        new CurrentLimitsConfigs()
-
-            .withStatorCurrentLimit(Amps.of(120))
-            .withStatorCurrentLimitEnable(true)
-    )   
-    ;
+public class SK26Indexer extends SubsystemBase {
+    private final SparkFlex indexerMotor;
+    private final SparkClosedLoopController closedLoopController;
+    private final RelativeEncoder encoder;
 
     // String to represent the current status of the indexer
     public String status = "Idle";
 
     // Target speed for the indexer motor in RPS
-    double targetIndexerSpeed = 0.0;
+    private double targetIndexerSpeed = 0.0;
 
-    //Sensor values
+    // Sensor values
     public int numBallsInIndexer = 0;
     public int totalNumBallsLaunched = 0;
-    public boolean lastLauncherSensorState;
-    public boolean lastIntakeSensorState;
+    private boolean lastLauncherSensorState = false;
+    private boolean lastIntakeSensorState = false;
 
     // Constructor
-    public SK26Indexer() 
-    {
-        indexerMotor = new TalonFX(kIndexerMotor.ID);
+    public SK26Indexer() {
+        indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
+        closedLoopController = indexerMotor.getClosedLoopController();
+        encoder = indexerMotor.getEncoder();
 
-        indexerMotor.setNeutralMode(NeutralModeValue.Brake);
+        // Configure the SparkFlex for Neo Vortex
+        SparkFlexConfig config = new SparkFlexConfig();
+        config
+            .idleMode(IdleMode.kBrake)
+            .smartCurrentLimit(40);
+        
+        config.closedLoop
+            .p(0.001)
+            .i(0.0)
+            .d(0.0);
 
-        indexerMotor.getConfigurator().apply(config);
+        // Apply configuration
+        indexerMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        
+        System.out.println("SK26Indexer initialized with CAN ID: " + kIndexerMotor.ID);
     }
 
-    
     public void setIsIdle() {
         status = "Idle";
     }
+
     public void setIsUnjamming() {
         status = "Unjamming";
     }
+
     public void setIsFeeding() {
         status = "Feeding";
     }
-    
+
     /**
      * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
+     * Uses duty cycle for testing - switch to velocity control once working.
      * @param velocity The desired velocity in RPS.
      */
     public void setIndexerVelocity(double velocity) {
         targetIndexerSpeed = velocity;
-        indexerMotor.setControl(new VelocityVoltage(velocity));
+        
+        // TESTING: Use simple duty cycle instead of closed-loop
+        // Neo Vortex free speed is ~113 RPS (6784 RPM)
+        double dutyCycle = velocity / 113.0;
+        indexerMotor.set(dutyCycle);
+        
+        System.out.println("Indexer set to: " + velocity + " RPS (duty cycle: " + dutyCycle + ")");
+        
+        // UNCOMMENT THIS for closed-loop velocity control after testing:
+        // closedLoopController.setSetpoint(velocity * 60.0, ControlType.kVelocity);
     }
 
     public Command setIndexerVelCommand(double velocityRPS) {
@@ -99,7 +112,7 @@ public class SK26Indexer extends SubsystemBase{
         setIsFeeding();
         setIndexerVelocity(indexerFeedRPS);
     }
-    
+
     /**
      * Runs the indexer at the speed, specifically for unjamming purposes.
      * @param speed The speed to target in RPS.
@@ -108,7 +121,7 @@ public class SK26Indexer extends SubsystemBase{
         setIsUnjamming();
         setIndexerVelocity(speed);
     }
-    
+
     public double getFullness() {
         return kIndexerHeight.minus(getTofDistance()).div(kIndexerHeight).baseUnitMagnitude();
     }
@@ -117,54 +130,21 @@ public class SK26Indexer extends SubsystemBase{
         return tofSensor.getDistance().refresh().getValue();
     }
 
-    /**
-     * Updates {@link #numBallsInIndexer} when a ball is detected leaving the launcher.
-     *
-     * <p>This method reads {@code launcherSensor} and looks for a <b>falling edge</b>
-     * (sensor state transitions from {@code true} to {@code false}). When that edge is seen,
-     * it assumes a ball has just passed the sensor / been launched and decrements
-     * {@link #numBallsInIndexer}.
-     *
-     * <p>Notes/assumptions:
-     * <ul>
-     *   <li>{@link #lastLauncherSensorState} must be maintained between calls; call this periodically.</li>
-     *   <li>The edge direction depends on whether the beam break is active-high or active-low.
-     *       If counts are inverted, swap the edge check accordingly.</li>
-     * </ul>
-     */
     private void checkIfBallLaunched() {
-        boolean currentState = launcherSensor.get(); // Read sensor
-    
-        // Check for falling edge (state changes from true to false)
+        boolean currentState = launcherSensor.get();
+
         if (lastLauncherSensorState && !currentState) {
-            numBallsInIndexer--; // decreases how many balls are in the indexer
-            totalNumBallsLaunched++; // increases how many total balls have been launched in a match
+            numBallsInIndexer--;
+            totalNumBallsLaunched++;
         }
-        lastLauncherSensorState = currentState; // Update last state
+        lastLauncherSensorState = currentState;
     }
 
-    /**
-     * Updates {@link #numBallsInIndexer} when a ball is detected entering the robot (intaked).
-     *
-     * <p>This method reads {@code intakeSensor} and looks for a <b>falling edge</b>
-     * (sensor state transitions from {@code true} to {@code false}). When that edge is seen,
-     * it assumes a ball has just crossed the intake sensor and increments
-     * {@link #numBallsInIndexer}.
-     *
-     * <p>Notes/assumptions:
-     * <ul>
-     *   <li>{@link #lastIntakeSensorState} must be maintained between calls; call this periodically.</li>
-     *   <li>The edge direction depends on whether the beam break is active-high or active-low.
-     *       If counts are inverted, swap the edge check accordingly.</li>
-     *   <li>If the sensor chatters, consider adding a small debounce (WPILib {@code Debouncer}).</li>
-     * </ul>
-     */
     private void checkIfBallIntaked() {
-        boolean currentState = intakeSensor.get(); // Read sensor
+        boolean currentState = intakeSensor.get();
 
-        // Check for falling edge (state changes from true to false)
-        if(lastIntakeSensorState && !currentState) {
-            numBallsInIndexer++; //Increases how many balls are in the indexer
+        if (lastIntakeSensorState && !currentState) {
+            numBallsInIndexer++;
         }
         lastIntakeSensorState = currentState;
     }
@@ -172,26 +152,42 @@ public class SK26Indexer extends SubsystemBase{
     @Override
     public void periodic() {
         SmartDashboard.putData("Indexer", this);
+        
+        // Debug info
+        SmartDashboard.putNumber("Indexer/Applied Output", indexerMotor.getAppliedOutput());
+        SmartDashboard.putNumber("Indexer/Actual Velocity RPM", encoder.getVelocity());
+        SmartDashboard.putNumber("Indexer/Output Current", indexerMotor.getOutputCurrent());
+        SmartDashboard.putNumber("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
 
         checkIfBallLaunched();
         checkIfBallIntaked();
     }
 
-    @Override 
+    @Override
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty(
-            "Indexer Motor Speed (RPS)", 
-            () -> indexerMotor.getVelocity().getValueAsDouble(),
+            "Indexer Motor Speed (RPS)",
+            () -> encoder.getVelocity() / 60.0,
             null);
-        
+
         builder.addStringProperty(
-            "Status", 
-            () -> status, 
+            "Status",
+            () -> status,
             null);
 
         builder.addDoubleProperty(
-            "Target Indexer Motor Speed (RPS)", 
-            () -> targetIndexerSpeed, 
+            "Target Indexer Motor Speed (RPS)",
+            () -> targetIndexerSpeed,
+            null);
+        
+        builder.addIntegerProperty(
+            "Balls In Indexer",
+            () -> numBallsInIndexer,
+            null);
+        
+        builder.addIntegerProperty(
+            "Total Balls Launched",
+            () -> totalNumBallsLaunched,
             null);
     }
 }
