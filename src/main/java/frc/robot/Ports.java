@@ -41,26 +41,37 @@ public class Ports
         public static final GenericHID kDriver = new FilteredXboxController(0).getHID();
         
         // Filtered axis (translation & rotation)
-        public static final FilteredAxis kTranslationXPort = new FilteredAxis(() -> kDriver.getRawAxis(kLeftY.value));
-        public static final FilteredAxis kTranslationYPort = new FilteredAxis(() -> kDriver.getRawAxis(kLeftX.value));
-        public static final FilteredAxis kVelocityOmegaPort = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
+        public static final FilteredAxis kLeftStickY = new FilteredAxis(() -> kDriver.getRawAxis(kLeftY.value));
+        public static final FilteredAxis kLeftStickX = new FilteredAxis(() -> kDriver.getRawAxis(kLeftX.value));
+        public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
-        // Vision subsystem enable/disable
-        public static final SKTrigger kVisionOff = new SKTrigger(kDriver, 180, POV);
-        public static final SKTrigger kVisionOn = new SKTrigger(kDriver, 0, POV);
+        // ABXY:
+        public static final SKTrigger kAbutton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
-        // Vision Driving buttons
-        public static final SKTrigger kResetPoseToVision = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kForceResetPoseToVision = new SKTrigger(kDriver, kY.value, BUTTON);
+        // D-pad:
+        public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);
+        public static final SKTrigger kRightDpad = new SKTrigger(kDriver, 90, POV);
+        public static final SKTrigger kDownDpad = new SKTrigger(kDriver, 180, POV);
+        public static final SKTrigger kLeftDpad = new SKTrigger(kDriver, 270, POV);
 
-        // Switch modes
-        public static final SKTrigger kRobotCentricMode = new SKTrigger(kDriver, kRightBumper.value, BUTTON);
-        public static final SKTrigger kSlowMode = new SKTrigger(kDriver, kLeftBumper.value, BUTTON);
-        public static final SKTrigger kFastMode = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
-        public static final SKTrigger kBumpAlign = new SKTrigger(kDriver, kLeftTrigger.value, AXIS);
+        // Bumpers:
+        public static final SKTrigger kRBbutton = new SKTrigger(kDriver, kRightBumper.value, BUTTON);
+        public static final SKTrigger kLBbutton = new SKTrigger(kDriver, kLeftBumper.value, BUTTON);
 
-        // Reset gyro
-        public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+        // Triggers:
+        public static final SKTrigger kLTrigger = new SKTrigger(kDriver, kLeftTrigger.value, AXIS);
+        public static final SKTrigger kRTrigger = new SKTrigger(kDriver, kRightTrigger.value, AXIS);
+
+        // Menu buttons:
+        public static final SKTrigger kStartbutton  = new SKTrigger(kDriver, kStart.value, BUTTON);
+        public static final SKTrigger kBackbutton = new SKTrigger(kDriver, kBack.value, BUTTON);
+        
+        // Stick buttons:
+        public static final SKTrigger kLSbutton = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
+        public static final SKTrigger kRSbutton = new SKTrigger(kDriver, kRightStick.value, BUTTON);
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external

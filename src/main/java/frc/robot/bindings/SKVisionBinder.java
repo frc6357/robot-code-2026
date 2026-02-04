@@ -4,10 +4,10 @@ import java.util.Optional;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
-import static frc.robot.Ports.DriverPorts.kForceResetPoseToVision;
-import static frc.robot.Ports.DriverPorts.kResetPoseToVision;
-import static frc.robot.Ports.DriverPorts.kVisionOff;
-import static frc.robot.Ports.DriverPorts.kVisionOn;
+import static frc.robot.Ports.DriverPorts.kYbutton;
+import static frc.robot.Ports.DriverPorts.kBbutton;
+import static frc.robot.Ports.DriverPorts.kDownDpad;
+import static frc.robot.Ports.DriverPorts.kUpDpad;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -29,10 +29,10 @@ public class SKVisionBinder implements CommandBinder {
         this.m_visionContainer = m_visionContainer;
         this.m_swerveContainer = m_swerveContainer;
 
-        this.resetPoseToVision = kResetPoseToVision.button;
-        this.forceResetPoseToVision = kForceResetPoseToVision.button;
-        this.visionOn = kVisionOn.button;
-        this.visionOff = kVisionOff.button;
+        this.resetPoseToVision = kBbutton.button;
+        this.forceResetPoseToVision = kYbutton.button;
+        this.visionOn = kUpDpad.button;
+        this.visionOff = kDownDpad.button;
     }
 
     public void bindButtons() {

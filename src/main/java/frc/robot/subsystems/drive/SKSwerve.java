@@ -2,9 +2,9 @@ package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
 import static frc.robot.Konstants.SwerveConstants.kChassisLength;
-import static frc.robot.Ports.DriverPorts.kTranslationXPort;
-import static frc.robot.Ports.DriverPorts.kTranslationYPort;
-import static frc.robot.Ports.DriverPorts.kVelocityOmegaPort;
+import static frc.robot.Ports.DriverPorts.kLeftStickY;
+import static frc.robot.Ports.DriverPorts.kLeftStickX;
+import static frc.robot.Ports.DriverPorts.kRightStickX;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -61,9 +61,9 @@ public class SKSwerve extends SubsystemBase {
     private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
-    private Supplier<Double> translationXSupplier = () -> -kTranslationXPort.getFilteredAxis();
-    private Supplier<Double> translationYSupplier = () -> -kTranslationYPort.getFilteredAxis();
-    private Supplier<Double> velocityOmegaSupplier = () -> -kVelocityOmegaPort.getFilteredAxis();
+    private Supplier<Double> translationXSupplier = () -> -kLeftStickY.getFilteredAxis();
+    private Supplier<Double> translationYSupplier = () -> -kLeftStickX.getFilteredAxis();
+    private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
     
     private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
     .getStructTopic("RobotPose", Pose2d.struct).publish();

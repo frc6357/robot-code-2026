@@ -3,10 +3,10 @@ package frc.robot.commands;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kD;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kI;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kP;
-import static frc.robot.Ports.DriverPorts.kFastMode;
-import static frc.robot.Ports.DriverPorts.kSlowMode;
-import static frc.robot.Ports.DriverPorts.kTranslationXPort;
-import static frc.robot.Ports.DriverPorts.kTranslationYPort;
+import static frc.robot.Ports.DriverPorts.kLSbutton;
+import static frc.robot.Ports.DriverPorts.kLBbutton;
+import static frc.robot.Ports.DriverPorts.kLeftStickY;
+import static frc.robot.Ports.DriverPorts.kLeftStickX;
 import frc.robot.subsystems.drive.DriveRequests;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -50,11 +50,11 @@ public class AlignAroundPoint extends Command{
         
         m_drive.setSwerveRequest(
             DriveRequests.getTeleopRequestUpdater(
-                () -> -kTranslationXPort.getFilteredAxis(), 
-                () -> -kTranslationYPort.getFilteredAxis(), 
+                () -> -kLeftStickY.getFilteredAxis(), 
+                () -> -kLeftStickX.getFilteredAxis(), 
                 () -> Math.toRadians(output), 
-                () -> kSlowMode.button.getAsBoolean(), 
-                () -> kFastMode.button.getAsBoolean())
+                () -> kLBbutton.button.getAsBoolean(), 
+                () -> kLSbutton.button.getAsBoolean())
             .apply(DriveRequests.teleopRequest)
         );
 

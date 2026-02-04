@@ -1,14 +1,14 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
-import static frc.robot.Ports.DriverPorts.kFastMode;
-import static frc.robot.Ports.DriverPorts.kResetGyroPos;
-import static frc.robot.Ports.DriverPorts.kRobotCentricMode;
-import static frc.robot.Ports.DriverPorts.kSlowMode;
-import static frc.robot.Ports.DriverPorts.kTranslationXPort;
-import static frc.robot.Ports.DriverPorts.kTranslationYPort;
-import static frc.robot.Ports.DriverPorts.kVelocityOmegaPort;
-import static frc.robot.Ports.DriverPorts.kBumpAlign;
+import static frc.robot.Ports.DriverPorts.kLSbutton;
+import static frc.robot.Ports.DriverPorts.kRSbutton;
+import static frc.robot.Ports.DriverPorts.kRBbutton;
+import static frc.robot.Ports.DriverPorts.kLBbutton;
+import static frc.robot.Ports.DriverPorts.kLeftStickY;
+import static frc.robot.Ports.DriverPorts.kLeftStickX;
+import static frc.robot.Ports.DriverPorts.kRightStickX;
+import static frc.robot.Ports.DriverPorts.kLTrigger;
 
 import java.util.Optional;
 
@@ -54,11 +54,11 @@ public class SKSwerveBinder implements CommandBinder{
                 });
 
     //Driver buttons
-    private final Trigger robotCentric = kRobotCentricMode.button;
-    private final Trigger slowmode = kSlowMode.button;
-    private final Trigger resetButton = kResetGyroPos.button;
-    private final Trigger fastmode = kFastMode.button;
-    private final Trigger hubAlign = kBumpAlign.button;
+    private final Trigger robotCentric = kRBbutton.button;
+    private final Trigger slowmode = kLBbutton.button;
+    private final Trigger resetButton = kRSbutton.button;
+    private final Trigger fastmode = kLSbutton.button;
+    private final Trigger hubAlign = kLTrigger.button;
 
 
     public SKSwerveBinder(Optional<SKSwerve> m_drive) {
@@ -87,17 +87,17 @@ public class SKSwerveBinder implements CommandBinder{
 
         // TODO: Might need to uncomment this later? It caused a weird issue that made the robot drift like it's in space.
         // Sets filters for driving axes
-        kTranslationXPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kTranslationYPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kVelocityOmegaPort.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kLeftStickY.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kLeftStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kRightStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
 
         robotCentric.whileTrue(
             drive.followSwerveRequestCommand(
                 DriveRequests.robotCentricTeleopRequest, 
                 DriveRequests.getRobotCentricTeleopRequestUpdater(
-                        () -> -kTranslationXPort.getFilteredAxis(), 
-                        () -> -kTranslationYPort.getFilteredAxis(), 
-                        () -> -kVelocityOmegaPort.getFilteredAxis(), 
+                        () -> -kLeftStickY.getFilteredAxis(), 
+                        () -> -kLeftStickX.getFilteredAxis(), 
+                        () -> -kRightStickX.getFilteredAxis(), 
                         () -> slowmode.getAsBoolean(), 
                         () -> fastmode.getAsBoolean())
         ));
@@ -115,9 +115,9 @@ public class SKSwerveBinder implements CommandBinder{
             drive.followSwerveRequestCommand(
                 DriveRequests.teleopRequest, 
                 DriveRequests.getTeleopRequestUpdater(
-                        () -> -kTranslationXPort.getFilteredAxis(), 
-                        () -> -kTranslationYPort.getFilteredAxis(), 
-                        () -> -kVelocityOmegaPort.getFilteredAxis(), 
+                        () -> -kLeftStickY.getFilteredAxis(), 
+                        () -> -kLeftStickX.getFilteredAxis(), 
+                        () -> -kRightStickX.getFilteredAxis(), 
                         () -> slowmode.getAsBoolean(), 
                         () -> fastmode.getAsBoolean())
             )
