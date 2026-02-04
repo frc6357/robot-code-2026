@@ -9,6 +9,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.AbsoluteEncoder;
 
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
+
+import java.util.Optional;
+
 import static frc.robot.Konstants.ClimbConstants.kClimbP;
 import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
 import static frc.robot.Konstants.ClimbConstants.kClimbI;
@@ -62,7 +65,7 @@ public class Climb extends SubsystemBase
     }
 
 
-    //runs the motor at a given speed
+//runs the motor at a given speed
     public void runMotor(double motorSpeed)
     {
         climbMotor.set(motorSpeed);

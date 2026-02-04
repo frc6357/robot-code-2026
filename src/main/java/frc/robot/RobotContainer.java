@@ -24,8 +24,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
+import frc.robot.bindings.ClimbBinder;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.subsystems.Climb;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
@@ -50,9 +52,11 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<Climb> m_climbComtainer = Optional.empty();
 
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static Climb m_climbInstance;
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
@@ -101,6 +105,10 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            if(subsystems.isClimbPresent()) {
+                m_climbComtainer = Optional.of(new Climb());
+                m_climbInstance = m_climbComtainer.get();
+            }
         }
         catch (IOException e)
         {
@@ -117,6 +125,7 @@ public class RobotContainer {
     private void configureButtonBindings()
     {
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add( new ClimbBinder(m_climbComtainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
