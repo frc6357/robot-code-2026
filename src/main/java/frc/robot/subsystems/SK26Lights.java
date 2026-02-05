@@ -379,6 +379,12 @@ public class SK26Lights extends SubsystemBase {
         candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, kNumLedOnBot - 1));
     }
 
+    /**
+     * Sets the leds to a certain color from a starting index to an ending index
+     * @param colorRGB an array of rgb values to set the leds
+     * @param startIndex the starting led number
+     * @param endIndex the end led number
+     */
     public void setSolidColor(int[] colorRGB, int startIndex, int endIndex) {
         setBrightnessIfChanged(kLightsOnBrightness);
         solidColor = new SolidColor(startIndex, endIndex);
@@ -386,6 +392,13 @@ public class SK26Lights extends SubsystemBase {
         candle.setControl(solidColor);
     }
 
+    /**
+     * Makes the leds strobe at a certain color at a certain part of the led strip
+     * @param colorRGB an array of rgb values to set the leds
+     * @param startIndex the stating led number
+     * @param endIndex the end led number
+     * @param intervalMs how often the colors should strobe
+     */
     public void setStrobeAnimation(int[] colorRGB, int startIndex, int endIndex, int intervalMs) {
         setBrightnessIfChanged(kLightsOnBrightness);
         strobe = new StrobeAnimation(startIndex, endIndex);
