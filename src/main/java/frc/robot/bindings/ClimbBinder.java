@@ -15,7 +15,7 @@ import static frc.robot.Ports.OperatorPorts.climbUpButton;
 import static frc.robot.Ports.OperatorPorts.climbDownButton;
 import static frc.robot.Konstants.ClimbConstants.kTOne;
 
-public class ClimbBinder {
+public class ClimbBinder implements CommandBinder {
 
     Optional<Climb> climbSubsystem;
     
