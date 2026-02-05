@@ -169,6 +169,7 @@ public class Ports
     {
         private static final String busName = kCANivoreName;
         public static final CANPort kClimbMotor = new CANPort(62, busName);        
+        public static final CANPort kClimbEncoder = new CANPort(61, busName);
     }
 
     public static class ElevatorPorts

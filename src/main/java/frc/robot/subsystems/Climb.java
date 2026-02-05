@@ -4,11 +4,14 @@ import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.AbsoluteEncoder;
 
+import static frc.robot.Ports.ClimbPorts.kClimbEncoder;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
+import static frc.robot.Ports.OperatorPorts.climbUpButton;
 import static frc.robot.Konstants.ClimbConstants.kClimbP;
 import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
 import static frc.robot.Konstants.ClimbConstants.kClimbI;
@@ -31,6 +34,7 @@ public class Climb extends SubsystemBase
 
     TalonFX climbMotor; // figure out if actually spark. depends on what motor is being used.
     DigitalInput cLimitSwitch;
+    PositionVoltage request;
 
     final double motorRatio = 0.0; //change once we know gear ratio
     final double climbFactor = 0.0; // change once fingure out what the conversion factor is from the encoder to the height
@@ -40,7 +44,7 @@ public class Climb extends SubsystemBase
 
     TalonFXConfiguration climbConfig;
 
-    public CANcoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
+    CANcoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
 
     SparkClosedLoopController cpid;
 
@@ -49,8 +53,9 @@ public class Climb extends SubsystemBase
     public Climb()
     {
         climbMotor = new TalonFX(kClimbMotor.ID);
-        //cEncoder = climbMotor.getAbsoluteEncoder();// figure out how to do encoder
+        cEncoder = new CANcoder(kClimbEncoder.ID);// figure out how to do encoder
         cLimitSwitch = new DigitalInput(0);
+        request = new PositionVoltage(0).withSlot(0);
 
         climbConfig = new TalonFXConfiguration();
         climbConfig.Slot0.kP = kClimbP;
@@ -96,7 +101,8 @@ public class Climb extends SubsystemBase
     // gets the current position of the climb
     public double getClimbPosition()
     {
-        return 25.0;//cEncoder.getPosition() * climbFactor;
+        double pos = cEncoder.getPosition().getValueAsDouble();
+        return pos * climbFactor;
     }
 
     // chacks the limit switch to see if it is true or false
@@ -111,13 +117,14 @@ public class Climb extends SubsystemBase
         cTargetHieight = targetHieight;
 
         double motorRotations =  targetHieight * motorRatio; // / scale factor of encode to height
-        cpid.setReference(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        climbMotor.setControl(request.withPosition(motorRotations));
     }
 
     // gets the current position of the encoder
     public double getEncoderPos()
     {
-        return 25.0;//cEncoder.getPosition();
+        double pos = cEncoder.getPosition().getValueAsDouble();
+        return pos;//cEncoder.getPosition();
     }
 
     // hold command, may be necessary to ensure the robot doesnt get pulled back down by gravity
@@ -149,6 +156,7 @@ public class Climb extends SubsystemBase
     public void teleopPeriodic()
     {
         SmartDashboard.putBoolean("Limit Switch", isSwitchPressed());
+        System.out.println("Encoder" + cEncoder.getPosition());
         SmartDashboard.putData("Encoder Pos", (Sendable) cEncoder.getPosition());
     }
 }

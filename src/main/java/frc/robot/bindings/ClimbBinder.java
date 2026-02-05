@@ -38,7 +38,7 @@ public class ClimbBinder {
         {
             Climb climb = climbSubsystem.get();
 
-            t1Button.whileTrue(new ClimbButtonCommand(kTOne, climb));
+            t1Button.onTrue(new ClimbButtonCommand(kTOne, climb));
             upButton.whileTrue(new ClimbUpCommand(climb));
             downButton.whileTrue(new ClimbDownCommand(climb));
         }

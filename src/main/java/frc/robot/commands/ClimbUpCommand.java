@@ -24,7 +24,7 @@ public class ClimbUpCommand extends Command{
     @Override
     public void execute()
     {
-        climb.setClimbHeight(kClimbMotorSpeed);
+        climb.runMotor(kClimbMotorSpeed);
         climb.isRunning = true;
     }
 

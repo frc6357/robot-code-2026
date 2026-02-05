@@ -174,7 +174,7 @@ public final class Konstants
 
     public static final class ClimbConstants
     {
-        public static final double kClimbMotorSpeed = 0;
+        public static final double kClimbMotorSpeed = .5;
         public static final double kClimbP = 0;
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
