@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
 import static frc.robot.Konstants.LightsConstants.kLightsPWMHeader;
 
@@ -10,10 +11,14 @@ import static frc.robot.Konstants.LightsConstants.kSKCream;
 import static frc.robot.Konstants.LightsConstants.kSKTeal;
 import static frc.robot.Konstants.LightsConstants.kSKDarkBlue;
 
+import java.util.Optional;
+
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
@@ -54,12 +59,30 @@ public class SK26Lights extends SubsystemBase {
     private final LEDPattern m_scrollingRainbow =
         m_rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
 
+    private final LEDPattern m_blinkingWhite = LEDPattern.solid(Color.kWhite)
+        .blink(Seconds.of(0.5), Seconds.of(0.5));
+
     private final LEDPattern m_SKBlueGradient = LEDPattern.gradient(
         LEDPattern.GradientType.kContinuous,
         kSKCream,
         kSKTeal,
         kSKBlue,
         kSKDarkBlue
+    ).scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
+
+    // Alliance-based patterns
+    private final LEDPattern m_redAllianceGradient = LEDPattern.gradient(
+        LEDPattern.GradientType.kContinuous,
+        Color.kRed,
+        Color.kDarkRed,
+        Color.kOrangeRed
+    ).scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
+
+    private final LEDPattern m_blueAllianceGradient = LEDPattern.gradient(
+        LEDPattern.GradientType.kContinuous,
+        Color.kBlue,
+        Color.kDarkBlue,
+        Color.kRoyalBlue
     ).scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
 
     private String ledStatus = "Breathing SKBlue";
@@ -71,6 +94,32 @@ public class SK26Lights extends SubsystemBase {
     private double breathePhase = 0.0;
     private static final double BREATHE_SPEED = 0.05;
 
+    // Endgame blink tracking
+    private int endgameBlinkCounter = 0;
+    private static final int ENDGAME_BLINK_ON_DURATION = 25;  // ~0.5 seconds at 50Hz
+    private static final int ENDGAME_BLINK_OFF_DURATION = 25; // ~0.5 seconds at 50Hz
+
+    // Alliance and game state tracking
+    private Alliance currentAlliance = null;
+    private GameState currentGameState = GameState.DISABLED;
+    private GameState previousGameState = GameState.DISABLED;
+    private boolean allianceKnown = false;
+    private boolean dsConnected = false;
+    private double matchTime = -1.0;
+
+    // Endgame threshold in seconds (last 20 seconds of teleop)
+    private static final double ENDGAME_THRESHOLD = 20.0;
+
+    /** Represents the current game state */
+    public enum GameState {
+        DISCONNECTED,   // Not connected to DriverStation
+        DISABLED,       // Connected but disabled
+        AUTONOMOUS,     // Autonomous period
+        TELEOP,         // Teleop (not endgame)
+        ENDGAME,        // Last 20 seconds of teleop
+        TEST            // Test mode
+    }
+
     private enum BaseMode {
         OFF,
         SOLID_WHITE,
@@ -81,7 +130,12 @@ public class SK26Lights extends SubsystemBase {
         SOLID_ORANGE,
         RAINBOW,
         BREATHING_SKBLUE,
-        SKBLUE_GRADIENT
+        SKBLUE_GRADIENT,
+        ALLIANCE_COLOR,           // Solid alliance color (red or blue)
+        ALLIANCE_GRADIENT,        // Scrolling gradient in alliance colors
+        BREATHING_ALLIANCE,       // Breathing effect in alliance color
+        ENDGAME_ALERT,            // Blinks white over alliance color
+        GAME_STATE_AWARE          // Automatically changes based on game state
     }
 
     private BaseMode currentBaseMode = BaseMode.BREATHING_SKBLUE;
@@ -102,6 +156,134 @@ public class SK26Lights extends SubsystemBase {
         SmartDashboard.putNumber("Lights/Brightness", DEFAULT_BRIGHTNESS);
         // SmartDashboard.putBoolean("Lights/Run Calibration", false);
         // SmartDashboard.putString("Lights/Calibration Color", "None");
+    }
+
+    /**
+     * Updates alliance and game state from DriverStation.
+     * Should be called periodically.
+     */
+    private void updateAllianceAndGameState() {
+        // Update connection state
+        dsConnected = DriverStation.isDSAttached();
+
+        // Update alliance
+        Optional<Alliance> alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            currentAlliance = alliance.get();
+            allianceKnown = true;
+        } else {
+            allianceKnown = false;
+        }
+
+        // Update match time
+        matchTime = DriverStation.getMatchTime();
+
+        // Update game state
+        previousGameState = currentGameState;
+        
+        if (!dsConnected) {
+            currentGameState = GameState.DISCONNECTED;
+        } else if (DriverStation.isDisabled()) {
+            currentGameState = GameState.DISABLED;
+        } else if (DriverStation.isAutonomousEnabled()) {
+            currentGameState = GameState.AUTONOMOUS;
+        } else if (DriverStation.isTeleopEnabled()) {
+            // Check for endgame (last 20 seconds)
+            // matchTime counts down, so < ENDGAME_THRESHOLD means endgame
+            // matchTime is -1 when not in a real match, so treat that as regular teleop
+            if (matchTime >= 0 && matchTime <= ENDGAME_THRESHOLD) {
+                currentGameState = GameState.ENDGAME;
+            } else {
+                currentGameState = GameState.TELEOP;
+            }
+        } else if (DriverStation.isTestEnabled()) {
+            currentGameState = GameState.TEST;
+        }
+    }
+
+    /**
+     * Gets the current alliance color.
+     * Returns red for Red alliance, blue for Blue alliance, or SKBlue if unknown.
+     * 
+     * @return The alliance color
+     */
+    public Color getAllianceColor() {
+        if (!allianceKnown) {
+            return kSKBlue;
+        }
+        return currentAlliance == Alliance.Red ? Color.kRed : Color.kBlue;
+    }
+
+    /**
+     * Gets the current alliance.
+     * 
+     * @return Optional containing the alliance, or empty if unknown
+     */
+    public Optional<Alliance> getAlliance() {
+        return allianceKnown ? Optional.of(currentAlliance) : Optional.empty();
+    }
+
+    /**
+     * Gets the current game state.
+     * 
+     * @return The current game state
+     */
+    public GameState getGameState() {
+        return currentGameState;
+    }
+
+    /**
+     * Checks if the game state changed since the last periodic call.
+     * 
+     * @return true if game state changed
+     */
+    public boolean gameStateChanged() {
+        return currentGameState != previousGameState;
+    }
+
+    /**
+     * Checks if the robot is currently enabled.
+     * 
+     * @return true if robot is enabled (auto, teleop, endgame, or test)
+     */
+    public boolean isEnabled() {
+        return currentGameState != GameState.DISABLED && currentGameState != GameState.DISCONNECTED;
+    }
+
+    /**
+     * Checks if the DriverStation is connected.
+     * 
+     * @return true if connected to DriverStation
+     */
+    public boolean isDSConnected() {
+        return dsConnected;
+    }
+
+    /**
+     * Checks if the robot is in endgame (last 20 seconds of teleop).
+     * 
+     * @return true if in endgame
+     */
+    public boolean isEndgame() {
+        return currentGameState == GameState.ENDGAME;
+    }
+
+    /**
+     * Gets the current match time.
+     * 
+     * @return Match time in seconds, or -1 if not in a match
+     */
+    public double getMatchTime() {
+        return matchTime;
+    }
+
+    /**
+     * Checks if the alliance is known.
+     * 
+     * @return true if alliance is known
+     */
+    public boolean isAllianceKnown() {
+        return allianceKnown;
     }
 
     private void updateCalibrationValues() {
@@ -178,6 +360,90 @@ public class SK26Lights extends SubsystemBase {
         }
     }
 
+    /**
+     * Applies a breathing effect in the current alliance color.
+     * Falls back to SKBlue if alliance is unknown.
+     */
+    private void applyBreathingAlliance() {
+        breathePhase += BREATHE_SPEED;
+        if (breathePhase > Math.PI * 2) {
+            breathePhase -= Math.PI * 2;
+        }
+
+        double breatheAmount = (Math.sin(breathePhase) + 1.0) / 2.0;
+        double minBrightness = 0.1;
+        double breatheBrightness = minBrightness + (breatheAmount * (1.0 - minBrightness));
+
+        Color allianceColor = getAllianceColor();
+        int r = (int)(allianceColor.red * 255 * breatheBrightness);
+        int g = (int)(allianceColor.green * 255 * breatheBrightness);
+        int b = (int)(allianceColor.blue * 255 * breatheBrightness);
+
+        for (int i = 0; i < m_baseBuffer.getLength(); i++) {
+            m_baseBuffer.setRGB(i, r, g, b);
+        }
+    }
+
+    /**
+     * Applies endgame alert pattern - blinks white on top of alliance color.
+     * White for half second, alliance color for half second.
+     */
+    private void applyEndgameAlert() {
+        endgameBlinkCounter++;
+        int totalCycle = ENDGAME_BLINK_ON_DURATION + ENDGAME_BLINK_OFF_DURATION;
+        
+        if (endgameBlinkCounter >= totalCycle) {
+            endgameBlinkCounter = 0;
+        }
+        
+        if (endgameBlinkCounter < ENDGAME_BLINK_ON_DURATION) {
+            // Blink ON - show white
+            m_white.applyTo(m_baseBuffer);
+        } else {
+            // Blink OFF - show alliance color
+            LEDPattern.solid(getAllianceColor()).applyTo(m_baseBuffer);
+        }
+    }
+
+    /**
+     * Applies patterns based on current game state automatically.
+     * - Disconnected: Breathing SKBlue
+     * - Disabled (connected): SKBlue Gradient
+     * - Autonomous: Rainbow scroll
+     * - Teleop: Alliance gradient (or SKBlue if unknown)
+     * - Endgame: Blinks white over alliance color (alerts drivers!)
+     * - Test: Solid yellow
+     */
+    private void applyGameStateAware() {
+        switch (currentGameState) {
+            case DISCONNECTED:
+                applyBreathingSKBlue();
+                break;
+            case DISABLED:
+                m_SKBlueGradient.applyTo(m_baseBuffer);
+                break;
+            case AUTONOMOUS:
+                m_scrollingRainbow.applyTo(m_baseBuffer);
+                break;
+            case TELEOP:
+                if (currentAlliance == Alliance.Red) {
+                    m_redAllianceGradient.applyTo(m_baseBuffer);
+                } else if (currentAlliance == Alliance.Blue) {
+                    m_blueAllianceGradient.applyTo(m_baseBuffer);
+                } else {
+                    m_SKBlueGradient.applyTo(m_baseBuffer);
+                }
+                break;
+            case ENDGAME:
+                // Blink white over alliance color to alert drivers of endgame
+                applyEndgameAlert();
+                break;
+            case TEST:
+                m_solidYellow.applyTo(m_baseBuffer);
+                break;
+        }
+    }
+
     private void applyBaseMode() {
         switch (currentBaseMode) {
             case OFF:
@@ -209,6 +475,27 @@ public class SK26Lights extends SubsystemBase {
                 break;
             case SKBLUE_GRADIENT:
                 m_SKBlueGradient.applyTo(m_baseBuffer);
+                break;
+            case ALLIANCE_COLOR:
+                LEDPattern.solid(getAllianceColor()).applyTo(m_baseBuffer);
+                break;
+            case ALLIANCE_GRADIENT:
+                if (currentAlliance == Alliance.Red) {
+                    m_redAllianceGradient.applyTo(m_baseBuffer);
+                } else if (currentAlliance == Alliance.Blue) {
+                    m_blueAllianceGradient.applyTo(m_baseBuffer);
+                } else {
+                    m_SKBlueGradient.applyTo(m_baseBuffer);
+                }
+                break;
+            case BREATHING_ALLIANCE:
+                applyBreathingAlliance();
+                break;
+            case ENDGAME_ALERT:
+                applyEndgameAlert();
+                break;
+            case GAME_STATE_AWARE:
+                applyGameStateAware();
                 break;
         }
     }
@@ -294,7 +581,7 @@ public class SK26Lights extends SubsystemBase {
         return runOnce(() -> {
             currentBaseMode = mode;
             ledStatus = status;
-            if (mode == BaseMode.BREATHING_SKBLUE) {
+            if (mode == BaseMode.BREATHING_SKBLUE || mode == BaseMode.BREATHING_ALLIANCE) {
                 breathePhase = 0.0;
             }
         }).ignoringDisable(true).withName(status);
@@ -350,6 +637,45 @@ public class SK26Lights extends SubsystemBase {
         return setMode(BaseMode.SKBLUE_GRADIENT, "SKBlue Gradient");
     }
 
+    /** Set LEDs to solid alliance color (red or blue, SKBlue if unknown) */
+    public Command setAllianceColor() {
+        return setMode(BaseMode.ALLIANCE_COLOR, "Alliance Color");
+    }
+
+    /** Set LEDs to scrolling gradient in alliance colors */
+    public Command setAllianceGradient() {
+        return setMode(BaseMode.ALLIANCE_GRADIENT, "Alliance Gradient");
+    }
+
+    /** Set LEDs to breathing effect in alliance color */
+    public Command setBreathingAlliance() {
+        return setMode(BaseMode.BREATHING_ALLIANCE, "Breathing Alliance");
+    }
+
+    /** 
+     * Set LEDs to endgame alert mode.
+     * Blinks white over alliance color to alert drivers.
+     */
+    public Command setEndgameAlert() {
+        return runOnce(() -> {
+            currentBaseMode = BaseMode.ENDGAME_ALERT;
+            ledStatus = "ENDGAME ALERT";
+            endgameBlinkCounter = 0;  // Reset so it starts with white
+        }).ignoringDisable(true).withName("Endgame Alert");
+    }
+
+    /** 
+     * Set LEDs to game state aware mode.
+     * Automatically changes pattern based on:
+     * - Disabled: Breathing alliance color
+     * - Autonomous: Rainbow
+     * - Teleop: Alliance gradient
+     * - Test: Solid yellow
+     */
+    public Command setGameStateAware() {
+        return setMode(BaseMode.GAME_STATE_AWARE, "Game State Aware");
+    }
+
     /** Start the color calibration test sequence */
     public Command startCalibrationTest() {
         return runOnce(() -> {
@@ -376,6 +702,11 @@ public class SK26Lights extends SubsystemBase {
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty("Status", () -> ledStatus, null);
+        builder.addStringProperty("Alliance", () -> allianceKnown ? currentAlliance.toString() : "Unknown", null);
+        builder.addStringProperty("Game State", () -> currentGameState.toString(), null);
+        builder.addStringProperty("Base Mode", () -> currentBaseMode.toString(), null);
+        builder.addDoubleProperty("Match Time", () -> matchTime, null);
+        builder.addBooleanProperty("Is Endgame", () -> isEndgame(), null);
         builder.addDoubleProperty("Gamma", () -> gamma, null);
         builder.addDoubleProperty("Red Correction", () -> redCorrection, null);
         builder.addDoubleProperty("Green Correction", () -> greenCorrection, null);
@@ -385,7 +716,19 @@ public class SK26Lights extends SubsystemBase {
 
     @Override
     public void periodic() {
+        updateAllianceAndGameState();
         updateCalibrationValues();
+
+        // Reset blink counter when entering endgame (so it always starts with white)
+        if (gameStateChanged() && currentGameState == GameState.ENDGAME) {
+            endgameBlinkCounter = 0;
+        }
+
+        // Update status string for game state aware mode
+        if (currentBaseMode == BaseMode.GAME_STATE_AWARE) {
+            String allianceStr = allianceKnown ? currentAlliance.toString() : "Unknown";
+            ledStatus = "Game State: " + currentGameState.toString() + " (" + allianceStr + ")";
+        }
 
         // boolean shouldRunCalibration = SmartDashboard.getBoolean("Lights/Run Calibration", false);
         // if (shouldRunCalibration && !runCalibrationTest) {

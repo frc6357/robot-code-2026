@@ -8,32 +8,75 @@ The SK26Lights subsystem controls a WS2812B addressable LED strip. It handles an
 
 ## Quick Reference
 
+### Manual Control Buttons (Operator Controller)
+
 | Mode | Command | Button | Description |
 |------|---------|--------|-------------|
 | Off | `setOff()` | X | All LEDs off |
-| Red | `setSolidRed()` | A | Solid red |
-| Blue | `setSolidBlue()` | B | Solid blue |
-| Green | `setSolidGreen()` | Y | Solid green |
 | White | `setSolidWhite()` | Left Bumper | Solid white |
-| Yellow | `setSolidYellow()` | - | Solid yellow |
-| Orange | `setSolidOrange()` | - | Solid orange |
-| Rainbow | `setRainbow()` | Start | Scrolling rainbow |
-| SK Gradient | `setSKBlueGradient()` | Back | Scrolling SK brand colors |
+| Rainbow | `setRainbow()` | Start | Scrolling rainbow (Party Mode) |
+| Breathing SKBlue | `setBreathingSKBlue()` | Right Bumper | Breathing team color |
+| Game State Aware | `setGameStateAware()` | Back | Automatic mode based on match state |
+| Alliance Color | `setAllianceColor()` | Y | Solid red/blue based on alliance |
+| Alliance Gradient | `setAllianceGradient()` | A | Scrolling gradient in alliance colors |
+| Breathing Alliance | `setBreathingAlliance()` | B | Breathing effect in alliance color |
+
+### Additional Modes (Available via Code)
+
+| Mode | Command | Description |
+|------|---------|-------------|
+| Red | `setSolidRed()` | Solid red |
+| Blue | `setSolidBlue()` | Solid blue |
+| Green | `setSolidGreen()` | Solid green |
+| Yellow | `setSolidYellow()` | Solid yellow |
+| Orange | `setSolidOrange()` | Solid orange |
+| SK Gradient | `setSKBlueGradient()` | Scrolling SK brand colors |
 
 ![Controller Button Layout](images/controller-layout.png)
 
 ---
 
-## Automatic States
+## Game States & Alliance Detection
 
-The lights change automatically based on robot connection status. These are set up in `SK26LightsBinder.java`.
+The lights subsystem automatically detects:
+- **Alliance** (Red/Blue) from the Driver Station
+- **Game State** (Disconnected, Disabled, Auto, Teleop, Endgame, Test)
+- **Match Time** for endgame detection (last 20 seconds)
 
-| State | Animation | Why |
-|-------|-----------|-----|
-| DS Disconnected | Breathing Blue | Shows robot is on but not connected |
-| DS Connected + Disabled | SK Gradient | Shows connection is good, waiting to enable |
+### Game State Aware Mode
+
+When `setGameStateAware()` is active (Back button), the LEDs automatically change based on the current match state:
+
+| Game State | LED Pattern | Purpose |
+|------------|-------------|---------|
+| **Disconnected** | Breathing SKBlue | Shows robot is powered but not connected to DS |
+| **Disabled** (connected) | SKBlue Gradient | Ready and waiting, connected to DS |
+| **Autonomous** | Rainbow Scroll | Indicates autonomous mode is active |
+| **Teleop** | Alliance Gradient | Team colors during main match play |
+| **Endgame** (last 20s) | Solid Alliance Color | Alerts drivers that endgame has started! |
+| **Test** | Solid Yellow | Clearly indicates test mode |
+
+### Automatic State Transitions
+
+Even when NOT in Game State Aware mode, these transitions fire automatically to provide visual feedback:
+
+| State Change | LED Pattern | Why |
+|--------------|-------------|-----|
+| DS Disconnected | Breathing SKBlue | Shows robot is on but not connected |
+| DS Connected + Disabled | SKBlue Gradient | Shows connection is good, waiting to enable |
+| Autonomous Starts | Rainbow | Visual indicator auto mode began |
+| Teleop Starts | Alliance Gradient | Team colors for main match |
+| Test Mode Starts | Solid Yellow | Clearly indicates test mode |
 
 You can override these at any time with a button press. The automatic state only triggers on the transition (when the state changes).
+
+### Alliance-Aware Colors
+
+| Alliance | Solid Color | Gradient Colors |
+|----------|-------------|-----------------|
+| Red | Red | Red → Dark Red → Orange Red |
+| Blue | Blue | Blue → Dark Blue → Royal Blue |
+| Unknown | SKBlue | SKBlue Gradient (team colors) |
 
 <p align="center">
   <img src="images/led-states.gif" alt="LED State Animations" width="400">
@@ -137,6 +180,39 @@ Make sure the data direction arrow on the strip points away from the roboRIO.
 | `SK26LightsBinder.java` | Button bindings and automatic state triggers |
 | `Konstants.java` | LED count, PWM port, SK brand colors |
 
+### Public API Methods
+
+#### LED Mode Commands
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `setOff()` | Command | Turn LEDs off |
+| `setSolidWhite()` | Command | Solid white |
+| `setSolidRed()` | Command | Solid red |
+| `setSolidBlue()` | Command | Solid blue |
+| `setSolidGreen()` | Command | Solid green |
+| `setSolidYellow()` | Command | Solid yellow |
+| `setSolidOrange()` | Command | Solid orange |
+| `setRainbow()` | Command | Scrolling rainbow |
+| `setBreathingSKBlue()` | Command | Breathing SK team color |
+| `setSKBlueGradient()` | Command | Scrolling SK brand gradient |
+| `setAllianceColor()` | Command | Solid alliance color |
+| `setAllianceGradient()` | Command | Scrolling alliance gradient |
+| `setBreathingAlliance()` | Command | Breathing alliance color |
+| `setGameStateAware()` | Command | Auto-change based on match state |
+
+#### State Query Methods
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `getAlliance()` | `Optional<Alliance>` | Current alliance (Red/Blue) or empty |
+| `getAllianceColor()` | `Color` | Alliance color (SKBlue if unknown) |
+| `getGameState()` | `GameState` | Current game state enum |
+| `getMatchTime()` | `double` | Match time in seconds (-1 if not in match) |
+| `isAllianceKnown()` | `boolean` | True if alliance has been received |
+| `isDSConnected()` | `boolean` | True if connected to DriverStation |
+| `isEnabled()` | `boolean` | True if robot is enabled |
+| `isEndgame()` | `boolean` | True if in last 20 seconds of teleop |
+| `gameStateChanged()` | `boolean` | True if state changed this cycle |
+
 ### BaseMode Enum
 
 All available modes are defined in the `BaseMode` enum inside `SK26Lights.java`:
@@ -152,7 +228,26 @@ private enum BaseMode {
     SOLID_ORANGE,
     RAINBOW,
     BREATHING_SKBLUE,
-    SKBLUE_GRADIENT
+    SKBLUE_GRADIENT,
+    ALLIANCE_COLOR,        // Solid alliance color (red or blue)
+    ALLIANCE_GRADIENT,     // Scrolling gradient in alliance colors
+    BREATHING_ALLIANCE,    // Breathing effect in alliance color
+    GAME_STATE_AWARE       // Automatically changes based on game state
+}
+```
+
+### GameState Enum
+
+Game states are tracked with the `GameState` enum:
+
+```java
+public enum GameState {
+    DISCONNECTED,   // Not connected to DriverStation
+    DISABLED,       // Connected but disabled
+    AUTONOMOUS,     // Autonomous period
+    TELEOP,         // Teleop (not endgame)
+    ENDGAME,        // Last 20 seconds of teleop
+    TEST            // Test mode
 }
 ```
 
