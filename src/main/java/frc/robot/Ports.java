@@ -22,7 +22,11 @@ import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.ToFParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -154,6 +158,29 @@ public class Ports
         public static final CANBus canBus = CANBus.roboRIO();
     //assign an ID of 48 to the CANdle
         public static final CANPort kCANdle = new CANPort(48, canBus.getName()); // CAN ID for the CANdle controller
+    }
+
+    public static class Sensors {
+        private static final String busName = "";
+        public static final CANPort kCANrange = new CANPort(70, busName);
+        public static final CANPort kLauncherSensor = new CANPort(10, busName);
+        public static final CANPort kIntakeSensor1 = new CANPort(11, busName);
+        public static final CANPort kIntakeSensor2 = new CANPort(12, busName);
+
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
+        public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
+
+        /* Sensor configurating */
+        static {
+            tofSensor.getConfigurator().apply(tofConfig);
+        }
+
+
     }
 
     public static class EndEffectorPorts
