@@ -5,11 +5,9 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Ports.OperatorPorts.kLeftStickY;
-import static frc.robot.Ports.OperatorPorts.kLeftStickX;
+
 import static frc.robot.RobotContainer.m_field;
 
 /**
@@ -87,8 +85,6 @@ public class SKTargetPoint extends SubsystemBase{
     @Override
     public void periodic() {
         targetPublisher.set(targetPoint);
-        SmartDashboard.putNumber("OperatorStickX", kLeftStickY.getFilteredAxis());
-        SmartDashboard.putNumber("OperatorStickY", kLeftStickX.getFilteredAxis());
         m_field.getObject("TargetPoint-" + name).setPose(targetPoint);
     }
 }

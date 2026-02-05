@@ -44,8 +44,10 @@ public class SKVisionBinder implements CommandBinder {
             SKSwerve m_swerve = m_swerveContainer.get();
             SKVision m_vision = m_visionContainer.get();
 
-            forceResetPoseToVision.onTrue(new InstantCommand(() -> m_vision.forcePoseToVision()));
-            resetPoseToVision.onTrue(new InstantCommand(() -> m_vision.resetPoseToVision()));
+            forceResetPoseToVision.onTrue(new InstantCommand(() -> m_vision.forcePoseToVision())
+                .withName("VisionForceResetPose"));
+            resetPoseToVision.onTrue(new InstantCommand(() -> m_vision.resetPoseToVision())
+                .withName("VisionResetPose"));
 
             // visionOff.onTrue(new InstantCommand())
         }

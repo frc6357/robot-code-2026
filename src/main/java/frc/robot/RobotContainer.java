@@ -30,6 +30,7 @@ import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
+import frc.robot.bindings.SK26StateBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
@@ -63,6 +64,7 @@ public class RobotContainer {
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
+  public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
 
 
   public static SKSwerve m_swerveInstance;
@@ -112,6 +114,9 @@ public class RobotContainer {
                     factory.createParser(new File(deployDirectory, Konstants.SUBSYSTEMFILE));
             SubsystemControls subsystems = mapper.readValue(parser, SubsystemControls.class);
 
+            // The state handler should always be present
+            m_stateHandlerContainer = Optional.of(new StateHandler());
+
             if(subsystems.isSwervePresent()) {
                 m_swerveContainer = Optional.of(new SKSwerve());
                 m_swerveInstance = m_swerveContainer.get(); // Returns new SKSwerve
@@ -147,6 +152,7 @@ public class RobotContainer {
      */
     private void configureButtonBindings()
     {
+        buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));

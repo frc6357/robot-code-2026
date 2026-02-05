@@ -66,10 +66,10 @@ public class SKSwerve extends SubsystemBase {
     private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
     
     private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("RobotPose", Pose2d.struct).publish();
+    .getStructTopic("SmartDashboard/Drive/EstimatedPose", Pose2d.struct).publish();
     
     private StructArrayPublisher<Pose2d> pathPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("ActivePath", Pose2d.struct).publish();
+    .getStructArrayTopic("SmartDashboard/Drive/ActivePath", Pose2d.struct).publish();
     
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
@@ -117,7 +117,7 @@ public class SKSwerve extends SubsystemBase {
         
         PathPlannerLogging.setLogActivePathCallback((activePath) -> telemeterizeActivePath(activePath));
 
-        drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest));
+        drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
     }
 
     @Override
@@ -135,7 +135,7 @@ public class SKSwerve extends SubsystemBase {
 
         outputTelemetry();
 
-        SmartDashboard.putString("Active Path Name", PathPlannerAuto.currentPathName);
+        SmartDashboard.putString("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
     }
 
     private void telemeterizeActivePath(List<Pose2d> path) {

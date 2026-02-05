@@ -19,6 +19,7 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -134,6 +135,10 @@ public class SK26Turret extends SubsystemBase
         return targetAngleDeg;
     }
 
+    public double getTurretError() {
+        return getTargetAngleDegrees() - getAngleDegrees();
+    }
+
     /**
      * Check if the turret is at its target position.
      */
@@ -170,10 +175,17 @@ public class SK26Turret extends SubsystemBase
         turretMotor.setControl(dutyCycleControl.withOutput(output));
 
         // ========== Dashboard ==========
-        SmartDashboard.putNumber("Turret Angle (deg)", currentAngle);
-        SmartDashboard.putNumber("Turret Target (deg)", targetAngleDeg);
-        SmartDashboard.putNumber("Turret Error (deg)", targetAngleDeg - currentAngle);
-        SmartDashboard.putNumber("Turret Output", output);
-        SmartDashboard.putBoolean("Turret At Target", atTarget());
+        SmartDashboard.putData("Turret", this);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder)
+    {
+        builder.addDoubleProperty("Turret Angle (deg)", this::getAngleDegrees, null);
+        builder.addDoubleProperty("Turret Target (deg)", this::getTargetAngleDegrees, null);
+        builder.addBooleanProperty("Turret At Target", this::atTarget, null);
+        builder.addDoubleProperty("Turret Error (deg)", this::getTurretError, null);
+        builder.addDoubleProperty("Turret Motor DutyCycle Output", () -> turretMotor.getDutyCycle().getValueAsDouble(), null);
+        builder.addDoubleProperty("Turret Motor Voltage Output", () -> turretMotor.getMotorVoltage().getValueAsDouble(), null);
     }
 }

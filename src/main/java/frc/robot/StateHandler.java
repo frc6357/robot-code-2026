@@ -15,9 +15,12 @@ import frc.robot.StateHandler.MacroState.Status;
 public class StateHandler extends SubsystemBase{
     public enum MacroState {
         IDLE(Status.READY),
-        LAUNCHING(Status.OFF),
+        SCORING(Status.OFF),
+        SHUTTLING(Status.OFF),
         INTAKING(Status.OFF),
-        CLIMBING(Status.OFF);
+        CLIMBING(Status.OFF),
+        STEADY_STREAM_SCORING(Status.OFF),
+        STEADY_STREAM_SHUTTLING(Status.OFF);
 
         private MacroState(Status status) {
             this.status = status;
@@ -41,8 +44,8 @@ public class StateHandler extends SubsystemBase{
         }
     }
 
-    private MacroState currentState = MacroState.IDLE;
-    private MacroState desiredState = MacroState.IDLE;
+    private static MacroState currentState = MacroState.IDLE;
+    private static MacroState desiredState = MacroState.IDLE;
 
     public StateHandler() {
         // Reset all states to default on construction
@@ -78,6 +81,7 @@ public class StateHandler extends SubsystemBase{
         for(MacroState state : MacroState.values()) {
             builder.addStringProperty(state.name() + " Status", () -> state.getStatus().name(), null);
         }
+
     }
 
     /**
@@ -147,7 +151,7 @@ public class StateHandler extends SubsystemBase{
      * @param state The MacroState to check against.
      * @return A Trigger that is true when currentState == state.
      */
-    public Trigger whenCurrentState(MacroState state) {
+    public static Trigger whenCurrentState(MacroState state) {
         return new Trigger(() -> currentState == state);
     }
 
@@ -156,7 +160,7 @@ public class StateHandler extends SubsystemBase{
      * @param state The MacroState to check against.
      * @return A Trigger that is true when desiredState == state.
      */
-    public Trigger whenDesiredState(MacroState state) {
+    public static Trigger whenDesiredState(MacroState state) {
         return new Trigger(() -> desiredState == state);
     }
 
@@ -166,7 +170,7 @@ public class StateHandler extends SubsystemBase{
      * @param status The Status to check for.
      * @return A Trigger that is true when state.getStatus() == status.
      */
-    public Trigger whenStateHasStatus(MacroState state, Status status) {
+    public static Trigger whenStateHasStatus(MacroState state, Status status) {
         return new Trigger(() -> state.getStatus() == status);
     }
 
@@ -176,7 +180,7 @@ public class StateHandler extends SubsystemBase{
      * @param state The MacroState to check.
      * @return A Trigger that is true when currentState == state AND status == READY.
      */
-    public Trigger whenCurrentStateReady(MacroState state) {
+    public static Trigger whenCurrentStateReady(MacroState state) {
         return new Trigger(() -> currentState == state && state.getStatus() == Status.READY);
     }
 
@@ -186,7 +190,7 @@ public class StateHandler extends SubsystemBase{
      * @param state The MacroState to check.
      * @return A Trigger that is true when currentState == state AND status == INITIALIZING.
      */
-    public Trigger whenCurrentStateInitializing(MacroState state) {
+    public static Trigger whenCurrentStateInitializing(MacroState state) {
         return new Trigger(() -> currentState == state && state.getStatus() == Status.INITIALIZING);
     }
 
@@ -196,7 +200,7 @@ public class StateHandler extends SubsystemBase{
      * @param state The MacroState to check.
      * @return A Trigger that is true when state.getStatus() == STOPPING.
      */
-    public Trigger whenStateStopping(MacroState state) {
+    public static Trigger whenStateStopping(MacroState state) {
         return new Trigger(() -> state.getStatus() == Status.STOPPING);
     }
 }

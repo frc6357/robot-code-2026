@@ -29,7 +29,6 @@ import frc.robot.commands.AlignAroundPoint;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
-import static frc.robot.Konstants.TargetPointConstants.targetPoints;
 
 @SuppressWarnings("unused")
 public class SKSwerveBinder implements CommandBinder{
@@ -99,8 +98,8 @@ public class SKSwerveBinder implements CommandBinder{
                         () -> -kLeftStickX.getFilteredAxis(), 
                         () -> -kRightStickX.getFilteredAxis(), 
                         () -> slowmode.getAsBoolean(), 
-                        () -> fastmode.getAsBoolean())
-        ));
+                        () -> fastmode.getAsBoolean())).withName("SwerveRobotCentricDrive")
+        );
         
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
@@ -109,7 +108,7 @@ public class SKSwerveBinder implements CommandBinder{
         hubAlign.whileTrue(
             new AlignAroundPoint(
                 drive, 
-                (Field.isBlue() ? targetPoints[kBlueHub.ordinal()] : targetPoints[kRedHub.ordinal()])));
+                (Field.isBlue() ? kBlueHub.point : kRedHub.point)).withName("SwerveHubAlign"));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(
@@ -120,7 +119,7 @@ public class SKSwerveBinder implements CommandBinder{
                         () -> -kRightStickX.getFilteredAxis(), 
                         () -> slowmode.getAsBoolean(), 
                         () -> fastmode.getAsBoolean())
-            )
+            ).withName("SwerveTeleopDrive")
         );
     }
 }
