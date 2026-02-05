@@ -418,11 +418,24 @@ public class SK26Lights extends SubsystemBase {
     }
 
     /**
+     * Turns off the lights in a certain interval of leds
+     * @param startIndex the starting index of leds to turn off
+     * @param endIndex the end index of leds to turn off
+     */
+    public void turnOffIntervalLights(int startIndex, int endIndex) {
+        setBrightnessIfChanged(kLightsOffBrightness);
+        solidColor = new SolidColor(startIndex, endIndex);
+        solidColor.Color = new RGBWColor(0, 0, 0, 0);
+        candle.setControl(solidColor);
+    }
+
+    /**
      * Sets the LED display to represent the hopper's fullness.
      * The number of LEDs lit corresponds to the amount of fuel in the hopper.
      */
     public void setHopperDisplay() {
         setSolidColor(kFuelColor, 0, (int) Math.ceil(kNumLedOnBot - 1 /* multiplied by hopper's fullness */)); //TODO: add getter for hopper fullness
+        turnOffIntervalLights(0, kNumLedOnBot-1); //TODO: change according to hopper's fullness
     }
 
     @Override 
