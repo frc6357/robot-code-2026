@@ -28,8 +28,8 @@ public class ClimbBinder implements CommandBinder {
         this.climbSubsystem = climbSubsystem;
 
         this.t1Button = climbGoButton.button;
-        this.upButton = climbUpButton.button;
-        this.downButton = climbDownButton.button;
+        upButton = climbUpButton.button;
+        downButton = climbDownButton.button;
     }
 
     public void bindButtons()
@@ -38,9 +38,9 @@ public class ClimbBinder implements CommandBinder {
         {
             Climb climb = climbSubsystem.get();
 
-            t1Button.onTrue(new ClimbButtonCommand(kTOne, climb));
-            upButton.whileTrue(new ClimbUpCommand(climb));
-            downButton.whileTrue(new ClimbDownCommand(climb));
+            t1Button.onTrue(new ClimbButtonCommand(kTOne, climb).withName("L1ButtomClimb"));
+            upButton.whileTrue(new ClimbUpCommand(climb).withName("ClimbUpCommand"));
+            downButton.whileTrue(new ClimbDownCommand(climb).withName("ClimbDownCommand"));
         }
     }
 }

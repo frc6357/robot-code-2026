@@ -39,8 +39,8 @@ public class Climb extends SubsystemBase
     DigitalInput cLimitSwitch;
     PositionVoltage request;
 
-    final double motorRatio = 0.0; //change once we know gear ratio
-    final double climbFactor = 0.0; // change once fingure out what the conversion factor is from the encoder to the height
+    final double motorRatio = 1.0; //change once we know gear ratio
+    final double climbFactor = 1.0; // change once fingure out what the conversion factor is from the encoder to the height
 
     double cTargetHieight = 0.0;
     double cCurrentHeight = 0.0;
