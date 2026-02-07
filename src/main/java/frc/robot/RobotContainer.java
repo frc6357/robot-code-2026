@@ -32,7 +32,7 @@ import frc.robot.bindings.SKVisionBinder;
 import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
-import frc.robot.subsystems.SK26Lights;
+import frc.robot.subsystems.lights.SK26Lights;
 
 
 /**
@@ -80,9 +80,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
+    // autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    // SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
@@ -158,7 +158,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand()
     {
-        return Commands.sequence(Commands.waitSeconds(0.01), autoCommandSelector.getSelected());
+        return autoCommandSelector.getSelected();
     }
 
     public void testPeriodic()

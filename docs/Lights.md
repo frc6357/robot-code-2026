@@ -13,12 +13,26 @@ The SK26Lights subsystem controls a WS2812B addressable LED strip. It handles an
 | Off | `setOff()` | X | All LEDs off |
 | Red | `setSolidRed()` | A | Solid red |
 | Blue | `setSolidBlue()` | B | Solid blue |
-| Green | `setSolidGreen()` | Y | Solid green |
+| Alliance Gradient | `setAllianceGradient()` | Y | Auto-detect alliance, scrolling gradient |
 | White | `setSolidWhite()` | Left Bumper | Solid white |
-| Yellow | `setSolidYellow()` | - | Solid yellow |
-| Orange | `setSolidOrange()` | - | Solid orange |
-| Rainbow | `setRainbow()` | Start | Scrolling rainbow |
+| SK Breathing | `setBreathingSKBlue()` | Right Bumper | Breathing SK Blue |
+| Rainbow | `activatePartyMode()` | Start | Party mode rainbow |
 | SK Gradient | `setSKBlueGradient()` | Back | Scrolling SK brand colors |
+
+### Fun Effects (SmartDashboard Only)
+
+These effects are available via SmartDashboard chooser (`Lights/Fun Effects`), not controller buttons:
+
+| Effect | Description |
+|--------|-------------|
+| Fire | Flickering orange/red flames |
+| Police | Alternating red/blue halves |
+| Sparkle | SK gradient with white twinkles |
+| Color Chase | Cyan dot chasing around strip |
+| Meteor | White meteor with fading tail |
+| Theater Chase | Classic marquee style rainbow |
+
+To use: Set `Lights/Fun Mode` to `true` in SmartDashboard, then select effect from `Lights/Fun Effects` dropdown.
 
 ![Controller Button Layout](images/controller-layout.png)
 

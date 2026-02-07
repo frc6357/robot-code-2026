@@ -1,5 +1,5 @@
 {
-    "swerve": true,
+    "swerve": false,
     "vision": false,
     "lights": true
 }
