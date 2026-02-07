@@ -137,6 +137,12 @@ public class SK26Lights extends SubsystemBase {
         funEffectChooser.addOption("Racing Stripes", LightMode.RACING_STRIPES);
         funEffectChooser.addOption("Drip", LightMode.DRIP);
         
+        // Interactive games (use Game Button to interact!)
+        funEffectChooser.addOption("🎮 Stop The Light", LightMode.STOP_THE_LIGHT);
+        funEffectChooser.addOption("🎮 Tug of War", LightMode.TUG_OF_WAR);
+        funEffectChooser.addOption("🎮 Rhythm Game", LightMode.RHYTHM_GAME);
+        funEffectChooser.addOption("🎮 Simon Says", LightMode.SIMON_SAYS);
+        
         // SK effects
         funEffectChooser.addOption("SK Gradient", LightMode.SKBLUE_GRADIENT);
         funEffectChooser.addOption("SK Breathing", LightMode.BREATHING_SKBLUE);
@@ -240,6 +246,12 @@ public class SK26Lights extends SubsystemBase {
             case NYAN_CAT: effects.applyNyanCat(m_baseBuffer); break;
             case RACING_STRIPES: effects.applyRacingStripes(m_baseBuffer); break;
             case DRIP: effects.applyDrip(m_baseBuffer); break;
+            
+            // Interactive games
+            case STOP_THE_LIGHT: effects.applyStopTheLight(m_baseBuffer); break;
+            case TUG_OF_WAR: effects.applyTugOfWar(m_baseBuffer); break;
+            case RHYTHM_GAME: effects.applyRhythmGame(m_baseBuffer); break;
+            case SIMON_SAYS: effects.applySimonSays(m_baseBuffer); break;
         }
     }
 
@@ -483,6 +495,88 @@ public class SK26Lights extends SubsystemBase {
         partyModeActive = false;
         currentGameState = GameState.PRE_MATCH_NO_FMS;
         previousGameState = GameState.PRE_MATCH_NO_FMS;
+    }
+
+    // ==================== GAME BUTTON ====================
+
+    /**
+     * Universal game button - handles interaction for all interactive light games.
+     * - Stop The Light: Stops the bouncing light
+     * - Tug of War: Pulls toward driver side (left)
+     * - Rhythm Game: Hits the note
+     * - Simon Says: Handled separately with colored buttons
+     * 
+     * Bound to: Driver A Button
+     */
+    public Command gameButtonPressed() {
+        return runOnce(() -> {
+            switch (currentMode) {
+                case STOP_THE_LIGHT:
+                    effects.stopTheLight(m_baseBuffer.getLength());
+                    break;
+                case TUG_OF_WAR:
+                    effects.tugOfWarPullLeft(); // Driver pulls left
+                    break;
+                case RHYTHM_GAME:
+                    effects.rhythmGameHit(m_baseBuffer.getLength());
+                    break;
+                default:
+                    // Not a game mode, do nothing
+                    break;
+            }
+        }).ignoringDisable(true).withName("Game Button (Driver)");
+    }
+
+    /**
+     * Operator game button - handles interaction for all interactive light games.
+     * - Stop The Light: Stops the bouncing light (same as driver)
+     * - Tug of War: Pulls toward operator side (right)
+     * - Rhythm Game: Hits the note (same as driver)
+     * - Simon Says: Handled separately with colored buttons
+     * 
+     * Bound to: Operator Right Stick Button
+     */
+    public Command gameButtonPressedAlt() {
+        return runOnce(() -> {
+            switch (currentMode) {
+                case STOP_THE_LIGHT:
+                    effects.stopTheLight(m_baseBuffer.getLength()); // Same as driver
+                    break;
+                case TUG_OF_WAR:
+                    effects.tugOfWarPullRight(); // Operator pulls right
+                    break;
+                case RHYTHM_GAME:
+                    effects.rhythmGameHit(m_baseBuffer.getLength()); // Same as driver
+                    break;
+                default:
+                    // Not a game mode, do nothing
+                    break;
+            }
+        }).ignoringDisable(true).withName("Game Button (Operator)");
+    }
+
+    /**
+     * Reset the current game
+     */
+    public Command resetCurrentGame() {
+        return runOnce(() -> {
+            switch (currentMode) {
+                case STOP_THE_LIGHT:
+                    effects.resetStopTheLight();
+                    break;
+                case TUG_OF_WAR:
+                    effects.resetTugOfWar();
+                    break;
+                case RHYTHM_GAME:
+                    effects.resetRhythmGame();
+                    break;
+                case SIMON_SAYS:
+                    effects.resetSimonSays();
+                    break;
+                default:
+                    break;
+            }
+        }).ignoringDisable(true).withName("Reset Game");
     }
 
     // Quick command methods

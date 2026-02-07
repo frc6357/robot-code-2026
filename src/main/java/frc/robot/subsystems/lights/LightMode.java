@@ -64,5 +64,11 @@ public enum LightMode {
     FIREFLIES,
     NYAN_CAT,
     RACING_STRIPES,
-    DRIP
+    DRIP,
+    
+    // Interactive games
+    STOP_THE_LIGHT,
+    TUG_OF_WAR,
+    RHYTHM_GAME,
+    SIMON_SAYS
 }

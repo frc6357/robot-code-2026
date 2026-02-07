@@ -8,10 +8,11 @@ import static frc.robot.Ports.OperatorPorts.k_Start;
 import static frc.robot.Ports.OperatorPorts.k_LeftTrigger;
 import static frc.robot.Ports.OperatorPorts.k_LeftBumperTrigger;
 import static frc.robot.Ports.OperatorPorts.k_RightBumperTrigger;
+import static frc.robot.Ports.OperatorPorts.kOperatorGameButton;
+import static frc.robot.Ports.DriverPorts.kDriverGameButton;
 
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.lights.SK26Lights;
 
 public class SK26LightsBinder implements CommandBinder {
@@ -37,5 +38,12 @@ public class SK26LightsBinder implements CommandBinder {
         k_RightBumperTrigger.button.onTrue(lights.setBreathingSKBlue());
         k_Start.button.onTrue(lights.activatePartyMode());
         k_LeftTrigger.button.onTrue(lights.setSKBlueGradient());
+        
+        // Game buttons - Driver and Operator each have one
+        // Stop The Light: Either button stops the light
+        // Tug of War: Driver pulls left, Operator pulls right
+        // Rhythm Game: Either button hits the note
+        kDriverGameButton.button.onTrue(lights.gameButtonPressed());
+        kOperatorGameButton.button.onTrue(lights.gameButtonPressedAlt());
     }
 }

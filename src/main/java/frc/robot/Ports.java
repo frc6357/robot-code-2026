@@ -64,6 +64,9 @@ public class Ports
 
         // Reset gyro
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+        
+        // Light game button (Driver) - A button
+        public static final SKTrigger kDriverGameButton = new SKTrigger(kDriver, kA.value, BUTTON);
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -130,6 +133,8 @@ public class Ports
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
         
+        // Light game button (Operator) - A button (same as driver)
+        public static final SKTrigger kOperatorGameButton = new SKTrigger(kOperator, kA.value, BUTTON);
     }
 
     /*
