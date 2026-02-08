@@ -4,14 +4,17 @@ import static frc.robot.Konstants.LightsConstants.kColorBlue;
 import static frc.robot.Konstants.LightsConstants.kColorBrown;
 import static frc.robot.Konstants.LightsConstants.kColorRed;
 import static frc.robot.Konstants.LightsConstants.kColorWhite;
+import static frc.robot.Konstants.LightsConstants.kEndHopperLightsIndex;
+import static frc.robot.Konstants.LightsConstants.kEndLauncherLightsIndex;
 import static frc.robot.Konstants.LightsConstants.kFuelColor;
 import static frc.robot.Konstants.LightsConstants.kLightsOffBrightness;
 import static frc.robot.Konstants.LightsConstants.kLightsOnBrightness;
-import static frc.robot.Konstants.LightsConstants.kNumLedOnBot;
+//import static frc.robot.Konstants.LightsConstants.kNumLedOnBot;
 import static frc.robot.Konstants.LightsConstants.kSKBlue1;
 import static frc.robot.Konstants.LightsConstants.kSKBlue2;
 import static frc.robot.Konstants.LightsConstants.kSKBlue3;
 import static frc.robot.Konstants.LightsConstants.kSKBlue4;
+import static frc.robot.Konstants.LightsConstants.kStartHopperLightsIndex;
 import static frc.robot.Konstants.LightsConstants.kWaveColorCycleSec;
 import static frc.robot.Konstants.LightsConstants.kWaveSpatialCycles;
 import static frc.robot.Konstants.LightsConstants.kWaveSpeedCyclesPerSecond;
@@ -362,22 +365,22 @@ public class SK26Lights extends SubsystemBase {
         return activeEffect;
     }
 
-    public void setLEDRed() {
-        setSolidColor(kColorRed, 0, kNumLedOnBot - 1);
-    }
+    // public void setLEDRed() {
+    //     setSolidColor(kColorRed, 0, kNumLedOnBot - 1);
+    // }
 
-    public void setLEDBlue() {
-        setSolidColor(kColorBlue, 0, kNumLedOnBot - 1);
-    }
+    // public void setLEDBlue() {
+    //     setSolidColor(kColorBlue, 0, kNumLedOnBot - 1);
+    // }
 
-    public void setLEDWhite() {
-        setSolidColor(kColorWhite, 0, kNumLedOnBot - 1);
-    }
+    // public void setLEDWhite() {
+    //     setSolidColor(kColorWhite, 0, kNumLedOnBot - 1);
+    // }
 
-    public void setRainbowAnimation() {
-        setBrightnessIfChanged(kLightsOnBrightness);
-        candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, kNumLedOnBot - 1));
-    }
+    // public void setRainbowAnimation() {
+    //     setBrightnessIfChanged(kLightsOnBrightness);
+    //     candle.setControl(new com.ctre.phoenix6.controls.RainbowAnimation(0, kNumLedOnBot - 1));
+    // }
 
     /**
      * Sets the leds to a certain color from a starting index to an ending index
@@ -412,7 +415,7 @@ public class SK26Lights extends SubsystemBase {
      */
     public void turnOffLights() {
         setBrightnessIfChanged(kLightsOffBrightness);
-        solidColor = new SolidColor(0, kNumLedOnBot - 1);
+        solidColor = new SolidColor(0, kEndLauncherLightsIndex);
         solidColor.Color = new RGBWColor(0, 0, 0, 0);
         candle.setControl(solidColor);
     }
@@ -434,8 +437,8 @@ public class SK26Lights extends SubsystemBase {
      * The number of LEDs lit corresponds to the amount of fuel in the hopper.
      */
     public void setHopperDisplay() {
-        setSolidColor(kFuelColor, 0, (int) Math.ceil(kNumLedOnBot - 1 /* multiplied by hopper's fullness */)); //TODO: add getter for hopper fullness
-        turnOffIntervalLights(0, kNumLedOnBot-1); //TODO: change according to hopper's fullness
+        setSolidColor(kFuelColor, kStartHopperLightsIndex, (int) Math.ceil(kEndHopperLightsIndex /* multiplied by hopper's fullness */)); //TODO: add getter for hopper fullness
+        turnOffIntervalLights(kStartHopperLightsIndex, kEndHopperLightsIndex); //TODO: change according to hopper's fullness
     }
 
     @Override 
@@ -474,28 +477,28 @@ public class SK26Lights extends SubsystemBase {
                 turnOffLights();
                 break;
             case SOLID_RED:
-                setLEDRed();
+                // setLEDRed();
                 break;
             case SOLID_BLUE:
-                setLEDBlue();
+                // setLEDBlue();
                 break;
             case SOLID_WHITE:
-                setLEDWhite();
+                // setLEDWhite();
                 break;
             case RAINBOW:
-                setRainbowAnimation();
+                // setRainbowAnimation();
                 break;
             case STROBE_RED:
-                setStrobeAnimation(kColorRed, 0, kNumLedOnBot - 1, 100);
+                // setStrobeAnimation(kColorRed, 0, kNumLedOnBot - 1, 100);
                 break;
             case STROBE_BLUE:
-                setStrobeAnimation(kColorBlue, 0, kNumLedOnBot - 1, 100);
+                // setStrobeAnimation(kColorBlue, 0, kNumLedOnBot - 1, 100);
                 break;
             case HOPPER_DISPLAY:
                 setHopperDisplay();
                 break;
             case BROWNOUT:
-                setStrobeAnimation(kColorBrown, 0, kNumLedOnBot - 1, 500);
+                // setStrobeAnimation(kColorBrown, 0, kNumLedOnBot - 1, 500);
                 break;
             default:
                 turnOffLights();

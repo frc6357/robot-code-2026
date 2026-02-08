@@ -207,9 +207,15 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int kNumLedOnBot = 240;
+        //public static final int kNumLedOnBot = 240;
+        public static final int kStartHopperLightsIndex = 8;
+        public static final int kEndHopperLightsIndex = 38;
+        public static final int kStartLauncherLightsIndex = 39;
+        public static final int kEndLauncherLightsIndex = 69;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
+
+        public static final double kLauncherLightsFrameRate = 0.05;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
