@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -27,6 +28,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 // import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -176,6 +178,24 @@ public final class Konstants
             public static final boolean kAttached = true;
         }
 
+        /* NOTE: this config should be representative of the Limelight's position when the turret is at 0 degrees */
+        public static final class TurretLimelight {
+            // Network/pipeline values
+            public static final String kName = "limelight-turret"; // NetworkTable name and hostname
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = 0; // (z) meters forward of center; negative is backwards
+            public static final double kRight = 0; // (x) meters right of center; negative is left
+            public static final double kUp = 0; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+        }
+
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
@@ -249,6 +269,9 @@ public final class Konstants
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
         public static final double kTurretJoystickDeadband = 0.15;
+
+        // Translation from center of robot to center of turret bearing
+        public static final Translation3d kTurretCenter = new Translation3d(Inches.of(10.3125), Inches.of(10.3125), Inches.of(14.5));
     }
 
 

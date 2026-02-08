@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.Konstants.TurretConstants.kTurretCenter;
 import static frc.robot.Konstants.VisionConstants.kAprilTagFieldLayout;
 import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
 
@@ -17,6 +18,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -31,22 +33,25 @@ import frc.lib.vision.Limelight;
 import frc.lib.vision.Limelight.IMUMode;
 import frc.lib.vision.LimelightHelpers.RawFiducial;
 import frc.robot.Robot;
+import frc.robot.subsystems.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
 
 public class SKVision extends SubsystemBase {
     // Swerve reference is needed in order to get drivetrain information like pose and velocity
     private SKSwerve m_swerve;
+    private SK26Turret m_turret;
 
     // Declare your limelights here and write their hostnames in a comment next to each limelight
     /* Example:
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
     public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
+    public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {frontLL}; 
+    public final Limelight[] allLimelights = {frontLL, turretLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {frontLL}; 
+    public final Limelight[] poseLimelights = {frontLL, turretLL}; 
     
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();
@@ -61,28 +66,40 @@ public class SKVision extends SubsystemBase {
 
     // Creates an ArrayList to store estimated vision poses during autonomous
     public ArrayList<Trio<Pose3d, Pose2d, Double>> multiCamPoses = new ArrayList<Trio<Pose3d, Pose2d, Double>>();
-
-    // Data extraction record (groups related vision measurement data)
-    // Package-private for testing
-    record VisionMeasurement(
-        double timeStamp,
-        double targetSize,
-        Pose3d botpose3D,
-        Pose2d botposeMT1,
-        Pose2d botposeMT2,
-        RawFiducial[] tags,
-        boolean multiTags,
-        ChassisSpeeds robotSpeed,
-        double poseDifference,
-        double highestAmbiguity
-    ) {}
-
-    public SKVision(Optional<SKSwerve> m_swerve) {
+    
+    
+        // Data extraction record (groups related vision measurement data)
+        // Package-private for testing
+        record VisionMeasurement(
+            double timeStamp,
+            double targetSize,
+            Pose3d botpose3D,
+            Pose2d botposeMT1,
+            Pose2d botposeMT2,
+            RawFiducial[] tags,
+            boolean multiTags,
+            ChassisSpeeds robotSpeed,
+            double poseDifference,
+            double highestAmbiguity
+        ) {}
+    
+    public SKVision(Optional<SKSwerve> m_swerve, Optional<SK26Turret> m_turret) {
         this.m_swerve = m_swerve.orElseThrow(
             () -> new IllegalArgumentException("SKSwerve is required for SKVision")
         );
-
+        try {
+            this.m_turret = m_turret.orElseThrow(
+                () -> new IllegalArgumentException("SK26Turret is required for using turret Limelight")
+            );
+        } catch (IllegalArgumentException e) {
+            System.err.println(e.getMessage() + " || Turret Limelight will be disabled");
+            this.m_turret = null;
+        }
         startupLimelights();
+    }
+
+    public SKVision(Optional<SKSwerve> m_swerve) {
+        this(m_swerve, Optional.empty());
     }
 
     @Override
@@ -92,14 +109,24 @@ public class SKVision extends SubsystemBase {
 
         for(Limelight ll : poseLimelights) {
             ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
+            if(ll == turretLL) {
+                if(m_turret == null) {
+                    ll.setLogStatus("Disabled");
+                    continue;
+                }
+                ll.setCameraPoseInRobotSpace(
+                    ll.getConfig().getCameraPose3d()
+                    .rotateAround(kTurretCenter, new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()))));
+            }
             scanForTags(ll);
         }
 
-        SmartDashboard.putData("Vision", this);
         telemeterizeTagLOS();
-
+        
         /* The secret sauce: */
         estimatePose();
+
+        SmartDashboard.putData("Vision", this);
     }
 
     @Override
@@ -149,7 +176,8 @@ public class SKVision extends SubsystemBase {
             else {
                 //ll.setLogStatus("Idle");
             }
-            ll.setIMUMode(IMUMode.EXTERNAL); // For Limelight 4s only; this makes sure that we're only using the external IMU for Megatag 2
+            ll.setIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST); // For Limelight 4s only; this fuses the internal IMU with the external IMU to provide more accurate pose estimation and better performance
+            ll.setIMUAssistAlpha(0.001); // Sets the alpha value for IMU assist mode
             ll.setLEDMode(false); // Turns off LED lights on startup
         }
     }
@@ -196,7 +224,7 @@ public class SKVision extends SubsystemBase {
 
         Pose3d botPose3d = ll.getRawPose3d(); // Gets the 3D pose of the limelight on the robot using the position offsets
         Pose2d megaPose2d = ll.getMegaPose2d(); // Gets the estimated pose of the robot using MegaTag2 objects
-        double timestamp = ll.getRawPoseTimestamp(); // Timestamp of when the pose was collected
+        double timestamp = ll.getMegaPoseTimestamp(); // Timestamp of when the pose was collected
 
         Pose2d estimatedRobotPose = // Uses limelight (effectively swerve) rotation value instead of estimated rotation value
             new Pose2d(megaPose2d.getTranslation(), megaPose2d.getRotation()); 
@@ -236,19 +264,21 @@ public class SKVision extends SubsystemBase {
         }
     }
 
-    private void updatePoseTeleop() {
-        if (!DriverStation.isTeleopEnabled() && !DriverStation.isDisabled()) {
-            return;
-        }
-
+    private void updatePose() {
         Limelight bestLL = getBestLimelight();
         for(Limelight ll : poseLimelights) {
+            if(!DriverStation.isDisabled()) {
+                ll.setThrottle(10);
+            }
+            else {
+                ll.setThrottle(0);
+            }
             if (!ll.getName().equals(bestLL.getName())) {
                 ll.sendInvalidStatus("Rejected: Not best Limelight");
             }
         }
 
-        updatePoseSingleCam(bestLL);    
+        updatePoseSingleCam(bestLL);
     }
 
     public void estimatePose() {
@@ -269,7 +299,7 @@ public class SKVision extends SubsystemBase {
         into the pose estimator. The pose can still be rejected for being too erroneous, but scoring each camera significantly
         reduces the chances of a pose estimate being rejected.
         */
-        updatePoseTeleop();
+        updatePose();
     }
 
     public Limelight getBestLimelight() {
