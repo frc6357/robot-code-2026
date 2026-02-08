@@ -67,6 +67,11 @@ public class Ports
         
         // Light game button (Driver) - A button
         public static final SKTrigger kDriverGameButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        
+        // Light game buttons for Simon Says (Driver)
+        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external

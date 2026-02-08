@@ -65,10 +65,12 @@ public enum LightMode {
     NYAN_CAT,
     RACING_STRIPES,
     DRIP,
+    GODZILLA_CHARGING,
     
     // Interactive games
     STOP_THE_LIGHT,
     TUG_OF_WAR,
     RHYTHM_GAME,
-    SIMON_SAYS
+    SIMON_SAYS,
+    COLOR_KNOCKOUT
 }

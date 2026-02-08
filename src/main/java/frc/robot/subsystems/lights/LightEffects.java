@@ -106,6 +106,20 @@ public class LightEffects {
     private int simonTimer = 0;
     private int simonCurrentButton = -1;
     
+    // Color Knockout variables - 1v1 competitive reaction game
+    private int knockoutP1Lives = 5;
+    private int knockoutP2Lives = 5;
+    private int knockoutState = 0; // 0 = countdown, 1 = show color, 2 = waiting for input, 3 = round result, 4 = game over
+    private int knockoutTimer = 0;
+    private int knockoutCurrentColor = 0; // 0=Red, 1=Green, 2=Blue, 3=Yellow
+    private int knockoutP1Button = -1; // Button pressed by player 1 (-1 = none)
+    private int knockoutP2Button = -1; // Button pressed by player 2 (-1 = none)
+    private long knockoutP1Time = 0; // Time when P1 pressed
+    private long knockoutP2Time = 0; // Time when P2 pressed
+    private long knockoutColorShownTime = 0; // When color was shown
+    private int knockoutRoundWinner = 0; // 0 = none, 1 = P1, 2 = P2, 3 = both wrong
+    private int knockoutGameWinner = 0; // 0 = playing, 1 = P1 wins, 2 = P2 wins
+    
     // Fixed Snake variables
     private int snakeApplePos = -1;
     
@@ -118,6 +132,11 @@ public class LightEffects {
     private int pacmanPowerTimer = 0;
     private boolean pacmanGameOver = false;
     private int pacmanScore = 0;
+    
+    // Godzilla Charging effect variables
+    private int godzillaTimer = 0;
+    private int godzillaPhase = 0; // 0=charging, 1=peak, 2=blast, 3=cooldown
+    private double godzillaIntensity = 0.0;
     
     private static final double BREATHE_SPEED = 0.05;
     private static final int FLASH_PERIOD = 10;
@@ -1408,6 +1427,232 @@ public class LightEffects {
             }
         }
     }
+    
+    /**
+     * Godzilla Charging Effect - Dramatic atomic breath charging sequence (SK Colors)
+     * Uses team colors: kSKDarkBlue (ambient), kSKBlue (energy), kSKTeal (particles), kSKCream (sparks)
+     * Starts with dim pulses gathering at center, intensifies with faster pulses,
+     * reaches peak with bright flash, then releases as spreading "blast"
+     */
+    public void applyGodzillaCharging(AddressableLEDBuffer buffer) {
+        int len = buffer.getLength();
+        int center = len / 2;
+        
+        godzillaTimer++;
+        
+        // SK Color values (R, G, B)
+        // kSKDarkBlue: (0, 118, 133) - darkest, for ambient
+        // kSKBlue: (81, 171, 185) - medium, for core energy
+        // kSKTeal: (104, 185, 196) - light, for particles
+        // kSKCream: (233, 235, 229) - brightest, for sparks/flash
+        
+        // Phase durations (in frames, ~50fps)
+        int chargeDuration = 200;    // 4 seconds of charging
+        int peakDuration = 25;       // 0.5 seconds at peak
+        int blastDuration = 60;      // 1.2 seconds for blast
+        int cooldownDuration = 40;   // 0.8 seconds cooldown
+        int totalCycle = chargeDuration + peakDuration + blastDuration + cooldownDuration;
+        
+        int cycleTime = godzillaTimer % totalCycle;
+        
+        // Clear buffer first
+        for (int i = 0; i < len; i++) {
+            buffer.setRGB(i, 0, 0, 0);
+        }
+        
+        if (cycleTime < chargeDuration) {
+            // PHASE 0: Charging - particles gather toward center with increasing intensity
+            godzillaPhase = 0;
+            double progress = (double) cycleTime / chargeDuration;
+            godzillaIntensity = progress;
+            
+            // Base ambient glow using kSKDarkBlue (0, 118, 133)
+            int ambientR = (int)(0 * progress * 0.3);
+            int ambientG = (int)(118 * progress * 0.3);
+            int ambientB = (int)(133 * progress * 0.3);
+            for (int i = 0; i < len; i++) {
+                buffer.setRGB(i, ambientR, ambientG, ambientB);
+            }
+            
+            // Pulsing frequency increases as charge builds (starts slow, gets frantic)
+            double pulseSpeed = 0.1 + progress * 0.5;
+            double pulsePhase = cycleTime * pulseSpeed;
+            double pulse = 0.5 + 0.5 * Math.sin(pulsePhase);
+            
+            // Core glow at center using kSKBlue (81, 171, 185)
+            int coreRadius = (int)(5 + progress * 10);
+            for (int i = -coreRadius; i <= coreRadius; i++) {
+                int pos = center + i;
+                if (pos >= 0 && pos < len) {
+                    double distFromCenter = Math.abs(i) / (double)coreRadius;
+                    double coreBright = (1.0 - distFromCenter) * progress;
+                    int r = (int)(81 * coreBright * (0.7 + 0.3 * pulse));
+                    int g = (int)(171 * coreBright * (0.7 + 0.3 * pulse));
+                    int b = (int)(185 * coreBright * (0.7 + 0.3 * pulse));
+                    buffer.setRGB(pos, r, g, b);
+                }
+            }
+            
+            // Energy particles flowing inward using kSKTeal (104, 185, 196)
+            int numParticles = 4 + (int)(progress * 8);
+            for (int p = 0; p < numParticles; p++) {
+                // Particles at different phases of their journey to center
+                double particlePhase = (cycleTime * (0.05 + progress * 0.1) + p * 0.7) % 1.0;
+                
+                // Left side particle
+                int leftPos = (int)((1.0 - particlePhase) * center);
+                if (leftPos >= 0 && leftPos < len) {
+                    double bright = Math.sin(particlePhase * Math.PI) * progress;
+                    int trailLen = 3 + (int)(progress * 5);
+                    for (int t = 0; t < trailLen; t++) {
+                        int tPos = leftPos - t;
+                        if (tPos >= 0 && tPos < len) {
+                            double trailFade = 1.0 - (t / (double)trailLen);
+                            int r = (int)(104 * bright * trailFade);
+                            int g = (int)(185 * bright * trailFade);
+                            int b = (int)(196 * bright * trailFade);
+                            int existingR = buffer.getRed(tPos);
+                            int existingG = buffer.getGreen(tPos);
+                            int existingB = buffer.getBlue(tPos);
+                            buffer.setRGB(tPos, Math.min(255, r + existingR), Math.min(255, g + existingG), Math.min(255, b + existingB));
+                        }
+                    }
+                }
+                
+                // Right side particle (mirror)
+                int rightPos = center + (int)(particlePhase * center);
+                if (rightPos >= 0 && rightPos < len) {
+                    double bright = Math.sin(particlePhase * Math.PI) * progress;
+                    int trailLen = 3 + (int)(progress * 5);
+                    for (int t = 0; t < trailLen; t++) {
+                        int tPos = rightPos + t;
+                        if (tPos >= 0 && tPos < len) {
+                            double trailFade = 1.0 - (t / (double)trailLen);
+                            int r = (int)(104 * bright * trailFade);
+                            int g = (int)(185 * bright * trailFade);
+                            int b = (int)(196 * bright * trailFade);
+                            int existingR = buffer.getRed(tPos);
+                            int existingG = buffer.getGreen(tPos);
+                            int existingB = buffer.getBlue(tPos);
+                            buffer.setRGB(tPos, Math.min(255, r + existingR), Math.min(255, g + existingG), Math.min(255, b + existingB));
+                        }
+                    }
+                }
+            }
+            
+            // Occasional bright sparks using kSKCream (233, 235, 229)
+            if (progress > 0.5 && random.nextDouble() < progress * 0.3) {
+                int sparkPos = center + random.nextInt(11) - 5;
+                if (sparkPos >= 0 && sparkPos < len) {
+                    buffer.setRGB(sparkPos, 233, 235, 229);
+                }
+            }
+            
+        } else if (cycleTime < chargeDuration + peakDuration) {
+            // PHASE 1: Peak - intense flashing at maximum power
+            godzillaPhase = 1;
+            godzillaIntensity = 1.0;
+            
+            int peakTime = cycleTime - chargeDuration;
+            boolean flash = (peakTime / 2) % 2 == 0;
+            
+            // Flash between kSKCream and kSKTeal
+            double flashMult = flash ? 1.0 : 0.6;
+            int coreRadius = 15;
+            
+            for (int i = 0; i < len; i++) {
+                int distFromCenter = Math.abs(i - center);
+                if (distFromCenter < coreRadius) {
+                    // Bright cream core (kSKCream: 233, 235, 229)
+                    int r = (int)(233 * flashMult);
+                    int g = (int)(235 * flashMult);
+                    int b = (int)(229 * flashMult);
+                    buffer.setRGB(i, r, g, b);
+                } else {
+                    // Radiating SK Blue glow (81, 171, 185)
+                    double falloff = 1.0 - (distFromCenter - coreRadius) / (double)(len / 2);
+                    falloff = Math.max(0, falloff);
+                    int r = (int)(81 * flashMult * falloff);
+                    int g = (int)(171 * flashMult * falloff);
+                    int b = (int)(185 * flashMult * falloff);
+                    buffer.setRGB(i, r, g, b);
+                }
+            }
+            
+        } else if (cycleTime < chargeDuration + peakDuration + blastDuration) {
+            // PHASE 2: Blast - energy releases outward from center
+            godzillaPhase = 2;
+            int blastTime = cycleTime - chargeDuration - peakDuration;
+            double blastProgress = (double) blastTime / blastDuration;
+            godzillaIntensity = 1.0 - blastProgress;
+            
+            // Blast wave expands outward
+            int blastRadius = (int)(blastProgress * len / 2);
+            int blastWidth = 8;
+            
+            for (int i = 0; i < len; i++) {
+                int distFromCenter = Math.abs(i - center);
+                
+                // Check if in blast wave - use kSKTeal (104, 185, 196)
+                if (distFromCenter >= blastRadius - blastWidth && distFromCenter <= blastRadius) {
+                    double wavePos = 1.0 - (blastRadius - distFromCenter) / (double)blastWidth;
+                    double intensity = Math.sin(wavePos * Math.PI) * (1.0 - blastProgress * 0.7);
+                    int r = (int)(104 * intensity);
+                    int g = (int)(185 * intensity);
+                    int b = (int)(196 * intensity);
+                    buffer.setRGB(i, r, g, b);
+                }
+                
+                // Trail behind blast wave - use kSKDarkBlue (0, 118, 133)
+                if (distFromCenter < blastRadius - blastWidth) {
+                    double trailIntensity = (1.0 - blastProgress) * 0.5;
+                    double flicker = 0.7 + 0.3 * Math.sin(i * 0.5 + blastTime * 0.3);
+                    int r = (int)(0 * trailIntensity * flicker);
+                    int g = (int)(118 * trailIntensity * flicker);
+                    int b = (int)(133 * trailIntensity * flicker);
+                    buffer.setRGB(i, r, g, b);
+                }
+            }
+            
+            // Residual sparks using kSKCream (233, 235, 229)
+            if (random.nextDouble() < (1.0 - blastProgress) * 0.4) {
+                int sparkPos = random.nextInt(len);
+                if (Math.abs(sparkPos - center) < blastRadius) {
+                    buffer.setRGB(sparkPos, 233, 235, 229);
+                }
+            }
+            
+        } else {
+            // PHASE 3: Cooldown - gradual fade to black using kSKDarkBlue
+            godzillaPhase = 3;
+            int coolTime = cycleTime - chargeDuration - peakDuration - blastDuration;
+            double coolProgress = (double) coolTime / cooldownDuration;
+            godzillaIntensity = 0.3 * (1.0 - coolProgress);
+            
+            // Fading ambient glow using kSKDarkBlue (0, 118, 133)
+            double ambient = (1.0 - coolProgress) * 0.5;
+            for (int i = 0; i < len; i++) {
+                double flicker = 0.5 + 0.5 * Math.sin(i * 0.2 + coolTime * 0.1);
+                int r = (int)(0 * ambient * flicker);
+                int g = (int)(118 * ambient * flicker);
+                int b = (int)(133 * ambient * flicker);
+                buffer.setRGB(i, r, g, b);
+            }
+            
+            // Fading core using kSKBlue (81, 171, 185)
+            int coreRadius = (int)(5 * (1.0 - coolProgress));
+            for (int i = -coreRadius; i <= coreRadius; i++) {
+                int pos = center + i;
+                if (pos >= 0 && pos < len) {
+                    double fade = (1.0 - coolProgress);
+                    int r = (int)(81 * fade);
+                    int g = (int)(171 * fade);
+                    int b = (int)(185 * fade);
+                    buffer.setRGB(pos, r, g, b);
+                }
+            }
+        }
+    }
 
     // ==================== INTERACTIVE GAME EFFECTS ====================
 
@@ -2004,5 +2249,350 @@ public class LightEffects {
      */
     public int getSimonLevel() {
         return simonLength;
+    }
+    
+    // ==================== COLOR KNOCKOUT GAME ====================
+    
+    /**
+     * Color Knockout - Competitive 1v1 reaction game.
+     * Both players start with 5 lives. A color flashes and both must press the matching button.
+     * Slowest player loses a life. Wrong button = lose 2 lives. First to 0 lives loses.
+     * 
+     * Layout: Left half = P1 (Driver), Right half = P2 (Operator)
+     * Lives shown as lit sections on each side
+     */
+    public void applyColorKnockout(AddressableLEDBuffer buffer) {
+        int len = buffer.getLength();
+        int halfLen = len / 2;
+        
+        knockoutTimer++;
+        
+        switch (knockoutState) {
+            case 0: // Countdown - flash white to signal get ready
+                // Clear buffer
+                for (int i = 0; i < len; i++) {
+                    buffer.setRGB(i, 0, 0, 0);
+                }
+                
+                // Show lives on each side (dim)
+                drawKnockoutLives(buffer, 0, halfLen, knockoutP1Lives, true);
+                drawKnockoutLives(buffer, halfLen, len, knockoutP2Lives, false);
+                
+                // Flash center to indicate countdown
+                if (knockoutTimer < 30) {
+                    // "3" - left third flashes
+                    if ((knockoutTimer / 5) % 2 == 0) {
+                        for (int i = len/3; i < len/3 + 5; i++) {
+                            if (i < len) buffer.setRGB(i, 100, 100, 100);
+                        }
+                    }
+                } else if (knockoutTimer < 60) {
+                    // "2" - middle flashes
+                    if ((knockoutTimer / 5) % 2 == 0) {
+                        for (int i = len/2 - 2; i < len/2 + 3; i++) {
+                            if (i >= 0 && i < len) buffer.setRGB(i, 100, 100, 100);
+                        }
+                    }
+                } else if (knockoutTimer < 90) {
+                    // "1" - right third flashes
+                    if ((knockoutTimer / 5) % 2 == 0) {
+                        for (int i = 2*len/3; i < 2*len/3 + 5; i++) {
+                            if (i < len) buffer.setRGB(i, 100, 100, 100);
+                        }
+                    }
+                } else {
+                    // Random delay before showing color (50-100 frames / ~1-2 seconds)
+                    int delay = 90 + 50 + random.nextInt(50);
+                    if (knockoutTimer >= delay) {
+                        knockoutCurrentColor = random.nextInt(4);
+                        knockoutState = 1;
+                        knockoutTimer = 0;
+                        knockoutP1Button = -1;
+                        knockoutP2Button = -1;
+                        knockoutColorShownTime = System.currentTimeMillis();
+                    }
+                }
+                break;
+                
+            case 1: // Show color - flash the target color on the whole strip
+                // Fill entire strip with the target color
+                int r = 0, g = 0, b = 0;
+                switch (knockoutCurrentColor) {
+                    case 0: r = 255; g = 0; b = 0; break;     // Red (B button)
+                    case 1: r = 0; g = 255; b = 0; break;     // Green (A button)
+                    case 2: r = 0; g = 0; b = 255; break;     // Blue (X button)
+                    case 3: r = 255; g = 255; b = 0; break;   // Yellow (Y button)
+                }
+                
+                // Pulsing effect
+                double pulse = 0.7 + 0.3 * Math.sin(knockoutTimer * 0.3);
+                for (int i = 0; i < len; i++) {
+                    buffer.setRGB(i, (int)(r * pulse), (int)(g * pulse), (int)(b * pulse));
+                }
+                
+                // Move to waiting state immediately - players can press anytime
+                knockoutState = 2;
+                break;
+                
+            case 2: // Waiting for input
+                // Keep showing the color
+                r = 0; g = 0; b = 0;
+                switch (knockoutCurrentColor) {
+                    case 0: r = 255; g = 0; b = 0; break;
+                    case 1: r = 0; g = 255; b = 0; break;
+                    case 2: r = 0; g = 0; b = 255; break;
+                    case 3: r = 255; g = 255; b = 0; break;
+                }
+                
+                pulse = 0.7 + 0.3 * Math.sin(knockoutTimer * 0.3);
+                for (int i = 0; i < len; i++) {
+                    buffer.setRGB(i, (int)(r * pulse), (int)(g * pulse), (int)(b * pulse));
+                }
+                
+                // Show who has pressed (their side dims)
+                if (knockoutP1Button >= 0) {
+                    for (int i = 0; i < halfLen; i++) {
+                        int cr = buffer.getRed(i);
+                        int cg = buffer.getGreen(i);
+                        int cb = buffer.getBlue(i);
+                        buffer.setRGB(i, cr / 3, cg / 3, cb / 3);
+                    }
+                }
+                if (knockoutP2Button >= 0) {
+                    for (int i = halfLen; i < len; i++) {
+                        int cr = buffer.getRed(i);
+                        int cg = buffer.getGreen(i);
+                        int cb = buffer.getBlue(i);
+                        buffer.setRGB(i, cr / 3, cg / 3, cb / 3);
+                    }
+                }
+                
+                // Check if both have pressed or timeout (3 seconds)
+                if ((knockoutP1Button >= 0 && knockoutP2Button >= 0) || knockoutTimer > 150) {
+                    // Determine round winner
+                    determineKnockoutRoundWinner();
+                    knockoutState = 3;
+                    knockoutTimer = 0;
+                }
+                break;
+                
+            case 3: // Round result
+                // Show result for each player
+                for (int i = 0; i < len; i++) {
+                    buffer.setRGB(i, 0, 0, 0);
+                }
+                
+                // Flash winner's side green, loser's side red
+                boolean flash = (knockoutTimer / 8) % 2 == 0;
+                
+                if (knockoutRoundWinner == 1) {
+                    // P1 won this round (P2 loses life)
+                    if (flash) {
+                        for (int i = 0; i < halfLen; i++) buffer.setRGB(i, 0, 150, 0);
+                        for (int i = halfLen; i < len; i++) buffer.setRGB(i, 150, 0, 0);
+                    }
+                } else if (knockoutRoundWinner == 2) {
+                    // P2 won this round (P1 loses life)
+                    if (flash) {
+                        for (int i = 0; i < halfLen; i++) buffer.setRGB(i, 150, 0, 0);
+                        for (int i = halfLen; i < len; i++) buffer.setRGB(i, 0, 150, 0);
+                    }
+                } else if (knockoutRoundWinner == 3) {
+                    // Both wrong - both sides red
+                    if (flash) {
+                        for (int i = 0; i < len; i++) buffer.setRGB(i, 150, 0, 0);
+                    }
+                } else {
+                    // Tie (same time, both correct) - both yellow
+                    if (flash) {
+                        for (int i = 0; i < len; i++) buffer.setRGB(i, 150, 150, 0);
+                    }
+                }
+                
+                // Show remaining lives
+                drawKnockoutLives(buffer, 0, halfLen, knockoutP1Lives, true);
+                drawKnockoutLives(buffer, halfLen, len, knockoutP2Lives, false);
+                
+                if (knockoutTimer > 60) {
+                    // Check for game over
+                    if (knockoutP1Lives <= 0 || knockoutP2Lives <= 0) {
+                        knockoutGameWinner = knockoutP1Lives <= 0 ? 2 : 1;
+                        knockoutState = 4;
+                        knockoutTimer = 0;
+                    } else {
+                        // Next round
+                        knockoutState = 0;
+                        knockoutTimer = 0;
+                    }
+                }
+                break;
+                
+            case 4: // Game over
+                for (int i = 0; i < len; i++) {
+                    buffer.setRGB(i, 0, 0, 0);
+                }
+                
+                // Winner's side rainbow, loser's side dim red
+                flash = (knockoutTimer / 3) % 2 == 0;
+                
+                if (knockoutGameWinner == 1) {
+                    // P1 wins!
+                    for (int i = 0; i < halfLen; i++) {
+                        int hue = (i * 10 + knockoutTimer * 5) % 180;
+                        buffer.setHSV(i, hue, 255, flash ? 200 : 150);
+                    }
+                    for (int i = halfLen; i < len; i++) {
+                        buffer.setRGB(i, 30, 0, 0);
+                    }
+                } else {
+                    // P2 wins!
+                    for (int i = 0; i < halfLen; i++) {
+                        buffer.setRGB(i, 30, 0, 0);
+                    }
+                    for (int i = halfLen; i < len; i++) {
+                        int hue = ((i - halfLen) * 10 + knockoutTimer * 5) % 180;
+                        buffer.setHSV(i, hue, 255, flash ? 200 : 150);
+                    }
+                }
+                
+                // Auto-reset after celebration
+                if (knockoutTimer > 200) {
+                    resetColorKnockout();
+                }
+                break;
+        }
+    }
+    
+    /**
+     * Draw lives indicator on one side of the strip
+     */
+    private void drawKnockoutLives(AddressableLEDBuffer buffer, int start, int end, int lives, boolean isP1) {
+        int sectionLen = (end - start) / 5;
+        for (int life = 0; life < 5; life++) {
+            int lifeStart, lifeEnd;
+            if (isP1) {
+                // P1 lives go left to right
+                lifeStart = start + life * sectionLen;
+                lifeEnd = start + (life + 1) * sectionLen;
+            } else {
+                // P2 lives go right to left (mirrored)
+                lifeStart = end - (life + 1) * sectionLen;
+                lifeEnd = end - life * sectionLen;
+            }
+            
+            if (life < lives) {
+                // Life still active - show as bright
+                for (int i = lifeStart; i < lifeEnd && i < buffer.getLength(); i++) {
+                    if (i >= 0) {
+                        // Add subtle life indicator (cyan for P1, magenta for P2)
+                        int existing_r = buffer.getRed(i);
+                        int existing_g = buffer.getGreen(i);
+                        int existing_b = buffer.getBlue(i);
+                        if (existing_r == 0 && existing_g == 0 && existing_b == 0) {
+                            if (isP1) {
+                                buffer.setRGB(i, 0, 40, 40); // Cyan tint
+                            } else {
+                                buffer.setRGB(i, 40, 0, 40); // Magenta tint
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    /**
+     * Determine who won the round based on button presses
+     */
+    private void determineKnockoutRoundWinner() {
+        boolean p1Correct = knockoutP1Button == knockoutCurrentColor;
+        boolean p2Correct = knockoutP2Button == knockoutCurrentColor;
+        
+        if (!p1Correct && !p2Correct) {
+            // Both wrong
+            knockoutRoundWinner = 3;
+            knockoutP1Lives -= 2;
+            knockoutP2Lives -= 2;
+        } else if (!p1Correct) {
+            // P1 wrong, P2 correct - P2 wins
+            knockoutRoundWinner = 2;
+            knockoutP1Lives -= 2;
+        } else if (!p2Correct) {
+            // P2 wrong or didn't press, P1 correct - P1 wins
+            knockoutRoundWinner = 1;
+            knockoutP2Lives -= 2;
+        } else {
+            // Both correct - slower one loses
+            if (knockoutP1Time < knockoutP2Time) {
+                // P1 was faster
+                knockoutRoundWinner = 1;
+                knockoutP2Lives -= 1;
+            } else if (knockoutP2Time < knockoutP1Time) {
+                // P2 was faster
+                knockoutRoundWinner = 2;
+                knockoutP1Lives -= 1;
+            } else {
+                // Exact tie (unlikely but possible)
+                knockoutRoundWinner = 0;
+            }
+        }
+        
+        // Clamp lives to 0
+        knockoutP1Lives = Math.max(0, knockoutP1Lives);
+        knockoutP2Lives = Math.max(0, knockoutP2Lives);
+    }
+    
+    /**
+     * Player 1 (Driver) presses a button for Color Knockout
+     * @param button 0=Red(B), 1=Green(A), 2=Blue(X), 3=Yellow(Y)
+     */
+    public void knockoutP1Press(int button) {
+        if (knockoutState == 2 && knockoutP1Button < 0) {
+            knockoutP1Button = button;
+            knockoutP1Time = System.currentTimeMillis() - knockoutColorShownTime;
+        }
+    }
+    
+    /**
+     * Player 2 (Operator) presses a button for Color Knockout
+     * @param button 0=Red(B), 1=Green(A), 2=Blue(X), 3=Yellow(Y)
+     */
+    public void knockoutP2Press(int button) {
+        if (knockoutState == 2 && knockoutP2Button < 0) {
+            knockoutP2Button = button;
+            knockoutP2Time = System.currentTimeMillis() - knockoutColorShownTime;
+        }
+    }
+    
+    /**
+     * Reset Color Knockout game
+     */
+    public void resetColorKnockout() {
+        knockoutP1Lives = 5;
+        knockoutP2Lives = 5;
+        knockoutState = 0;
+        knockoutTimer = 0;
+        knockoutCurrentColor = 0;
+        knockoutP1Button = -1;
+        knockoutP2Button = -1;
+        knockoutP1Time = 0;
+        knockoutP2Time = 0;
+        knockoutColorShownTime = 0;
+        knockoutRoundWinner = 0;
+        knockoutGameWinner = 0;
+    }
+    
+    /**
+     * Get P1 remaining lives
+     */
+    public int getKnockoutP1Lives() {
+        return knockoutP1Lives;
+    }
+    
+    /**
+     * Get P2 remaining lives
+     */
+    public int getKnockoutP2Lives() {
+        return knockoutP2Lives;
     }
 }

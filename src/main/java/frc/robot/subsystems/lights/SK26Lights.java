@@ -64,6 +64,9 @@ public class SK26Lights extends SubsystemBase {
     // Fun mode
     private final SendableChooser<LightMode> funEffectChooser = new SendableChooser<>();
     private boolean funModeEnabled = false;
+    
+    // Game controller mode - when enabled, A buttons interact with games instead of lights
+    private boolean gameModeEnabled = false;
 
     public SK26Lights() {
         // Initialize hardware
@@ -136,12 +139,14 @@ public class SK26Lights extends SubsystemBase {
         funEffectChooser.addOption("Nyan Cat", LightMode.NYAN_CAT);
         funEffectChooser.addOption("Racing Stripes", LightMode.RACING_STRIPES);
         funEffectChooser.addOption("Drip", LightMode.DRIP);
+        funEffectChooser.addOption("🦎 Godzilla Charging", LightMode.GODZILLA_CHARGING);
         
         // Interactive games (use Game Button to interact!)
         funEffectChooser.addOption("🎮 Stop The Light", LightMode.STOP_THE_LIGHT);
         funEffectChooser.addOption("🎮 Tug of War", LightMode.TUG_OF_WAR);
         funEffectChooser.addOption("🎮 Rhythm Game", LightMode.RHYTHM_GAME);
         funEffectChooser.addOption("🎮 Simon Says", LightMode.SIMON_SAYS);
+        funEffectChooser.addOption("🎮 Color Knockout (1v1)", LightMode.COLOR_KNOCKOUT);
         
         // SK effects
         funEffectChooser.addOption("SK Gradient", LightMode.SKBLUE_GRADIENT);
@@ -149,6 +154,7 @@ public class SK26Lights extends SubsystemBase {
         
         SmartDashboard.putData("Lights/Fun Effects", funEffectChooser);
         SmartDashboard.putBoolean("Lights/Fun Mode", false);
+        SmartDashboard.putBoolean("Lights/Game Controller Mode", false);
     }
 
     // ==================== PERIODIC ====================
@@ -158,6 +164,7 @@ public class SK26Lights extends SubsystemBase {
         updateCalibrationValues();
         
         funModeEnabled = SmartDashboard.getBoolean("Lights/Fun Mode", false);
+        gameModeEnabled = SmartDashboard.getBoolean("Lights/Game Controller Mode", false);
         
         if (funModeEnabled) {
             autoLightsEnabled = false;
@@ -246,12 +253,14 @@ public class SK26Lights extends SubsystemBase {
             case NYAN_CAT: effects.applyNyanCat(m_baseBuffer); break;
             case RACING_STRIPES: effects.applyRacingStripes(m_baseBuffer); break;
             case DRIP: effects.applyDrip(m_baseBuffer); break;
+            case GODZILLA_CHARGING: effects.applyGodzillaCharging(m_baseBuffer); break;
             
             // Interactive games
             case STOP_THE_LIGHT: effects.applyStopTheLight(m_baseBuffer); break;
             case TUG_OF_WAR: effects.applyTugOfWar(m_baseBuffer); break;
             case RHYTHM_GAME: effects.applyRhythmGame(m_baseBuffer); break;
             case SIMON_SAYS: effects.applySimonSays(m_baseBuffer); break;
+            case COLOR_KNOCKOUT: effects.applyColorKnockout(m_baseBuffer); break;
         }
     }
 
@@ -573,10 +582,153 @@ public class SK26Lights extends SubsystemBase {
                 case SIMON_SAYS:
                     effects.resetSimonSays();
                     break;
+                case COLOR_KNOCKOUT:
+                    effects.resetColorKnockout();
+                    break;
                 default:
                     break;
             }
         }).ignoringDisable(true).withName("Reset Game");
+    }
+
+    // ==================== SIMON SAYS BUTTONS ====================
+    
+    /**
+     * Simon Says - Red button (B button on controller)
+     * Maps to section 0 (Red)
+     */
+    public Command simonRedButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.SIMON_SAYS) {
+                effects.simonSaysInput(0); // Red = 0
+            }
+        }).ignoringDisable(true).withName("Simon Red (B)");
+    }
+    
+    /**
+     * Simon Says - Green button (A button on controller)
+     * Maps to section 1 (Green)
+     */
+    public Command simonGreenButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.SIMON_SAYS) {
+                effects.simonSaysInput(1); // Green = 1
+            }
+        }).ignoringDisable(true).withName("Simon Green (A)");
+    }
+    
+    /**
+     * Simon Says - Blue button (X button on controller)
+     * Maps to section 2 (Blue)
+     */
+    public Command simonBlueButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.SIMON_SAYS) {
+                effects.simonSaysInput(2); // Blue = 2
+            }
+        }).ignoringDisable(true).withName("Simon Blue (X)");
+    }
+    
+    /**
+     * Simon Says - Yellow button (Y button on controller)
+     * Maps to section 3 (Yellow)
+     */
+    public Command simonYellowButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.SIMON_SAYS) {
+                effects.simonSaysInput(3); // Yellow = 3
+            }
+        }).ignoringDisable(true).withName("Simon Yellow (Y)");
+    }
+    
+    // ==================== COLOR KNOCKOUT COMMANDS ====================
+    
+    /**
+     * Color Knockout - Player 1 (Driver) Red button (B button)
+     */
+    public Command knockoutP1RedButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP1Press(0); // Red = 0
+            }
+        }).ignoringDisable(true).withName("Knockout P1 Red (B)");
+    }
+    
+    /**
+     * Color Knockout - Player 1 (Driver) Green button (A button)
+     */
+    public Command knockoutP1GreenButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP1Press(1); // Green = 1
+            }
+        }).ignoringDisable(true).withName("Knockout P1 Green (A)");
+    }
+    
+    /**
+     * Color Knockout - Player 1 (Driver) Blue button (X button)
+     */
+    public Command knockoutP1BlueButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP1Press(2); // Blue = 2
+            }
+        }).ignoringDisable(true).withName("Knockout P1 Blue (X)");
+    }
+    
+    /**
+     * Color Knockout - Player 1 (Driver) Yellow button (Y button)
+     */
+    public Command knockoutP1YellowButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP1Press(3); // Yellow = 3
+            }
+        }).ignoringDisable(true).withName("Knockout P1 Yellow (Y)");
+    }
+    
+    /**
+     * Color Knockout - Player 2 (Operator) Red button (B button)
+     */
+    public Command knockoutP2RedButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP2Press(0); // Red = 0
+            }
+        }).ignoringDisable(true).withName("Knockout P2 Red (B)");
+    }
+    
+    /**
+     * Color Knockout - Player 2 (Operator) Green button (A button)
+     */
+    public Command knockoutP2GreenButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP2Press(1); // Green = 1
+            }
+        }).ignoringDisable(true).withName("Knockout P2 Green (A)");
+    }
+    
+    /**
+     * Color Knockout - Player 2 (Operator) Blue button (X button)
+     */
+    public Command knockoutP2BlueButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP2Press(2); // Blue = 2
+            }
+        }).ignoringDisable(true).withName("Knockout P2 Blue (X)");
+    }
+    
+    /**
+     * Color Knockout - Player 2 (Operator) Yellow button (Y button)
+     */
+    public Command knockoutP2YellowButton() {
+        return runOnce(() -> {
+            if (currentMode == LightMode.COLOR_KNOCKOUT) {
+                effects.knockoutP2Press(3); // Yellow = 3
+            }
+        }).ignoringDisable(true).withName("Knockout P2 Yellow (Y)");
     }
 
     // Quick command methods
@@ -611,6 +763,7 @@ public class SK26Lights extends SubsystemBase {
     public boolean isAutoLightsEnabled() { return autoLightsEnabled; }
     public GameState getCurrentGameState() { return currentGameState; }
     public LightMode getCurrentMode() { return currentMode; }
+    public boolean isGameModeEnabled() { return gameModeEnabled; }
 
     // ==================== SENDABLE ====================
 
