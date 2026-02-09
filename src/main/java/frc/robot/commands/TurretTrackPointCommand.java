@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,7 +31,7 @@ public class TurretTrackPointCommand extends Command
         this.drive = drive;
         this.targetPoint = targetPoint;
     
-        addRequirements(turret, drive);
+        addRequirements(turret);
     }
 
     @Override
@@ -56,28 +57,26 @@ public class TurretTrackPointCommand extends Command
 
         // Calculate the field-relative angle to the target (in degrees)
         // atan2 gives angle from positive X-axis, counterclockwise positive
-        double fieldAngleToTargetDeg = Math.toDegrees(Math.atan2(dy, dx));
+        double desiredAngle = Math.toDegrees(
+            Math.signum(drive.getRobotPose().getTranslation().getY() - targetPoint.getTargetPoint().getY()) *
+            Math.acos(
+                (drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
+                drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))
+                 + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
+        if(Double.isNaN(desiredAngle)) {
+            desiredAngle = turret.getAngleDegrees();
+        }
+        double wrappedAngle = MathUtil.inputModulus(desiredAngle, -180, 180);
 
         // Convert field-relative angle to robot-relative angle for the turret
         // If robot is facing 0° and target is at 45° field-relative, turret should be at 45°
         // If robot is facing 30° and target is at 45° field-relative, turret should be at 15°
-        double turretAngleDeg = fieldAngleToTargetDeg - robotHeadingDeg;
+        double turretAngleDeg = wrappedAngle - robotHeadingDeg;
 
-        // Normalize to -180 to +180 range
-        while (turretAngleDeg > 180)
-        {
-            turretAngleDeg -= 360;
-        }
-        while (turretAngleDeg < -180)
-        {
-            turretAngleDeg += 360;
-        }
-
-        // Use wrapped angle setting to handle limits gracefully
-        turret.setAngleDegreesWrapped(turretAngleDeg);
+        turret.setAngleDegrees(turretAngleDeg);
 
         // Debug output
-        SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", fieldAngleToTargetDeg);
+        SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", desiredAngle);
         SmartDashboard.putNumber("TurretTrack/RobotHeading", robotHeadingDeg);
         SmartDashboard.putNumber("TurretTrack/DesiredTurretAngle", turretAngleDeg);
         SmartDashboard.putNumber("TurretTrack/DistanceToTarget", robotPosition.getDistance(target));

@@ -67,8 +67,9 @@ public class SK26TurretBinder implements CommandBinder
         kYbutton.button.and(IsIdle).whileTrue(new TurretTemporaryButtonCommand(0.0, turret));
         kAbutton.button.and(IsIdle).toggleOnTrue(new TurretTrackPointCommand(
             turret, 
-            swerve, 
-            Field.isBlue() ? kBlueHub.point : kRedHub.point
+            swerve,
+            kOperatorControlled.point
+            // Field.isBlue() ? kBlueHub.point : kRedHub.point
         ).withName("TurretManualTrackHubCommand"));
 
         PointAtHub.whileTrue(new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? kBlueHub.point : kRedHub.point)
