@@ -82,7 +82,7 @@ public class SK26TurretBinder implements CommandBinder
         turret.setDefaultCommand(
             new TurretJoystickCommand(
                 turret, 
-                () -> slewLimiter.calculate(kRightStickX.getFilteredAxis()))
+                () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()))
             .unless(IsIdle.negate()).withName("TurretManualJoystick")
         );
     }
