@@ -184,14 +184,14 @@ public final class Konstants
             public static final String kName = "limelight-turret"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = 0; // (z) meters forward of center; negative is backwards
-            public static final double kRight = 0; // (x) meters right of center; negative is left
-            public static final double kUp = 0; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+            public static final double kForward = -8.0; // (z) meters forward of center; negative is backwards
+            public static final double kRight = -9.5; // (x) meters right of center; negative is left
+            public static final double kUp = 19.625; // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kPitch = 2; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
             public static final boolean kAttached = true;
         }
