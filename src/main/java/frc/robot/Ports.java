@@ -132,8 +132,8 @@ public class Ports
         public static final SKTrigger resetencoder = new SKTrigger(kOperator, kRightStick.value, BUTTON);
 
         //public static final SKTrigger kProcessor = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
-        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, POV);
-        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, POV);
+        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
+        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
         public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
     }
 

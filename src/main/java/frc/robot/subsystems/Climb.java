@@ -25,6 +25,7 @@ import static frc.robot.Konstants.ClimbConstants.kClimbD;
 import static frc.robot.Konstants.ClimbConstants.kClimbV;
 
 import edu.wpi.first.util.sendable.Sendable;
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -61,12 +62,16 @@ public class Climb extends SubsystemBase
         request = new PositionVoltage(0).withSlot(0);
 
         climbConfig = new TalonFXConfiguration();
-        climbConfig.Slot0.kP = kClimbP;
+        climbConfig.Slot0.kP = kClimbP.get();
         climbConfig.Slot0.kI = kClimbI;
         climbConfig.Slot0.kD = kClimbD;
         climbConfig.Slot0.kV = kClimbV;
 
         climbMotor.getConfigurator().apply(climbConfig);
+        kClimbP.onChange((newkClimbP) -> {
+            climbConfig.Slot0.kP = newkClimbP;
+            climbMotor.getConfigurator().apply(climbConfig);
+        });
     }
 
 
@@ -118,6 +123,7 @@ public class Climb extends SubsystemBase
     public void setClimbHeight(double targetHieight)
     {
         cTargetHieight = targetHieight;
+        
 
         double motorRotations =  targetHieight * motorRatio; // / scale factor of encode to height
         climbMotor.setControl(request.withPosition(motorRotations));
@@ -156,10 +162,18 @@ public class Climb extends SubsystemBase
         
     }
 
-    public void teleopPeriodic()
+    @Override
+    public void periodic() {
+        SmartDashboard.putData("Climb", this);
+    }
+
+    @Override
+    public void initSendable(SendableBuilder builder)
     {
-        SmartDashboard.putBoolean("Limit Switch", isSwitchPressed());
-        System.out.println("Encoder" + cEncoder.getPosition());
-        SmartDashboard.putData("Encoder Pos", (Sendable) cEncoder.getPosition());
+        super.initSendable(builder);
+        builder.addDoubleProperty("Current Pos (CANCoder)", this::getClimbPosition, null);
+        builder.addDoubleProperty("Current Pos (Motor)", () -> climbMotor.getPosition().getValueAsDouble(), null);
+        builder.addDoubleProperty("Target Pos", this::getClimbTargetPosition, null);
+        builder.addDoubleProperty("Motor out", climbMotor::get, null);       
     }
 }

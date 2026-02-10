@@ -28,8 +28,8 @@ public class ClimbBinder implements CommandBinder {
         this.climbSubsystem = climbSubsystem;
 
         this.t1Button = climbGoButton.button;
-        upButton = climbUpButton.button;
-        downButton = climbDownButton.button;
+        this.upButton = climbUpButton.button;
+        this.downButton = climbDownButton.button;
     }
 
     public void bindButtons()

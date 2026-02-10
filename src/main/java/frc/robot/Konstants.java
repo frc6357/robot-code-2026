@@ -32,6 +32,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
+import frc.robot.preferences.SKPreferences;
+import frc.robot.preferences.Pref;
 import frc.robot.subsystems.drive.GeneratedConstants;
 
 @SuppressWarnings("unused")
@@ -174,8 +176,8 @@ public final class Konstants
 
     public static final class ClimbConstants
     {
-        public static final double kClimbMotorSpeed = .5;
-        public static final double kClimbP = 0;
+        public static final double kClimbMotorSpeed = .05;
+        public static final Pref<Double> kClimbP = SKPreferences.attach("kClimbP", 0.1);
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbV = 0;
