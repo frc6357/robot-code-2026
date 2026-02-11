@@ -3,32 +3,37 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.2213975903614456,
-        "y": 5.357253012048193
+        "x": 4.453095577746077,
+        "y": 7.4572753209700435
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.6640843373493976,
-        "y": 4.5923132530120485
+        "x": 8.390204819277107,
+        "y": 7.739493975903613
       },
       "isLocked": false,
-      "linkedName": "SimpleScore_End"
+      "linkedName": "LeftTrench"
     },
     {
       "anchor": {
-        "x": 1.5385301204819273,
-        "y": 3.9803614457831324
+        "x": 8.127939759036146,
+        "y": 2.2647108433734933
       },
       "prevControl": {
-        "x": 2.4673855421686754,
-        "y": 3.8383012048192766
+        "x": 8.543192771084337,
+        "y": 4.603240963855422
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "TrenchWarfare_Sweep"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5,
+      "rotationDegrees": 90.82278081754518
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
@@ -42,13 +47,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 91.54815769897806
   },
   "reversed": false,
-  "folder": "Left Trench",
+  "folder": "Chaos",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 90.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }
