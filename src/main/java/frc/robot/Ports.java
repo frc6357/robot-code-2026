@@ -218,17 +218,21 @@ public class Ports
         public static final CANPort kIntakeSensor1 = new CANPort(11, busName);
         public static final CANPort kIntakeSensor2 = new CANPort(12, busName);
 
-        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor1 = new CANrange(kIntakeSensor1.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
 
-        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
-        public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
-        public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
+        // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        // public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
+        // public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
 
         /* Sensor configurating */
         static {
-            tofSensor.getConfigurator().apply(tofConfig);
+            hopperSensor.getConfigurator().apply(tofConfig);
         }
 
 

@@ -17,7 +17,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.IndexerPorts.kSpindexerMotor;
-import static frc.robot.Ports.Sensors.tofSensor;
+import static frc.robot.Ports.Sensors.hopperSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 import static frc.robot.Ports.Sensors.intakeSensor1;
 import static frc.robot.Ports.Sensors.intakeSensor2;
@@ -146,7 +146,7 @@ public class SK26Indexer extends SubsystemBase{
      * @return the measured distance as a {@link edu.wpi.first.units.measure.Distance}
      */
     private Distance getTofDistance() {
-        return tofSensor.getDistance().refresh().getValue();
+        return hopperSensor.getDistance().refresh().getValue();
     }
 
     /**
@@ -165,7 +165,7 @@ public class SK26Indexer extends SubsystemBase{
      * </ul>
      */
     private void checkIfBallLaunched() {
-        boolean currentState = launcherSensor.get(); // Read sensor
+        boolean currentState = launcherSensor.getIsDetected().getValue(); // Read sensor
     
         // Check for falling edge (state changes from true to false)
         if (lastLauncherSensorState && !currentState) {
@@ -192,8 +192,8 @@ public class SK26Indexer extends SubsystemBase{
      * </ul>
      */
     private void checkIfBallIntaked() {
-        boolean currentState1 = intakeSensor1.get(); // Read sensor
-        boolean currentState2 = intakeSensor2.get(); // Read second sensor
+        boolean currentState1 = intakeSensor1.getIsDetected().getValue(); // Read sensor
+        boolean currentState2 = intakeSensor2.getIsDetected().getValue(); // Read second sensor
 
         // Check for falling edge (state changes from true to false)
         if(lastIntakeSensorState1 && !currentState1) {
