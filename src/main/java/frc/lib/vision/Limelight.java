@@ -35,7 +35,7 @@ public class Limelight {
         /** The angle of the limelight in terms of roll, pitch, and yaw respectively in degrees*/
         @Getter private double roll, pitch, yaw; // degrees
         /** The default pose of the limelight in 3D space relative to the robot */
-        @Getter private Pose3d cameraPose3d;
+        @Getter private Pose3d cameraPose3d = new Pose3d();
 
         /** Creates a new limelight config (configurable limelight)
          * @param name The name of the limelight
