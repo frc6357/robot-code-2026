@@ -253,7 +253,7 @@ public final class Konstants
         public static final double kTurretAngleTolerance = 0.5;
 
         // CANcoder / Absolute Encoder constants
-        public static final double kTurretEncoderOffset = -0.111; // Rotations (-0.5 to +0.5) //-0.111
+        public static final double kTurretEncoderOffset = -0.3828125; // Rotations (-0.5 to +0.5) //-0.111
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
