@@ -5,12 +5,17 @@ import static frc.robot.Konstants.TurretConstants.*;
 import static frc.robot.Ports.LauncherPorts.kTurretMotor;
 import static frc.robot.Ports.LauncherPorts.kTurretEncoder;
 
+import frc.lib.preferences.SKPreferences;
+import lombok.Getter;
+import frc.lib.preferences.Pref;
+
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -30,17 +35,28 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class SK26Turret extends SubsystemBase
 {
+    
     // Motor
     private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
-
+    
     // Absolute encoder (CANcoder) - the ONLY position feedback source
     private final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
 
+    @Getter
+    boolean wrapping = false;
+    
     // WPILib PID controller (runs in periodic, uses CANcoder feedback)
     private final PIDController pidController = new PIDController(kTurretP, kTurretI, kTurretD);
+    
+    private Pref<Double> pPref = SKPreferences.attach("TurretPID/p", kTurretP)
+        .onChange((newP) -> pidController.setP(newP));
+    private Pref<Double> iPref = SKPreferences.attach("TurretPID/i", kTurretI)
+        .onChange((newI) -> pidController.setI(newI));
+    private Pref<Double> dPref = SKPreferences.attach("TurretPID/d", kTurretD)
+        .onChange((newD) -> pidController.setD(newD));
 
     // Motor output control
-    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
+    private final VoltageOut voltageControl = new VoltageOut(0.0);
 
     // Target angle in degrees
     private double targetAngleDeg = 0.0;
@@ -112,14 +128,16 @@ public class SK26Turret extends SubsystemBase
     {
         // Calculate the total range (from -170 to +170 = 340 degrees)
         double range = kTurretMaxPosition - kTurretMinPosition;
-        
+    
         // Wrap the angle if it exceeds limits
         while (angleDeg > kTurretMaxPosition)
         {
+            wrapping = true;
             angleDeg -= range;
         }
         while (angleDeg < kTurretMinPosition)
         {
+            wrapping = true;
             angleDeg += range;
         }
         
@@ -136,7 +154,7 @@ public class SK26Turret extends SubsystemBase
     }
 
     public double getTurretError() {
-        return getTargetAngleDegrees() - getAngleDegrees();
+        return pidController.getError();//getTargetAngleDegrees() - getAngleDegrees();
     }
 
     /**
@@ -160,7 +178,7 @@ public class SK26Turret extends SubsystemBase
     {
         // ========== Run PID Loop ==========
         double currentAngle = getAngleDegrees();
-        double output = (atTarget() ? 0.0 : pidController.calculate(currentAngle));
+        double output = pidController.calculate(currentAngle);//(atTarget() ? 0.0 : pidController.calculate(currentAngle));
         
         // Clamp output for safety
         output = MathUtil.clamp(output, -kMaxTurretOutput, kMaxTurretOutput);
@@ -172,10 +190,17 @@ public class SK26Turret extends SubsystemBase
         }
         
         // Apply to motor
-        turretMotor.setControl(dutyCycleControl.withOutput(output));
+        turretMotor.setControl(voltageControl.withOutput(output));
+
+        if(targetAngleDeg < kTurretMaxPosition && 
+            targetAngleDeg > kTurretMinPosition) 
+        {
+            wrapping = false;
+        }
 
         // ========== Dashboard ==========
         SmartDashboard.putData("Turret", this);
+        SmartDashboard.putData("Turret/PIDController", pidController);
     }
 
     @Override
@@ -187,5 +212,6 @@ public class SK26Turret extends SubsystemBase
         builder.addDoubleProperty("Turret Error (deg)", this::getTurretError, null);
         builder.addDoubleProperty("Turret Motor DutyCycle Output", () -> turretMotor.getDutyCycle().getValueAsDouble(), null);
         builder.addDoubleProperty("Turret Motor Voltage Output", () -> turretMotor.getMotorVoltage().getValueAsDouble(), null);
+        builder.addBooleanProperty("Turret Wrapping", () -> isWrapping(), null);
     }
 }

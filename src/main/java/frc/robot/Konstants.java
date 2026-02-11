@@ -3,6 +3,7 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -29,6 +30,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -241,10 +243,13 @@ public final class Konstants
         public static final boolean kTurretMotorInverted = true;
 
         // Turret PID (WPILib PIDController - input is degrees, output is duty cycle)
-        public static final double kTurretP = 0.00375; //.015
-        public static final double kTurretI = 0.016;
-        public static final double kTurretD = 0.00005; //0.00005
-        public static final double kMaxTurretOutput = 0.4; // Max duty cycle (0-1) for safety
+        public static final double kTurretP = 0.07; //0.00375
+        public static final double kTurretI = 0.02;
+        public static final double kTurretD = 0.005; //0.00005
+        public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
+
+        public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = DegreesPerSecondPerSecond.of(1320);
 
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection

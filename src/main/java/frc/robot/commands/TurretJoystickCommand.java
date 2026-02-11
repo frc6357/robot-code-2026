@@ -45,6 +45,11 @@ public class TurretJoystickCommand extends Command
 
         double angularVelocity = input * kManualTurretSpeed;
         double newAngle = turret.getTargetAngleDegrees() + angularVelocity * dt;
+
+        // Ignore new angle requests until it's done wrapping
+        if(turret.isWrapping()) {
+            return;
+        }
         turret.setAngleDegreesWrapped(newAngle);
     }
 

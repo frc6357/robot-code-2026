@@ -1,6 +1,11 @@
 package frc.robot;
     
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,6 +18,7 @@ import frc.robot.StateHandler.MacroState.Status;
  * A MacroState can still have its status updated while it is not the current nor desired state.
  */
 public class StateHandler extends SubsystemBase{
+    
     public enum MacroState {
         IDLE(Status.READY),
         SCORING(Status.OFF),
@@ -21,11 +27,11 @@ public class StateHandler extends SubsystemBase{
         CLIMBING(Status.OFF),
         STEADY_STREAM_SCORING(Status.OFF),
         STEADY_STREAM_SHUTTLING(Status.OFF);
-
+        
         private MacroState(Status status) {
             this.status = status;
         }
-
+        
         private Status status;
 
         public Status getStatus() {
@@ -34,7 +40,7 @@ public class StateHandler extends SubsystemBase{
         public void setStatus(Status status) {
             this.status = status;
         }
-
+        
         // Similar to WPILib Command structure
         public enum Status {
             OFF,
@@ -43,15 +49,28 @@ public class StateHandler extends SubsystemBase{
             STOPPING
         }
     }
+    private SendableChooser<MacroState> stateChooser = new SendableChooser<MacroState>();        
 
     private static MacroState currentState = MacroState.IDLE;
     private static MacroState desiredState = MacroState.IDLE;
+
+    private MacroState previousChosenState = MacroState.IDLE;
 
     public StateHandler() {
         // Reset all states to default on construction
         for (MacroState state : MacroState.values()) {
             state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.OFF);
         }
+
+        stateChooser.setDefaultOption("IDLE", MacroState.IDLE);
+        stateChooser.addOption("SCORING", MacroState.SCORING);
+        stateChooser.addOption("INTAKING", MacroState.INTAKING);
+        stateChooser.addOption("SHUTTLING", MacroState.SHUTTLING);
+        stateChooser.addOption("CLIMBING", MacroState.CLIMBING);
+        stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
+        stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
+
+        SmartDashboard.putData("StateChooser", stateChooser);
     }
 
     /**
@@ -69,6 +88,10 @@ public class StateHandler extends SubsystemBase{
     @Override
     public void periodic() {
         handleStateTransition();
+        if(stateChooser.getSelected() != previousChosenState) {
+            setCurrentState(stateChooser.getSelected());
+            previousChosenState = stateChooser.getSelected();
+        }
 
         SmartDashboard.putData("StateHandler", this);
     }
@@ -129,7 +152,7 @@ public class StateHandler extends SubsystemBase{
      * Clears the desired MacroState, setting it to IDLE.
      */
     public void clearDesiredState() {
-        desiredState = MacroState.IDLE;
+        desiredState = currentState;
     }
 
     public Command clearDesiredStateCommand() {
