@@ -18,7 +18,10 @@ public class SubsystemControls
      *            indicates if the swerve subsystem is present and should be enabled
      * @param lights
      *            indicates if the lights subsystem is present and should be enabled
+     * @param pickup
+     *            indicates if the pickup subsystem is present and should be enabled
      */
+
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,

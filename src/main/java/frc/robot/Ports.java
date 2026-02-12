@@ -140,11 +140,8 @@ public class Ports
      * Defines all the ports needed to create sensors and actuators for the drivetrain.
      */
 
-    public static class DrivePorts
-    {
-
-    }
-    
+    public static class DrivePorts {}
+     
     public static class ClimbPorts
     {
         private static final String busName = kCANivoreName;

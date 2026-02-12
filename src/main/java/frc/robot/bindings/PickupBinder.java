@@ -36,7 +36,7 @@ public class PickupBinder implements CommandBinder {
         {
             SK26PickupOB subsys = subsystem.get();
 
-            extend.whileTrue(new OBPickupPositionCommand(subsys));
+            extend.whileTrue(new OBPickupPositionCommand(subsys)); 
             retract.whileTrue(new OBPickupRetractCommand(subsys));
             eat.whileTrue(new OBPickupEatCommand(subsys));
             spit.whileTrue(new OBPickupSpitCommand(subsys));
