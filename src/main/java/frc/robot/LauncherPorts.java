@@ -178,7 +178,7 @@ public class Ports
     public static class pickupOBPorts
     {
         //bus name is null
-        private static final String busName = "";
+        private static final String busName = "kCandle";
         public static final CANPort kCANdle = new CANPort(48, busName);
 
         //assign a motor ID [PLACEHOLDERS}
