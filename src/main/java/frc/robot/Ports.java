@@ -34,6 +34,8 @@ import static frc.robot.Konstants.SwerveConstants.kFrontRightTurnMotorID;
 
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
@@ -225,6 +227,12 @@ public class Ports
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+        private static CANrangeConfiguration beamConfig = new CANrangeConfiguration()
+            .withFovParams(new FovParamsConfigs().withFOVCenterX(0)
+                                                 .withFOVCenterY(0)
+                                                 .withFOVRangeX(6.25)
+                                                 .withFOVRangeY(6.25))
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
 
         // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
         // public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
@@ -233,6 +241,9 @@ public class Ports
         /* Sensor configurating */
         static {
             hopperSensor.getConfigurator().apply(tofConfig);
+            launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
         }
 
 
