@@ -50,7 +50,7 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kDriverGameButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
         // Light game buttons for Simon Says (Driver)
         public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
         public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);

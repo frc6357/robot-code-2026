@@ -4,11 +4,11 @@ import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
-import static frc.robot.Ports.OperatorPorts.k_Start;
-import static frc.robot.Ports.OperatorPorts.k_LeftTrigger;
-import static frc.robot.Ports.OperatorPorts.k_LeftBumperTrigger;
-import static frc.robot.Ports.OperatorPorts.k_RightBumperTrigger;
-import static frc.robot.Ports.DriverPorts.kDriverGameButton;
+import static frc.robot.Ports.OperatorPorts.kStartbutton;
+import static frc.robot.Ports.OperatorPorts.kLTrigger;
+import static frc.robot.Ports.OperatorPorts.kLBbutton;
+import static frc.robot.Ports.OperatorPorts.kRBbutton;
+import static frc.robot.Ports.DriverPorts.kDriverAButton;
 import static frc.robot.Ports.DriverPorts.kDriverBbutton;
 import static frc.robot.Ports.DriverPorts.kDriverXbutton;
 import static frc.robot.Ports.DriverPorts.kDriverYbutton;
@@ -35,10 +35,10 @@ public class SK26LightsBinder implements CommandBinder {
         SK26Lights lights = lightsSubsystem.get();
         
         // Non-game mode light controls (bumpers, triggers, start)
-        k_LeftBumperTrigger.button.onTrue(lights.setSolidWhite());
-        k_RightBumperTrigger.button.onTrue(lights.setBreathingSKBlue());
-        k_Start.button.onTrue(lights.activatePartyMode());
-        k_LeftTrigger.button.onTrue(lights.setSKBlueGradient());
+        kLBbutton.button.onTrue(lights.setSolidWhite());
+        kRBbutton.button.onTrue(lights.setBreathingSKBlue());
+        kStartbutton.button.onTrue(lights.activatePartyMode());
+        kLTrigger.button.onTrue(lights.setSKBlueGradient());
         
         // ==================== GAME MODE BUTTONS ====================
         // When Game Controller Mode is ON:
@@ -49,7 +49,7 @@ public class SK26LightsBinder implements CommandBinder {
         //   - X=Off, B=Blue, Y=Alliance Gradient, A=Red
         
         // Driver A button (Green - P1 in Knockout, Simon, or game action)
-        kDriverGameButton.button.onTrue(
+        kDriverAButton.button.onTrue(
             Commands.either(
                 Commands.either(
                     lights.simonGreenButton(),       // Simon Says: Green

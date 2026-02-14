@@ -27,7 +27,7 @@ public class SubsystemControls
         @JsonProperty(required = true, value = "vision")      boolean vision,
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
-        @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher
+        @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
         @JsonProperty(required = true, value = "lights")      boolean lights 
     )
 
@@ -62,6 +62,7 @@ public class SubsystemControls
     }
     public boolean isBangBangLauncherPresent() {
         return bangbanglauncher;
+    }
     public boolean isLightsPresent() {
         return lights;
     }
