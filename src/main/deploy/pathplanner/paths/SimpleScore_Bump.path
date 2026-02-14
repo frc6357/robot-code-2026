@@ -28,7 +28,12 @@
       "linkedName": "SimpleScore_End"
     }
   ],
-  "rotationTargets": [],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.6545842217483916,
+      "rotationDegrees": 46.440339270051176
+    }
+  ],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
