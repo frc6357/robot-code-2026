@@ -4,14 +4,9 @@ import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
-import static frc.robot.Ports.OperatorPorts.kStartbutton;
-import static frc.robot.Ports.OperatorPorts.kLTrigger;
-import static frc.robot.Ports.OperatorPorts.kLBbutton;
-import static frc.robot.Ports.OperatorPorts.kRBbutton;
-import static frc.robot.Ports.DriverPorts.kDriverAButton;
-import static frc.robot.Ports.DriverPorts.kDriverBbutton;
-import static frc.robot.Ports.DriverPorts.kDriverXbutton;
-import static frc.robot.Ports.DriverPorts.kDriverYbutton;
+import static frc.robot.Ports.OperatorPorts.kLeftDpad;
+import static frc.robot.Ports.OperatorPorts.kRightDpad;
+import static frc.robot.Ports.OperatorPorts.kBackbutton;
 
 import java.util.Optional;
 
@@ -33,153 +28,95 @@ public class SK26LightsBinder implements CommandBinder {
             return;
         }
         SK26Lights lights = lightsSubsystem.get();
-        
-        // Non-game mode light controls (bumpers, triggers, start)
-        kLBbutton.button.onTrue(lights.setSolidWhite());
-        kRBbutton.button.onTrue(lights.setBreathingSKBlue());
-        kStartbutton.button.onTrue(lights.activatePartyMode());
-        kLTrigger.button.onTrue(lights.setSKBlueGradient());
-        
-        // ==================== GAME MODE BUTTONS ====================
-        // When Game Controller Mode is ON:
-        //   - For Simon Says: A=Green, B=Red, X=Blue, Y=Yellow (both controllers)
-        //   - For Color Knockout: Driver=P1, Operator=P2 (A=Green, B=Red, X=Blue, Y=Yellow)
-        //   - For other games: A button interacts (Stop Light, Rhythm, Tug of War)
-        // When Game Controller Mode is OFF:
-        //   - X=Off, B=Blue, Y=Alliance Gradient, A=Red
-        
-        // Driver A button (Green - P1 in Knockout, Simon, or game action)
-        kDriverAButton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonGreenButton(),       // Simon Says: Green
-                    Commands.either(
-                        lights.knockoutP1GreenButton(),  // Color Knockout: P1 Green
-                        lights.gameButtonPressed(),      // Other games: game action
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                lights.setSolidRed(),                // Game mode OFF: Red
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
-        
-        // Driver B button (Red - P1 in Knockout/Simon)
-        kDriverBbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonRedButton(),         // Simon Says: Red
-                    Commands.either(
-                        lights.knockoutP1RedButton(),    // Color Knockout: P1 Red
-                        Commands.none(),                 // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                     // Game mode OFF: do nothing (used by vision)
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
-        
-        // Driver X button (Blue - P1 in Knockout/Simon)
-        kDriverXbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonBlueButton(),        // Simon Says: Blue
-                    Commands.either(
-                        lights.knockoutP1BlueButton(),   // Color Knockout: P1 Blue
-                        Commands.none(),                 // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                     // Game mode OFF: do nothing
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
-        
-        // Driver Y button (Yellow - P1 in Knockout/Simon)
-        kDriverYbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonYellowButton(),      // Simon Says: Yellow
-                    Commands.either(
-                        lights.knockoutP1YellowButton(), // Color Knockout: P1 Yellow
-                        Commands.none(),                 // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                     // Game mode OFF: do nothing (used by vision)
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
-        
-        // Operator A button (Green - P2 in Knockout, Simon, or game action)
+
+        // ==================== BASIC LIGHT CONTROLS (Operator D-pad) ====================
+        // These two buttons always work regardless of game mode.
+        kLeftDpad.button.onTrue(lights.setOff());           // D-pad Left = Lights Off
+        kRightDpad.button.onTrue(lights.setSKBlueGradient()); // D-pad Right = SK Gradient
+
+        // Serious light effects (Alliance Gradient, Solid colors, etc.) are controlled
+        // via the "Lights/Light Effect" dropdown on SmartDashboard.
+
+        // ==================== GAME MODE TOGGLE (Operator Back) ====================
+        // Back button toggles game controller mode on/off.
+        // When game mode is ON, Operator ABXY become game interaction buttons.
+        // When game mode is OFF, Operator ABXY are free for other subsystems (turret, etc).
+        kBackbutton.button.onTrue(lights.toggleGameModeCommand());
+
+        // ==================== GAME MODE BUTTONS (Operator ABXY) ====================
+        // These buttons ONLY do something when Game Controller Mode is ON.
+        // When Game Controller Mode is OFF, they do nothing for lights,
+        // leaving them free for turret/launcher bindings.
+        //
+        // When ON:
+        //   - Simon Says: A=Green, B=Red, X=Blue, Y=Yellow
+        //   - Color Knockout: A=Green, B=Red, X=Blue, Y=Yellow (P2)
+        //   - Other games: A = game action
+
+        // Operator A button (Green / game action)
         kAbutton.button.onTrue(
             Commands.either(
                 Commands.either(
-                    lights.simonGreenButton(),       // Simon Says: Green
+                    lights.simonGreenButton(),              // Simon Says: Green
                     Commands.either(
-                        lights.knockoutP2GreenButton(),  // Color Knockout: P2 Green
-                        lights.gameButtonPressedAlt(),   // Other games: game action (pulls right in Tug)
+                        lights.knockoutP2GreenButton(),     // Color Knockout: P2 Green
+                        lights.gameButtonPressedAlt(),      // Other games: game action
                         () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
                     ),
                     () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
                 ),
-                lights.setSolidRed(),                // Game mode OFF: Red
+                Commands.none(),                            // Game mode OFF: do nothing
                 lights::isGameModeEnabled
             ).ignoringDisable(true)
         );
-        
-        // Operator B button (Red - P2 in Knockout/Simon, Blue light when off)
+
+        // Operator B button (Red)
         kBbutton.button.onTrue(
             Commands.either(
                 Commands.either(
-                    lights.simonRedButton(),         // Simon Says: Red
+                    lights.simonRedButton(),                // Simon Says: Red
                     Commands.either(
-                        lights.knockoutP2RedButton(),    // Color Knockout: P2 Red
-                        Commands.none(),                 // Other games: nothing
+                        lights.knockoutP2RedButton(),       // Color Knockout: P2 Red
+                        Commands.none(),                    // Other games: nothing
                         () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
                     ),
                     () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
                 ),
-                lights.setSolidBlue(),               // Game mode OFF: Blue light
+                Commands.none(),                            // Game mode OFF: do nothing
                 lights::isGameModeEnabled
             ).ignoringDisable(true)
         );
-        
-        // Operator X button (Blue - P2 in Knockout/Simon, Off when off)
+
+        // Operator X button (Blue)
         kXbutton.button.onTrue(
             Commands.either(
                 Commands.either(
-                    lights.simonBlueButton(),        // Simon Says: Blue
+                    lights.simonBlueButton(),               // Simon Says: Blue
                     Commands.either(
-                        lights.knockoutP2BlueButton(),   // Color Knockout: P2 Blue
-                        Commands.none(),                 // Other games: nothing
+                        lights.knockoutP2BlueButton(),      // Color Knockout: P2 Blue
+                        Commands.none(),                    // Other games: nothing
                         () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
                     ),
                     () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
                 ),
-                lights.setOff(),                     // Game mode OFF: Lights off
+                Commands.none(),                            // Game mode OFF: do nothing
                 lights::isGameModeEnabled
             ).ignoringDisable(true)
         );
-        
-        // Operator Y button (Yellow - P2 in Knockout/Simon, Alliance Gradient when off)
+
+        // Operator Y button (Yellow)
         kYbutton.button.onTrue(
             Commands.either(
                 Commands.either(
-                    lights.simonYellowButton(),      // Simon Says: Yellow
+                    lights.simonYellowButton(),             // Simon Says: Yellow
                     Commands.either(
-                        lights.knockoutP2YellowButton(), // Color Knockout: P2 Yellow
-                        Commands.none(),                 // Other games: nothing
+                        lights.knockoutP2YellowButton(),    // Color Knockout: P2 Yellow
+                        Commands.none(),                    // Other games: nothing
                         () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
                     ),
                     () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
                 ),
-                lights.setAllianceGradient(),        // Game mode OFF: Alliance Gradient
+                Commands.none(),                            // Game mode OFF: do nothing
                 lights::isGameModeEnabled
             ).ignoringDisable(true)
         );

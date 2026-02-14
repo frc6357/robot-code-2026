@@ -64,6 +64,9 @@ public class SK26Lights extends SubsystemBase {
     // Fun mode
     private final SendableChooser<LightMode> funEffectChooser = new SendableChooser<>();
     private boolean funModeEnabled = false;
+
+    // Light effect chooser - serious/useful effects controllable from SmartDashboard
+    private final SendableChooser<LightMode> lightEffectChooser = new SendableChooser<>();
     
     // Game controller mode - when enabled, A buttons interact with games instead of lights
     private boolean gameModeEnabled = false;
@@ -90,6 +93,9 @@ public class SK26Lights extends SubsystemBase {
 
         // Setup fun effect chooser
         setupFunEffectChooser();
+
+        // Setup light effect chooser (serious/useful effects for SmartDashboard)
+        setupLightEffectChooser();
     }
 
     private void setupFunEffectChooser() {
@@ -157,6 +163,28 @@ public class SK26Lights extends SubsystemBase {
         SmartDashboard.putBoolean("Lights/Game Controller Mode", false);
     }
 
+    /**
+     * Sets up the light effect chooser for serious/useful effects on SmartDashboard.
+     * These are the "real" light effects (alliance colors, team colors, etc.)
+     * controlled via the "Lights/Light Effect" dropdown instead of physical buttons.
+     */
+    private void setupLightEffectChooser() {
+        lightEffectChooser.setDefaultOption("Off", LightMode.OFF);
+        lightEffectChooser.addOption("Alliance Gradient", LightMode.ALLIANCE_GRADIENT);
+        lightEffectChooser.addOption("Alliance Solid", LightMode.ALLIANCE_SOLID);
+        lightEffectChooser.addOption("Alliance Flash White", LightMode.ALLIANCE_FLASH_WHITE);
+        lightEffectChooser.addOption("Breathing SK Blue", LightMode.BREATHING_SKBLUE);
+        lightEffectChooser.addOption("SK Blue Gradient", LightMode.SKBLUE_GRADIENT);
+        lightEffectChooser.addOption("Solid White", LightMode.SOLID_WHITE);
+        lightEffectChooser.addOption("Solid Red", LightMode.SOLID_RED);
+        lightEffectChooser.addOption("Solid Blue", LightMode.SOLID_BLUE);
+        lightEffectChooser.addOption("Solid Green", LightMode.SOLID_GREEN);
+        lightEffectChooser.addOption("Solid Orange", LightMode.SOLID_ORANGE);
+        lightEffectChooser.addOption("Rainbow", LightMode.RAINBOW);
+
+        SmartDashboard.putData("Lights/Light Effect", lightEffectChooser);
+    }
+
     // ==================== PERIODIC ====================
 
     @Override
@@ -167,6 +195,7 @@ public class SK26Lights extends SubsystemBase {
         gameModeEnabled = SmartDashboard.getBoolean("Lights/Game Controller Mode", false);
         
         if (funModeEnabled) {
+            // Fun mode paints over everything
             autoLightsEnabled = false;
             LightMode selectedEffect = funEffectChooser.getSelected();
             if (selectedEffect != null) {
@@ -175,6 +204,13 @@ public class SK26Lights extends SubsystemBase {
             }
         } else if (autoLightsEnabled) {
             updateAutoLights();
+        } else {
+            // Light effect chooser is the base layer when nothing else is active
+            LightMode selectedEffect = lightEffectChooser.getSelected();
+            if (selectedEffect != null) {
+                currentMode = selectedEffect;
+                ledStatus = "Light Effect: " + selectedEffect.toString();
+            }
         }
 
         if (runCalibrationTest) {
@@ -507,6 +543,18 @@ public class SK26Lights extends SubsystemBase {
     }
 
     // ==================== GAME BUTTON ====================
+
+    /**
+     * Toggles game controller mode on/off.
+     * When ON, Operator ABXY buttons interact with light games.
+     * When OFF, Operator ABXY buttons are free for other subsystems.
+     */
+    public Command toggleGameModeCommand() {
+        return runOnce(() -> {
+            gameModeEnabled = !gameModeEnabled;
+            SmartDashboard.putBoolean("Lights/Game Controller Mode", gameModeEnabled);
+        }).ignoringDisable(true).withName("Toggle Game Mode");
+    }
 
     /**
      * Universal game button - handles interaction for all interactive light games.
