@@ -16,9 +16,13 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
 import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+import static frc.robot.Konstants.kCANivoreName;
+import static frc.robot.Konstants.DriveConstants.kPigeonID;
+import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 import com.ctre.phoenix6.CANBus;
 
@@ -46,10 +50,11 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kAbutton = new SKTrigger(kDriver, kA.value, BUTTON);
-        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
+        public static final SKTrigger kDriverGameButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        // Light game buttons for Simon Says (Driver)
+        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);
@@ -72,6 +77,7 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+        
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -130,7 +136,13 @@ public class Ports
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
     }
 
-    public static class LightsPorts
+    public static class LightsPorts{
+        public static final CANBus canBus = CANBus.roboRIO();
+        //assign an ID of 48 to the CANdle
+        public static final CANPort kCANdle = new CANPort(48, canBus.getName()); // CAN ID for the CANdle controller
+    }
+
+    public static class EndEffectorPorts
     {
         private static final String busName = "";
         //assign an ID of 48 to the CANdle
@@ -145,7 +157,6 @@ public class Ports
         public static final CANPort kTurretMotor = new CANPort(55, busName);
         public static final CANPort kTurretEncoder = new CANPort(57, busName);
     }
-
 
     // public static class ExamplePorts
     // {

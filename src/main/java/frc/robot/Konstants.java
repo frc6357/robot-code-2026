@@ -35,6 +35,10 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.GeneratedConstants;
 import frc.robot.subsystems.drive.SKTargetPoint;
 
@@ -199,13 +203,40 @@ public final class Konstants
          * acceleration will not cause the robot to tip over.*/
         public static final double kMaxFullSpeedElevatorHeight = 2.0;
     }
-
-    public static final class LightConstants
+    
+    public static final class SystemConstants
     {
-        public static final int numLedOnBot = 240;
+        // Brownout detection
+        // public static final double kBrownoutVoltageThreshold = 7.0; // Voltage threshold for brownout detection
+        // public static final int kPdhCAN_ID = 63;
+        // public static final PowerDistribution PDH = new PowerDistribution(kPdhCAN_ID, ModuleType.kRev);
+        // public static final Trigger kBrownoutTrigger = new Trigger(() -> PDH.getVoltage() < kBrownoutVoltageThreshold);
+
+    }
+
+    public static final class LightsConstants
+    {
+        public static final int kNumLedOnBot = 60;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
-    }
+
+        public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
+        public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
+
+        public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
+        public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
+        public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
+        public static final Color kSKDarkBlue = new Color(0 / 255.0, 118 / 255.0, 133 / 255.0);
+
+
+        // Wave animation constants - control the speed and appearance of the wave effect
+        public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)
+        public static final double kWaveSpatialCycles = 2.0; // How many complete wave patterns fit across the entire LED strip
+        public static final double kWaveColorCycleSec = 2.2; // How long it takes for the color gradient to cycle through all colors (seconds)
+
+    }   
+
+
 
     public static final class IndexerConstants
     {

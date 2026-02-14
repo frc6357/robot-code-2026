@@ -3,5 +3,6 @@
     "vision": false,
     "turret": true,
     "launcher": false,
-    "bangbanglauncher": false
+    "bangbanglauncher": false,
+    "lights": true
 }

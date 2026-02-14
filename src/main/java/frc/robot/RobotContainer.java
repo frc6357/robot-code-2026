@@ -36,9 +36,11 @@ import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
 import frc.robot.subsystems.SK26Launcher;
+import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.vision.SKVision;
+import frc.robot.subsystems.lights.SK26Lights;
 
 
 /**
@@ -65,6 +67,7 @@ public class RobotContainer {
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
+  public Optional<SK26Lights> m_lightsContainer = Optional.empty();
 
 
   public static SKSwerve m_swerveInstance;
@@ -72,6 +75,7 @@ public class RobotContainer {
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
   public static SK26Launcher m_standardLauncherInstance;
+  public static SK26Lights m_lightsInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -92,9 +96,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = AutoBuilder.buildAutoChooser();
+    // autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    // SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
@@ -137,6 +141,12 @@ public class RobotContainer {
                 m_StandardLauncherContainer = Optional.of(new SK26Launcher());
                 m_standardLauncherInstance = m_StandardLauncherContainer.get();
             }
+            if(subsystems.isLightsPresent()) {
+                m_lightsContainer = Optional.of(new SK26Lights());
+                m_lightsInstance = m_lightsContainer.get();
+            }
+
+
         }
         catch (IOException e)
         {
@@ -159,6 +169,7 @@ public class RobotContainer {
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
+        buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
@@ -182,7 +193,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand()
     {
-        return Commands.sequence(Commands.waitSeconds(0.01), autoCommandSelector.getSelected());
+        return autoCommandSelector.getSelected();
     }
 
     public void testPeriodic()
@@ -207,8 +218,7 @@ public class RobotContainer {
         
     }
 
-    public void teleopInit()
-    {
+    public void teleopInit(){
     }
 
     public void autonomousInit()
