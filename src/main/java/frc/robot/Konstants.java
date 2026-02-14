@@ -177,7 +177,7 @@ public final class Konstants
     public static final class ClimbConstants
     {
         public static final double kClimbMotorSpeed = .05;
-        public static final Pref<Double> kClimbP = SKPreferences.attach("kClimbP", 0.1);
+        public static final Double kClimbP = 0.5;
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbV = 0;

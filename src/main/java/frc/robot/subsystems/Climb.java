@@ -1,13 +1,21 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLimitSwitch;
+import com.revrobotics.spark.SparkRelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 
 import static frc.robot.Ports.ClimbPorts.kClimbEncoder;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
@@ -36,9 +44,13 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Climb extends SubsystemBase
 {
 
-    TalonFX climbMotor; // figure out if actually spark. depends on what motor is being used.
+    SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
     DigitalInput cLimitSwitch;
     PositionVoltage request;
+    SparkLimitSwitch forwardLimit;
+    SparkLimitSwitch reverseLimit;
+    
+    SparkClosedLoopController cPID;
 
     final double motorRatio = 1.0; //change once we know gear ratio
     final double climbFactor = 1.0; // change once fingure out what the conversion factor is from the encoder to the height
@@ -46,9 +58,9 @@ public class Climb extends SubsystemBase
     double cTargetHieight = 0.0;
     double cCurrentHeight = 0.0;
 
-    TalonFXConfiguration climbConfig;
+    SparkFlexConfig climbConfig;
 
-    CANcoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
+    public RelativeEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
 
     SparkClosedLoopController cpid;
 
@@ -56,22 +68,33 @@ public class Climb extends SubsystemBase
 
     public Climb()
     {
-        climbMotor = new TalonFX(kClimbMotor.ID);
-        cEncoder = new CANcoder(kClimbEncoder.ID);// figure out how to do encoder
+        climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
+        cEncoder = climbMotor.getEncoder(); 
         cLimitSwitch = new DigitalInput(0);
         request = new PositionVoltage(0).withSlot(0);
+        forwardLimit = climbMotor.getForwardLimitSwitch();
+        reverseLimit = climbMotor.getReverseLimitSwitch();
 
-        climbConfig = new TalonFXConfiguration();
-        climbConfig.Slot0.kP = kClimbP.get();
-        climbConfig.Slot0.kI = kClimbI;
-        climbConfig.Slot0.kD = kClimbD;
-        climbConfig.Slot0.kV = kClimbV;
+        climbConfig = new SparkFlexConfig();
 
-        climbMotor.getConfigurator().apply(climbConfig);
+        climbConfig.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(kClimbP)
+        .i(kClimbI)
+        .d(kClimbD)
+        .maxMotion.maxVelocity(kClimbV);
+
+        //climbConfig = new TalonFXConfiguration();
+        //climbConfig.Slot0.kP = kClimbP.get();
+        //climbConfig.Slot0.kI = kClimbI;
+        //climbConfig.Slot0.kD = kClimbD;
+        //climbConfig.Slot0.kV = kClimbV;
+
+        /*climbMotor.getConfigurator().apply(climbConfig);
         kClimbP.onChange((newkClimbP) -> {
             climbConfig.Slot0.kP = newkClimbP;
             climbMotor.getConfigurator().apply(climbConfig);
-        });
+        });*/
     }
 
 
@@ -109,7 +132,7 @@ public class Climb extends SubsystemBase
     // gets the current position of the climb
     public double getClimbPosition()
     {
-        double pos = cEncoder.getPosition().getValueAsDouble();
+        double pos = cEncoder.getPosition();
         return pos * climbFactor;
     }
 
@@ -126,13 +149,13 @@ public class Climb extends SubsystemBase
         
 
         double motorRotations =  targetHieight * motorRatio; // / scale factor of encode to height
-        climbMotor.setControl(request.withPosition(motorRotations));
+        cPID.setReference(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     // gets the current position of the encoder
     public double getEncoderPos()
     {
-        double pos = cEncoder.getPosition().getValueAsDouble();
+        double pos = cEncoder.getPosition();
         return pos;//cEncoder.getPosition();
     }
 
@@ -150,7 +173,7 @@ public class Climb extends SubsystemBase
     // checks if the climb arm is at its max height
     public boolean cAtMaxHeight()
     {
-        if(getEncoderPos() == kCLimbMax && isSwitchPressed())
+        if(getEncoderPos() == kCLimbMax)
         {
             return true;
         }
@@ -172,8 +195,10 @@ public class Climb extends SubsystemBase
     {
         super.initSendable(builder);
         builder.addDoubleProperty("Current Pos (CANCoder)", this::getClimbPosition, null);
-        builder.addDoubleProperty("Current Pos (Motor)", () -> climbMotor.getPosition().getValueAsDouble(), null);
+        //builder.addDoubleProperty("Current Pos (Motor)", () -> climbMotor.getPosition(), null);
         builder.addDoubleProperty("Target Pos", this::getClimbTargetPosition, null);
-        builder.addDoubleProperty("Motor out", climbMotor::get, null);       
+        builder.addDoubleProperty("Motor out", climbMotor::get, null);     
+        builder.addBooleanProperty("Forward Limit Swotch", forwardLimit::isPressed, null);  
+        builder.addBooleanProperty("Reverse Limit Switch", reverseLimit::isPressed, null);
     }
 }
