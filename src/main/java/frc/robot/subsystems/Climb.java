@@ -9,13 +9,17 @@ import com.revrobotics.spark.SparkRelativeEncoder;
 import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
 import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
 
 import static frc.robot.Ports.ClimbPorts.kClimbEncoder;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
@@ -84,6 +88,15 @@ public class Climb extends SubsystemBase
         .d(kClimbD)
         .maxMotion.maxVelocity(kClimbV);
 
+        climbConfig.limitSwitch
+        .forwardLimitSwitchType(Type.kNormallyOpen)
+        .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
+        .reverseLimitSwitchType(Type.kNormallyClosed)
+        .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+
+        climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+    
         //climbConfig = new TalonFXConfiguration();
         //climbConfig.Slot0.kP = kClimbP.get();
         //climbConfig.Slot0.kI = kClimbI;
