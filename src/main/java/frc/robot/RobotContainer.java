@@ -90,6 +90,7 @@ public class RobotContainer {
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
+  SendableChooser<Command> autoCommandSelector;
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -104,9 +105,9 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    // autoCommandSelector = AutoBuilder.buildAutoChooser("Taxi");
+    autoCommandSelector = AutoBuilder.buildAutoChooser("TrenchTaxi");
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-    // SmartDashboard.putData("Select an Auto", autoCommandSelector);
+    SmartDashboard.putData("Select an Auto", autoCommandSelector);
   }
   
   /**
@@ -209,8 +210,7 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand()
     {
-        return Commands.none();
-        //return autoCommandSelector.getSelected();
+        return autoCommandSelector.getSelected();
     }
 
     public void testPeriodic()
