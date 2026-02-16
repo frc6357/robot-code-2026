@@ -1,18 +1,19 @@
 package frc.robot.subsystems.pickupOB;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static frc.robot.Konstants.pickupOBConstants.*;
-import static frc.robot.Ports.pickupOBPorts.*;
+import static frc.robot.Konstants.pickupOBConstants.kEaterMotorSpeed;
+import static frc.robot.Konstants.pickupOBConstants.kPositionMotorMaxPosition;
+import static frc.robot.Konstants.pickupOBConstants.kPositionerMotorMinPosition;
+import static frc.robot.Konstants.pickupOBConstants.kPositionerMotorSpeed;
+import static frc.robot.Ports.pickupOBPorts.kEaterMotor;
+import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-//import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkRelativeEncoder;
+
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SK26PickupOB extends SubsystemBase {
  //Declarations

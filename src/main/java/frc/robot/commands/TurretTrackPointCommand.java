@@ -51,10 +51,6 @@ public class TurretTrackPointCommand extends Command
         // Get the target point position
         Translation2d target = targetPoint.getTargetPoint();
 
-        // Calculate the vector from robot to target
-        double dx = target.getX() - robotPosition.getX();
-        double dy = target.getY() - robotPosition.getY();
-
         // Calculate the field-relative angle to the target (in degrees)
         // atan2 gives angle from positive X-axis, counterclockwise positive
         double desiredAngle = Math.toDegrees(
