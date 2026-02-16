@@ -258,14 +258,6 @@ public final class Konstants
 
     }   
 
-
-
-    public static final class IndexerConstants
-    {
-        public static final double kFeederSpeed = 0.7;
-        public static final double kFeederStop = 0.0;
-    }
-
     public static final class TurretConstants
     {
         public static enum TurretPosition

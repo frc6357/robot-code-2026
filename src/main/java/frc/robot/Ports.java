@@ -186,6 +186,18 @@ public class Ports
         public static final CANPort kSpindexerMotor = new CANPort(41, busName);
     }
 
+    public static class pickupOBPorts
+    {
+        //bus name is null
+        private static final String busName = "kCandle";
+        public static final CANPort kCANdle = new CANPort(48, busName);
+
+        //assign a motor ID [PLACEHOLDERS}
+        public static final CANPort kPositionerMotor = new CANPort(59, busName); 
+        public static final CANPort kEaterMotor = new CANPort(60, busName);
+
+    }
+
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(70, busName);
