@@ -39,6 +39,9 @@ import frc.robot.subsystems.SK26Launcher;
 import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.bindings.PickupBinder;
+import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
 
@@ -68,21 +71,22 @@ public class RobotContainer {
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
+  public Optional<SK26PickupOB> m_pickupContainer = Optional.empty();
 
-
-  public static SKSwerve m_swerveInstance;
-  public static SKVision m_visionInstance;
+  
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
   public static SK26Launcher m_standardLauncherInstance;
   public static SK26Lights m_lightsInstance;
+  public static SKSwerve m_swerveInstance;
+  public static SKVision m_visionInstance;
+  public static SK26PickupOB m_pickupInstance;
 
   public static Field2d m_field = new Field2d();
 
   // The list containing all the command binding classes
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
 
-  SendableChooser<Command> autoCommandSelector;
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer()
@@ -145,8 +149,10 @@ public class RobotContainer {
                 m_lightsContainer = Optional.of(new SK26Lights());
                 m_lightsInstance = m_lightsContainer.get();
             }
-
-
+            if(subsystems.isPickupPresent()) {
+                m_pickupContainer = Optional.of(new SK26PickupOB());
+                m_pickupInstance = m_pickupContainer.get();
+            }
         }
         catch (IOException e)
         {
@@ -170,6 +176,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
+        buttonBinders.add(new PickupBinder(m_pickupContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
@@ -193,7 +200,8 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand()
     {
-        return autoCommandSelector.getSelected();
+        return Commands.none();
+        //return autoCommandSelector.getSelected();
     }
 
     public void testPeriodic()

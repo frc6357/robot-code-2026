@@ -325,9 +325,19 @@ public final class Konstants
     {
         public static final double kExampleSpeed = 0.5;  //percentage based where 1.0 is max power and 0.0 is minimum
     }
+
+    public static final class pickupOBConstants
+    {
+        public static final double kEaterMotorSpeed = 0.5;
+        public static final double kPositionerMotorSpeed = 0.5;
+
+        public static final double kPositionerMotorMinPosition = 0.5;
+        public static final double kPositionMotorMaxPosition = 0.5;
+    }
     
     public static final String kCANivoreName = "SwerveCANivore";
 
     /** The file that is used for system instantiation at runtime */
     public static final String SUBSYSTEMFILE = "Subsystems.json";
 }
+

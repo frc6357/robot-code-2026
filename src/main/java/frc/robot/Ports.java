@@ -77,6 +77,18 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+        // Reset gyro
+        public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+
+        //Intake (OB) Ports, exact buttons to be decided
+        public static final SKTrigger positionExtendButton = new SKTrigger(kDriver, 90, POV);
+        public static final SKTrigger positionRetractButton = new SKTrigger(kDriver, 270, POV);
+        public static final SKTrigger eaterEatButton = new SKTrigger(kDriver, 0, POV);
+        public static final SKTrigger eaterSpitButton = new SKTrigger(kDriver, 180, POV);
+
+        //Should be redundant
+        //public static final SKTrigger climbStopButton = new SKTrigger(kDriver, 90, POV);
+
         
     }
     /**
@@ -157,13 +169,15 @@ public class Ports
         public static final CANPort kTurretMotor = new CANPort(55, busName);
         public static final CANPort kTurretEncoder = new CANPort(57, busName);
     }
+    public static class pickupOBPorts
+    {
+        //bus name is null
+        private static final String busName = "kCandle";
+        public static final CANPort kCANdle = new CANPort(48, busName);
 
-    // public static class ExamplePorts
-    // {
-    //     //bus name is null
-    //     private static final String busName = "";
+        //assign a motor ID [PLACEHOLDERS}
+        public static final CANPort kPositionerMotor = new CANPort(59, busName); 
+        public static final CANPort kEaterMotor = new CANPort(60, busName);
 
-    //     //assign a motor ID of 49 to the example motor
-    //     public static final CANPort kExampleMotor = new CANPort(59, busName); 
-    // }
+    }
 }

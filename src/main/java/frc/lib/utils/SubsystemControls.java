@@ -15,16 +15,22 @@ public class SubsystemControls
     private final boolean launcher;
     private final boolean bangbanglauncher;
     private final boolean lights;
+    private final boolean pickup;
 
      /**  
      * @param swerve
      *            indicates if the swerve subsystem is present and should be enabled
      * @param lights
      *            indicates if the lights subsystem is present and should be enabled
+     * @param pickup
+     *            indicates if the pickup subsystem is present and should be enabled
      */
+
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,
+        @JsonProperty(required = true, value = "pickup")      boolean pickup
+,
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
         @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
@@ -38,6 +44,7 @@ public class SubsystemControls
         this.launcher = launcher;
         this.bangbanglauncher = bangbanglauncher;
         this.lights = lights;
+        this.pickup = pickup;
     }
 
 
@@ -65,5 +72,8 @@ public class SubsystemControls
     }
     public boolean isLightsPresent() {
         return lights;
+    }
+    public boolean isPickupPresent() {
+        return pickup;
     }
 }
