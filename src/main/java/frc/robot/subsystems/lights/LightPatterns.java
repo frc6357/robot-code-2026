@@ -2,6 +2,8 @@ package frc.robot.subsystems.lights;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Konstants.LightsConstants.kDefaultStrobeSeconds;
 import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
 import static frc.robot.Konstants.LightsConstants.kSKBlue;
 import static frc.robot.Konstants.LightsConstants.kSKCream;
@@ -33,6 +35,15 @@ public class LightPatterns {
     public final LEDPattern rainbow = LEDPattern.rainbow(255, 128);
     public final LEDPattern scrollingRainbow = 
         rainbow.scrollAtAbsoluteSpeed(MetersPerSecond.of(0.5), kLedSpacing);
+    
+    // Strobing effects
+    public final LEDPattern whiteStrobe = white.blink(kDefaultStrobeSeconds);
+    public final LEDPattern greenStrobe = green.blink(kDefaultStrobeSeconds);
+    public final LEDPattern redStrobe = red.blink(kDefaultStrobeSeconds);
+    public final LEDPattern blueStrobe = blue.blink(kDefaultStrobeSeconds);
+    public final LEDPattern yellowStrobe = yellow.blink(kDefaultStrobeSeconds);
+    public final LEDPattern orangeStrobe = orange.blink(kDefaultStrobeSeconds);
+    public final LEDPattern skBlueStrobe = skBlue.blink(kDefaultStrobeSeconds);
     
     // SK Blue gradient
     public final LEDPattern skBlueGradient = LEDPattern.gradient(

@@ -8,6 +8,7 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
@@ -36,6 +37,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -250,6 +252,7 @@ public final class Konstants
         public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
         public static final Color kSKDarkBlue = new Color(0 / 255.0, 118 / 255.0, 133 / 255.0);
 
+        public static final Time kDefaultStrobeSeconds = Seconds.of(0.1);
 
         // Wave animation constants - control the speed and appearance of the wave effect
         public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)
