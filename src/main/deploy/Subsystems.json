@@ -1,10 +1,10 @@
 {
     "swerve": true,
-    "vision": true,
-    "turret": true,
+    "vision": false,
+    "turret": false,
     "launcher": false,
-    "bangbanglauncher": true,
-    "lights": true,
-    "indexer": true,
-    "pickup": true
+    "bangbanglauncher": false,
+    "lights": false,
+    "indexer": false,
+    "pickup": false
 }
