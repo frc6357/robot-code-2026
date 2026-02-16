@@ -16,6 +16,30 @@
     }
   },
   {
+    "name": "/Preferences/turretP",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/turretI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/turretD",
+    "type": "double",
+    "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/TorqueCurrent Output (A)",
     "type": "double",
     "value": 54.0,
