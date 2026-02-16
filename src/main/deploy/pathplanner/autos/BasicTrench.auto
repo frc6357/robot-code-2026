@@ -1,0 +1,19 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BasicTrench_Move"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Right Trench",
+  "choreoAuto": false
+}
