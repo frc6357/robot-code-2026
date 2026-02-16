@@ -55,7 +55,6 @@ public class Ports
         
         // ABXY:
         public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
-        // Light game buttons for Simon Says (Driver)
         public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
         public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
         public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
@@ -81,19 +80,6 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kDriver, kRightStick.value, BUTTON);
-        // Reset gyro
-        public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
-
-        //Intake (OB) Ports, exact buttons to be decided
-        public static final SKTrigger positionExtendButton = new SKTrigger(kDriver, 90, POV);
-        public static final SKTrigger positionRetractButton = new SKTrigger(kDriver, 270, POV);
-        public static final SKTrigger eaterEatButton = new SKTrigger(kDriver, 0, POV);
-        public static final SKTrigger eaterSpitButton = new SKTrigger(kDriver, 180, POV);
-
-        //Should be redundant
-        //public static final SKTrigger climbStopButton = new SKTrigger(kDriver, 90, POV);
-
-        
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -133,11 +119,6 @@ public class Ports
         public static final SKTrigger kLBbutton = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         public static final SKTrigger kRBbutton = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
         
-
-        // Indexer Buttons
-        public static final SKTrigger kIndexFeed = new SKTrigger(kOperator,kRightBumper.value, BUTTON);
-        public static final SKTrigger kIndexUnjam = new SKTrigger(kOperator,kLeftBumper.value, BUTTON);
-
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kOperator, 0, POV);
         public static final SKTrigger kRightDpad = new SKTrigger(kOperator, 90, POV);

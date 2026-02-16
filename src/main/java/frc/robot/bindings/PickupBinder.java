@@ -1,10 +1,12 @@
 package frc.robot.bindings;
 
-import static frc.robot.Ports.OperatorPorts.*;
-import static frc.robot.Ports.DriverPorts.*;
-
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.commands.*;
+
+import static frc.robot.Ports.OperatorPorts.kDownDpad;
+import static frc.robot.Ports.OperatorPorts.kLeftDpad;
+import static frc.robot.Ports.OperatorPorts.kRightDpad;
+import static frc.robot.Ports.OperatorPorts.kUpDpad;
 
 import java.util.Optional;
 
@@ -19,15 +21,13 @@ public class PickupBinder implements CommandBinder {
     Trigger retract;
     Trigger eat;
     Trigger spit;
-    //Trigger stop;
 
     public PickupBinder(Optional<SK26PickupOB> pobSys) {
         subsystem = pobSys;
-        extend = positionExtendButton.button;
-        retract = positionRetractButton.button;
-        eat = eaterEatButton.button;
-        spit = eaterSpitButton.button;
-        // stop = climbStopButton.button;
+        extend = kRightDpad.button;
+        retract = kLeftDpad.button;
+        eat = kUpDpad.button;
+        spit = kDownDpad.button;
     }
 
     public void bindButtons() 

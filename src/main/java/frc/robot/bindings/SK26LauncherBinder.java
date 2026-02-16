@@ -10,12 +10,10 @@ import frc.robot.commands.RunLauncherWithVelCommand;
 import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
 import frc.robot.subsystems.launcher.SK26Launcher;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
 import static frc.robot.Konstants.LauncherConstants.kTargetlaunchVelocity;
 import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
-import static frc.robot.Ports.OperatorPorts.kLBbutton;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 public class SK26LauncherBinder implements CommandBinder {
@@ -43,16 +41,9 @@ public class SK26LauncherBinder implements CommandBinder {
             // SK26Launcher launcher = launcherSubsystem.get();
             SK26Launcher launcher = launcherSubsystem.get();
 
-            //TODO: Use the Trigger methods of ".and()", ".or()", and ".negate()" to make this cleaner and not access the boolean on initial runtime
-            if(ShootExitVel.getAsBoolean() && UnJam.getAsBoolean()) {
-                ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
-            } else if(ShootRPS.getAsBoolean() && UnJam.getAsBoolean()) {
-                ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
-            } else {
-                ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
-                ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
-                UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
-            }
+            ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
+            ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
+            UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
         }
     }
     

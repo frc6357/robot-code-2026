@@ -1,20 +1,14 @@
 package frc.robot.bindings;
 
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Ports.IndexerPorts;
-
-import frc.robot.commands.IndexerFeedCommand;
-import frc.robot.commands.commandGroups.UnjamCommand;
-import frc.robot.subsystems.indexer.SK26Indexer;
-
-import static frc.robot.Konstants.IndexerConstants.*;
+import static frc.robot.Ports.OperatorPorts.kLBbutton;
+import static frc.robot.Ports.OperatorPorts.kRBbutton;
 
 import java.util.Optional;
 
-import static frc.robot.Ports.OperatorPorts.kIndexFeed;
-import static frc.robot.Ports.OperatorPorts.kIndexUnjam;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.IndexerFeedCommand;
+import frc.robot.commands.commandGroups.UnjamCommand;
+import frc.robot.subsystems.indexer.SK26Indexer;
 
 public class SK26IndexerBinder implements CommandBinder{
 
@@ -26,8 +20,8 @@ public class SK26IndexerBinder implements CommandBinder{
 
     public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem){
         this.indexerSubsystem = indexerSubsystem;
-        this.IndexFeed = kIndexFeed.button;
-        this.IndexUnjam = kIndexUnjam.button;
+        this.IndexFeed = kRBbutton.button;
+        this.IndexUnjam = kLBbutton.button;
     }
 
     public void bindButtons(){
