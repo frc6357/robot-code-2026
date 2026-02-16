@@ -1,0 +1,70 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.466034236804564,
+        "y": 0.6515406562054205
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 4.216897797243344,
+        "y": 0.6307792862419879
+      },
+      "isLocked": true,
+      "linkedName": "TestRTrench"
+    },
+    {
+      "anchor": {
+        "x": 5.721084165477888,
+        "y": 0.7809272467902997
+      },
+      "prevControl": {
+        "x": 5.350664546660707,
+        "y": 0.526925222458519
+      },
+      "nextControl": {
+        "x": 6.173937232524963,
+        "y": 1.0914550641940082
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 5.953980028530669,
+        "y": 2.695848787446506
+      },
+      "prevControl": {
+        "x": 5.979857346647646,
+        "y": 1.9195292439372325
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": null,
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 0.0
+  },
+  "useDefaultConstraints": true
+}
