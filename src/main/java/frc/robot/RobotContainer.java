@@ -31,6 +31,7 @@ import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26StateBinder;
+import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.subsystems.SK26Turret;
 import frc.robot.bindings.SKTargetPointsBinder;
@@ -44,6 +45,7 @@ import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
+import frc.robot.subsystems.SK26Indexer;
 
 
 /**
@@ -72,6 +74,7 @@ public class RobotContainer {
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26PickupOB> m_pickupContainer = Optional.empty();
+  public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
 
   
   public static SK26Turret m_turretInstance;
@@ -81,6 +84,7 @@ public class RobotContainer {
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
   public static SK26PickupOB m_pickupInstance;
+  public static SK26Indexer m_indexerInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -153,6 +157,10 @@ public class RobotContainer {
                 m_pickupContainer = Optional.of(new SK26PickupOB());
                 m_pickupInstance = m_pickupContainer.get();
             }
+            if(subsystems.isIndexerPresent()) {
+                m_indexerContainer = Optional.of(new SK26Indexer());
+                m_indexerInstance = m_indexerContainer.get(); // Returns new SKSwerve
+            }
         }
         catch (IOException e)
         {
@@ -177,6 +185,7 @@ public class RobotContainer {
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new PickupBinder(m_pickupContainer));
+        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

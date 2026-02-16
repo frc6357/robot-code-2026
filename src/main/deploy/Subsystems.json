@@ -4,5 +4,6 @@
     "turret": true,
     "launcher": false,
     "bangbanglauncher": false,
-    "lights": true
+    "lights": true,
+    "indexer": true
 }

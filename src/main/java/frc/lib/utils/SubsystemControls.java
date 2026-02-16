@@ -16,6 +16,7 @@ public class SubsystemControls
     private final boolean bangbanglauncher;
     private final boolean lights;
     private final boolean pickup;
+    private final boolean indexer;
 
      /**  
      * @param swerve
@@ -34,7 +35,8 @@ public class SubsystemControls
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
         @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
-        @JsonProperty(required = true, value = "lights")      boolean lights 
+        @JsonProperty(required = true, value = "lights")      boolean lights,
+        @JsonProperty(required = true, value = "indexer")     boolean indexer
     )
 
     {
@@ -45,6 +47,7 @@ public class SubsystemControls
         this.bangbanglauncher = bangbanglauncher;
         this.lights = lights;
         this.pickup = pickup;
+        this.indexer = indexer;
     }
 
 
@@ -75,5 +78,8 @@ public class SubsystemControls
     }
     public boolean isPickupPresent() {
         return pickup;
+    }
+    public boolean isIndexerPresent() {
+        return indexer;
     }
 }

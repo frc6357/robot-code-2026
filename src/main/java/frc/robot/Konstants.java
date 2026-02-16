@@ -4,6 +4,7 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -33,6 +34,7 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.PowerDistribution;
@@ -185,6 +187,26 @@ public final class Konstants
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
+    }
+
+    public static final class IndexerConstants {
+
+        // Indexer feed speed in Rotations Per Second (RPS)
+        public static final double kIndexerFeedRPS = 8.0;
+
+        // Indexer idle speed in Rotations Per Second (RPS)
+        public static final double kIndexerIdleRPS = 0.0;
+
+        // Indexer unjam parameters
+        public static final double kIndexerUnjamReverseRPS = -4.0;
+        public static final double kIndexerUnjamReverseDuration = 0.25;
+
+        public static final double kIndexerUnjamWaitDuration = 0.25;
+
+        public static final double kIndexerUnjamForwardRPS = 5.0;
+        public static final double kIndexerUnjamForwardDuration = 0.25;
+
+        public static final Distance kIndexerHeight = Inches.of(18);
     }
 
     /** Constants that are used when defining filters for controllers */

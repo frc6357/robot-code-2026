@@ -22,9 +22,13 @@ import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
-import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.configs.ToFParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
@@ -128,6 +132,11 @@ public class Ports
         // Bumpers:
         public static final SKTrigger kLBbutton = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         public static final SKTrigger kRBbutton = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
+        
+
+        // Indexer Buttons
+        public static final SKTrigger kIndexFeed = new SKTrigger(kOperator,kRightBumper.value, BUTTON);
+        public static final SKTrigger kIndexUnjam = new SKTrigger(kOperator,kLeftBumper.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kOperator, 0, POV);
@@ -169,15 +178,57 @@ public class Ports
         public static final CANPort kTurretMotor = new CANPort(55, busName);
         public static final CANPort kTurretEncoder = new CANPort(57, busName);
     }
-    public static class pickupOBPorts
-    {
-        //bus name is null
-        private static final String busName = "kCandle";
-        public static final CANPort kCANdle = new CANPort(48, busName);
 
-        //assign a motor ID [PLACEHOLDERS}
-        public static final CANPort kPositionerMotor = new CANPort(59, busName); 
-        public static final CANPort kEaterMotor = new CANPort(60, busName);
+    public static class IndexerPorts
+    {
+        private static final String busName = "";
+        public static final CANPort kIndexerMotor = new CANPort(55, busName);
+        public static final CANPort kSpindexerMotor = new CANPort(41, busName);
+    }
+
+    public static class Sensors {
+        private static final String busName = "";
+        public static final CANPort kCANrange = new CANPort(70, busName);
+        public static final CANPort kLauncherSensor = new CANPort(10, busName);
+        public static final CANPort kIntakeSensor1 = new CANPort(11, busName);
+        public static final CANPort kIntakeSensor2 = new CANPort(12, busName);
+
+        public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor1 = new CANrange(kIntakeSensor1.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+
+        private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+        private static CANrangeConfiguration beamConfig = new CANrangeConfiguration()
+            .withFovParams(new FovParamsConfigs().withFOVCenterX(0)
+                                                 .withFOVCenterY(0)
+                                                 .withFOVRangeX(6.25)
+                                                 .withFOVRangeY(6.25))
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+
+        // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        // public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
+        // public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
+
+        /* Sensor configurating */
+        static {
+            hopperSensor.getConfigurator().apply(tofConfig);
+            launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+        }
+
 
     }
+
+
+    // public static class ExamplePorts
+    // {
+    //     //bus name is null
+    //     private static final String busName = "";
+
+    //     //assign a motor ID of 49 to the example motor
+    //     public static final CANPort kExampleMotor = new CANPort(59, busName); 
+    // }
 }
