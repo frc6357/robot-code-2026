@@ -4,7 +4,7 @@ import static frc.robot.Konstants.IndexerConstants.*;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.subsystems.SK26Indexer;
+import frc.robot.subsystems.indexer.SK26Indexer;
 
 public class UnjamCommand extends SequentialCommandGroup {
   public UnjamCommand(SK26Indexer indexer, SK26Indexer spindexer ) {

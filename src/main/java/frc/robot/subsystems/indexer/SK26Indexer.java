@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.indexer;
 
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;

@@ -7,8 +7,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.TurretJoystickCommand;
 import frc.robot.commands.TurretTemporaryButtonCommand;
 import frc.robot.commands.TurretTrackPointCommand;
-import frc.robot.subsystems.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.Field;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 

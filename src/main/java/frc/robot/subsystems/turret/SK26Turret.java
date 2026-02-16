@@ -1,9 +1,9 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.turret;
 
 // Imports from the robot
 import static frc.robot.Konstants.TurretConstants.*;
-import static frc.robot.Ports.LauncherPorts.kTurretMotor;
-import static frc.robot.Ports.LauncherPorts.kTurretEncoder;
+import static frc.robot.Ports.TurretPorts.kTurretMotor;
+import static frc.robot.Ports.TurretPorts.kTurretEncoder;
 
 import frc.lib.preferences.SKPreferences;
 import lombok.Getter;

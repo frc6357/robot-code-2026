@@ -1,6 +1,5 @@
 package frc.robot.bindings;
 
-import frc.robot.subsystems.SK26Indexer;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -8,6 +7,7 @@ import frc.robot.Ports.IndexerPorts;
 
 import frc.robot.commands.IndexerFeedCommand;
 import frc.robot.commands.commandGroups.UnjamCommand;
+import frc.robot.subsystems.indexer.SK26Indexer;
 
 import static frc.robot.Konstants.IndexerConstants.*;
 

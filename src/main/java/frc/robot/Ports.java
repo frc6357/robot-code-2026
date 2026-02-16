@@ -157,53 +157,43 @@ public class Ports
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
     }
 
-    public static class LightsPorts{
-        public static final CANBus canBus = CANBus.roboRIO();
-        //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(48, canBus.getName()); // CAN ID for the CANdle controller
-    }
-
-    public static class EndEffectorPorts
-    {
-        private static final String busName = "";
-        //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(48, busName);
-    }
-
     public static class LauncherPorts {
         
         private static final String busName = "";
-        public static final CANPort kFixedLauncherMotor = new CANPort(50, busName);
-        public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
-        public static final CANPort kTurretMotor = new CANPort(55, busName);
-        public static final CANPort kTurretEncoder = new CANPort(57, busName);
+        public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
+        public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
+    }
+
+    public static class TurretPorts {
+        private static final String busName = "";
+        public static final CANPort kTurretMotor = new CANPort(50, busName);
+        public static final CANPort kTurretEncoder = new CANPort(51, busName);
     }
 
     public static class IndexerPorts
     {
         private static final String busName = "";
-        public static final CANPort kIndexerMotor = new CANPort(55, busName);
-        public static final CANPort kSpindexerMotor = new CANPort(41, busName);
+        public static final CANPort kIndexerMotor = new CANPort(62, busName);
+        public static final CANPort kSpindexerMotor = new CANPort(60, busName);
     }
 
     public static class pickupOBPorts
     {
         //bus name is null
-        private static final String busName = "kCandle";
-        public static final CANPort kCANdle = new CANPort(48, busName);
+        private static final String busName = "";
 
         //assign a motor ID [PLACEHOLDERS}
-        public static final CANPort kPositionerMotor = new CANPort(59, busName); 
-        public static final CANPort kEaterMotor = new CANPort(60, busName);
+        public static final CANPort kPositionerMotor = new CANPort(30, busName); 
+        public static final CANPort kEaterMotor = new CANPort(31, busName);
 
     }
 
     public static class Sensors {
         private static final String busName = "";
-        public static final CANPort kCANrange = new CANPort(70, busName);
-        public static final CANPort kLauncherSensor = new CANPort(10, busName);
-        public static final CANPort kIntakeSensor1 = new CANPort(11, busName);
-        public static final CANPort kIntakeSensor2 = new CANPort(12, busName);
+        public static final CANPort kCANrange = new CANPort(61, busName);
+        public static final CANPort kLauncherSensor = new CANPort(42, busName);
+        public static final CANPort kIntakeSensor1 = new CANPort(32, busName);
+        public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
 
         public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());

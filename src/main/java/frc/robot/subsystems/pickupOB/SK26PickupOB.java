@@ -7,6 +7,7 @@ import static frc.robot.Ports.pickupOBPorts.*;
 
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 //import com.ctre.phoenix6.sim.TalonFXSimState.MotorType;
@@ -20,8 +21,8 @@ public class SK26PickupOB extends SubsystemBase {
   //TalonFX eaterMotor; 
 
   //If Vortex:
-  SparkMax positionerMotor;
-  SparkMax eaterMotor; 
+  SparkFlex positionerMotor;
+  SparkFlex eaterMotor; 
 
   //Encoder
   RelativeEncoder positionerEncoder;
@@ -41,8 +42,8 @@ public class SK26PickupOB extends SubsystemBase {
 
     //positionerMotor = new TalonFX(kPositionerMotor.ID, kPositionerMotor.bus);
     //eaterMotor = new TalonFX(kEaterMotor.ID, kEaterMotor.bus);
-    positionerMotor = new SparkMax(kPositionerMotor.ID, MotorType.kBrushless);
-    eaterMotor = new SparkMax(kEaterMotor.ID, MotorType.kBrushless);
+    positionerMotor = new SparkFlex(kPositionerMotor.ID, MotorType.kBrushless);
+    eaterMotor = new SparkFlex(kEaterMotor.ID, MotorType.kBrushless);
 
     positionerEncoder = positionerMotor.getEncoder();
     eaterEncoder = eaterMotor.getEncoder();

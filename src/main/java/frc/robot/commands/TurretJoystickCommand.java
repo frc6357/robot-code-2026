@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SK26Turret;
+import frc.robot.subsystems.turret.SK26Turret;
 
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 

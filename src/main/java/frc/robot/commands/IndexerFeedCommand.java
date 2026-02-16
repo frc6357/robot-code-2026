@@ -1,8 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-
-import frc.robot.subsystems.SK26Indexer;
+import frc.robot.subsystems.indexer.SK26Indexer;
 
 import static frc.robot.Konstants.IndexerConstants.kIndexerFeedRPS;
 

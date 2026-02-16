@@ -30,8 +30,7 @@ public class SubsystemControls
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,
-        @JsonProperty(required = true, value = "pickup")      boolean pickup
-,
+        @JsonProperty(required = true, value = "pickup")      boolean pickup,
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
         @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
