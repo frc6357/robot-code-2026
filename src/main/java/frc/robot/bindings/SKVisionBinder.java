@@ -41,6 +41,7 @@ public class SKVisionBinder implements CommandBinder {
             // while the vision commands are all static since vision doesn't need one specific
             // instance to be controlled. Vision should be able to run multiple commands
             // either in sequence or parallel with itself.
+            @SuppressWarnings("unused")
             SKSwerve m_swerve = m_swerveContainer.get();
             SKVision m_vision = m_visionContainer.get();
 

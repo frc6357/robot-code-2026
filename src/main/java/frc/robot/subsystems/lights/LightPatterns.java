@@ -2,7 +2,6 @@ package frc.robot.subsystems.lights;
 
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.LightsConstants.kDefaultStrobeSeconds;
 import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
 import static frc.robot.Konstants.LightsConstants.kSKBlue;

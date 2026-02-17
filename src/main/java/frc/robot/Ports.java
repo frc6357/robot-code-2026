@@ -5,7 +5,6 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
-import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static edu.wpi.first.wpilibj.XboxController.Button.kA;
 import static edu.wpi.first.wpilibj.XboxController.Button.kB;
 import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
@@ -19,6 +18,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
@@ -35,6 +35,7 @@ import frc.lib.utils.SKTrigger;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 
+@SuppressWarnings("unused")
 public class Ports
 {
     public static class DriverPorts

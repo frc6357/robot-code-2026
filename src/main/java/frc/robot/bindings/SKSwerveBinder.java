@@ -84,7 +84,6 @@ public class SKSwerveBinder implements CommandBinder{
 
         SKSwerve drive = m_drive.get();
 
-        // TODO: Might need to uncomment this later? It caused a weird issue that made the robot drift like it's in space.
         // Sets filters for driving axes
         kLeftStickY.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
         kLeftStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));

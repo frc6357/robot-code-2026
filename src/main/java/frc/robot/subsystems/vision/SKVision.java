@@ -190,6 +190,7 @@ public class SKVision extends SubsystemBase {
      * and then pass the current camera into the method.
      * @param ll The camera to estimate the robot pose with
      */
+    @SuppressWarnings("unused")
     private void updatePoseMultiCam(Limelight ll) {
         // Sets the robot's yaw for use with MEGATAG2 right before integrating with estimator
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
@@ -303,9 +304,6 @@ public class SKVision extends SubsystemBase {
 
         m_swerve.resetPose(ll.getRawPose3d().toPose2d());
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-        //TODO: if MT2 doesn't work, change it to the line below
-        // m_swerve.resetPose(ll.getRawPose3d().toPose2d());
-        // m_swerve.resetPose(ll.getMegaPose2d());
     }
 
     public void autonResetPoseToVision() {
@@ -371,8 +369,6 @@ public class SKVision extends SubsystemBase {
         boolean targetInView, Pose3d botpose3D, Pose2d megaPose, double poseTimestamp) {
         boolean reject = false;
         if (targetInView) {
-            Pose2d botpose = botpose3D.toPose2d();
-            // Pose2d robotPose = m_swerve.getRobotPose(); // TODO: Add telemetry for pose before and after integrating vision
             if (Field.poseOutOfField(megaPose)
                     || Math.abs(botpose3D.getZ()) > VisionConfig.Thresholds.MAX_HEIGHT.in(Meters)
                     || (Math.abs(botpose3D.getRotation().getX()) > VisionConfig.Thresholds.MAX_TILT.in(Radians)

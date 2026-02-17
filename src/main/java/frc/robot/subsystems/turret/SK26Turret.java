@@ -1,20 +1,25 @@
 package frc.robot.subsystems.turret;
 
 // Imports from the robot
-import static frc.robot.Konstants.TurretConstants.*;
-import static frc.robot.Ports.TurretPorts.kTurretMotor;
+import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
+import static frc.robot.Konstants.TurretConstants.kMaxTurretOutput;
+import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
+import static frc.robot.Konstants.TurretConstants.kTurretD;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderInverted;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
+import static frc.robot.Konstants.TurretConstants.kTurretI;
+import static frc.robot.Konstants.TurretConstants.kTurretMaxPosition;
+import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
+import static frc.robot.Konstants.TurretConstants.kTurretMotorInverted;
+import static frc.robot.Konstants.TurretConstants.kTurretP;
 import static frc.robot.Ports.TurretPorts.kTurretEncoder;
-
-import frc.lib.preferences.SKPreferences;
-import lombok.Getter;
-import frc.lib.preferences.Pref;
+import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -27,6 +32,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import lombok.Getter;
 
 /**
  * Turret subsystem using CANcoder absolute encoder as the ONLY position feedback.
@@ -48,12 +54,6 @@ public class SK26Turret extends SubsystemBase
     // WPILib PID controller (runs in periodic, uses CANcoder feedback)
     private final PIDController pidController = new PIDController(kTurretP, kTurretI, kTurretD);
     
-    private Pref<Double> pPref = SKPreferences.attach("TurretPID/p", kTurretP)
-        .onChange((newP) -> pidController.setP(newP));
-    private Pref<Double> iPref = SKPreferences.attach("TurretPID/i", kTurretI)
-        .onChange((newI) -> pidController.setI(newI));
-    private Pref<Double> dPref = SKPreferences.attach("TurretPID/d", kTurretD)
-        .onChange((newD) -> pidController.setD(newD));
 
     // Motor output control
     private final VoltageOut voltageControl = new VoltageOut(0.0);
