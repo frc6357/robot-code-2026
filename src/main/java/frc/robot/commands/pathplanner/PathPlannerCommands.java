@@ -9,7 +9,12 @@ import frc.robot.StateHandler.MacroState;
 public class PathPlannerCommands {
     public HashMap<String, Command> availableCommands = new HashMap<String, Command>();
 
+    /**
+     * Constructor for PathPlannerCommands. Populates the availableCommands map with commands based on the existing subsystems in RobotContainer.
+     * @param container The RobotContainer instance to pull subsystems and commands from. Commands will only be added if the corresponding subsystem is present in the container.
+     */
     public PathPlannerCommands(RobotContainer container) {
+        // Repeat this concept for all subsystems that have commands we want to use in PathPlanner.
         if(container.m_stateHandlerContainer.isPresent()) {
                 availableCommands.put("Request Idle State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.IDLE));
                 availableCommands.put("Request Scoring State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.SCORING));
