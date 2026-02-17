@@ -40,7 +40,7 @@ public class StateHandler extends SubsystemBase{
         // Similar to WPILib Command structure
         public enum Status {
             OFF,
-            INITIALIZING,
+            WAITING,
             READY,
             STOPPING
         }
@@ -48,7 +48,7 @@ public class StateHandler extends SubsystemBase{
     private SendableChooser<MacroState> stateChooser = new SendableChooser<MacroState>();        
 
     private static MacroState currentState = MacroState.IDLE;
-    private static MacroState desiredState = MacroState.IDLE;
+    private static MacroState requestedState = MacroState.IDLE;
 
     private MacroState previousChosenState = MacroState.IDLE;
 
@@ -74,10 +74,10 @@ public class StateHandler extends SubsystemBase{
      * This method should be called periodically to ensure state transitions are managed.
      */
     private void handleStateTransition() {
-        if(desiredState != currentState) {
+        if(requestedState != currentState) {
             currentState.setStatus(Status.STOPPING);
-            currentState = desiredState;
-            currentState.setStatus(Status.INITIALIZING);
+            currentState = requestedState;
+            currentState.setStatus(Status.WAITING);
         }
     }
 
@@ -95,7 +95,7 @@ public class StateHandler extends SubsystemBase{
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty("Current State", () -> getCurrentState().name(), null);
-        builder.addStringProperty("Desired State", () -> getDesiredState().name(), null);
+        builder.addStringProperty("Requested State", () -> getRequestedState().name(), null);
 
         for(MacroState state : MacroState.values()) {
             builder.addStringProperty(state.name() + " Status", () -> state.getStatus().name(), null);
@@ -117,42 +117,42 @@ public class StateHandler extends SubsystemBase{
      */
     public void setCurrentState(MacroState state) {
         currentState = state;
-        clearDesiredState();
+        clearRequestedState();
     }
 
     public Command setCurrentStateCommand(MacroState state) {
-        return runOnce(() -> setCurrentState(state));
+        return runOnce(() -> setCurrentState(state)).withName("Force" + state.name());
     }
 
     /**
      * Gets the desired state.
      * @return The desired MacroState.
      */
-    public MacroState getDesiredState() {
-        return desiredState;
+    public MacroState getRequestedState() {
+        return requestedState;
     }
 
     /**
      * Sets the desired state.
      * @param state The desired MacroState.
      */
-    public void setDesiredState(MacroState state) {
-        desiredState = state;
+    public void requestState(MacroState state) {
+        requestedState = state;
     }
 
-    public Command setDesiredStateCommand(MacroState state) {
-        return runOnce(() -> setDesiredState(state));
+    public Command requestStateCommand(MacroState state) {
+        return runOnce(() -> requestState(state)).withName("Request" + state.name());
     }
 
     /**
      * Clears the desired MacroState, setting it to IDLE.
      */
-    public void clearDesiredState() {
-        desiredState = currentState;
+    public void clearRequestedState() {
+        requestedState = currentState;
     }
 
-    public Command clearDesiredStateCommand() {
-        return runOnce(this::clearDesiredState);
+    public Command clearRequestedStateCommand() {
+        return runOnce(this::clearRequestedState).withName("ClearRequestedState");
     }
 
     public MacroState.Status getStatusOf(MacroState state) {
@@ -180,7 +180,7 @@ public class StateHandler extends SubsystemBase{
      * @return A Trigger that is true when desiredState == state.
      */
     public static Trigger whenDesiredState(MacroState state) {
-        return new Trigger(() -> desiredState == state);
+        return new Trigger(() -> requestedState == state);
     }
 
     /**
@@ -210,7 +210,7 @@ public class StateHandler extends SubsystemBase{
      * @return A Trigger that is true when currentState == state AND status == INITIALIZING.
      */
     public static Trigger whenCurrentStateInitializing(MacroState state) {
-        return new Trigger(() -> currentState == state && state.getStatus() == Status.INITIALIZING);
+        return new Trigger(() -> currentState == state && state.getStatus() == Status.WAITING);
     }
 
     /**

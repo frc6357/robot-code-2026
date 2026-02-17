@@ -26,12 +26,12 @@ public class SK26StateBinder implements CommandBinder {
     }
     
     private void bindDriverButtons() {
-        DriverPorts.kRTrigger.button.onTrue(stateHandler.setDesiredStateCommand(MacroState.CLIMBING));
+        DriverPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.CLIMBING));
     }
 
     private void bindOperatorButtons() {
-        OperatorPorts.kRTrigger.button.onTrue(stateHandler.setDesiredStateCommand(MacroState.SCORING));
-        OperatorPorts.kLTrigger.button.onTrue(stateHandler.setDesiredStateCommand(MacroState.INTAKING));
+        OperatorPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
+        OperatorPorts.kLTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.INTAKING));
 
         OperatorPorts.kStartbutton.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
     }

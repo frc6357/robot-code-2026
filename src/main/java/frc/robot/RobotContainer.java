@@ -15,6 +15,7 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -34,6 +35,7 @@ import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
+import frc.robot.commands.pathplanner.PathPlannerCommands;
 import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.indexer.SK26Indexer;
@@ -190,11 +192,12 @@ public class RobotContainer {
         {
             subsystemGroup.bindButtons();
         }
-
     }
 
     public void configurePathPlannerCommands()
     {
+        PathPlannerCommands commands = new PathPlannerCommands(this);
+        NamedCommands.registerCommands(commands.availableCommands);
     }
 
     /**
