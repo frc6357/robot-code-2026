@@ -103,9 +103,6 @@ public class SK26PickupOB extends SubsystemBase {
 
     SmartDashboard.putBoolean("Forward Limit Switch", forwardLimitSwitch.isPressed());
     SmartDashboard.putBoolean("Reverse Limit Switch", reverseLimitSwitch.isPressed());
-
-
-
   }
 
 }

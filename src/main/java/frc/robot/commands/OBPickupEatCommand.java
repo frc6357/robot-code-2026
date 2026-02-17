@@ -1,18 +1,16 @@
 package frc.robot.commands;
 
-import static frc.robot.Konstants.pickupOBConstants.*;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class OBPickupEatCommand extends Command {
-  public final SK26PickupOB eat;
+  public final SK26PickupOB intakeSubsystem;
   /** Creates a new OBPickupEatCommand. */
-  public OBPickupEatCommand(SK26PickupOB eat) {
-    this.eat = eat;
+  public OBPickupEatCommand(SK26PickupOB intakeSubsystem) {
+    this.intakeSubsystem = intakeSubsystem;
     // Use addRequirements() here to declare subsystem dependencies.
-    addRequirements(eat);
+    addRequirements(intakeSubsystem);
   }
 
   // Called when the command is initially scheduled.
@@ -23,13 +21,13 @@ public class OBPickupEatCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    eat.runEaterMotor(); //defined in subsystem
+    intakeSubsystem.runEaterMotor(); //defined in subsystem
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    eat.stopEaterMotor(); //defined in subsystem
+    intakeSubsystem.stopEaterMotor(); //defined in subsystem
   }
 
   // Returns true when the command should end.
