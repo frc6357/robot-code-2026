@@ -32,9 +32,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
+import frc.lib.subsystems.PathplannerSubsystem;
 import lombok.Getter;
 
-public class BangBangLauncher extends SubsystemBase{
+public class BangBangLauncher extends SubsystemBase implements PathplannerSubsystem {
     private TalonFX mainMotor;
     private TalonFX followingMotor;
 
@@ -191,5 +192,11 @@ public class BangBangLauncher extends SubsystemBase{
 
     public Command stopCommand() {
         return runOnce(this::stop);
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

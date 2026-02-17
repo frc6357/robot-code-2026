@@ -1,36 +1,26 @@
 package frc.robot.commands.pathplanner;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.RobotContainer;
-import frc.robot.StateHandler.MacroState;
 
+/**
+ * A helper class to store and manage all commands that are used in PathPlanner autos and paths.<p>
+ * This helps avoid a pileup of boilerplate code in {@link frc.robot.RobotContainer} for PathPlanner autos, 
+ * and also allows for easier management of commands used in PathPlanner per subsystem. <p>
+ * When a subsystem implements the {@link frc.lib.subsystems.PathplannerSubsystem} interface, it can add commands 
+ * to this class that are used in PathPlanner autos, and then those commands will be registered to the NamedCommands.
+ */
 public class PathPlannerCommands {
-    public HashMap<String, Command> availableCommands = new HashMap<String, Command>();
+    private static HashMap<String, Command> availableCommands = new HashMap<String, Command>();
 
-    /**
-     * Constructor for PathPlannerCommands. Populates the availableCommands map with commands based on the existing subsystems in RobotContainer.
-     * @param container The RobotContainer instance to pull subsystems and commands from. Commands will only be added if the corresponding subsystem is present in the container.
-     */
-    public PathPlannerCommands(RobotContainer container) {
-        // Repeat this concept for all subsystems that have commands we want to use in PathPlanner.
-        if(container.m_stateHandlerContainer.isPresent()) {
-                availableCommands.put("Request Idle State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.IDLE));
-                availableCommands.put("Request Scoring State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.SCORING));
-                availableCommands.put("Request Shuttling State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.SHUTTLING));
-                availableCommands.put("Request Intaking State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.INTAKING));
-                availableCommands.put("Request Climbing State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.CLIMBING));
-                availableCommands.put("Request Steady Stream Scoring State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.STEADY_STREAM_SCORING));
-                availableCommands.put("Request Steady Stream Shuttling State", container.m_stateHandlerContainer.get().requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
-
-                availableCommands.put("Force Idle State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.IDLE));
-                availableCommands.put("Force Scoring State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.SCORING));
-                availableCommands.put("Force Shuttling State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.SHUTTLING));
-                availableCommands.put("Force Intaking State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.INTAKING));
-                availableCommands.put("Force Climbing State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.CLIMBING));
-                availableCommands.put("Force Steady Stream Scoring State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
-                availableCommands.put("Force Steady Stream Shuttling State", container.m_stateHandlerContainer.get().setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
-        }
+    public static void addCommand(String name, Command command) {
+        availableCommands.put(name, command);
     }
+
+    public static Map<String, Command> getAvailableCommands() {
+        return availableCommands;
+    }
+
 }

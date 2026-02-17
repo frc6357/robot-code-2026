@@ -196,8 +196,7 @@ public class RobotContainer {
 
     public void configurePathPlannerCommands()
     {
-        PathPlannerCommands commands = new PathPlannerCommands(this);
-        NamedCommands.registerCommands(commands.availableCommands);
+        NamedCommands.registerCommands(PathPlannerCommands.getAvailableCommands());
     }
 
     /**

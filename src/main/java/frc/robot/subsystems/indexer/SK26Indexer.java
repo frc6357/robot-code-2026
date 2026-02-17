@@ -12,6 +12,7 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.subsystems.PathplannerSubsystem;
 
 import static edu.wpi.first.units.Units.Amps;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
@@ -24,7 +25,7 @@ import static frc.robot.Ports.Sensors.intakeSensor2;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 
 // Subsystem for the SK26 Indexer mechanism
-public class SK26Indexer extends SubsystemBase{
+public class SK26Indexer extends SubsystemBase implements PathplannerSubsystem {
     private final TalonFX indexerMotor;
     private final TalonFX spindexerMotor;
 
@@ -40,8 +41,7 @@ public class SK26Indexer extends SubsystemBase{
 
             .withStatorCurrentLimit(Amps.of(120))
             .withStatorCurrentLimitEnable(true)
-    )   
-    ;
+    );
 
     // String to represent the current status of the indexer
     public String status = "Idle";
@@ -250,5 +250,12 @@ public class SK26Indexer extends SubsystemBase{
             "Number of Balls Intaked",
             () -> totalNumBallsLaunched,
             null);
+    }
+
+
+    @Override
+    public void addPathPlannerCommands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

@@ -22,10 +22,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.subsystems.PathplannerSubsystem;
+
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
 
-public class SK26Launcher extends SubsystemBase {
+public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
 
     //initialize launcher motor
     TalonFX launchermotor;
@@ -150,5 +152,11 @@ public class SK26Launcher extends SubsystemBase {
             "Target RPS",
             () -> targetMotorRPS,
             null);
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

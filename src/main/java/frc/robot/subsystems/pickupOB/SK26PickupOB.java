@@ -14,8 +14,9 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.subsystems.PathplannerSubsystem;
 
-public class SK26PickupOB extends SubsystemBase {
+public class SK26PickupOB extends SubsystemBase implements PathplannerSubsystem {
  //Declarations
 
   // TalonFX positionerMotor;
@@ -103,6 +104,12 @@ public class SK26PickupOB extends SubsystemBase {
 
     SmartDashboard.putBoolean("Forward Limit Switch", forwardLimitSwitch.isPressed());
     SmartDashboard.putBoolean("Reverse Limit Switch", reverseLimitSwitch.isPressed());
+  }
+
+  @Override
+  public void addPathPlannerCommands() {
+    // TODO Auto-generated method stub
+    throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
   }
 
 }

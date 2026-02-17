@@ -6,14 +6,16 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.StateHandler.MacroState.Status;
+import frc.robot.commands.pathplanner.PathPlannerCommands;
 
 /**
  * A class to handle large-scale robot states (macros) such as launching, intaking, climbing, and idling.
  * Each macro state has an associated status to indicate its current condition.
  * A MacroState can still have its status updated while it is not the current nor desired state.
  */
-public class StateHandler extends SubsystemBase{
+public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
     public enum MacroState {
         IDLE(Status.READY),
@@ -221,5 +223,24 @@ public class StateHandler extends SubsystemBase{
      */
     public static Trigger whenStateStopping(MacroState state) {
         return new Trigger(() -> state.getStatus() == Status.STOPPING);
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        PathPlannerCommands.addCommand("Request Idle State", requestStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Request Scoring State", requestStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Request Shuttling State", requestStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Request Intaking State", requestStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Request Climbing State", requestStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Request SS Scoring State", requestStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Request SS Shuttling State", requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+
+        PathPlannerCommands.addCommand("Force Idle State", setCurrentStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Force Scoring State", setCurrentStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Force Shuttling State", setCurrentStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Force Intaking State", setCurrentStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Force Climbing State", setCurrentStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Force SS Scoring State", setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Force SS Shuttling State", setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
     }
 }
