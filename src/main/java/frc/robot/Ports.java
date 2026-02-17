@@ -20,6 +20,7 @@ import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
+import static frc.robot.Ports.DriverPorts.kDriver;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
@@ -60,6 +61,9 @@ public class Ports
 
         // Reset gyro
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
+
+        public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV); 
+        public static final SKTrigger kDownDpad = new SKTrigger(kDriver, 180,, POV); 
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -82,6 +86,8 @@ public class Ports
         * Example of rawAxis values (Joysticks on the controller)
         * public static final FilteredAxis kExampleRawAxis = new FilteredAxis(() -> kOperator.getRawAxis(kLeftY.value));
         */
+
+        
 
         public static final FilteredAxis kMoveTargetX = new FilteredAxis(() -> kOperator.getRawAxis(kRightY.value)); 
         public static final FilteredAxis kMoveTargetY = new FilteredAxis(() -> kOperator.getRawAxis(kRightX.value)); 

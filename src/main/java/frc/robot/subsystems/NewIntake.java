@@ -29,7 +29,7 @@ public class NewIntake extends SubsystemBase {
   public void runNewIntake()
   {
     intakeMotor.set(kSetIntakeSpeed);
-    intakeMotor2.set(kSetIntakeSpeed);
+    intakeMotor2.set(-kSetIntakeSpeed);
     intakeMotor3.set(kSetIntakeSpeed);
   }
     public void stopNewIntake()
