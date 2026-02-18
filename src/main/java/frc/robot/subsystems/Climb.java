@@ -23,6 +23,7 @@ import com.revrobotics.ResetMode;
 
 import static frc.robot.Ports.ClimbPorts.kClimbEncoder;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
+import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
 import static frc.robot.Ports.OperatorPorts.climbUpButton;
 
 import java.util.Optional;
@@ -49,6 +50,7 @@ public class Climb extends SubsystemBase
 {
 
     SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
+    SparkFlex climbMotorTwo;
     DigitalInput cLimitSwitch;
     PositionVoltage request;
     SparkLimitSwitch forwardLimit;
@@ -63,8 +65,10 @@ public class Climb extends SubsystemBase
     double cCurrentHeight = 0.0;
 
     SparkFlexConfig climbConfig;
+    SparkFlexConfig climbConfig2;
 
     public RelativeEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
+    public RelativeEncoder cEncoder2;
 
     SparkClosedLoopController cpid;
 
@@ -73,7 +77,9 @@ public class Climb extends SubsystemBase
     public Climb()
     {
         climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
+        climbMotorTwo = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
         cEncoder = climbMotor.getEncoder(); 
+        cEncoder2 = climbMotorTwo.getEncoder();
         cLimitSwitch = new DigitalInput(0);
         request = new PositionVoltage(0).withSlot(0);
         forwardLimit = climbMotor.getForwardLimitSwitch();
@@ -88,15 +94,33 @@ public class Climb extends SubsystemBase
         .d(kClimbD)
         .maxMotion.maxVelocity(kClimbV);
 
+        climbConfig2.closedLoop
+        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+        .p(kClimbP)
+        .i(kClimbI)
+        .d(kClimbD)
+        .maxMotion.maxVelocity(kClimbV);
+        //climbConfig2.follow(41);
+
+
         climbConfig.limitSwitch
         .forwardLimitSwitchType(Type.kNormallyOpen)
         .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
         .reverseLimitSwitchType(Type.kNormallyClosed)
         .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
-        climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        climbConfig2.limitSwitch
+        .forwardLimitSwitchType(Type.kNormallyOpen)
+        .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
+        .reverseLimitSwitchType(Type.kNormallyClosed)
+        .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
-    
+        climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        climbMotorTwo.configure(climbConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
+        cEncoder.setPosition(0);
+        cEncoder2.setPosition(0);
+
         //climbConfig = new TalonFXConfiguration();
         //climbConfig.Slot0.kP = kClimbP.get();
         //climbConfig.Slot0.kI = kClimbI;
@@ -213,5 +237,7 @@ public class Climb extends SubsystemBase
         builder.addDoubleProperty("Motor out", climbMotor::get, null);     
         builder.addBooleanProperty("Forward Limit Swotch", forwardLimit::isPressed, null);  
         builder.addBooleanProperty("Reverse Limit Switch", reverseLimit::isPressed, null);
+        builder.addDoubleProperty("Current Pos (Motor 1)", () -> cEncoder.getPosition(), null);
+        builder.addDoubleProperty("Current Pos (Motor 2)", () -> cEncoder2.getPosition(), null);
     }
 }
