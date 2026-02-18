@@ -63,7 +63,7 @@ public class Ports
         public static final SKTrigger kResetGyroPos = new SKTrigger(kDriver, kRightStick.value, BUTTON);
 
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV); 
-        public static final SKTrigger kDownDpad = new SKTrigger(kDriver, 180,, POV); 
+        public static final SKTrigger kDownDpad = new SKTrigger(kDriver, 180, POV); 
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
