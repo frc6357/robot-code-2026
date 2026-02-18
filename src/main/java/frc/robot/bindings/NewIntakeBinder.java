@@ -1,5 +1,6 @@
 package frc.robot.bindings;
 
+
 import java.util.Optional;
 import frc.robot.subsystems.NewIntake;
 import frc.robot.commands.*;
@@ -18,7 +19,17 @@ public class NewIntakeBinder implements CommandBinder
     public NewIntakeBinder(Optional<NewIntake> pobSys)
     {
         subsystem = pobSys;
-        spinA = kUpDpad;
-        spinB = kDownDpad;
+        spinA = kUpDpad.button;
+        spinB = kDownDpad.button;
+    }
+
+    public void bindButtons()
+    {
+        if (subsystem.isPresent()) 
+        {
+            NewIntake subsys = subsystem.get();
+            spinA.whileTrue(new NewIntakeCommand(subsys));
+            spinB.whileTrue(new NewIntakeCommandB(subsys));
+        }
     }
 }
