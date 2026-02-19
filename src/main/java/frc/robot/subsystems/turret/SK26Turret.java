@@ -90,6 +90,10 @@ public class SK26Turret extends SubsystemBase
         // Set initial target to current position (don't move on boot)
         targetAngleDeg = getAngleDegrees();
         pidController.setSetpoint(targetAngleDeg);
+
+        // ========== Dashboard ==========
+        SmartDashboard.putData("Turret", this);
+        SmartDashboard.putData("Turret/PIDController", pidController);
     }
 
     /**
@@ -197,10 +201,6 @@ public class SK26Turret extends SubsystemBase
         {
             wrapping = false;
         }
-
-        // ========== Dashboard ==========
-        SmartDashboard.putData("Turret", this);
-        SmartDashboard.putData("Turret/PIDController", pidController);
     }
 
     @Override

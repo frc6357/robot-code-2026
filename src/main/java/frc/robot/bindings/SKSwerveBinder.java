@@ -104,10 +104,10 @@ public class SKSwerveBinder implements CommandBinder{
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
 
         // bumpAlign.whileTrue(new AlignForBumpJump(drive));
-        hubAlign.whileTrue(
-            new AlignAroundPoint(
-                drive, 
-                (Field.isBlue() ? kBlueHub.point : kRedHub.point)).withName("SwerveHubAlign"));
+        // hubAlign.whileTrue(
+        //     new AlignAroundPoint(
+        //         drive, 
+        //         (Field.isBlue() ? kBlueHub.point : kRedHub.point)).withName("SwerveHubAlign"));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(

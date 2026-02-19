@@ -83,6 +83,8 @@ public class SKVision extends SubsystemBase {
         );
 
         startupLimelights();
+
+        SmartDashboard.putData("Vision", this);
     }
 
     @Override
@@ -95,7 +97,6 @@ public class SKVision extends SubsystemBase {
             scanForTags(ll);
         }
 
-        SmartDashboard.putData("Vision", this);
         telemeterizeTagLOS();
 
         /* The secret sauce: */

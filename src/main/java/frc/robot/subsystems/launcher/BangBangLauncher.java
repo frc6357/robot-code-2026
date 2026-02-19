@@ -111,6 +111,8 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         }
 
         followingMotor.setControl(followerControl);
+
+        SmartDashboard.putData("BBLauncher", this);
     }
 
     @Override
@@ -128,7 +130,6 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
                 mainMotor.setControl(coastControl);
                 break;
         }
-        SmartDashboard.putData("BBLauncher", this);
     }
 
     /**
