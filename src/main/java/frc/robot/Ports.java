@@ -49,10 +49,10 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
-        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
+        public static final SKTrigger kAButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);

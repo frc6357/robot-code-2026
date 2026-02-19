@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.453095577746077,
-        "y": 7.457
+        "x": 3.767346647646219,
+        "y": 0.6127246790299581
       },
       "prevControl": null,
       "nextControl": {
-        "x": 7.687760342368046,
-        "y": 7.612263908701854
+        "x": 4.767346647646218,
+        "y": 0.6127246790299581
       },
       "isLocked": false,
-      "linkedName": "LeftTrench"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 7.868901569186875,
-        "y": 4.998930099857347
+        "x": 5.837532097004279,
+        "y": 0.6127246790299581
       },
       "prevControl": {
-        "x": 7.817146932952923,
-        "y": 5.852881597717547
+        "x": 4.837532097004279,
+        "y": 0.6127246790299581
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "SimpleScore_Sweep"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -41,14 +41,14 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 87.75425743410493
+    "velocity": 3.0,
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Left Trench",
+  "folder": "Automations",
   "idealStartingState": {
-    "velocity": 0,
-    "rotation": 180.0
+    "velocity": 2.6,
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

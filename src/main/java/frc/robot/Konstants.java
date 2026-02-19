@@ -128,7 +128,7 @@ public final class Konstants
         public static final PPHolonomicDriveController pathConfig = new PPHolonomicDriveController(kTranslationPIDConstants, kRotationPIDConstants);
 
         public static final PathConstraints kDefaultPathfindingConstraints = new PathConstraints(
-            3.5, 3.0, 
+            4.5, 5.1, 
             540, 720, 
             12, false);
     }
