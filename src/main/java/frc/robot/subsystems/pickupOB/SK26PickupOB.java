@@ -12,6 +12,7 @@ import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
+import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.subsystems.PathplannerSubsystem;
@@ -60,6 +61,7 @@ public class SK26PickupOB extends SubsystemBase implements PathplannerSubsystem 
     motorCurrentPosition = kPositionerMotorMinPosition;
     motorTargetPosition = kPositionMotorMaxPosition;
 
+    SmartDashboard.putData("SK26PickupOB", this);
   }
 
   public void runPositionerMotor() {
@@ -98,12 +100,14 @@ public class SK26PickupOB extends SubsystemBase implements PathplannerSubsystem 
     if (forwardLimitSwitch.isPressed() || reverseLimitSwitch.isPressed()) {
       stopPositionerMotor();
     }
+  }
 
-    SmartDashboard.putNumber("Positioner Velocity (RPMs)", positionerMotor.get());
-    SmartDashboard.putNumber("Eater Velocity (RPMs)", eaterMotor.get());
-
-    SmartDashboard.putBoolean("Forward Limit Switch", forwardLimitSwitch.isPressed());
-    SmartDashboard.putBoolean("Reverse Limit Switch", reverseLimitSwitch.isPressed());
+  @Override
+  public void initSendable(SendableBuilder builder) {
+    builder.addDoubleProperty("Positioner Velocity (RPMs)", positionerMotor::get, null);
+    builder.addDoubleProperty("Eater Velocity (RPMs)", eaterMotor::get, null);
+    builder.addBooleanProperty("Forward Limit Switch", forwardLimitSwitch::isPressed, null);
+    builder.addBooleanProperty("Reverse Limit Switch", reverseLimitSwitch::isPressed, null);
   }
 
   @Override

@@ -47,6 +47,8 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         //configures motors
         configMotor(launchermotor);
         configMotor(launchermotorFollower);
+
+        SmartDashboard.putData("Static Launcher", this);
     }
 
     public void configMotor(TalonFX motor) {
@@ -130,7 +132,6 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
     //Sends subsystem to the Smart Dashboard
     @Override
     public void periodic() {
-        SmartDashboard.putData("Static Launcher", this);
     }
 
     //Sends data to the Smart Dashboard

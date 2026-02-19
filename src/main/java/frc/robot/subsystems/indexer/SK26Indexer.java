@@ -68,6 +68,8 @@ public class SK26Indexer extends SubsystemBase implements PathplannerSubsystem {
 
         indexerMotor.getConfigurator().apply(config);
         spindexerMotor.getConfigurator().apply(config);
+
+        SmartDashboard.putData("Indexer", this);
     }
 
     
@@ -208,8 +210,6 @@ public class SK26Indexer extends SubsystemBase implements PathplannerSubsystem {
 
     @Override
     public void periodic() {
-        SmartDashboard.putData("Indexer", this);
-
         checkIfBallLaunched();
         checkIfBallIntaked();
     }
