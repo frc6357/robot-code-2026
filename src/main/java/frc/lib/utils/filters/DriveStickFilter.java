@@ -3,14 +3,14 @@ package frc.lib.utils.filters;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 
 public class DriveStickFilter implements Filter {
-    private DeadbandFilter deadbandFilter;
+    private LinearDeadbandFilter deadbandFilter;
     private SlewRateLimiter slewRateFilter;
         
         public DriveStickFilter(double slewRate, double deadband) {                
-            setDeadband(deadband);
+            setDeadband(deadband, 1.0);
             setSlewRate(slewRate);
         }
-        public DriveStickFilter(double slewRate, DeadbandFilter deadbandFilter) {                
+        public DriveStickFilter(double slewRate, LinearDeadbandFilter deadbandFilter) {                
             this.deadbandFilter = deadbandFilter;
             setSlewRate(slewRate);
         }
@@ -21,10 +21,9 @@ public class DriveStickFilter implements Filter {
             double slewedAxis = slewRateFilter.calculate(processedAxis);
             return Math.min(slewedAxis, 1.0);
         }
-    
-    
-        public void setDeadband(double deadband) {
-            this.deadbandFilter = new DeadbandFilter(deadband);
+
+        public void setDeadband(double deadband, double maxInput) {
+            this.deadbandFilter = new LinearDeadbandFilter(deadband, maxInput);
         }
     
         public void setSlewRate(double slewRate) {

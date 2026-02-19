@@ -61,6 +61,8 @@ public class SKSwerve extends SubsystemBase {
     private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
+    private Pose2d[] emptyPath = new Pose2d[0];
+
     private Supplier<Double> translationXSupplier = () -> -kLeftStickY.getFilteredAxis();
     private Supplier<Double> translationYSupplier = () -> -kLeftStickX.getFilteredAxis();
     private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
@@ -140,7 +142,7 @@ public class SKSwerve extends SubsystemBase {
 
     private void telemeterizeActivePath(List<Pose2d> path) {
 
-        pathPublisher.set(path.toArray(Pose2d[]::new));
+        pathPublisher.set(path.toArray(emptyPath));
     }
 
     public void outputTelemetry() {
