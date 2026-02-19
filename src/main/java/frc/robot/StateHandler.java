@@ -147,7 +147,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     /**
-     * Clears the desired MacroState, setting it to IDLE.
+     * Clears the desired MacroState, setting it to whatever the current state is.
      */
     public void clearRequestedState() {
         requestedState = currentState;
@@ -163,6 +163,110 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
     public void setStatusOf(MacroState state, MacroState.Status status) {
         state.setStatus(status);
+    }
+
+    public void removeIntakeFromRequestedState() {
+        if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.IDLE;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+            requestedState = MacroState.SCORING;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            requestedState = MacroState.SHUTTLING;
+        }
+    }
+
+    public Command removeIntakeFromRequestedStateCommand() {
+        return runOnce(this::removeIntakeFromRequestedState).withName("RemoveIntakeFromRequestedState");
+    }
+
+    public void addIntakeToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.INTAKING;
+        }
+        if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+        if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+    }
+
+    public Command addIntakeToRequestedStateCommand() {
+        return runOnce(this::addIntakeToRequestedState).withName("AddIntakeToRequestedState");
+    }
+
+    public void toggleIntakeInRequestedState() {
+        if(requestedState == MacroState.INTAKING || requestedState == MacroState.STEADY_STREAM_SCORING || requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            removeIntakeFromRequestedState();
+        } else {
+            addIntakeToRequestedState();
+        }
+    }
+
+    public Command toggleIntakeInRequestedStateCommand() {
+        return runOnce(this::toggleIntakeInRequestedState).withName("ToggleIntakeInRequestedState");
+    }
+
+    public void removeScoringFromRequestedState() {
+        if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.IDLE;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+            requestedState = MacroState.INTAKING;
+        }
+    }
+
+    public void addScoringToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.SCORING;
+        }
+        if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+    }
+
+    public void toggleScoringInRequestedState() {
+        if(requestedState == MacroState.SCORING || requestedState == MacroState.STEADY_STREAM_SCORING) {
+            removeScoringFromRequestedState();
+        } else {
+            addScoringToRequestedState();
+        }
+    }
+
+    public Command toggleScoringInRequestedStateCommand() {
+        return runOnce(this::toggleScoringInRequestedState).withName("ToggleScoringInRequestedState");
+    }
+
+    public void removeShuttlingFromRequestedState() {
+        if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.IDLE;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            requestedState = MacroState.INTAKING;
+        }
+    }
+
+    public void addShuttlingToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.SHUTTLING;
+        }
+        if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+    }
+
+    public void toggleShuttlingInRequestedState() {
+        if(requestedState == MacroState.SHUTTLING || requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            removeShuttlingFromRequestedState();
+        } else {
+            addShuttlingToRequestedState();
+        }
+    }
+
+    public Command toggleShuttlingInRequestedStateCommand() {
+        return runOnce(this::toggleShuttlingInRequestedState).withName("ToggleShuttlingInRequestedState");
     }
 
     // ==================== Trigger Factory Methods ====================
@@ -223,6 +327,18 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      */
     public static Trigger whenStateStopping(MacroState state) {
         return new Trigger(() -> state.getStatus() == Status.STOPPING);
+    }
+
+    public static Trigger whenIntakeNotCurrent() {
+        return new Trigger(
+            () -> currentState != MacroState.INTAKING && currentState != MacroState.STEADY_STREAM_SCORING && currentState != MacroState.STEADY_STREAM_SHUTTLING
+        );
+    }
+
+    public static Trigger whenIntakeNotDesired() {
+        return new Trigger(
+            () -> requestedState != MacroState.INTAKING && requestedState != MacroState.STEADY_STREAM_SCORING && requestedState != MacroState.STEADY_STREAM_SHUTTLING
+        );
     }
 
     @Override
