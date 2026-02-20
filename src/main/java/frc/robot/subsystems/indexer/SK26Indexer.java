@@ -3,7 +3,7 @@ package frc.robot.subsystems.indexer;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
+// import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -25,7 +25,7 @@ import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 // Subsystem for the SK26 Indexer mechanism
 public class SK26Indexer extends SubsystemBase {
     private final SparkFlex indexerMotor;
-    private final SparkClosedLoopController closedLoopController;
+    // private final SparkClosedLoopController closedLoopController;
     private final RelativeEncoder encoder;
 
     // String to represent the current status of the indexer
@@ -41,9 +41,10 @@ public class SK26Indexer extends SubsystemBase {
     private boolean lastIntakeSensorState = false;
 
     // Constructor
+    @SuppressWarnings("removal")
     public SK26Indexer() {
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
-        closedLoopController = indexerMotor.getClosedLoopController();
+        // closedLoopController = indexerMotor.getClosedLoopController();
         encoder = indexerMotor.getEncoder();
 
         // Configure the SparkFlex for Neo Vortex
