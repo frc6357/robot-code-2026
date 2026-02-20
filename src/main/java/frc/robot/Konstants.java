@@ -8,9 +8,11 @@ import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meter;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Konstants.DriveConstants.kMaxAngularRate;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
@@ -38,6 +40,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
@@ -52,13 +55,17 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 public final class Konstants
 {
     public static final class DriveConstants {
+        
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
         public static final LinearVelocity kMaxSpeedFAST = kMaxSpeed.times(1.75);
         public static final LinearVelocity kMaxSpeedSLOW = kMaxSpeed.times(0.3);
-
+        
         public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(1.25); // 3/4 of a rotation per second max angular velocity
         public static final AngularVelocity kMaxAngularRateFAST = kMaxAngularRate.times(2); // 1.5 rotations per second max angular velocity
         public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
+        
+        public static final LinearAcceleration kMaxTeleopLinAcceleration = kMaxSpeed.div(Seconds.of(0.33));
+        public static final AngularAcceleration kMaxTeleopRotAcceleration = kMaxAngularRate.div(Seconds.of(0.33));
 
         //pigeon ID
         public static final int kPigeonID = 5; //5

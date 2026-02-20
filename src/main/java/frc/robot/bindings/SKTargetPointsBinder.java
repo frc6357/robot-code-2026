@@ -7,8 +7,6 @@ import frc.lib.utils.Field;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-
 public class SKTargetPointsBinder implements CommandBinder {
     public SKTargetPointsBinder() {
         // Initialize target point at the origin (0,0); could be changed to a different default location
@@ -18,13 +16,19 @@ public class SKTargetPointsBinder implements CommandBinder {
 
     @Override
     public void bindButtons() {
+        // kOperatorControlled.point.setDefaultCommand(
+        //     new InstantCommand(
+        //         () -> kOperatorControlled.point.moveTargetPoint(
+        //             (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
+        //             (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis()), 
+        //             kOperatorControlled.point).ignoringDisable(true).withName("OperatorTargetPointMover")
+        // );
+
         kOperatorControlled.point.setDefaultCommand(
-            new InstantCommand(
-                () -> kOperatorControlled.point.moveTargetPoint(
-                    (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
-                    (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis()), 
-                    kOperatorControlled.point).ignoringDisable(true).withName("OperatorTargetPointMover")
-        );
+            kOperatorControlled.point.movePointCommand(
+                (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
+                (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis())
+            .withName("OperatorTargetPointMover"));
     }
     
 }

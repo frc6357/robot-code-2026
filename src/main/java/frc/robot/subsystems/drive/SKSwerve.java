@@ -120,6 +120,8 @@ public class SKSwerve extends SubsystemBase {
         PathPlannerLogging.setLogActivePathCallback((activePath) -> telemeterizeActivePath(activePath));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
+        SmartDashboard.putData("Elastic Field 2D", m_field);
+        SmartDashboard.putData("Drive", this);
     }
 
     @Override
@@ -127,30 +129,19 @@ public class SKSwerve extends SubsystemBase {
         poseEstimator.update(getGyroRotation(), drivetrain.getState().ModulePositions);
         lastReadState = drivetrain.getState();
 
-        SmartDashboard.putNumberArray(
-            "Drive/RawJoysticks", 
-            new double[] {
-                 translationXSupplier.get(),
-                translationYSupplier.get(),
-                velocityOmegaSupplier.get()          
-                });
-
         outputTelemetry();
 
         SmartDashboard.putString("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
     }
 
     private void telemeterizeActivePath(List<Pose2d> path) {
-
         pathPublisher.set(path.toArray(emptyPath));
     }
 
     public void outputTelemetry() {
 		posePublisher.set(getRobotPose());
 		telemetry.telemeterize(lastReadState);
-		SmartDashboard.putData("Drive", this);
 		m_field.setRobotPose(getRobotPose());
-        SmartDashboard.putData("Elastic Field 2D", m_field);
 	}
 
     @Override
