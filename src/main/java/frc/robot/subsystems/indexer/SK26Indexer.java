@@ -124,7 +124,7 @@ public class SK26Indexer extends SubsystemBase
      * @param indexerFeedRPS The feed speed in RPS.
      */
     public void feedFuel(double indexerFeedRPS) {
-        setIsFeeding();
+        setIsFeeding(); // TODO This should eventually be implemented in the command itself.
         setIndexerVelocity(indexerFeedRPS);
     }
 
