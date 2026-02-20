@@ -86,6 +86,7 @@ public class Climb extends SubsystemBase
         reverseLimit = climbMotor.getReverseLimitSwitch();
 
         climbConfig = new SparkFlexConfig();
+        climbConfig2 = new SparkFlexConfig();
 
         climbConfig.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
@@ -106,7 +107,7 @@ public class Climb extends SubsystemBase
         climbConfig.limitSwitch
         .forwardLimitSwitchType(Type.kNormallyOpen)
         .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
-        .reverseLimitSwitchType(Type.kNormallyClosed)
+        .reverseLimitSwitchType(Type.kNormallyOpen)
         .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbConfig2.limitSwitch
