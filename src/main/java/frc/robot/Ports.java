@@ -162,18 +162,20 @@ public class Ports
         public static final CANPort kPositionerMotor = new CANPort(30, busName); 
         public static final CANPort kEaterMotor = new CANPort(31, busName);
 
+        public static final CANPort kIndexerMotor = new CANPort(59, busName);
     }
 
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(61, busName);
         public static final CANPort kLauncherSensor = new CANPort(42, busName);
-        public static final CANPort kIntakeSensor1 = new CANPort(32, busName);
+        public static final CANPort kIntakeSensor = new CANPort(32, busName);
         public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
 
         public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
-        public static CANrange intakeSensor1 = new CANrange(kIntakeSensor1.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
         public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
