@@ -41,7 +41,6 @@ import lombok.Getter;
  */
 public class SK26Turret extends SubsystemBase
 {
-    
     // Motor
     private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
     

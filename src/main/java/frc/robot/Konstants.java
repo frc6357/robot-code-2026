@@ -191,8 +191,8 @@ public final class Konstants
         }
     }
 
-    public static final class IndexerConstants {
-
+    public static final class IndexerConstants 
+    {
         // Indexer feed speed in Rotations Per Second (RPS)
         public static final double kIndexerFeedRPS = 8.0;
 
@@ -209,6 +209,9 @@ public final class Konstants
         public static final double kIndexerUnjamForwardDuration = 0.25;
 
         public static final Distance kIndexerHeight = Inches.of(18);
+
+        // Max voltage output for indexer motor (for brownout protection)
+        public static final double kMaxIndexerVoltage = 10.0;
     }
 
     /** Constants that are used when defining filters for controllers */

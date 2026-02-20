@@ -1,38 +1,49 @@
 package frc.robot.subsystems.indexer;
 
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
-// import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
+// Imports from robot
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 import static frc.robot.Ports.Sensors.intakeSensor;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
+import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
-// Subsystem for the SK26 Indexer mechanism
-public class SK26Indexer extends SubsystemBase {
+// Imports from REV
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.SparkFlexConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+
+// Imports from WPILib
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+/**
+ * Indexer subsystem using CANrange sensor for gamepiece recognition
+ * Controls the indexer motor (Neo Vortex) using voltage control to help avoid brownouts.
+ * Tracks the number of balls in the indexer using sensors.
+ */
+public class SK26Indexer extends SubsystemBase
+{
+    // Motor
     private final SparkFlex indexerMotor;
-    // private final SparkClosedLoopController closedLoopController;
-    private final RelativeEncoder encoder;
+
+    // Built-in motor encoder
+    private final RelativeEncoder indexerEncoder;
 
     // String to represent the current status of the indexer
     public String status = "Idle";
 
-    // Target speed for the indexer motor in RPS
-    private double targetIndexerSpeed = 0.0;
+    // Target voltage for the indexer motor
+    private double targetVoltage = 0.0;
 
     // Sensor values
     public int numBallsInIndexer = 0;
@@ -40,28 +51,23 @@ public class SK26Indexer extends SubsystemBase {
     private boolean lastLauncherSensorState = false;
     private boolean lastIntakeSensorState = false;
 
-    // Constructor
     @SuppressWarnings("removal")
-    public SK26Indexer() {
+    public SK26Indexer() 
+    {
+        // ========== Motor Configuration ==========
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
-        // closedLoopController = indexerMotor.getClosedLoopController();
-        encoder = indexerMotor.getEncoder();
-
-        // Configure the SparkFlex for Neo Vortex
         SparkFlexConfig config = new SparkFlexConfig();
         config
             .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(40);
-        
-        config.closedLoop
-            .p(0.001)
-            .i(0.0)
-            .d(0.0);
-
-        // Apply configuration
+            .smartCurrentLimit(40)
+            .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         indexerMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        
-        System.out.println("SK26Indexer initialized with CAN ID: " + kIndexerMotor.ID);
+
+        // ========== Encoder Configuration ==========
+        indexerEncoder = indexerMotor.getEncoder();
+
+        // ========== Dashboard ==========
+        SmartDashboard.putData("Indexer", this);
     }
 
     public void setIsIdle() {
@@ -77,26 +83,35 @@ public class SK26Indexer extends SubsystemBase {
     }
 
     /**
+     * Sets the voltage of the indexer motor directly.
+     * Clamped for safety to prevent brownouts.
+     * @param voltage The desired voltage (-12 to +12 volts).
+     */
+    public void setIndexerVoltage(double voltage) {
+        // Clamp output for safety
+        voltage = MathUtil.clamp(voltage, -kMaxIndexerVoltage, kMaxIndexerVoltage);
+        targetVoltage = voltage;
+        indexerMotor.setVoltage(voltage);
+    }
+
+    /**
      * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
-     * Uses duty cycle for testing - switch to velocity control once working.
+     * Internally converts to voltage control.
      * @param velocity The desired velocity in RPS.
      */
     public void setIndexerVelocity(double velocity) {
-        targetIndexerSpeed = velocity;
-        
-        // TESTING: Use simple duty cycle instead of closed-loop
-        // Neo Vortex free speed is ~113 RPS (6784 RPM)
-        double dutyCycle = velocity / 113.0;
-        indexerMotor.set(dutyCycle);
-        
-        System.out.println("Indexer set to: " + velocity + " RPS (duty cycle: " + dutyCycle + ")");
-        
-        // UNCOMMENT THIS for closed-loop velocity control after testing:
-        // closedLoopController.setSetpoint(velocity * 60.0, ControlType.kVelocity);
+        // Neo Vortex free speed is ~113 RPS (6784 RPM) at 12V
+        // Convert RPS to voltage (approximate open-loop)
+        double voltage = (velocity / 113.0) * 12.0;
+        setIndexerVoltage(voltage);
     }
 
     public Command setIndexerVelCommand(double velocityRPS) {
         return run(() -> setIndexerVelocity(velocityRPS));
+    }
+
+    public Command setIndexerVoltageCommand(double voltage) {
+        return run(() -> setIndexerVoltage(voltage));
     }
 
     public void idleIndexer() {
@@ -150,12 +165,10 @@ public class SK26Indexer extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
-        SmartDashboard.putData("Indexer", this);
-        
-        // Debug info
+    public void periodic() 
+    {
         SmartDashboard.putNumber("Indexer/Applied Output", indexerMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Indexer/Actual Velocity RPM", encoder.getVelocity());
+        SmartDashboard.putNumber("Indexer/Actual Velocity RPM", indexerEncoder.getVelocity());
         SmartDashboard.putNumber("Indexer/Output Current", indexerMotor.getOutputCurrent());
         SmartDashboard.putNumber("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
 
@@ -167,7 +180,7 @@ public class SK26Indexer extends SubsystemBase {
     public void initSendable(SendableBuilder builder) {
         builder.addDoubleProperty(
             "Indexer Motor Speed (RPS)",
-            () -> encoder.getVelocity() / 60.0,
+            () -> indexerEncoder.getVelocity() / 60.0,
             null);
 
         builder.addStringProperty(
@@ -176,8 +189,8 @@ public class SK26Indexer extends SubsystemBase {
             null);
 
         builder.addDoubleProperty(
-            "Target Indexer Motor Speed (RPS)",
-            () -> targetIndexerSpeed,
+            "Target Indexer Voltage (V)",
+            () -> targetVoltage,
             null);
         
         builder.addIntegerProperty(
