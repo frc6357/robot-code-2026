@@ -29,6 +29,7 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -174,9 +175,11 @@ public class Ports
         public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
 
         public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
-        public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
-        public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
+        // public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        // public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
         public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
@@ -194,8 +197,8 @@ public class Ports
         /* Sensor configurating */
         static {
             hopperSensor.getConfigurator().apply(tofConfig);
-            launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
-            intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            // launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            // intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
             intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
         }
 
