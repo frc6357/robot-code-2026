@@ -1,7 +1,7 @@
 {
     
     "swerve": true,
-    "vision": false,
+    "vision": true,
     "turret": false,
     "launcher": false,
     "bangbanglauncher": false,

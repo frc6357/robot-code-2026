@@ -92,9 +92,9 @@ public class SKSwerveBinder implements CommandBinder{
         SKSwerve drive = m_drive.get();
 
         // Sets filters for driving axes
-        kLeftStickY.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kLeftStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kRightStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kLeftStickY.setFilter(translationXFilter);
+        kLeftStickX.setFilter(translationYFilter);
+        kRightStickX.setFilter(rotationFilter);
 
         robotCentric.whileTrue(
             drive.followSwerveRequestCommand(

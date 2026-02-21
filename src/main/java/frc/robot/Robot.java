@@ -43,6 +43,8 @@ public class Robot extends TimedRobot {
     kDriver.setRumble(RumbleType.kBothRumble, 0.0);
     kOperator.setRumble(RumbleType.kBothRumble, 0.0);
 
+    DriverStation.silenceJoystickConnectionWarning(true);
+
     CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup")); // FollowPathCommand.warmupCommand().schedule();
   }
 

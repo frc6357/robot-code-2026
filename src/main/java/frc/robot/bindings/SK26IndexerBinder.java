@@ -6,7 +6,6 @@ import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.IndexerFeedCommand;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullSpeed;
-import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
 
 // Imports from Java/WPILib
 import java.util.Optional;
@@ -17,7 +16,6 @@ public class SK26IndexerBinder implements CommandBinder
     Optional<SK26Indexer> indexerSubsystem;
 
     Trigger IndexFeed;
-    Trigger IndexIdle;
     Trigger IsIdle;
 
     public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem)
@@ -44,6 +42,7 @@ public class SK26IndexerBinder implements CommandBinder
         SK26Indexer indexer = indexerSubsystem.get();
 
         IndexFeed.whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
-        IndexIdle.whileTrue(new IndexerFeedCommand(indexer, kIndexerIdleSpeed));
+        // Removed IndexIdle binding - it was using an uninitialized trigger
+        // If you need idle behavior, set it as the default command instead
     }
 }

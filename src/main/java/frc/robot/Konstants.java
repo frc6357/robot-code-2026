@@ -5,10 +5,14 @@ import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Meter;
+import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Konstants.DriveConstants.kMaxAngularRate;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
@@ -36,6 +40,7 @@ import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearAcceleration;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
@@ -52,13 +57,17 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 public final class Konstants
 {
     public static final class DriveConstants {
+        
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
         public static final LinearVelocity kMaxSpeedFAST = kMaxSpeed.times(1.75);
         public static final LinearVelocity kMaxSpeedSLOW = kMaxSpeed.times(0.3);
-
+        
         public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(1.25); // 3/4 of a rotation per second max angular velocity
         public static final AngularVelocity kMaxAngularRateFAST = kMaxAngularRate.times(2); // 1.5 rotations per second max angular velocity
         public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
+        
+        public static final LinearAcceleration kMaxTeleopLinAcceleration = kMaxSpeed.div(Seconds.of(0.33));
+        public static final AngularAcceleration kMaxTeleopRotAcceleration = kMaxAngularRate.div(Seconds.of(0.33));
 
         //pigeon ID
         public static final int kPigeonID = 5; //5
@@ -179,6 +188,40 @@ public final class Konstants
             public static final double kForward = 0.3; // (z) meters forward of center; negative is backwards
             public static final double kRight = 0.0; // (x) meters right of center; negative is left
             public static final double kUp = 0.25; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+        }
+
+        public static final class LimelightThree {
+            // Network/pipeline values
+            public static final String kName = "limelight-three"; // NetworkTable name and hostname
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = Inches.of(-5).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(6).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(13.5).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+        }
+
+        public static final class LimelightFour {
+            // Network/pipeline values
+            public static final String kName = "limelight-four"; // NetworkTable name and hostname
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = Inches.of(-9).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(6).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(13.5).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]

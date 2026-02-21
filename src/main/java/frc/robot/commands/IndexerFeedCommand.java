@@ -15,6 +15,7 @@ public class IndexerFeedCommand extends Command
     public IndexerFeedCommand(SK26Indexer Subsystem, double velocity)
     {
         this.Subsystem = Subsystem;
+        this.velocity = velocity;
         addRequirements(Subsystem);
     }
 

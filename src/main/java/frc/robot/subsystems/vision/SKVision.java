@@ -42,12 +42,15 @@ public class SKVision extends SubsystemBase {
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
     public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
+    public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
+    public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {frontLL}; 
+    public final Limelight[] allLimelights = {threeLL, fourLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {frontLL}; 
+    public final Limelight[] poseLimelights = {threeLL, fourLL}; 
     
+    private Pose3d[] emptyPose3dArray = new Pose3d[0];
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();
     private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
@@ -181,7 +184,7 @@ public class SKVision extends SubsystemBase {
             });
         }
 
-        tagLOSPublisher.set(tagLOSTransforms.toArray(Pose3d[]::new));
+        tagLOSPublisher.set(tagLOSTransforms.toArray(emptyPose3dArray));
     }
 
     /**
