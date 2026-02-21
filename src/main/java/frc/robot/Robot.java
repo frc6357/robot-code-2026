@@ -4,6 +4,16 @@
 
 package frc.robot;
 
+import static frc.robot.Ports.DriverPorts.kDriver;
+import static frc.robot.Ports.OperatorPorts.kOperator;
+
+import com.pathplanner.lib.commands.FollowPathCommand;
+
+import edu.wpi.first.net.WebServer;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +38,14 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
+
+    //get the saved elastic dashboard layout
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
+
+    kDriver.setRumble(RumbleType.kBothRumble, 0.0);
+    kOperator.setRumble(RumbleType.kBothRumble, 0.0);
+
+    CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup")); // FollowPathCommand.warmupCommand().schedule();
   }
 
   /**
@@ -46,7 +64,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
 
     SmartDashboard.putData(CommandScheduler.getInstance());
-    SKPreferences.refreshIfNeeded();
+    SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -84,7 +102,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotContainer.teleopPeriodic();
+  }
 
   @Override
   public void testInit() {

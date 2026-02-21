@@ -1,0 +1,59 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 8.127939759036146,
+        "y": 2.2647108433734933
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 7.057024096385543,
+        "y": 0.25401204819277146
+      },
+      "isLocked": false,
+      "linkedName": "TrenchWarfare_Sweep"
+    },
+    {
+      "anchor": {
+        "x": 1.0686385542168677,
+        "y": 2.811096385542169
+      },
+      "prevControl": {
+        "x": 3.166759036144578,
+        "y": -0.42350602409638505
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 0.5834024896265536,
+      "rotationDegrees": 0.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 179.44909602078147
+  },
+  "reversed": false,
+  "folder": "Chaos",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 91.54815769897806
+  },
+  "useDefaultConstraints": true
+}

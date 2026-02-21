@@ -2,9 +2,9 @@ package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
 import static frc.robot.Konstants.SwerveConstants.kChassisLength;
-import static frc.robot.Ports.DriverPorts.kTranslationXPort;
-import static frc.robot.Ports.DriverPorts.kTranslationYPort;
-import static frc.robot.Ports.DriverPorts.kVelocityOmegaPort;
+import static frc.robot.Ports.DriverPorts.kLeftStickY;
+import static frc.robot.Ports.DriverPorts.kLeftStickX;
+import static frc.robot.Ports.DriverPorts.kRightStickX;
 
 import java.util.List;
 import java.util.function.Supplier;
@@ -47,6 +47,7 @@ import frc.lib.utils.Field;
 import frc.lib.utils.Util;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
+import static frc.robot.RobotContainer.m_field;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
@@ -60,17 +61,15 @@ public class SKSwerve extends SubsystemBase {
     private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
-    private Supplier<Double> translationXSupplier = () -> -kTranslationXPort.getFilteredAxis();
-    private Supplier<Double> translationYSupplier = () -> -kTranslationYPort.getFilteredAxis();
-    private Supplier<Double> velocityOmegaSupplier = () -> -kVelocityOmegaPort.getFilteredAxis();
-    
-    private Field2d elasticField = new Field2d();
+    private Supplier<Double> translationXSupplier = () -> -kLeftStickY.getFilteredAxis();
+    private Supplier<Double> translationYSupplier = () -> -kLeftStickX.getFilteredAxis();
+    private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
     
     private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("RobotPose", Pose2d.struct).publish();
+    .getStructTopic("SmartDashboard/Drive/EstimatedPose", Pose2d.struct).publish();
     
     private StructArrayPublisher<Pose2d> pathPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("ActivePath", Pose2d.struct).publish();
+    .getStructArrayTopic("SmartDashboard/Drive/ActivePath", Pose2d.struct).publish();
     
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
@@ -118,7 +117,7 @@ public class SKSwerve extends SubsystemBase {
         
         PathPlannerLogging.setLogActivePathCallback((activePath) -> telemeterizeActivePath(activePath));
 
-        drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest));
+        drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
     }
 
     @Override
@@ -136,7 +135,7 @@ public class SKSwerve extends SubsystemBase {
 
         outputTelemetry();
 
-        SmartDashboard.putString("Active Path Name", PathPlannerAuto.currentPathName);
+        SmartDashboard.putString("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
     }
 
     private void telemeterizeActivePath(List<Pose2d> path) {
@@ -148,8 +147,8 @@ public class SKSwerve extends SubsystemBase {
 		posePublisher.set(getRobotPose());
 		telemetry.telemeterize(lastReadState);
 		SmartDashboard.putData("Drive", this);
-		elasticField.setRobotPose(getRobotPose());
-		SmartDashboard.putData("Elastic Field 2D", elasticField);
+		m_field.setRobotPose(getRobotPose());
+        SmartDashboard.putData("Elastic Field 2D", m_field);
 	}
 
     @Override
@@ -337,7 +336,7 @@ public class SKSwerve extends SubsystemBase {
         double timestampSeconds,
         Matrix<N3, N1> visionMeasurementStdDevs
     ) {
-        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+        poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
     /* 

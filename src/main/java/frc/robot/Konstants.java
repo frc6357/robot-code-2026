@@ -3,9 +3,13 @@ package frc.robot;
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
 
@@ -28,13 +32,21 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import frc.robot.preferences.SKPreferences;
 import frc.robot.preferences.Pref;
+import edu.wpi.first.wpilibj.PowerDistribution;
+import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.GeneratedConstants;
+import frc.robot.subsystems.drive.SKTargetPoint;
 
 @SuppressWarnings("unused")
 public final class Konstants
@@ -49,7 +61,7 @@ public final class Konstants
         public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
 
         //pigeon ID
-        public static final int kPigeonID = 30; //30
+        public static final int kPigeonID = 5; //5
 
         public static double getDeadbandedStick(double rawValue) {
             if (Math.abs(rawValue) < kJoystickDeadband) {
@@ -60,34 +72,48 @@ public final class Konstants
                 return (rawValue > 0 ? unsignedValue : -unsignedValue);
             }
         }
+
+        public static final class RotationAligningConstants {
+            public static final double kP = 0.85;
+            public static final double kI = 0.1;
+            public static final double kD = 0.03;
+
+            public static final Rotation2d[] kBumpJumpAngles = new Rotation2d[] {
+                Rotation2d.fromDegrees(45),
+                Rotation2d.fromDegrees(135),
+                Rotation2d.fromDegrees(-45),
+                Rotation2d.fromDegrees(-135)
+            };
+        }
+    }
+
+    public static final class TargetPointConstants {
+        public enum TargetPoint {
+            kOperatorControlled(
+                new SKTargetPoint(new Translation2d(0, 0), "Operator")
+            ),
+            kBlueHub(
+                new SKTargetPoint(new Translation2d(4.622, 4.0295), "Blue Hub")
+            ),
+            kRedHub(
+                new SKTargetPoint(new Pose2d(11.929, 4.0295, Rotation2d.k180deg), "Red Hub")
+            );
+
+            public SKTargetPoint point;
+
+            private TargetPoint(SKTargetPoint point) {
+                this.point = point;
+            }
+        }
     }
 
     public static final class SwerveConstants
     {
-        // //Device Settings and Default States
-        
-        //swerve motor IDs
-        public static final int kFrontLeftDriveMotorID = 1; //1
-        public static final int kFrontRightDriveMotorID = 2; //2
-        public static final int kBackLeftDriveMotorID = 3; //3
-        public static final int kBackRightDriveMotorID = 4; //4
-        
-        public static final int kFrontLeftTurnMotorID = 11; //11
-        public static final int kFrontRightTurnMotorID = 12; //12
-        public static final int kBackLeftTurnMotorID = 13; //13
-        public static final int kBackRightTurnMotorID = 14; //14
-        
-        //encoder IDs
-        public static final int kFrontLeftEncoderID = 21; //21
-        public static final int kFrontRightEncoderID = 22; //22
-        public static final int kBackLeftEncoderID = 23; //23
-        public static final int kBackRightEncoderID = 24; //24
-        
-        //Robot Dimension values
+        // Robot Dimension values
     
-        //swerve chassis width and length in inches 
-        public static final int kChassisLength = 27;
-        public static final int kChassisWidth = 27;    
+        // swerve chassis width and length in inches 
+        public static final int kChassisLength = 28; // TODO: protobot is 28x28, but final bot will be different
+        public static final int kChassisWidth = 28; 
     }
 
     public static final class AutoConstants
@@ -104,7 +130,7 @@ public final class Konstants
         public static final PPHolonomicDriveController pathConfig = new PPHolonomicDriveController(kTranslationPIDConstants, kRotationPIDConstants);
 
         public static final PathConstraints kDefaultPathfindingConstraints = new PathConstraints(
-            3.5, 3.0, 
+            4.5, 5.1, 
             540, 720, 
             12, false);
     }
@@ -122,7 +148,7 @@ public final class Konstants
     }
 
     public static final class VisionConstants { // Each limelight has a greek letter name and an individual class for their own set of constants
-        public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2025ReefscapeAndyMark);
+        public static final AprilTagFieldLayout kAprilTagFieldLayout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
         public static final int kAprilTagPipeline = 0; // Default Apriltag pipeline value for all Limelights
 
@@ -145,9 +171,49 @@ public final class Konstants
         }
         */
 
+        public static final class FrontLimelight {
+            // Network/pipeline values
+            public static final String kName = "limelight-front"; // NetworkTable name and hostname
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = 0.3; // (z) meters forward of center; negative is backwards
+            public static final double kRight = 0.0; // (x) meters right of center; negative is left
+            public static final double kUp = 0.25; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+        }
+
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
+    }
+
+    public static final class IndexerConstants 
+    {
+        // Indexer feed speed in Rotations Per Second (RPS)
+        public static final double kIndexerFullSpeed = 8.0;
+
+        // Indexer idle speed in Rotations Per Second (RPS)
+        public static final double kIndexerIdleSpeed = 0.0;
+
+        // Indexer unjam parameters
+        public static final double kIndexerUnjamReverseRPS = -4.0;
+        public static final double kIndexerUnjamReverseDuration = 0.25;
+
+        public static final double kIndexerUnjamWaitDuration = 0.25;
+
+        public static final double kIndexerUnjamForwardRPS = 5.0;
+        public static final double kIndexerUnjamForwardDuration = 0.25;
+
+        public static final Distance kIndexerHeight = Inches.of(18);
+
+        // Max voltage output for indexer motor (for brownout protection)
+        public static final double kMaxIndexerVoltage = 10.0;
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -166,12 +232,81 @@ public final class Konstants
          * acceleration will not cause the robot to tip over.*/
         public static final double kMaxFullSpeedElevatorHeight = 2.0;
     }
-
-    public static final class LightConstants
+    
+    public static final class SystemConstants
     {
-        public static final int numLedOnBot = 240;
+        // Brownout detection
+        // public static final double kBrownoutVoltageThreshold = 7.0; // Voltage threshold for brownout detection
+        // public static final int kPdhCAN_ID = 63;
+        // public static final PowerDistribution PDH = new PowerDistribution(kPdhCAN_ID, ModuleType.kRev);
+        // public static final Trigger kBrownoutTrigger = new Trigger(() -> PDH.getVoltage() < kBrownoutVoltageThreshold);
+
+    }
+
+    public static final class LightsConstants
+    {
+        public static final int kNumLedOnBot = 60;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
+
+        public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
+        public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
+
+        public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
+        public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
+        public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
+        public static final Color kSKDarkBlue = new Color(0 / 255.0, 118 / 255.0, 133 / 255.0);
+
+        public static final Time kDefaultStrobeSeconds = Seconds.of(0.1);
+
+        // Wave animation constants - control the speed and appearance of the wave effect
+        public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)
+        public static final double kWaveSpatialCycles = 2.0; // How many complete wave patterns fit across the entire LED strip
+        public static final double kWaveColorCycleSec = 2.2; // How long it takes for the color gradient to cycle through all colors (seconds)
+
+    }   
+
+    public static final class TurretConstants
+    {
+        public static enum TurretPosition
+        {
+            /** Set the turret angle to 90 degrees **/
+            kTurretLeftPosition(90.0),
+            /** Set the turret angle to 0 degrees **/
+            kTurretZeroPosition(0.0);
+
+            public final double angle;
+            TurretPosition(double angle)
+            {
+                this.angle = angle;
+            }
+        }
+
+        // Turret position limits and tolerances
+        public static final double kTurretMinPosition = -170.0;
+        public static final double kTurretMaxPosition = 170.0;
+        public static final double kTurretAngleTolerance = 0.5;
+
+        // CANcoder / Absolute Encoder constants
+        public static final double kTurretEncoderOffset = -0.3828125; // Rotations (-0.5 to +0.5) //-0.111
+        public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+        public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
+
+        // Motor direction - set true if motor spins opposite to encoder direction
+        public static final boolean kTurretMotorInverted = true;
+
+        // Turret PID (WPILib PIDController - input is degrees, output is duty cycle)
+        public static final double kTurretP = 0.07; //0.00375
+        public static final double kTurretI = 0.02;
+        public static final double kTurretD = 0.005; //0.00005
+        public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
+
+        public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = DegreesPerSecondPerSecond.of(1320);
+
+        // Turret extra constants
+        public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
+        public static final double kTurretJoystickDeadband = 0.15;
     }
 
     public static final class ClimbConstants
@@ -188,9 +323,56 @@ public final class Konstants
     }
 
 
+    public static final class LauncherConstants {
+
+        //initialize PID values
+        public static final double kLauncherA = 0.0;
+        public static final double kLauncherV = 0.093;
+        public static final double kLauncherS = 0.25;
+
+        public static final double kWheelRadius = .0508; //TEMPORARY
+        public static final double kShooterTolerance = 0.5; // +/- rps
+        public static final double kTargetlaunchVelocity = 5; //meters per second
+        public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
+        public static final double kCoastLauncherRPS = 0.25; //RPS of launcher when waiting to shoots
+        public static final double kStopLauncher = 0; // velocity/motorRPS of stopped motor
+        public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
+        public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
+        public static final double kUnJamLauncherRPS = 1/kUnJamLauncherRunTime; //Velocity of motor when unjamming
+
+        public static final class Slot0 {
+            public static final double kP = 1.8;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
+        public static final class Slot1 {
+            public static final double kP = 0.5;
+            public static final double kI = 0;
+            public static final double kD = 0;
+        }
+
+        public static final class BangBangLauncher {
+            
+        }
+    }
+
     public static final class ExampleConstants
     {
         public static final double kExampleSpeed = 0.5;  //percentage based where 1.0 is max power and 0.0 is minimum
+    }
+
+    public static final class IntakeConstants
+    {
+        public static final double kEaterMotorSpeed = 0.5;
+        public static final double kPositionerMotorSpeed = 0.5;
+
+        public static final double kPositionerMotorMinPosition = 0.5;
+        public static final double kPositionMotorMaxPosition = 0.5;
+
+        public static final double kMaxIntakeVoltage = 10.0;
+
+        public static final double kIntakeFullSpeed = 8.0;
+        public static final double kIntakeIdleSpeed = 2.0;
     }
     
     public static final String kCANivoreName = "SwerveCANivore";
@@ -198,3 +380,4 @@ public final class Konstants
     /** The file that is used for system instantiation at runtime */
     public static final String SUBSYSTEMFILE = "Subsystems.json";
 }
+

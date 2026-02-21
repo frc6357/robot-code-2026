@@ -1,5 +1,12 @@
 {
-    "swerve": false,
+    
+    "swerve": true,
     "vision": false,
-    "climb": true
+    "turret": false,
+    "launcher": false,
+    "bangbanglauncher": false,
+    "lights": false,
+    "indexer": false,
+    "pickup": false,
+    "climb": false
 }
