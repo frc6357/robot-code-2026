@@ -1,5 +1,7 @@
 package frc.robot;
 
+import java.util.Optional;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -9,6 +11,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
+import frc.robot.subsystems.launcher.BangBangLauncher;
 
 /**
  * A class to handle large-scale robot states (macros) such as launching, intaking, climbing, and idling.
@@ -54,6 +57,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     private MacroState previousChosenState = MacroState.IDLE;
 
+    // Optional reference to launcher for checking if shooting states are ready
+    private Optional<BangBangLauncher> launcherSubsystem = Optional.empty();
+
     public StateHandler() {
         // Reset all states to default on construction
         for (MacroState state : MacroState.values()) {
@@ -74,6 +80,15 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     /**
+     * Sets the launcher subsystem reference for checking launcher readiness.
+     * Call this from RobotContainer after creating the StateHandler.
+     * @param launcher The BangBangLauncher subsystem (can be empty Optional if not present)
+     */
+    public void setLauncherSubsystem(Optional<BangBangLauncher> launcher) {
+        this.launcherSubsystem = launcher;
+    }
+
+    /**
      * Handles changes in the desired state by stopping the current state and initializing the desired state.
      * This method should be called periodically to ensure state transitions are managed.
      */
@@ -85,9 +100,47 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
     }
 
+    /**
+     * Updates the status of shooting states (SCORING, SHUTTLING, STEADY_STREAM_*) based on launcher readiness.
+     * When the launcher is at its target velocity, the state becomes READY; otherwise it stays WAITING.
+     */
+    private void updateShootingStateReadiness() {
+        boolean launcherReady = launcherSubsystem.map(BangBangLauncher::isAtGoal).orElse(true);
+
+        // States that require the launcher to be ready before they can be "READY"
+        MacroState[] shootingStates = 
+        {
+            MacroState.SCORING,
+            MacroState.SHUTTLING,
+            MacroState.STEADY_STREAM_SCORING,
+            MacroState.STEADY_STREAM_SHUTTLING
+        };
+
+        for (MacroState state : shootingStates) 
+        {
+            // Only update if this is the current state and it's in WAITING status
+            if (currentState == state && state.getStatus() == Status.WAITING) 
+            {
+                if (launcherReady) 
+                {
+                    state.setStatus(Status.READY);
+                }
+            }
+            // If launcher loses readiness while in a shooting state, go back to WAITING
+            else if (currentState == state && state.getStatus() == Status.READY) 
+            {
+                if (!launcherReady) 
+                {
+                    state.setStatus(Status.WAITING);
+                }
+            }
+        }
+    }
+
     @Override
     public void periodic() {
         handleStateTransition();
+        updateShootingStateReadiness();
         if(stateChooser.getSelected() != previousChosenState) {
             setCurrentState(stateChooser.getSelected());
             previousChosenState = stateChooser.getSelected();

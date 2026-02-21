@@ -162,6 +162,9 @@ public class RobotContainer {
                 m_indexerContainer = Optional.of(new SK26Indexer());
                 m_indexerInstance = m_indexerContainer.get(); // Returns new SKSwerve
             }
+
+            // Give StateHandler a reference to the launcher for state readiness checking
+            m_stateHandlerContainer.ifPresent(sh -> sh.setLauncherSubsystem(m_BBLauncherContainer));
         }
         catch (IOException e)
         {
@@ -186,7 +189,7 @@ public class RobotContainer {
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
-        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer, m_BBLauncherContainer));
+        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
