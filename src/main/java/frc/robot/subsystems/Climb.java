@@ -1,50 +1,35 @@
 package frc.robot.subsystems;
 
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.FeedbackSensor;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLimitSwitch;
-import com.revrobotics.spark.SparkRelativeEncoder;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkFlexConfig;
-import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
-import com.revrobotics.spark.config.LimitSwitchConfig.Type;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModule.ClosedLoopOutputType;
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode;
-
-import static frc.robot.Ports.ClimbPorts.kClimbEncoder;
-import static frc.robot.Ports.ClimbPorts.kClimbMotor;
-import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
-import static frc.robot.Ports.OperatorPorts.climbUpButton;
-
-import java.util.Optional;
-
-import static frc.robot.Konstants.ClimbConstants.kClimbP;
-import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
-import static frc.robot.Konstants.ClimbConstants.kClimbI;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;
 import static frc.robot.Konstants.ClimbConstants.kCLimbMax;
 import static frc.robot.Konstants.ClimbConstants.kClimbD;
-import static frc.robot.Konstants.ClimbConstants.kClimbV;
+import static frc.robot.Konstants.ClimbConstants.kClimbI;
+import static frc.robot.Konstants.ClimbConstants.kClimbP;
+import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
+import static frc.robot.Ports.ClimbPorts.kClimbMotor;
+import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
 
-import edu.wpi.first.util.sendable.Sendable;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.ClosedLoopSlot;
+import com.revrobotics.spark.FeedbackSensor;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLimitSwitch;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
+import com.revrobotics.spark.config.LimitSwitchConfig.Type;
+import com.revrobotics.spark.config.SparkFlexConfig;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-
-
 
 public class Climb extends SubsystemBase
 {

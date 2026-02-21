@@ -152,7 +152,8 @@ public class Ports
         public static final CANPort kClimbMotor = new CANPort(41, busName);
         public static final CANPort kClimbMotorTwo = new CANPort (42, busName);
         public static final CANPort kClimbEncoder = new CANPort(61, busName);
-
+    }
+    
     public static class TurretPorts {
         private static final String busName = "";
         public static final CANPort kTurretMotor = new CANPort(50, busName);

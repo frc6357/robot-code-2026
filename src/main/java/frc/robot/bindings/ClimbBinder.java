@@ -2,10 +2,7 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.lib.utils.SKTrigger;
 import frc.robot.commands.ClimbButtonCommand;
 import frc.robot.commands.ClimbDownCommand;
 

@@ -31,7 +31,7 @@ public class SubsystemControls
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,
-        @JsonProperty(required = true, value = "climb")       boolean climb
+        @JsonProperty(required = true, value = "climb")       boolean climb,
 
         @JsonProperty(required = true, value = "pickup")      boolean pickup,
         @JsonProperty(required = true, value = "turret")      boolean turret,
@@ -69,6 +69,7 @@ public class SubsystemControls
     }
     public boolean isClimbPresent() {
         return climb;
+    }
     public boolean isTurretPresent() {
         return turret;
     }
