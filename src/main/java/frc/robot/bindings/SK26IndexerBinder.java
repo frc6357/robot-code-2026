@@ -5,6 +5,7 @@ import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.IndexerFeedCommand;
 import frc.robot.subsystems.indexer.SK26Indexer;
+import frc.robot.subsystems.launcher.BangBangLauncher;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullSpeed;
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
 
@@ -15,20 +16,27 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 public class SK26IndexerBinder implements CommandBinder
 {
     Optional<SK26Indexer> indexerSubsystem;
+    Optional<BangBangLauncher> launcherSubsystem;
 
     Trigger IndexFeed;
     Trigger IndexIdle;
     Trigger IsIdle;
+    Trigger LauncherReady;
 
-    public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem)
+    public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem, Optional<BangBangLauncher> launcherSubsystem)
     {
         this.indexerSubsystem = indexerSubsystem;
+        this.launcherSubsystem = launcherSubsystem;
 
-        // For integration with other states
+        // Trigger for when launcher is at target velocity (ready to feed)
+        LauncherReady = new Trigger(() -> launcherSubsystem.map(BangBangLauncher::isAtGoal).orElse(false));
+
+        // For integration with other states - only feed when launcher is ready
         IndexFeed = StateHandler.whenCurrentState(MacroState.SCORING)
             .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
+            .and(LauncherReady);
 
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);

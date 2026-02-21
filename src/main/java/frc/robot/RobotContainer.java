@@ -186,7 +186,7 @@ public class RobotContainer {
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
-        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
+        buttonBinders.add(new SK26IndexerBinder(m_indexerContainer, m_BBLauncherContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
