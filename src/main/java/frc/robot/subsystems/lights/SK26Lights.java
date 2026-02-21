@@ -238,6 +238,15 @@ public class SK26Lights extends SubsystemBase {
             case SOLID_ORANGE: patterns.orange.applyTo(m_baseBuffer); break;
             case RAINBOW: patterns.scrollingRainbow.applyTo(m_baseBuffer); break;
             case SKBLUE_GRADIENT: patterns.skBlueGradient.applyTo(m_baseBuffer); break;
+
+            // Strobe modes
+            case STROBE_WHITE: patterns.whiteStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_GREEN: patterns.greenStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_RED: patterns.redStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_BLUE: patterns.blueStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_YELLOW: patterns.yellowStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_ORANGE: patterns.orangeStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_SKBLUE: patterns.skBlueStrobe.applyTo(m_baseBuffer); break;
             
             // Team/Alliance modes
             case BREATHING_SKBLUE: effects.applyBreathingSKBlue(m_baseBuffer); break;
@@ -495,6 +504,9 @@ public class SK26Lights extends SubsystemBase {
 
     // ==================== COMMANDS ====================
 
+    public Command setMode(LightMode mode) {
+        return setMode(mode, mode.toString()); 
+    }
     public void setModeImmediate(LightMode mode) {
         autoLightsEnabled = false;
         currentMode = mode;
@@ -779,18 +791,6 @@ public class SK26Lights extends SubsystemBase {
         }).ignoringDisable(true).withName("Knockout P2 Yellow (Y)");
     }
 
-    // Quick command methods
-    public Command setOff() { return setMode(LightMode.OFF, "Off"); }
-    public Command setSolidWhite() { return setMode(LightMode.SOLID_WHITE, "White"); }
-    public Command setSolidGreen() { return setMode(LightMode.SOLID_GREEN, "Green"); }
-    public Command setSolidRed() { return setMode(LightMode.SOLID_RED, "Red"); }
-    public Command setSolidBlue() { return setMode(LightMode.SOLID_BLUE, "Blue"); }
-    public Command setSolidYellow() { return setMode(LightMode.SOLID_YELLOW, "Yellow"); }
-    public Command setSolidOrange() { return setMode(LightMode.SOLID_ORANGE, "Orange"); }
-    public Command setRainbow() { return setMode(LightMode.RAINBOW, "Rainbow"); }
-    public Command setBreathingSKBlue() { return setMode(LightMode.BREATHING_SKBLUE, "Breathing SKBlue"); }
-    public Command setSKBlueGradient() { return setMode(LightMode.SKBLUE_GRADIENT, "SKBlue Gradient"); }
-    public Command setAllianceGradient() { return setMode(LightMode.ALLIANCE_GRADIENT, "Alliance Gradient"); }
 
     public Command startCalibrationTest() {
         return runOnce(() -> {

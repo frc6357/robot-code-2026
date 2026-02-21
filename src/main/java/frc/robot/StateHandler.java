@@ -1,23 +1,21 @@
 package frc.robot;
-    
-import edu.wpi.first.networktables.NetworkTable;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.Publisher;
-import edu.wpi.first.networktables.StructPublisher;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.StateHandler.MacroState.Status;
+import frc.robot.commands.pathplanner.PathPlannerCommands;
 
 /**
  * A class to handle large-scale robot states (macros) such as launching, intaking, climbing, and idling.
  * Each macro state has an associated status to indicate its current condition.
  * A MacroState can still have its status updated while it is not the current nor desired state.
  */
-public class StateHandler extends SubsystemBase{
+public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
     public enum MacroState {
         IDLE(Status.READY),
@@ -44,7 +42,7 @@ public class StateHandler extends SubsystemBase{
         // Similar to WPILib Command structure
         public enum Status {
             OFF,
-            INITIALIZING,
+            WAITING,
             READY,
             STOPPING
         }
@@ -52,7 +50,7 @@ public class StateHandler extends SubsystemBase{
     private SendableChooser<MacroState> stateChooser = new SendableChooser<MacroState>();        
 
     private static MacroState currentState = MacroState.IDLE;
-    private static MacroState desiredState = MacroState.IDLE;
+    private static MacroState requestedState = MacroState.IDLE;
 
     private MacroState previousChosenState = MacroState.IDLE;
 
@@ -71,6 +69,8 @@ public class StateHandler extends SubsystemBase{
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
 
         SmartDashboard.putData("StateChooser", stateChooser);
+
+        SmartDashboard.putData("StateHandler", this);
     }
 
     /**
@@ -78,10 +78,10 @@ public class StateHandler extends SubsystemBase{
      * This method should be called periodically to ensure state transitions are managed.
      */
     private void handleStateTransition() {
-        if(desiredState != currentState) {
+        if(requestedState != currentState) {
             currentState.setStatus(Status.STOPPING);
-            currentState = desiredState;
-            currentState.setStatus(Status.INITIALIZING);
+            currentState = requestedState;
+            currentState.setStatus(Status.WAITING);
         }
     }
 
@@ -92,14 +92,12 @@ public class StateHandler extends SubsystemBase{
             setCurrentState(stateChooser.getSelected());
             previousChosenState = stateChooser.getSelected();
         }
-
-        SmartDashboard.putData("StateHandler", this);
     }
 
     @Override
     public void initSendable(SendableBuilder builder) {
         builder.addStringProperty("Current State", () -> getCurrentState().name(), null);
-        builder.addStringProperty("Desired State", () -> getDesiredState().name(), null);
+        builder.addStringProperty("Requested State", () -> getRequestedState().name(), null);
 
         for(MacroState state : MacroState.values()) {
             builder.addStringProperty(state.name() + " Status", () -> state.getStatus().name(), null);
@@ -121,42 +119,42 @@ public class StateHandler extends SubsystemBase{
      */
     public void setCurrentState(MacroState state) {
         currentState = state;
-        clearDesiredState();
+        clearRequestedState();
     }
 
     public Command setCurrentStateCommand(MacroState state) {
-        return runOnce(() -> setCurrentState(state));
+        return runOnce(() -> setCurrentState(state)).withName("Force" + state.name());
     }
 
     /**
      * Gets the desired state.
      * @return The desired MacroState.
      */
-    public MacroState getDesiredState() {
-        return desiredState;
+    public MacroState getRequestedState() {
+        return requestedState;
     }
 
     /**
      * Sets the desired state.
      * @param state The desired MacroState.
      */
-    public void setDesiredState(MacroState state) {
-        desiredState = state;
+    public void requestState(MacroState state) {
+        requestedState = state;
     }
 
-    public Command setDesiredStateCommand(MacroState state) {
-        return runOnce(() -> setDesiredState(state));
+    public Command requestStateCommand(MacroState state) {
+        return runOnce(() -> requestState(state)).withName("Request" + state.name());
     }
 
     /**
-     * Clears the desired MacroState, setting it to IDLE.
+     * Clears the desired MacroState, setting it to whatever the current state is.
      */
-    public void clearDesiredState() {
-        desiredState = currentState;
+    public void clearRequestedState() {
+        requestedState = currentState;
     }
 
-    public Command clearDesiredStateCommand() {
-        return runOnce(this::clearDesiredState);
+    public Command clearRequestedStateCommand() {
+        return runOnce(this::clearRequestedState).withName("ClearRequestedState");
     }
 
     public MacroState.Status getStatusOf(MacroState state) {
@@ -165,6 +163,123 @@ public class StateHandler extends SubsystemBase{
     
     public void setStatusOf(MacroState state, MacroState.Status status) {
         state.setStatus(status);
+    }
+
+    public void removeIntakeFromRequestedState() {
+        if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.IDLE;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+            requestedState = MacroState.SCORING;
+        }
+        if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            requestedState = MacroState.SHUTTLING;
+        }
+    }
+
+    public Command removeIntakeFromRequestedStateCommand() {
+        return runOnce(this::removeIntakeFromRequestedState).withName("RemoveIntakeFromRequestedState");
+    }
+
+    public void addIntakeToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.INTAKING;
+        }
+        if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+        if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+    }
+
+    public Command addIntakeToRequestedStateCommand() {
+        return runOnce(this::addIntakeToRequestedState).withName("AddIntakeToRequestedState");
+    }
+
+    public void toggleIntakeInRequestedState() {
+        if(requestedState == MacroState.INTAKING || requestedState == MacroState.STEADY_STREAM_SCORING || requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            removeIntakeFromRequestedState();
+        } else {
+            addIntakeToRequestedState();
+        }
+    }
+
+    public Command toggleIntakeInRequestedStateCommand() {
+        return runOnce(this::toggleIntakeInRequestedState).withName("ToggleIntakeInRequestedState");
+    }
+
+    public void removeScoringFromRequestedState() {
+        if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.IDLE;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+            requestedState = MacroState.INTAKING;
+        }
+    }
+
+    public void addScoringToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.SCORING;
+        }
+        else if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+        else if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.SCORING;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+    }
+
+    public void requestScoring() {
+        addScoringToRequestedState();
+    }
+
+    public Command requestScoringCommand() {
+        return runOnce(this::requestScoring).withName("RequestScoring");
+    }
+
+    public void removeShuttlingFromRequestedState() {
+        if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.IDLE;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+            requestedState = MacroState.INTAKING;
+        }
+    }
+
+    public void addShuttlingToRequestedState() {
+        if(requestedState == MacroState.IDLE) {
+            requestedState = MacroState.SHUTTLING;
+        }
+        else if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+        else if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.SHUTTLING;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+    }
+
+    public void requestShuttling() {
+        addShuttlingToRequestedState();
+    }
+
+    public Command requestShuttlingCommand() {
+        return runOnce(this::requestShuttling).withName("RequestShuttling");
+    }
+
+    public void turnOffLaunchingStates() {
+        removeShuttlingFromRequestedState();
+        removeScoringFromRequestedState();
+    }
+
+    public Command turnOffLaunchingStatesCommand() {
+        return runOnce(this::turnOffLaunchingStates).withName("TurnOffLaunchingStates");
     }
 
     // ==================== Trigger Factory Methods ====================
@@ -184,7 +299,7 @@ public class StateHandler extends SubsystemBase{
      * @return A Trigger that is true when desiredState == state.
      */
     public static Trigger whenDesiredState(MacroState state) {
-        return new Trigger(() -> desiredState == state);
+        return new Trigger(() -> requestedState == state);
     }
 
     /**
@@ -214,7 +329,7 @@ public class StateHandler extends SubsystemBase{
      * @return A Trigger that is true when currentState == state AND status == INITIALIZING.
      */
     public static Trigger whenCurrentStateInitializing(MacroState state) {
-        return new Trigger(() -> currentState == state && state.getStatus() == Status.INITIALIZING);
+        return new Trigger(() -> currentState == state && state.getStatus() == Status.WAITING);
     }
 
     /**
@@ -225,5 +340,36 @@ public class StateHandler extends SubsystemBase{
      */
     public static Trigger whenStateStopping(MacroState state) {
         return new Trigger(() -> state.getStatus() == Status.STOPPING);
+    }
+
+    public static Trigger whenIntakeNotCurrent() {
+        return new Trigger(
+            () -> currentState != MacroState.INTAKING && currentState != MacroState.STEADY_STREAM_SCORING && currentState != MacroState.STEADY_STREAM_SHUTTLING
+        );
+    }
+
+    public static Trigger whenIntakeNotDesired() {
+        return new Trigger(
+            () -> requestedState != MacroState.INTAKING && requestedState != MacroState.STEADY_STREAM_SCORING && requestedState != MacroState.STEADY_STREAM_SHUTTLING
+        );
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        PathPlannerCommands.addCommand("Request Idle State", requestStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Request Scoring State", requestStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Request Shuttling State", requestStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Request Intaking State", requestStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Request Climbing State", requestStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Request SS Scoring State", requestStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Request SS Shuttling State", requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+
+        PathPlannerCommands.addCommand("Force Idle State", setCurrentStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Force Scoring State", setCurrentStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Force Shuttling State", setCurrentStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Force Intaking State", setCurrentStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Force Climbing State", setCurrentStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Force SS Scoring State", setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Force SS Shuttling State", setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
     }
 }

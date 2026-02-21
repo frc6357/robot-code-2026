@@ -5,7 +5,6 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
-import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static edu.wpi.first.wpilibj.XboxController.Button.kA;
 import static edu.wpi.first.wpilibj.XboxController.Button.kB;
 import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
@@ -16,27 +15,28 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
 import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
-import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
-import static frc.robot.Ports.OperatorPorts.kXbutton;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.configs.CANrangeConfiguration;
+import com.ctre.phoenix6.configs.FovParamsConfigs;
+import com.ctre.phoenix6.configs.ProximityParamsConfigs;
+import com.ctre.phoenix6.configs.ToFParamsConfigs;
+import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 
-// Unused Imports
-
-//import static frc.robot.utils.SKTrigger.INPUT_TYPE.*;
-//import static frc.robot.utils.SKTrigger.INPUT_TYPE.AXIS;
-
+@SuppressWarnings("unused")
 public class Ports
 {
     public static class DriverPorts
@@ -50,11 +50,10 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
-        // Light game buttons for Simon Says (Driver)
-        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
+        public static final SKTrigger kAButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);
@@ -77,7 +76,6 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kDriver, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kDriver, kRightStick.value, BUTTON);
-        
     }
     /**
      * Defines the button, controller, and axis IDs needed to get input from an external
@@ -116,7 +114,7 @@ public class Ports
         // Bumpers:
         public static final SKTrigger kLBbutton = new SKTrigger(kOperator, kLeftBumper.value, BUTTON);
         public static final SKTrigger kRBbutton = new SKTrigger(kOperator, kRightBumper.value, BUTTON);
-
+        
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kOperator, 0, POV);
         public static final SKTrigger kRightDpad = new SKTrigger(kOperator, 90, POV);
@@ -136,27 +134,77 @@ public class Ports
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
     }
 
-    public static class LightsPorts{
-        public static final CANBus canBus = CANBus.roboRIO();
-        //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(48, canBus.getName()); // CAN ID for the CANdle controller
-    }
-
-    public static class EndEffectorPorts
-    {
-        private static final String busName = "";
-        //assign an ID of 48 to the CANdle
-        public static final CANPort kCANdle = new CANPort(48, busName);
-    }
-
     public static class LauncherPorts {
         
         private static final String busName = "";
-        public static final CANPort kFixedLauncherMotor = new CANPort(50, busName);
-        public static final CANPort kFixedLauncherMotorFollower = new CANPort(51, busName);
-        public static final CANPort kTurretMotor = new CANPort(55, busName);
-        public static final CANPort kTurretEncoder = new CANPort(57, busName);
+        public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
+        public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
     }
+
+    public static class TurretPorts {
+        private static final String busName = "";
+        public static final CANPort kTurretMotor = new CANPort(50, busName);
+        public static final CANPort kTurretEncoder = new CANPort(51, busName);
+    }
+
+    public static class IndexerPorts
+    {
+        private static final String busName = "";
+        public static final CANPort kIndexerMotor = new CANPort(62, busName);
+        public static final CANPort kSpindexerMotor = new CANPort(60, busName);
+    }
+
+    public static class pickupOBPorts
+    {
+        //bus name is null
+        private static final String busName = "";
+
+        //assign a motor ID [PLACEHOLDERS}
+        public static final CANPort kPositionerMotor = new CANPort(30, busName); 
+        public static final CANPort kEaterMotor = new CANPort(31, busName);
+
+        public static final CANPort kIndexerMotor = new CANPort(59, busName);
+    }
+
+    public static class Sensors {
+        private static final String busName = "";
+        public static final CANPort kCANrange = new CANPort(61, busName);
+        public static final CANPort kLauncherSensor = new CANPort(42, busName);
+        public static final CANPort kIntakeSensor = new CANPort(32, busName);
+        public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+
+        public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        // public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        // public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
+        public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
+
+        private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+        private static CANrangeConfiguration beamConfig = new CANrangeConfiguration()
+            .withFovParams(new FovParamsConfigs().withFOVCenterX(0)
+                                                 .withFOVCenterY(0)
+                                                 .withFOVRangeX(6.25)
+                                                 .withFOVRangeY(6.25))
+            .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
+
+        // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        // public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
+        // public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
+
+        /* Sensor configurating */
+        static {
+            hopperSensor.getConfigurator().apply(tofConfig);
+            // launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            // intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+        }
+
+
+    }
+
 
     // public static class ExamplePorts
     // {

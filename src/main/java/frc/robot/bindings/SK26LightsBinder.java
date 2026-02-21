@@ -11,6 +11,8 @@ import static frc.robot.Ports.OperatorPorts.kBackbutton;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.StateHandler;
+import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.lights.LightMode;
 import frc.robot.subsystems.lights.SK26Lights;
 
@@ -29,10 +31,22 @@ public class SK26LightsBinder implements CommandBinder {
         }
         SK26Lights lights = lightsSubsystem.get();
 
+        StateHandler.whenCurrentStateReady(MacroState.SHUTTLING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING))
+        .onTrue(
+            lights.setMode(LightMode.STROBE_WHITE)
+        );
+        
+        StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+        .onTrue(
+            lights.setMode(LightMode.STROBE_SKBLUE)
+        );
+
         // ==================== BASIC LIGHT CONTROLS (Operator D-pad) ====================
         // These two buttons always work regardless of game mode.
-        kLeftDpad.button.onTrue(lights.setOff());           // D-pad Left = Lights Off
-        kRightDpad.button.onTrue(lights.setSKBlueGradient()); // D-pad Right = SK Gradient
+        kLeftDpad.button.onTrue(lights.setMode(LightMode.OFF));           // D-pad Left = Lights Off
+        kRightDpad.button.onTrue(lights.setMode(LightMode.SKBLUE_GRADIENT)); // D-pad Right = SK Gradient
 
         // Serious light effects (Alliance Gradient, Solid colors, etc.) are controlled
         // via the "Lights/Light Effect" dropdown on SmartDashboard.

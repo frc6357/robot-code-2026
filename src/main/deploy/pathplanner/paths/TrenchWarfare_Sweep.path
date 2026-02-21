@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 4.453095577746077,
-        "y": 7.4572753209700435
+        "y": 7.457
       },
       "prevControl": null,
       "nextControl": {
         "x": 8.390204819277107,
-        "y": 7.739493975903613
+        "y": 7.73921865493357
       },
       "isLocked": false,
       "linkedName": "LeftTrench"
@@ -38,7 +38,7 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 3.0,
+    "maxVelocity": 4.5,
     "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,

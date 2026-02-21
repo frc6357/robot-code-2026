@@ -1,18 +1,19 @@
 package frc.robot.bindings;
 
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+// Imports from robot
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
-
-import java.util.Optional;
-
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.launcher.BangBangLauncher;
+
+// Imports from Java/WPILib
+import java.util.Optional;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class SK26BBLauncherBinder implements CommandBinder {
 
@@ -25,11 +26,14 @@ public class SK26BBLauncherBinder implements CommandBinder {
 
     Pref<Double> kShootVelocity = SKPreferences.attach("BBLauncher/ManualShootVelocity (rps)", 24.5);
     
-    public SK26BBLauncherBinder(Optional<BangBangLauncher> launcherSubsystem) {
+    public SK26BBLauncherBinder(Optional<BangBangLauncher> launcherSubsystem) 
+    {
         this.launcherSubsystem = launcherSubsystem;
-        this.ShootExitVel = kLTrigger.button;
-        this.ShootRPS = kRTrigger.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
-        this.UnJam = kXbutton.button;
+
+        ShootExitVel = kLTrigger.button;
+        UnJam = kXbutton.button;
+        ShootRPS = kRTrigger.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
+
         Shoot = StateHandler.whenCurrentState(MacroState.SCORING)
                 .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
                 .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))

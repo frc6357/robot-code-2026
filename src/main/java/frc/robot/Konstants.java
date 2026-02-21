@@ -4,9 +4,11 @@ import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.DegreesPerSecondPerSecond;
+import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
@@ -33,7 +35,9 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
@@ -124,7 +128,7 @@ public final class Konstants
         public static final PPHolonomicDriveController pathConfig = new PPHolonomicDriveController(kTranslationPIDConstants, kRotationPIDConstants);
 
         public static final PathConstraints kDefaultPathfindingConstraints = new PathConstraints(
-            3.5, 3.0, 
+            4.5, 5.1, 
             540, 720, 
             12, false);
     }
@@ -187,6 +191,29 @@ public final class Konstants
         }
     }
 
+    public static final class IndexerConstants 
+    {
+        // Indexer feed speed in Rotations Per Second (RPS)
+        public static final double kIndexerFullSpeed = 8.0;
+
+        // Indexer idle speed in Rotations Per Second (RPS)
+        public static final double kIndexerIdleSpeed = 0.0;
+
+        // Indexer unjam parameters
+        public static final double kIndexerUnjamReverseRPS = -4.0;
+        public static final double kIndexerUnjamReverseDuration = 0.25;
+
+        public static final double kIndexerUnjamWaitDuration = 0.25;
+
+        public static final double kIndexerUnjamForwardRPS = 5.0;
+        public static final double kIndexerUnjamForwardDuration = 0.25;
+
+        public static final Distance kIndexerHeight = Inches.of(18);
+
+        // Max voltage output for indexer motor (for brownout protection)
+        public static final double kMaxIndexerVoltage = 10.0;
+    }
+
     /** Constants that are used when defining filters for controllers */
     public static final class OIConstants
     {
@@ -228,6 +255,7 @@ public final class Konstants
         public static final Color kSKBlue = new Color(81 / 255.0, 171 / 255.0, 185 / 255.0);
         public static final Color kSKDarkBlue = new Color(0 / 255.0, 118 / 255.0, 133 / 255.0);
 
+        public static final Time kDefaultStrobeSeconds = Seconds.of(0.1);
 
         // Wave animation constants - control the speed and appearance of the wave effect
         public static final double kWaveSpeedCyclesPerSecond = 0.35; // How fast the wave travels along the LED strip (cycles per second)
@@ -235,14 +263,6 @@ public final class Konstants
         public static final double kWaveColorCycleSec = 2.2; // How long it takes for the color gradient to cycle through all colors (seconds)
 
     }   
-
-
-
-    public static final class IndexerConstants
-    {
-        public static final double kFeederSpeed = 0.7;
-        public static final double kFeederStop = 0.0;
-    }
 
     public static final class TurretConstants
     {
@@ -325,9 +345,24 @@ public final class Konstants
     {
         public static final double kExampleSpeed = 0.5;  //percentage based where 1.0 is max power and 0.0 is minimum
     }
+
+    public static final class IntakeConstants
+    {
+        public static final double kEaterMotorSpeed = 0.5;
+        public static final double kPositionerMotorSpeed = 0.5;
+
+        public static final double kPositionerMotorMinPosition = 0.5;
+        public static final double kPositionMotorMaxPosition = 0.5;
+
+        public static final double kMaxIntakeVoltage = 10.0;
+
+        public static final double kIntakeFullSpeed = 8.0;
+        public static final double kIntakeIdleSpeed = 2.0;
+    }
     
     public static final String kCANivoreName = "SwerveCANivore";
 
     /** The file that is used for system instantiation at runtime */
     public static final String SUBSYSTEMFILE = "Subsystems.json";
 }
+
