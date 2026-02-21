@@ -12,6 +12,7 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
  * Contains all LED effect implementations.
  * Effects modify an AddressableLEDBuffer directly.
  */
+@SuppressWarnings("unused")
 public class LightEffects {
     
     private final Random random = new Random();
