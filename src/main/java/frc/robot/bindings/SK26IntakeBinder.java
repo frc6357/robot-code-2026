@@ -9,11 +9,11 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
-public class PickupBinder implements CommandBinder {
+public class SK26IntakeBinder implements CommandBinder {
     Optional<SK26Intake> subsystem;
     Trigger intake;
 
-    public PickupBinder(Optional<SK26Intake> pobSys) {
+    public SK26IntakeBinder(Optional<SK26Intake> pobSys) {
         subsystem = pobSys;
         intake = kRightDpad.button;
     }
