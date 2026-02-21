@@ -105,7 +105,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		// ========== PID Configuration ==========
 		positionerPID = positionerMotor.getClosedLoopController();
 
-		SmartDashboard.putData("SK26PickupOB", this);
+		SmartDashboard.putData("SK26Intake", this);
 	}
 
 	/**

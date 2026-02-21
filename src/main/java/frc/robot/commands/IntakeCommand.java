@@ -3,8 +3,8 @@ package frc.robot.commands;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.SK26Intake;
 
-import static frc.robot.Konstants.pickupOBConstants.kIntakeIdleSpeed;
-import static frc.robot.Konstants.pickupOBConstants.kIntakeSpeed;
+import static frc.robot.Konstants.IntakeConstants.kIntakeIdleSpeed;
+import static frc.robot.Konstants.IntakeConstants.kIntakeSpeed;
 
 // Command to feed fuel using the indexer subsystem
 public class IntakeCommand extends Command {
