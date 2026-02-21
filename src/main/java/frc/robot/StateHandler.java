@@ -213,7 +213,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if(requestedState == MacroState.SCORING) {
             requestedState = MacroState.IDLE;
         }
-        if(requestedState == MacroState.STEADY_STREAM_SCORING) {
+        else if(requestedState == MacroState.STEADY_STREAM_SCORING) {
             requestedState = MacroState.INTAKING;
         }
     }
@@ -222,28 +222,30 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if(requestedState == MacroState.IDLE) {
             requestedState = MacroState.SCORING;
         }
-        if(requestedState == MacroState.INTAKING) {
+        else if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+        else if(requestedState == MacroState.SHUTTLING) {
+            requestedState = MacroState.SCORING;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
             requestedState = MacroState.STEADY_STREAM_SCORING;
         }
     }
 
-    public void toggleScoringInRequestedState() {
-        if(requestedState == MacroState.SCORING || requestedState == MacroState.STEADY_STREAM_SCORING) {
-            removeScoringFromRequestedState();
-        } else {
-            addScoringToRequestedState();
-        }
+    public void requestScoring() {
+        addScoringToRequestedState();
     }
 
-    public Command toggleScoringInRequestedStateCommand() {
-        return runOnce(this::toggleScoringInRequestedState).withName("ToggleScoringInRequestedState");
+    public Command requestScoringCommand() {
+        return runOnce(this::requestScoring).withName("RequestScoring");
     }
 
     public void removeShuttlingFromRequestedState() {
         if(requestedState == MacroState.SHUTTLING) {
             requestedState = MacroState.IDLE;
         }
-        if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
+        else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
             requestedState = MacroState.INTAKING;
         }
     }
@@ -252,21 +254,32 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if(requestedState == MacroState.IDLE) {
             requestedState = MacroState.SHUTTLING;
         }
-        if(requestedState == MacroState.INTAKING) {
+        else if(requestedState == MacroState.INTAKING) {
+            requestedState = MacroState.STEADY_STREAM_SHUTTLING;
+        }
+        else if(requestedState == MacroState.SCORING) {
+            requestedState = MacroState.SHUTTLING;
+        }
+        else if(requestedState == MacroState.STEADY_STREAM_SCORING) {
             requestedState = MacroState.STEADY_STREAM_SHUTTLING;
         }
     }
 
-    public void toggleShuttlingInRequestedState() {
-        if(requestedState == MacroState.SHUTTLING || requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
-            removeShuttlingFromRequestedState();
-        } else {
-            addShuttlingToRequestedState();
-        }
+    public void requestShuttling() {
+        addShuttlingToRequestedState();
     }
 
-    public Command toggleShuttlingInRequestedStateCommand() {
-        return runOnce(this::toggleShuttlingInRequestedState).withName("ToggleShuttlingInRequestedState");
+    public Command requestShuttlingCommand() {
+        return runOnce(this::requestShuttling).withName("RequestShuttling");
+    }
+
+    public void turnOffLaunchingStates() {
+        removeShuttlingFromRequestedState();
+        removeScoringFromRequestedState();
+    }
+
+    public Command turnOffLaunchingStatesCommand() {
+        return runOnce(this::turnOffLaunchingStates).withName("TurnOffLaunchingStates");
     }
 
     // ==================== Trigger Factory Methods ====================
