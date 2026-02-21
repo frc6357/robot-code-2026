@@ -282,8 +282,8 @@ public class SKVision extends SubsystemBase {
         double bestScore = 0;
         for(Limelight LL : poseLimelights) {
             double score = 0;
-            score += LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT;
-            score += LL.getTargetSize(); // Range: 1-100
+            score += (LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / LL.getDistanceToTagFromCamera();
+            score += LL.getTargetSize() * 1.25; // Range: 1-100
 
             if(score > bestScore) {
                 bestScore = score;
