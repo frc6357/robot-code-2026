@@ -356,7 +356,7 @@ public final class Konstants
 
         public static final double kMaxIntakeVoltage = 10.0;
 
-        public static final double kIntakeSpeed = 8.0;
+        public static final double kIntakeFullSpeed = 8.0;
         public static final double kIntakeIdleSpeed = 2.0;
     }
     

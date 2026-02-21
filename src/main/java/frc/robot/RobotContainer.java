@@ -42,7 +42,7 @@ import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.intake.SK26Intake;
 import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.launcher.SK26Launcher;
-import frc.robot.bindings.PickupBinder;
+import frc.robot.bindings.SK26IntakeBinder;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
@@ -185,7 +185,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
-        buttonBinders.add(new PickupBinder(m_pickupContainer));
+        buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
