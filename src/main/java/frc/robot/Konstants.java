@@ -183,8 +183,8 @@ public final class Konstants
         public static final double kClimbV = 0;
         public static final double kClimbTolerance = 1; //figure out tolerance
         public static final double kCLimbMax = 0; //figure out value of encoder when climb is at max height.
-        public static final double kTOne = 10;
-        public static final double kClimbReturn = 1.0;
+        public static final double kTOne = 70;
+        public static final double kClimbReturn = 25;
     }
 
 
