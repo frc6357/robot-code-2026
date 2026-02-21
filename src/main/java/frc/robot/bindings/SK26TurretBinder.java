@@ -5,7 +5,7 @@ import java.util.Optional;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.TurretJoystickCommand;
-import frc.robot.commands.TurretTemporaryButtonCommand;
+import frc.robot.commands.TurretButtonCommand;
 import frc.robot.commands.TurretTrackPointCommand;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.turret.SK26Turret;
@@ -17,6 +17,8 @@ import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
+import static frc.robot.Konstants.TurretConstants.TurretPosition.kTurretZeroPosition;
+import static frc.robot.Konstants.TurretConstants.TurretPosition.kTurretLeftPosition;
 import static frc.robot.Ports.OperatorPorts.kRightStickX;
 import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
@@ -63,8 +65,8 @@ public class SK26TurretBinder implements CommandBinder
 
         kRightStickX.setFilter(new LinearDeadbandFilter(kTurretJoystickDeadband, 1.0));
 
-        kBbutton.button.and(IsIdle).whileTrue(new TurretTemporaryButtonCommand(90, turret));
-        kYbutton.button.and(IsIdle).whileTrue(new TurretTemporaryButtonCommand(0.0, turret));
+        kBbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretLeftPosition, turret));
+        kYbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretZeroPosition, turret));
         kAbutton.button.and(IsIdle).toggleOnTrue(new TurretTrackPointCommand(
             turret, 
             swerve,

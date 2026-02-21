@@ -234,13 +234,13 @@ public final class Konstants
         }
     }
 
-    public static final class IndexerConstants {
-
+    public static final class IndexerConstants 
+    {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFeedRPS = 8.0;
+        public static final double kIndexerFullSpeed = 8.0;
 
         // Indexer idle speed in Rotations Per Second (RPS)
-        public static final double kIndexerIdleRPS = 0.0;
+        public static final double kIndexerIdleSpeed = 0.0;
 
         // Indexer unjam parameters
         public static final double kIndexerUnjamReverseRPS = -4.0;
@@ -252,6 +252,9 @@ public final class Konstants
         public static final double kIndexerUnjamForwardDuration = 0.25;
 
         public static final Distance kIndexerHeight = Inches.of(18);
+
+        // Max voltage output for indexer motor (for brownout protection)
+        public static final double kMaxIndexerVoltage = 10.0;
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -386,13 +389,18 @@ public final class Konstants
         public static final double kExampleSpeed = 0.5;  //percentage based where 1.0 is max power and 0.0 is minimum
     }
 
-    public static final class pickupOBConstants
+    public static final class IntakeConstants
     {
         public static final double kEaterMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
 
         public static final double kPositionerMotorMinPosition = 0.5;
         public static final double kPositionMotorMaxPosition = 0.5;
+
+        public static final double kMaxIntakeVoltage = 10.0;
+
+        public static final double kIntakeFullSpeed = 8.0;
+        public static final double kIntakeIdleSpeed = 2.0;
     }
     
     public static final String kCANivoreName = "SwerveCANivore";

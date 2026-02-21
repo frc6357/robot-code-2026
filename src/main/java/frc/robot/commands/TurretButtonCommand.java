@@ -1,14 +1,15 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Konstants.TurretConstants.TurretPosition;
 import frc.robot.subsystems.turret.SK26Turret;
 
-public class TurretTemporaryButtonCommand extends Command
+public class TurretButtonCommand extends Command
 {
     private final SK26Turret turret;
-    private final double angle;
+    private final TurretPosition angle;
 
-    public TurretTemporaryButtonCommand(double angle, SK26Turret turret)
+    public TurretButtonCommand(TurretPosition angle, SK26Turret turret)
     {
         this.angle = angle;
         this.turret = turret;

@@ -39,5 +39,4 @@ public class LauncherUnJamCommandGroup extends SequentialCommandGroup {
                 .finallyDo(() -> launchermotor.stopLauncher()) //stops the launcher once it stops repeating
         );
     }
-    
 }
