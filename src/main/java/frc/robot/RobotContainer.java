@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
+import frc.robot.bindings.ClimbBinder;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26TurretBinder;
@@ -33,6 +34,7 @@ import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26StateBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SKSwerveBinder;
+import frc.robot.subsystems.Climb;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
@@ -68,6 +70,7 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
+  public Optional<Climb> m_climbComtainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
@@ -83,6 +86,7 @@ public class RobotContainer {
   public static SK26Lights m_lightsInstance;
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
+  public static Climb m_climbInstance;
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
 
@@ -138,6 +142,10 @@ public class RobotContainer {
                 m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
                 m_visionInstance = m_visionContainer.get();
             }
+            if(subsystems.isClimbPresent()) {
+                m_climbComtainer = Optional.of(new Climb());
+                m_climbInstance = m_climbComtainer.get();
+            }
             if(subsystems.isTurretPresent()) {
                 m_turretContainer = Optional.of(new SK26Turret());
                 m_turretInstance = m_turretContainer.get();
@@ -182,6 +190,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
+        buttonBinders.add( new ClimbBinder(m_climbComtainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());

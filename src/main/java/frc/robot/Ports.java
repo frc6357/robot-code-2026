@@ -132,6 +132,11 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
+        
+        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
+        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
+        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
+        public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
     }
 
     public static class LauncherPorts {
@@ -140,6 +145,13 @@ public class Ports
         public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
         public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
     }
+    
+    public static class ClimbPorts
+    {
+        private static final String busName = kCANivoreName;
+        public static final CANPort kClimbMotor = new CANPort(41, busName);
+        public static final CANPort kClimbMotorTwo = new CANPort (42, busName);
+        public static final CANPort kClimbEncoder = new CANPort(61, busName);
 
     public static class TurretPorts {
         private static final String busName = "";
