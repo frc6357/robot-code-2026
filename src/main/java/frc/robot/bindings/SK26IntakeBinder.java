@@ -26,9 +26,10 @@ public class SK26IntakeBinder implements CommandBinder
 
         // For integration with other states
         intakeFullSpeed = StateHandler.whenCurrentState(MacroState.INTAKING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
-        intakeIdleSpeed = StateHandler.whenCurrentState(MacroState.SCORING)
+            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+        intakeIdleSpeed = StateHandler.whenCurrentState(MacroState.SCORING);
 
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
