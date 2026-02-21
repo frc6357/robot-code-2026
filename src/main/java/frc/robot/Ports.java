@@ -29,6 +29,7 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
@@ -49,10 +50,10 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
-        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
+        public static final SKTrigger kAButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);
@@ -162,19 +163,23 @@ public class Ports
         public static final CANPort kPositionerMotor = new CANPort(30, busName); 
         public static final CANPort kEaterMotor = new CANPort(31, busName);
 
+        public static final CANPort kIndexerMotor = new CANPort(59, busName);
     }
 
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(61, busName);
         public static final CANPort kLauncherSensor = new CANPort(42, busName);
-        public static final CANPort kIntakeSensor1 = new CANPort(32, busName);
+        public static final CANPort kIntakeSensor = new CANPort(32, busName);
         public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
 
         public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
-        public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
-        public static CANrange intakeSensor1 = new CANrange(kIntakeSensor1.ID, CANBus.roboRIO());
+        // public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        // public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
         public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
@@ -192,8 +197,8 @@ public class Ports
         /* Sensor configurating */
         static {
             hopperSensor.getConfigurator().apply(tofConfig);
-            launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
-            intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            // launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            // intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
             intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
         }
 

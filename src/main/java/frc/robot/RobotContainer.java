@@ -39,10 +39,10 @@ import frc.robot.commands.pathplanner.PathPlannerCommands;
 import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.indexer.SK26Indexer;
+import frc.robot.subsystems.intake.SK26Intake;
 import frc.robot.subsystems.launcher.BangBangLauncher;
 import frc.robot.subsystems.launcher.SK26Launcher;
 import frc.robot.bindings.PickupBinder;
-import frc.robot.subsystems.pickupOB.SK26PickupOB;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
@@ -73,7 +73,7 @@ public class RobotContainer {
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
-  public Optional<SK26PickupOB> m_pickupContainer = Optional.empty();
+  public Optional<SK26Intake> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
 
   
@@ -83,7 +83,7 @@ public class RobotContainer {
   public static SK26Lights m_lightsInstance;
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
-  public static SK26PickupOB m_pickupInstance;
+  public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
 
   public static Field2d m_field = new Field2d();
@@ -155,7 +155,7 @@ public class RobotContainer {
                 m_lightsInstance = m_lightsContainer.get();
             }
             if(subsystems.isPickupPresent()) {
-                m_pickupContainer = Optional.of(new SK26PickupOB());
+                m_pickupContainer = Optional.of(new SK26Intake());
                 m_pickupInstance = m_pickupContainer.get();
             }
             if(subsystems.isIndexerPresent()) {

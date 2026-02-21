@@ -69,6 +69,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
 
         SmartDashboard.putData("StateChooser", stateChooser);
+
+        SmartDashboard.putData("StateHandler", this);
     }
 
     /**
@@ -90,8 +92,6 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             setCurrentState(stateChooser.getSelected());
             previousChosenState = stateChooser.getSelected();
         }
-
-        SmartDashboard.putData("StateHandler", this);
     }
 
     @Override
