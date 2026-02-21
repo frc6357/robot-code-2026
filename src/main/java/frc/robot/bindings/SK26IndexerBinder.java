@@ -35,8 +35,7 @@ public class SK26IndexerBinder implements CommandBinder
         IndexFeed = StateHandler.whenCurrentState(MacroState.SCORING)
             .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
-            .and(LauncherReady);
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
@@ -51,7 +50,7 @@ public class SK26IndexerBinder implements CommandBinder
 
         SK26Indexer indexer = indexerSubsystem.get();
 
-        IndexFeed.whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
+        IndexFeed.and(LauncherReady).whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
         IndexIdle.whileTrue(new IndexerFeedCommand(indexer, kIndexerIdleSpeed));
     }
 }
