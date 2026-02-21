@@ -1,8 +1,8 @@
 package frc.robot.subsystems.intake;
 
 // Imports from robot
-import static frc.robot.Konstants.pickupOBConstants.kPositionerMotorMinPosition;
-import static frc.robot.Konstants.pickupOBConstants.kMaxIntakeVoltage;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
+import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
 import static frc.robot.Ports.pickupOBPorts.kEaterMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import frc.lib.subsystems.PathplannerSubsystem;
