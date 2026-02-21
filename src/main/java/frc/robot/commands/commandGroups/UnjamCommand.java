@@ -18,7 +18,7 @@ public class UnjamCommand extends SequentialCommandGroup {
                 Commands.waitSeconds(kIndexerUnjamReverseDuration),
 
                 // Pause
-                Commands.runOnce(() -> indexer.unjamIndexer(kIndexerIdleRPS), indexer),
+                Commands.runOnce(() -> indexer.unjamIndexer(kIndexerIdleSpeed), indexer),
                 Commands.waitSeconds(kIndexerUnjamWaitDuration),
 
                 // Forward
@@ -26,7 +26,7 @@ public class UnjamCommand extends SequentialCommandGroup {
                 Commands.waitSeconds(kIndexerUnjamForwardDuration),
 
                 // Pause
-                Commands.runOnce(() -> indexer.unjamIndexer(kIndexerIdleRPS), indexer),
+                Commands.runOnce(() -> indexer.unjamIndexer(kIndexerIdleSpeed), indexer),
                 Commands.waitSeconds(kIndexerUnjamWaitDuration))
 
             // Repeat until interrupted

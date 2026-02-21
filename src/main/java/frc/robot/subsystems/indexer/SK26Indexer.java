@@ -1,7 +1,7 @@
 package frc.robot.subsystems.indexer;
 
 // Imports from robot
-import static frc.robot.Konstants.IndexerConstants.kIndexerIdleRPS;
+import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
@@ -116,7 +116,7 @@ public class SK26Indexer extends SubsystemBase
 
     public void idleIndexer() {
         setIsIdle();
-        setIndexerVelocity(kIndexerIdleRPS);
+        setIndexerVelocity(kIndexerIdleSpeed);
     }
 
     /**
