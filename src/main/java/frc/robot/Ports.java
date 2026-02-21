@@ -13,6 +13,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kLeftStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
 import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
 import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
@@ -135,6 +136,7 @@ public class Ports
         public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
         public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
         public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
+        public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
     }
 
     /*

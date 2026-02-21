@@ -50,11 +50,13 @@ public class Climb extends SubsystemBase
 {
 
     SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
-    SparkFlex climbMotorTwo;
+    SparkFlex climbMotor2;
     DigitalInput cLimitSwitch;
     PositionVoltage request;
     SparkLimitSwitch forwardLimit;
     SparkLimitSwitch reverseLimit;
+    SparkLimitSwitch forwardLimit2;
+    SparkLimitSwitch reverseLimit2;
     
     SparkClosedLoopController cPID;
 
@@ -70,20 +72,22 @@ public class Climb extends SubsystemBase
     public RelativeEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
     public RelativeEncoder cEncoder2;
 
-    SparkClosedLoopController cpid;
+    SparkClosedLoopController cpid2;
 
     public boolean isRunning;
 
     public Climb()
     {
         climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
-        climbMotorTwo = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
+        climbMotor2 = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
         cEncoder = climbMotor.getEncoder(); 
-        cEncoder2 = climbMotorTwo.getEncoder();
+        cEncoder2 = climbMotor2.getEncoder();
         cLimitSwitch = new DigitalInput(0);
         request = new PositionVoltage(0).withSlot(0);
         forwardLimit = climbMotor.getForwardLimitSwitch();
         reverseLimit = climbMotor.getReverseLimitSwitch();
+        forwardLimit2 = climbMotor2.getForwardLimitSwitch();
+        reverseLimit2 = climbMotor2.getReverseLimitSwitch();
 
         climbConfig = new SparkFlexConfig();
         climbConfig2 = new SparkFlexConfig();
@@ -92,15 +96,13 @@ public class Climb extends SubsystemBase
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(kClimbP)
         .i(kClimbI)
-        .d(kClimbD)
-        .maxMotion.maxVelocity(kClimbV);
+        .d(kClimbD);
 
         climbConfig2.closedLoop
         .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
         .p(kClimbP)
         .i(kClimbI)
-        .d(kClimbD)
-        .maxMotion.maxVelocity(kClimbV);
+        .d(kClimbD);
         //climbConfig2.follow(41);
 
 
@@ -113,14 +115,16 @@ public class Climb extends SubsystemBase
         climbConfig2.limitSwitch
         .forwardLimitSwitchType(Type.kNormallyOpen)
         .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
-        .reverseLimitSwitchType(Type.kNormallyClosed)
+        .reverseLimitSwitchType(Type.kNormallyOpen)
         .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        climbMotorTwo.configure(climbConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        climbMotor2.configure(climbConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
         cEncoder.setPosition(0);
         cEncoder2.setPosition(0);
+        cPID = climbMotor.getClosedLoopController();
+        cpid2 = climbMotor2.getClosedLoopController();
 
         //climbConfig = new TalonFXConfiguration();
         //climbConfig.Slot0.kP = kClimbP.get();
@@ -137,15 +141,17 @@ public class Climb extends SubsystemBase
 
 
 //runs the motor at a given speed
-    public void runMotor(double motorSpeed)
+    public void runMotors(double motorSpeed)
     {
         climbMotor.set(motorSpeed);
+        climbMotor2.set(motorSpeed);
     }
 
     // stops the motor by setting the speed to 0
-    public void stopMotor()
+    public void stopMotors()
     {
         climbMotor.stopMotor();
+        climbMotor2.stopMotor();
     }
 
     // checks if the climb is at the target height
@@ -187,7 +193,8 @@ public class Climb extends SubsystemBase
         
 
         double motorRotations =  targetHieight * motorRatio; // / scale factor of encode to height
-        cPID.setReference(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        cPID.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        cpid2.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     // gets the current position of the encoder
@@ -235,10 +242,15 @@ public class Climb extends SubsystemBase
         builder.addDoubleProperty("Current Pos (CANCoder)", this::getClimbPosition, null);
         //builder.addDoubleProperty("Current Pos (Motor)", () -> climbMotor.getPosition(), null);
         builder.addDoubleProperty("Target Pos", this::getClimbTargetPosition, null);
-        builder.addDoubleProperty("Motor out", climbMotor::get, null);     
-        builder.addBooleanProperty("Forward Limit Swotch", forwardLimit::isPressed, null);  
-        builder.addBooleanProperty("Reverse Limit Switch", reverseLimit::isPressed, null);
+        builder.addDoubleProperty("Motor One Out", climbMotor::get, null);   
+        builder.addDoubleProperty("Motor Two Out", climbMotor2::get, null);  
+        builder.addBooleanProperty("Forward Limit Switch One", forwardLimit::isPressed, null);
+        builder.addBooleanProperty("Forward Limit Switch Two", forwardLimit2::isPressed, null);  
+        builder.addBooleanProperty("Reverse Limit Switch One", reverseLimit::isPressed, null);
+        builder.addBooleanProperty("Reverse Limit Switch Two", reverseLimit2::isPressed, null);
         builder.addDoubleProperty("Current Pos (Motor 1)", () -> cEncoder.getPosition(), null);
         builder.addDoubleProperty("Current Pos (Motor 2)", () -> cEncoder2.getPosition(), null);
+        builder.addDoubleProperty("RPMs? 1", cEncoder::getVelocity, null);
+        builder.addDoubleProperty("RPMs? 2", cEncoder2::getVelocity, null);
     }
 }

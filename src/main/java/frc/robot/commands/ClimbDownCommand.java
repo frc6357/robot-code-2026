@@ -26,14 +26,14 @@ public class ClimbDownCommand extends Command{
     public void execute()
     {
         SmartDashboard.putNumber("speed", kClimbMotorSpeed);
-        climb.runMotor(-kClimbMotorSpeed);
+        climb.runMotors(-kClimbMotorSpeed);
         climb.isRunning = true;
     }
 
     @Override
     public void end(boolean interrupted)
     {
-        climb.stopMotor();
+        climb.stopMotors();
     }
 
     @Override
