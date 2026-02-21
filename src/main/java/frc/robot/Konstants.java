@@ -30,6 +30,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 // import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
@@ -304,7 +305,6 @@ public final class Konstants
         public static final double kTurretJoystickDeadband = 0.15;
     }
 
-
     public static final class LauncherConstants {
 
         //initialize PID values
@@ -336,6 +336,72 @@ public final class Konstants
         public static final class BangBangLauncher {
             
         }
+        // 3D Transform (placeholder - measure from CAD)
+        public static final edu.wpi.first.math.geometry.Transform3d kRobotToShooter =
+            new edu.wpi.first.math.geometry.Transform3d(
+                new edu.wpi.first.math.geometry.Translation3d(0.0, 0.0, 0.5),  // Placeholder: 0.5m height
+                new edu.wpi.first.math.geometry.Rotation3d()                    // No rotation offset
+            );
+
+        // Phase delay compensation
+        public static final double kPhaseDelaySeconds = 0.03;  // MA's tested value
+
+        // Launch angle mode
+        public enum LaunchAngleMode { FIXED, ADJUSTABLE }
+        public static final LaunchAngleMode kAngleMode = LaunchAngleMode.FIXED;
+        public static final double kFixedLaunchAngleRadians = Math.toRadians(55.0);
+
+        // Motion compensation (for InterpolatedShotStrategy)
+        public static final int kMaxIterations = 20;
+        public static final double kConvergenceThresholdMeters = 0.01;
+
+        // Filtering
+        public static final boolean kEnableFiltering = true;
+        public static final double kFilterTimePeriodSeconds = 0.1;
+
+        // Strategy selection
+        public static final String kDefaultStrategy = "Interpolated";  // "Interpolated" or "Ballistic"
+
+        // Continuous-feed velocity compensation
+        public static final boolean kVelocityCompensationEnabled = true;
+        public static final double kMinVelocityRatio = 0.85;  // Reject shots below 85% target speed
+
+        // Valid range
+        public static final double kMinRangeMeters = 1.0;
+        public static final double kMaxRangeMeters = 10.0;
+
+        // Placeholder interpolation data (replace with characterization data)
+        // These maps would typically be loaded from CSV or built from characterization
+        public static InterpolatingDoubleTreeMap createFlywheelSpeedMap() {
+            InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
+
+            // Example data (distance in meters -> flywheel speed in RPM)
+            map.put(1.0, 2500.0);
+            map.put(2.0, 3000.0);
+            map.put(3.0, 3500.0);
+            map.put(4.0, 4000.0);
+            map.put(5.0, 4500.0);
+
+            return map;
+        }
+
+        public static InterpolatingDoubleTreeMap createTimeOfFlightMap() {
+            InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
+
+            // Example data (distance in meters -> time of flight in seconds)
+            map.put(1.0, 0.2);
+            map.put(2.0, 0.4);
+            map.put(3.0, 0.6);
+            map.put(4.0, 0.8);
+            map.put(5.0, 1.0);
+
+            return map;
+        }
+
+        // Motor IDs (placeholder - update with actual CAN IDs)
+        public static final int kFlywheelMotorID = 1000;  // TODO: Update with actual CAN ID
+        public static final int kYawMotorID = 1001;       // TODO: Update with actual CAN ID
+        public static final int kAngleMotorID = 1002;     // TODO: Update with actual CAN ID
     }
 
     public static final class ExampleConstants
@@ -351,7 +417,7 @@ public final class Konstants
         public static final double kPositionerMotorMinPosition = 0.5;
         public static final double kPositionMotorMaxPosition = 0.5;
     }
-    
+
     public static final String kCANivoreName = "SwerveCANivore";
 
     /** The file that is used for system instantiation at runtime */
