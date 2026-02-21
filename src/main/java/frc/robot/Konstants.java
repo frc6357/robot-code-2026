@@ -39,6 +39,8 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.units.measure.Velocity;
+import frc.robot.preferences.SKPreferences;
+import frc.robot.preferences.Pref;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj.util.Color;
@@ -305,6 +307,19 @@ public final class Konstants
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
         public static final double kTurretJoystickDeadband = 0.15;
+    }
+
+    public static final class ClimbConstants
+    {
+        public static final double kClimbMotorSpeed = .05;
+        public static final Double kClimbP = 0.5;
+        public static final double kClimbI = 0;
+        public static final double kClimbD = 0;
+        public static final double kClimbV = 0;
+        public static final double kClimbTolerance = 1; //figure out tolerance
+        public static final double kCLimbMax = 0; //figure out value of encoder when climb is at max height.
+        public static final double kTOne = 70;
+        public static final double kClimbReturn = 25;
     }
 
 

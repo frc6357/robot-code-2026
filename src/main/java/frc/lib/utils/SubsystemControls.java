@@ -11,6 +11,7 @@ public class SubsystemControls
 
     private final boolean swerve;
     private final boolean vision;
+    private final boolean climb;
     private final boolean turret;
     private final boolean launcher;
     private final boolean bangbanglauncher;
@@ -30,6 +31,8 @@ public class SubsystemControls
     public SubsystemControls(
         @JsonProperty(required = true, value = "swerve")      boolean swerve,
         @JsonProperty(required = true, value = "vision")      boolean vision,
+        @JsonProperty(required = true, value = "climb")       boolean climb
+
         @JsonProperty(required = true, value = "pickup")      boolean pickup,
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
@@ -41,6 +44,7 @@ public class SubsystemControls
     {
         this.swerve = swerve;
         this.vision = vision;
+        this.climb = climb;
         this.turret = turret;
         this.launcher = launcher;
         this.bangbanglauncher = bangbanglauncher;
@@ -63,6 +67,8 @@ public class SubsystemControls
     public boolean isVisionPresent() {
         return vision;
     }
+    public boolean isClimbPresent() {
+        return climb;
     public boolean isTurretPresent() {
         return turret;
     }
