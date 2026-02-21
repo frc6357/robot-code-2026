@@ -32,6 +32,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Konstants.TurretConstants.TurretPosition;
 import lombok.Getter;
 
 /**
@@ -109,6 +110,11 @@ public class SK26Turret extends SubsystemBase
         double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
         
         return turretDegrees;
+    }
+
+    public void setAngleDegrees(TurretPosition angle) 
+    {
+        setAngleDegrees(angle.angle);
     }
 
     /**
