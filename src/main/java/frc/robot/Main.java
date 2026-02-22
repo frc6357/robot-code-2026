@@ -4,8 +4,13 @@
 
 package frc.robot;
 
-import java.util.Scanner;
+import java.io.File;
+import java.io.IOException;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 
 /**
@@ -22,28 +27,25 @@ public final class Main {
      * <p>If you change your main robot class, change the parameter type.
      */
     public static void main(String... args) {
-        int mode = 0;
-        Scanner scanner = new Scanner(System.in);
-        while(mode != 1 && mode != 2) {
-            System.out.print("Select robot mode (1. Controlled, 2. Replay): ");
-        try{
-            mode = scanner.nextInt();
-        }
-        catch(Exception e){
-            mode = 0;
-            System.out.println("Invalid input. Please enter 1 or 2.");
-            scanner.nextLine(); // Clear the invalid input
-        }
+        boolean runReplay = false;
+
+        try {
+            File configFile = new File(Filesystem.getDeployDirectory(), "RunReplay.json");
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode config = mapper.readTree(configFile);
+            runReplay = config.get("RunReplay").asBoolean(false);
+        } catch (IOException e) {
+            System.err.println("Failed to read RunReplay.json, defaulting to CONTROLLED mode: " + e.getMessage());
+            runReplay = false;
         }
 
-        final int selectedMode = mode;
-        if(selectedMode == 1) {
-            System.out.println("Starting in CONTROLLED mode.");
-            scanner.close();  // Can close System.in since AdvantageKit won't need it in CONTROLLED mode
-        }
-        else {
+        if (runReplay) {
             System.out.println("Starting in REPLAY mode.");
+        } else {
+            System.out.println("Starting in CONTROLLED mode.");
         }
-        RobotBase.startRobot(() -> new Robot(selectedMode == 1 ? Robot.RobotMode.CONTROLLED : Robot.RobotMode.REPLAY));
+
+        final Robot.RobotMode mode = runReplay ? Robot.RobotMode.REPLAY : Robot.RobotMode.CONTROLLED;
+        RobotBase.startRobot(() -> new Robot(mode));
     }
 }
