@@ -1,19 +1,13 @@
 package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
-import static frc.robot.Konstants.SwerveConstants.kChassisLength;
-import static frc.robot.Ports.DriverPorts.kLeftStickY;
-import static frc.robot.Ports.DriverPorts.kLeftStickX;
-import static frc.robot.Ports.DriverPorts.kRightStickX;
+import static frc.robot.RobotContainer.m_field;
 
-import java.util.List;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -22,41 +16,28 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-//import choreo.Choreo.TrajectoryLogger;
-//import choreo.auto.AutoFactory;
-//import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.utils.Field;
-import frc.lib.utils.Util;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
-import static frc.robot.RobotContainer.m_field;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
  */
-@SuppressWarnings("unused")
 public class SKSwerve extends SubsystemBase {
     private SwerveDriveState lastReadState;
     private final GeneratedDrivetrain drivetrain = GeneratedConstants.createDrivetrain();
@@ -65,17 +46,7 @@ public class SKSwerve extends SubsystemBase {
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
     private Pose2d[] emptyPath = new Pose2d[0];
-
-    private Supplier<Double> translationXSupplier = () -> -kLeftStickY.getFilteredAxis();
-    private Supplier<Double> translationYSupplier = () -> -kLeftStickX.getFilteredAxis();
-    private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
-    
-    private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("SmartDashboard/Drive/EstimatedPose", Pose2d.struct).publish();
-    
-    private StructArrayPublisher<Pose2d> pathPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("PathPlanner/activePath", Pose2d.struct).publish();
-    
+            
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
         if(DriverStation.isAutonomousEnabled() && !request.equals(DriveRequests.pathPlannerRequest)) {
@@ -260,17 +231,6 @@ public class SKSwerve extends SubsystemBase {
                 new Pose2d());
     }
 
-    private void setupPoseEstimatorWithStdDevs(Matrix<N3, N1> odomStdDevs, Matrix<N3, N1> visionStdDevs) {
-        poseEstimator = 
-            new SwerveDrivePoseEstimator(
-                drivetrain.getKinematics(), 
-                new Rotation2d(drivetrain.getPigeon2().getYaw().getValue()), 
-                drivetrain.getState().ModulePositions, 
-                new Pose2d(),
-                odomStdDevs, 
-                visionStdDevs);
-    }
-
     /**
      * Sets the pose estimator's trust of global measurements. This might be used to
      * change trust in vision measurements after the autonomous period, or to change
@@ -377,25 +337,6 @@ public class SKSwerve extends SubsystemBase {
      * 
      */
 
-    /** 
-     * Keep the robot on the field using the field length from Util by checking if the position is off 
-     * the field, then replacing it with the correct position
-     * @return The new pose after limiting out of field possibilities.
-     */
-    private Pose2d keepPoseOnField(Pose2d pose) {
-        double halfRobot = kChassisLength / 2;
-        double x = pose.getX();
-        double y = pose.getY();
-
-        double newX = Util.limit(x, halfRobot, Field.getFieldLength() - halfRobot);
-        double newY = Util.limit(y, halfRobot, Field.getFieldWidth() - halfRobot);
-
-        if (x != newX || y != newY) {
-            pose = new Pose2d(new Translation2d(newX, newY), pose.getRotation());
-            resetPose(pose);
-        }
-        return pose;
-    }
 
     /**
      * 
