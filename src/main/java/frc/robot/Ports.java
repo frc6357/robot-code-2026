@@ -5,7 +5,6 @@ import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
 import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
-import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static edu.wpi.first.wpilibj.XboxController.Button.kA;
 import static edu.wpi.first.wpilibj.XboxController.Button.kB;
 import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
@@ -19,6 +18,7 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
 import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
 import static frc.robot.Konstants.kCANivoreName;
 import static frc.robot.Konstants.DriveConstants.kPigeonID;
 
@@ -29,12 +29,14 @@ import com.ctre.phoenix6.configs.ProximityParamsConfigs;
 import com.ctre.phoenix6.configs.ToFParamsConfigs;
 import com.ctre.phoenix6.hardware.CANrange;
 
+import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
 import frc.lib.utils.SKTrigger;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
 
+@SuppressWarnings("unused")
 public class Ports
 {
     public static class DriverPorts
@@ -48,10 +50,10 @@ public class Ports
         public static final FilteredAxis kRightStickX = new FilteredAxis(() -> kDriver.getRawAxis(kRightX.value)); 
         
         // ABXY:
-        public static final SKTrigger kDriverAButton = new SKTrigger(kDriver, kA.value, BUTTON);
-        public static final SKTrigger kDriverBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
-        public static final SKTrigger kDriverXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
-        public static final SKTrigger kDriverYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
+        public static final SKTrigger kAButton = new SKTrigger(kDriver, kA.value, BUTTON);
+        public static final SKTrigger kBbutton = new SKTrigger(kDriver, kB.value, BUTTON);
+        public static final SKTrigger kXbutton = new SKTrigger(kDriver, kX.value, BUTTON);
+        public static final SKTrigger kYbutton = new SKTrigger(kDriver, kY.value, BUTTON);
 
         // D-pad:
         public static final SKTrigger kUpDpad = new SKTrigger(kDriver, 0, POV);
@@ -130,6 +132,11 @@ public class Ports
         // Stick buttons:
         public static final SKTrigger kLSbutton = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
+        
+        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
+        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
+        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
+        public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
     }
 
     public static class LauncherPorts {
@@ -138,7 +145,15 @@ public class Ports
         public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
         public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
     }
-
+    
+    public static class ClimbPorts
+    {
+        private static final String busName = kCANivoreName;
+        public static final CANPort kClimbMotor = new CANPort(41, busName);
+        public static final CANPort kClimbMotorTwo = new CANPort (42, busName);
+        public static final CANPort kClimbEncoder = new CANPort(61, busName);
+    }
+    
     public static class TurretPorts {
         private static final String busName = "";
         public static final CANPort kTurretMotor = new CANPort(50, busName);
@@ -161,19 +176,23 @@ public class Ports
         public static final CANPort kPositionerMotor = new CANPort(30, busName); 
         public static final CANPort kEaterMotor = new CANPort(31, busName);
 
+        public static final CANPort kIndexerMotor = new CANPort(59, busName);
     }
 
     public static class Sensors {
         private static final String busName = "";
         public static final CANPort kCANrange = new CANPort(61, busName);
         public static final CANPort kLauncherSensor = new CANPort(42, busName);
-        public static final CANPort kIntakeSensor1 = new CANPort(32, busName);
+        public static final CANPort kIntakeSensor = new CANPort(32, busName);
         public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
+        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
 
         public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
-        public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
-        public static CANrange intakeSensor1 = new CANrange(kIntakeSensor1.ID, CANBus.roboRIO());
+        // public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
+        // public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
         public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
+        public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
+        public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
@@ -191,8 +210,8 @@ public class Ports
         /* Sensor configurating */
         static {
             hopperSensor.getConfigurator().apply(tofConfig);
-            launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
-            intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            // launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
+            // intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
             intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
         }
 

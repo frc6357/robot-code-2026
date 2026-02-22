@@ -42,12 +42,15 @@ public class SKVision extends SubsystemBase {
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
     public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
+    public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
+    public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {frontLL}; 
+    public final Limelight[] allLimelights = {threeLL, fourLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {frontLL}; 
+    public final Limelight[] poseLimelights = {threeLL, fourLL}; 
     
+    private Pose3d[] emptyPose3dArray = new Pose3d[0];
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();
     private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
@@ -83,6 +86,8 @@ public class SKVision extends SubsystemBase {
         );
 
         startupLimelights();
+
+        SmartDashboard.putData("Vision", this);
     }
 
     @Override
@@ -95,7 +100,6 @@ public class SKVision extends SubsystemBase {
             scanForTags(ll);
         }
 
-        SmartDashboard.putData("Vision", this);
         telemeterizeTagLOS();
 
         /* The secret sauce: */
@@ -180,7 +184,7 @@ public class SKVision extends SubsystemBase {
             });
         }
 
-        tagLOSPublisher.set(tagLOSTransforms.toArray(Pose3d[]::new));
+        tagLOSPublisher.set(tagLOSTransforms.toArray(emptyPose3dArray));
     }
 
     /**
@@ -190,6 +194,7 @@ public class SKVision extends SubsystemBase {
      * and then pass the current camera into the method.
      * @param ll The camera to estimate the robot pose with
      */
+    @SuppressWarnings("unused")
     private void updatePoseMultiCam(Limelight ll) {
         // Sets the robot's yaw for use with MEGATAG2 right before integrating with estimator
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
@@ -277,8 +282,8 @@ public class SKVision extends SubsystemBase {
         double bestScore = 0;
         for(Limelight LL : poseLimelights) {
             double score = 0;
-            score += LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT;
-            score += LL.getTargetSize(); // Range: 1-100
+            score += (LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / LL.getDistanceToTagFromCamera();
+            score += LL.getTargetSize() * 1.25; // Range: 1-100
 
             if(score > bestScore) {
                 bestScore = score;
@@ -303,9 +308,6 @@ public class SKVision extends SubsystemBase {
 
         m_swerve.resetPose(ll.getRawPose3d().toPose2d());
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-        //TODO: if MT2 doesn't work, change it to the line below
-        // m_swerve.resetPose(ll.getRawPose3d().toPose2d());
-        // m_swerve.resetPose(ll.getMegaPose2d());
     }
 
     public void autonResetPoseToVision() {
@@ -371,8 +373,6 @@ public class SKVision extends SubsystemBase {
         boolean targetInView, Pose3d botpose3D, Pose2d megaPose, double poseTimestamp) {
         boolean reject = false;
         if (targetInView) {
-            Pose2d botpose = botpose3D.toPose2d();
-            // Pose2d robotPose = m_swerve.getRobotPose(); // TODO: Add telemetry for pose before and after integrating vision
             if (Field.poseOutOfField(megaPose)
                     || Math.abs(botpose3D.getZ()) > VisionConfig.Thresholds.MAX_HEIGHT.in(Meters)
                     || (Math.abs(botpose3D.getRotation().getX()) > VisionConfig.Thresholds.MAX_TILT.in(Radians)

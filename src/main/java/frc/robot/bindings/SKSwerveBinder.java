@@ -1,5 +1,6 @@
 package frc.robot.bindings;
 
+import static frc.robot.Konstants.AutoConstants.kDefaultPathfindingConstraints;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Ports.DriverPorts.kLSbutton;
 import static frc.robot.Ports.DriverPorts.kRSbutton;
@@ -12,8 +13,13 @@ import static frc.robot.Ports.DriverPorts.kLTrigger;
 
 import java.util.Optional;
 
+import com.pathplanner.lib.commands.PathfindThenFollowPath;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.auto.Pathfinder;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.filters.LinearDeadbandFilter;
@@ -24,6 +30,7 @@ import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
 import frc.robot.RobotContainer;
+import frc.robot.Ports.DriverPorts;
 import frc.robot.commands.AlignAroundPoint;
 
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
@@ -84,11 +91,10 @@ public class SKSwerveBinder implements CommandBinder{
 
         SKSwerve drive = m_drive.get();
 
-        // TODO: Might need to uncomment this later? It caused a weird issue that made the robot drift like it's in space.
         // Sets filters for driving axes
-        kLeftStickY.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kLeftStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
-        kRightStickX.setFilter(new LinearDeadbandFilter(kJoystickDeadband, 1.0));
+        kLeftStickY.setFilter(translationXFilter);
+        kLeftStickX.setFilter(translationYFilter);
+        kRightStickX.setFilter(rotationFilter);
 
         robotCentric.whileTrue(
             drive.followSwerveRequestCommand(
@@ -104,11 +110,25 @@ public class SKSwerveBinder implements CommandBinder{
         // Resets gyro angles / robot oreintation
         resetButton.onTrue(new InstantCommand(() -> {drive.resetOrientation();} ));
 
+        // DriverPorts.kXbutton.button.toggleOnTrue(
+        //     Pathfinder.PathfindToPoseCommand(new Pose2d(Field.flipIfRed(new Translation2d(5.838, 7.431)), drive.getRobotRotation()), kDefaultPathfindingConstraints, 3.5).withName("PathfindUnderLeftTrench")
+        // );
+        // DriverPorts.kBbutton.button.toggleOnTrue(
+        //     Pathfinder.PathfindToPoseCommand(new Pose2d(Field.flipIfRed(new Translation2d(5.838, 0.613)), drive.getRobotRotation()), kDefaultPathfindingConstraints, 3.5).withName("PathfindUnderRightTrench")
+        // );
+
+        DriverPorts.kXbutton.button.toggleOnTrue(
+            Pathfinder.PathfindThenFollowPathCommand("PassUnderLTrench", kDefaultPathfindingConstraints)
+        );
+        DriverPorts.kBbutton.button.toggleOnTrue(
+            Pathfinder.PathfindThenFollowPathCommand("PassUnderRTrench", kDefaultPathfindingConstraints)
+        );
+
         // bumpAlign.whileTrue(new AlignForBumpJump(drive));
-        hubAlign.whileTrue(
-            new AlignAroundPoint(
-                drive, 
-                (Field.isBlue() ? kBlueHub.point : kRedHub.point)).withName("SwerveHubAlign"));
+        // hubAlign.whileTrue(
+        //     new AlignAroundPoint(
+        //         drive, 
+        //         (Field.isBlue() ? kBlueHub.point : kRedHub.point)).withName("SwerveHubAlign"));
 
         drive.setDefaultCommand(
             drive.followSwerveRequestCommand(

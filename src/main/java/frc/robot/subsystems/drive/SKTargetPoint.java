@@ -79,7 +79,7 @@ public class SKTargetPoint extends SubsystemBase{
     }
 
     public Command movePointCommand(double deltaX, double deltaY) {
-        return this.runOnce(() -> this.moveTargetPoint(deltaX, deltaY)).ignoringDisable(true);
+        return runOnce(() -> moveTargetPoint(deltaX, deltaY));
     }
 
     @Override

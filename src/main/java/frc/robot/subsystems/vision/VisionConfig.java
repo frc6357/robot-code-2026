@@ -39,6 +39,22 @@ public final class VisionConfig {
                                         .withRotation(FrontLimelight.kRoll, FrontLimelight.kPitch, FrontLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(FrontLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
 
+    public static final String LL_THREE = LimelightThree.kName;
+    public static final int THREE_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig THREE_CONFIG = 
+                                        new LimelightConfig(LimelightThree.kName)
+                                        .withTranslation(LimelightThree.kForward, LimelightThree.kRight, LimelightThree.kUp)
+                                        .withRotation(LimelightThree.kRoll, LimelightThree.kPitch, LimelightThree.kYaw)
+                                        .withAttached(LimelightThree.kAttached);
+
+    public static final String LL_FOUR = LimelightFour.kName;
+    public static final int FOUR_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig FOUR_CONFIG = 
+                                        new LimelightConfig(LimelightFour.kName)
+                                        .withTranslation(LimelightFour.kForward, LimelightFour.kRight, LimelightFour.kUp)
+                                        .withRotation(LimelightFour.kRoll, LimelightFour.kPitch, LimelightFour.kYaw)
+                                        .withAttached(LimelightFour.kAttached);
+
 
     // Standard deviations for vision measurements (in meters and degrees)
     public static double VISION_STD_DEV_X = 0.5; // These are not final because they are sometimes (not often) changed 
@@ -92,7 +108,7 @@ public final class VisionConfig {
         public static final double PROXIMITY_POSE_DIFF = 0.3;
 
         // Scoring
-        public static final double TAG_COUNT_WEIGHT = 100.0;
+        public static final double TAG_COUNT_WEIGHT = 20.0;
     }
 
     // Command configs for vision-based commands
