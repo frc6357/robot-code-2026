@@ -11,6 +11,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.VecBuilder;
@@ -19,8 +21,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
+// import edu.wpi.first.networktables.NetworkTableInstance;
+// import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -53,8 +55,8 @@ public class SKVision extends SubsystemBase {
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();
-    private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
-            .getStructArrayTopic("VisibleTargetPoses", Pose3d.struct).publish();
+    // private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
+    //         .getStructArrayTopic("VisibleTargetPoses", Pose3d.struct).publish();
 
     // Boolean stating whether or not limelight poses are being integrated with actual
     public boolean isIntegrating = false; 
@@ -175,7 +177,8 @@ public class SKVision extends SubsystemBase {
     /**
      * Sends the poses of all visible tags to NetworkTables for logging and telemetry purposes.
      */
-    private void telemeterizeTagLOS() {
+    @AutoLogOutput
+    private Pose3d[] telemeterizeTagLOS() {
         for(int id : tagIDsInView) {
             kAprilTagFieldLayout.getTagPose(id).ifPresent(targetPose -> {
                 tagLOSTransforms.add(
@@ -184,7 +187,7 @@ public class SKVision extends SubsystemBase {
             });
         }
 
-        tagLOSPublisher.set(tagLOSTransforms.toArray(emptyPose3dArray));
+        return tagLOSTransforms.toArray(emptyPose3dArray);
     }
 
     /**
