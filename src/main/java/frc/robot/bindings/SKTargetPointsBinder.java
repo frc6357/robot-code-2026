@@ -28,7 +28,7 @@ public class SKTargetPointsBinder implements CommandBinder {
             kOperatorControlled.point.movePointCommand(
                 (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
                 (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis())
-            .withName("OperatorTargetPointMover"));
+            .withName("OperatorTargetPointMover").ignoringDisable(true));
     }
     
 }

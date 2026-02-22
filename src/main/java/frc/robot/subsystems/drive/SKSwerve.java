@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -71,7 +74,7 @@ public class SKSwerve extends SubsystemBase {
     .getStructTopic("SmartDashboard/Drive/EstimatedPose", Pose2d.struct).publish();
     
     private StructArrayPublisher<Pose2d> pathPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("SmartDashboard/Drive/ActivePath", Pose2d.struct).publish();
+    .getStructArrayTopic("PathPlanner/activePath", Pose2d.struct).publish();
     
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
@@ -117,11 +120,11 @@ public class SKSwerve extends SubsystemBase {
         setupPoseEstimator();
         configureAutoBuilder();
         
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> telemeterizeActivePath(activePath));
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> Logger.recordOutput("Drive/ActivePath", activePath.toArray(emptyPath)));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
         SmartDashboard.putData("Elastic Field 2D", m_field);
-        SmartDashboard.putData("Drive", this);
+        // SmartDashboard.putData("Drive", this);
     }
 
     @Override
@@ -131,133 +134,116 @@ public class SKSwerve extends SubsystemBase {
 
         outputTelemetry();
 
-        SmartDashboard.putString("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
-    }
-
-    private void telemeterizeActivePath(List<Pose2d> path) {
-        pathPublisher.set(path.toArray(emptyPath));
+        Logger.recordOutput("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
     }
 
     public void outputTelemetry() {
-		posePublisher.set(getRobotPose());
 		telemetry.telemeterize(lastReadState);
+        telemeterizeDevices();
 		m_field.setRobotPose(getRobotPose());
 	}
 
-    @Override
-	public void initSendable(SendableBuilder builder) {
-		builder.addDoubleProperty(
-				"Pitch Velocity Degrees Per Second",
-				() -> drivetrain
+	public void telemeterizeDevices() {
+		Logger.recordOutput(
+				"Drive/Pitch Velocity Degrees Per Second",
+				drivetrain
 						.getPigeon2()
 						.getAngularVelocityYDevice()
 						.getValue()
-						.in(Units.DegreesPerSecond),
-				null);
-		builder.addDoubleProperty(
-				"Pitch Degrees",
-				() -> drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees),
-				null);
+						.in(Units.DegreesPerSecond));
+		Logger.recordOutput(
+				"Drive/Pitch Degrees",
+				drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees));
 
-		builder.addDoubleProperty(
-				"Roll Velocity Degrees Per Second",
-				() -> drivetrain
+		Logger.recordOutput(
+				"Drive/Roll Velocity Degrees Per Second",
+				drivetrain
 						.getPigeon2()
 						.getAngularVelocityXDevice()
 						.getValue()
-						.in(Units.DegreesPerSecond),
-				null);
-		builder.addDoubleProperty(
-				"Roll Degrees",
-				() -> drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees),
-				null);
-
-		addModuleToBuilder(builder, 0);
-		addModuleToBuilder(builder, 1);
-		addModuleToBuilder(builder, 2);
-		addModuleToBuilder(builder, 3);
+						.in(Units.DegreesPerSecond));
+		Logger.recordOutput(
+				"Drive/Roll Degrees",
+				drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees));
+            
+		addModuleToLogger(0);
+		addModuleToLogger(1);
+		addModuleToLogger(2);
+		addModuleToLogger(3);
 	}
 
-	private void addModuleToBuilder(SendableBuilder builder, int module) {
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Volts",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getMotorVoltage()
-						.getValue()
-						.in(Units.Volts),
-				null);
+	private void addModuleToLogger(int module) {
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Volts",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getMotorVoltage()
+                    .getValue()
+                    .in(Units.Volts));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Volts",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getMotorVoltage()
-						.getValue()
-						.in(Units.Volts),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Volts",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getMotorVoltage()
+                    .getValue()
+                    .in(Units.Volts));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Stator Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getStatorCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Stator Current",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getStatorCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Temperature Celsius",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getDeviceTemp()
-						.getValue()
-						.in(Units.Celsius),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Temperature Celsius",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getDeviceTemp()
+                    .getValue()
+                    .in(Units.Celsius));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Stator Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getStatorCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Stator Current",
+                drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getStatorCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Supply Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getSupplyCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Supply Current",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getSupplyCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Supply Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getSupplyCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Supply Current",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getSupplyCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Temperature Celsius",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getDeviceTemp()
-						.getValue()
-						.in(Units.Celsius),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Temperature Celsius",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getDeviceTemp()
+                    .getValue()
+                    .in(Units.Celsius));
 	}
 
 
@@ -415,6 +401,7 @@ public class SKSwerve extends SubsystemBase {
      * 
      * @return The estimation of the robot's pose
      */
+    @AutoLogOutput(key = "Drive/EstimatedPose")
     public Pose2d getRobotPose() {
         return poseEstimator.getEstimatedPosition();
        // return pose;

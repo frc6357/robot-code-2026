@@ -2,8 +2,9 @@ package frc.robot;
 
 import java.util.Optional;
 
+import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
+
 import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -50,7 +51,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             STOPPING
         }
     }
-    private SendableChooser<MacroState> stateChooser = new SendableChooser<MacroState>();        
+    private LoggedDashboardChooser<MacroState> stateChooser = new LoggedDashboardChooser<>("State Chooser");        
 
     private static MacroState currentState = MacroState.IDLE;
     private static MacroState requestedState = MacroState.IDLE;
@@ -66,7 +67,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.OFF);
         }
 
-        stateChooser.setDefaultOption("IDLE", MacroState.IDLE);
+        stateChooser.addDefaultOption("IDLE", MacroState.IDLE);
         stateChooser.addOption("SCORING", MacroState.SCORING);
         stateChooser.addOption("INTAKING", MacroState.INTAKING);
         stateChooser.addOption("SHUTTLING", MacroState.SHUTTLING);
@@ -74,8 +75,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
 
-        SmartDashboard.putData("StateChooser", stateChooser);
-
+        stateChooser.onChange((state) -> requestState(state));
         SmartDashboard.putData("StateHandler", this);
     }
 
@@ -141,9 +141,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     public void periodic() {
         handleStateTransition();
         updateShootingStateReadiness();
-        if(stateChooser.getSelected() != previousChosenState) {
-            setCurrentState(stateChooser.getSelected());
-            previousChosenState = stateChooser.getSelected();
+        if(stateChooser.get() != previousChosenState) {
+            setCurrentState(stateChooser.get());
+            previousChosenState = stateChooser.get();
         }
     }
 
