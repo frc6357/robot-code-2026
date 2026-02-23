@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
 
 import com.pathplanner.lib.config.PIDConstants;
 
@@ -21,11 +22,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
-// import edu.wpi.first.networktables.NetworkTableInstance;
-// import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.utils.Field;
 import frc.lib.utils.Trio;
@@ -88,8 +85,6 @@ public class SKVision extends SubsystemBase {
         );
 
         startupLimelights();
-
-        SmartDashboard.putData("Vision", this);
     }
 
     @Override
@@ -103,48 +98,31 @@ public class SKVision extends SubsystemBase {
         }
 
         telemeterizeTagLOS();
+        addStdDevsToLogger();
+        addLimelightsToLogger();
 
         /* The secret sauce: */
         estimatePose();
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addBooleanProperty(
-            "Vision Driving", 
-            () -> isDriving, 
-            null);
-        builder.addStringProperty(
-            "ResetPoseToVision Status", 
-            () -> resetPoseToVisionLog, 
-            null);
-        
-        addStdDevsToBuilder(builder);
-        addLimelightsToBuilder(builder);
-    }
-
-    private void addLimelightsToBuilder(SendableBuilder builder) {
+    private void addLimelightsToLogger() {
         for(Limelight ll : allLimelights) {
-            builder.addStringProperty(
-                ll.getName() + " Status", 
-                () -> ll.getLogStatus(), 
-                null);
+            Logger.recordOutput(
+                "Vision/" + ll.getName() + " Status", 
+                ll.getLogStatus());
         }
     }
 
-    private void addStdDevsToBuilder(SendableBuilder builder) {
-        builder.addDoubleProperty(
-            "StdDevs/Vision Std Dev X", 
-            () -> VisionConfig.VISION_STD_DEV_X, 
-            null);
-        builder.addDoubleProperty(
-            "StdDevs/Y", 
-            () -> VisionConfig.VISION_STD_DEV_Y,
-            null);
-        builder.addDoubleProperty(
-            "StdDevs/Theta", 
-            () -> VisionConfig.VISION_STD_DEV_THETA,
-            null);
+    private void addStdDevsToLogger() {
+        Logger.recordOutput(
+            "Vision/StdDevs/X", 
+            VisionConfig.VISION_STD_DEV_X);
+        Logger.recordOutput(
+            "Vision/StdDevs/Y", 
+            VisionConfig.VISION_STD_DEV_Y);
+        Logger.recordOutput(
+            "Vision/StdDevs/Theta", 
+            VisionConfig.VISION_STD_DEV_THETA);
     }
 
     private void startupLimelights() {
@@ -177,7 +155,7 @@ public class SKVision extends SubsystemBase {
     /**
      * Sends the poses of all visible tags to NetworkTables for logging and telemetry purposes.
      */
-    @AutoLogOutput
+    @AutoLogOutput(key = "Vision/VisibleTagPoses")
     private Pose3d[] telemeterizeTagLOS() {
         for(int id : tagIDsInView) {
             kAprilTagFieldLayout.getTagPose(id).ifPresent(targetPose -> {
@@ -366,6 +344,7 @@ public class SKVision extends SubsystemBase {
                 ll.targetInView(), botPose3d, ll.getMegaPose2d(), ll.getRawPoseTimestamp());
     }
 
+    @AutoLogOutput(key = "Vision/ResetPoseToVisionLog")
     private String resetPoseToVisionLog = "Not executed yet..."; // Provides an updatable string for smartdashboard
     /**
      * Set robot pose to vision pose only if LL has good tag reading
