@@ -137,8 +137,12 @@ public class RobotContainer {
                 m_swerveContainer = Optional.of(new SKSwerve());
                 m_swerveInstance = m_swerveContainer.get(); // Returns new SKSwerve
             }
+            // if(subsystems.isVisionPresent()) {
+            //     m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
+            //     m_visionInstance = m_visionContainer.get();
+            // }
             if(subsystems.isVisionPresent()) {
-                m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
+                m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
                 m_visionInstance = m_visionContainer.get();
             }
             if(subsystems.isClimbPresent()) {

@@ -13,6 +13,7 @@ import frc.robot.Konstants.DriveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
 import frc.robot.Konstants.VisionConstants.FrontLimelight;
+import frc.robot.Konstants.VisionConstants.TurretLimelight;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
@@ -38,6 +39,14 @@ public final class VisionConfig {
                                         .withTranslation(FrontLimelight.kForward, FrontLimelight.kRight, FrontLimelight.kUp) // Feeds in the position of the limelight on the bot
                                         .withRotation(FrontLimelight.kRoll, FrontLimelight.kPitch, FrontLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(FrontLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+    
+    public static final String TURRET_LL = TurretLimelight.kName;
+    public static final int TURRET_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig TURRET_CONFIG = 
+                                        new LimelightConfig(TurretLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
+                                        .withTranslation(TurretLimelight.kForward, TurretLimelight.kRight, TurretLimelight.kUp) // Feeds in the position of the limelight on the bot
+                                        .withRotation(TurretLimelight.kRoll, TurretLimelight.kPitch, TurretLimelight.kYaw) // Feeds in rotation of limelight
+                                        .withAttached(TurretLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
 
     public static final String LL_THREE = LimelightThree.kName;
     public static final int THREE_TAG_PIPELINE = kAprilTagPipeline;
