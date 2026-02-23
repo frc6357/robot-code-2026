@@ -19,6 +19,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -107,9 +108,9 @@ public class Robot extends LoggedRobot {
 
 
         // Mechanisms in 3d field on AdvantageScope. Ignore these shenanigans
-        // Logger.recordOutput("Pose3ds/kZeroPose", Pose3d.kZero);
-        // Logger.recordOutput("Pose3ds/kTurretPose", new Pose3d(TurretConstants.kTurretCenter, Rotation3d.kZero));
-        // Logger.recordOutput("Pose3ds/TurretSpinPose", new Pose3d(new Translation3d(Inches.of(Math.cos(Timer.getTimestamp()) * 7.892), Inches.of(Math.cos(Timer.getTimestamp()) * 7.892), Inches.of(0)), new Rotation3d(0, 0, Math.cos(Timer.getTimestamp()))));
+        Logger.recordOutput("Pose3ds/kZeroPose", Pose3d.kZero);
+        Logger.recordOutput("Pose3ds/kTurretPose", new Pose3d(TurretConstants.kTurretCenter, Rotation3d.kZero));
+        Logger.recordOutput("Pose3ds/TurretSpinPose", new Pose3d(Translation3d.kZero.rotateAround(new Translation3d(4.676, 6.357, 0), new Rotation3d(0, 0, Math.cos(Timer.getTimestamp()))), new Rotation3d(0, 0, Math.cos(Timer.getTimestamp()))));
 
         SmartDashboard.putData(CommandScheduler.getInstance());
         SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
