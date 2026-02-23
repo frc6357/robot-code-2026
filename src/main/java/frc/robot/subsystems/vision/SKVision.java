@@ -12,6 +12,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import com.pathplanner.lib.config.PIDConstants;
 
 import edu.wpi.first.math.VecBuilder;
@@ -21,11 +24,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.utils.Field;
 import frc.lib.utils.Trio;
@@ -33,7 +32,7 @@ import frc.lib.vision.Limelight;
 import frc.lib.vision.Limelight.IMUMode;
 import frc.lib.vision.LimelightHelpers.RawFiducial;
 import frc.robot.Robot;
-import frc.robot.subsystems.SK26Turret;
+import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
 
 public class SKVision extends SubsystemBase {
@@ -47,16 +46,20 @@ public class SKVision extends SubsystemBase {
     */
     public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
+    public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
+    public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {frontLL, turretLL}; 
+    public final Limelight[] allLimelights = {threeLL, fourLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {frontLL, turretLL}; 
+    public final Limelight[] poseLimelights = {threeLL, fourLL}; 
     
+    
+    private Pose3d[] emptyPose3dArray = new Pose3d[0];
     public List<Integer> tagIDsInView = new ArrayList<Integer>();
     public List<Pose3d> tagLOSTransforms = new ArrayList<Pose3d>();
-    private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
-            .getStructArrayTopic("VisibleTargetPoses", Pose3d.struct).publish();
+    // private StructArrayPublisher<Pose3d> tagLOSPublisher = NetworkTableInstance.getDefault()
+    //         .getStructArrayTopic("VisibleTargetPoses", Pose3d.struct).publish();
 
     // Boolean stating whether or not limelight poses are being integrated with actual
     public boolean isIntegrating = false; 
@@ -123,49 +126,31 @@ public class SKVision extends SubsystemBase {
 
         telemeterizeTagLOS();
         
+        addStdDevsToLogger();
+        addLimelightsToLogger();
+
         /* The secret sauce: */
         estimatePose();
-
-        SmartDashboard.putData("Vision", this);
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addBooleanProperty(
-            "Vision Driving", 
-            () -> isDriving, 
-            null);
-        builder.addStringProperty(
-            "ResetPoseToVision Status", 
-            () -> resetPoseToVisionLog, 
-            null);
-        
-        addStdDevsToBuilder(builder);
-        addLimelightsToBuilder(builder);
-    }
-
-    private void addLimelightsToBuilder(SendableBuilder builder) {
+    private void addLimelightsToLogger() {
         for(Limelight ll : allLimelights) {
-            builder.addStringProperty(
-                ll.getName() + " Status", 
-                () -> ll.getLogStatus(), 
-                null);
+            Logger.recordOutput(
+                "Vision/" + ll.getName() + " Status", 
+                ll.getLogStatus());
         }
     }
 
-    private void addStdDevsToBuilder(SendableBuilder builder) {
-        builder.addDoubleProperty(
-            "StdDevs/Vision Std Dev X", 
-            () -> VisionConfig.VISION_STD_DEV_X, 
-            null);
-        builder.addDoubleProperty(
-            "StdDevs/Y", 
-            () -> VisionConfig.VISION_STD_DEV_Y,
-            null);
-        builder.addDoubleProperty(
-            "StdDevs/Theta", 
-            () -> VisionConfig.VISION_STD_DEV_THETA,
-            null);
+    private void addStdDevsToLogger() {
+        Logger.recordOutput(
+            "Vision/StdDevs/X", 
+            VisionConfig.VISION_STD_DEV_X);
+        Logger.recordOutput(
+            "Vision/StdDevs/Y", 
+            VisionConfig.VISION_STD_DEV_Y);
+        Logger.recordOutput(
+            "Vision/StdDevs/Theta", 
+            VisionConfig.VISION_STD_DEV_THETA);
     }
 
     private void startupLimelights() {
@@ -199,7 +184,8 @@ public class SKVision extends SubsystemBase {
     /**
      * Sends the poses of all visible tags to NetworkTables for logging and telemetry purposes.
      */
-    private void telemeterizeTagLOS() {
+    @AutoLogOutput(key = "Vision/VisibleTagPoses")
+    private Pose3d[] telemeterizeTagLOS() {
         for(int id : tagIDsInView) {
             kAprilTagFieldLayout.getTagPose(id).ifPresent(targetPose -> {
                 tagLOSTransforms.add(
@@ -208,7 +194,7 @@ public class SKVision extends SubsystemBase {
             });
         }
 
-        tagLOSPublisher.set(tagLOSTransforms.toArray(Pose3d[]::new));
+        return tagLOSTransforms.toArray(emptyPose3dArray);
     }
 
     /**
@@ -218,6 +204,7 @@ public class SKVision extends SubsystemBase {
      * and then pass the current camera into the method.
      * @param ll The camera to estimate the robot pose with
      */
+    @SuppressWarnings("unused")
     private void updatePoseMultiCam(Limelight ll) {
         // Sets the robot's yaw for use with MEGATAG2 right before integrating with estimator
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
@@ -307,8 +294,8 @@ public class SKVision extends SubsystemBase {
         double bestScore = 0;
         for(Limelight LL : poseLimelights) {
             double score = 0;
-            score += LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT;
-            score += LL.getTargetSize(); // Range: 1-100
+            score += (LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / LL.getDistanceToTagFromCamera();
+            score += LL.getTargetSize() * 1.25; // Range: 1-100
 
             if(score > bestScore) {
                 bestScore = score;
@@ -333,9 +320,6 @@ public class SKVision extends SubsystemBase {
 
         m_swerve.resetPose(ll.getRawPose3d().toPose2d());
         ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-        //TODO: if MT2 doesn't work, change it to the line below
-        // m_swerve.resetPose(ll.getRawPose3d().toPose2d());
-        // m_swerve.resetPose(ll.getMegaPose2d());
     }
 
     public void autonResetPoseToVision() {
@@ -391,6 +375,7 @@ public class SKVision extends SubsystemBase {
                 ll.targetInView(), botPose3d, ll.getMegaPose2d(), ll.getRawPoseTimestamp());
     }
 
+    @AutoLogOutput(key = "Vision/ResetPoseToVisionLog")
     private String resetPoseToVisionLog = "Not executed yet..."; // Provides an updatable string for smartdashboard
     /**
      * Set robot pose to vision pose only if LL has good tag reading
@@ -401,8 +386,6 @@ public class SKVision extends SubsystemBase {
         boolean targetInView, Pose3d botpose3D, Pose2d megaPose, double poseTimestamp) {
         boolean reject = false;
         if (targetInView) {
-            Pose2d botpose = botpose3D.toPose2d();
-            // Pose2d robotPose = m_swerve.getRobotPose(); // TODO: Add telemetry for pose before and after integrating vision
             if (Field.poseOutOfField(megaPose)
                     || Math.abs(botpose3D.getZ()) > VisionConfig.Thresholds.MAX_HEIGHT.in(Meters)
                     || (Math.abs(botpose3D.getRotation().getX()) > VisionConfig.Thresholds.MAX_TILT.in(Radians)

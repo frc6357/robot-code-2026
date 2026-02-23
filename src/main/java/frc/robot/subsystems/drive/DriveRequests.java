@@ -1,13 +1,20 @@
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecondPerSecond;
+import static frc.robot.Konstants.DriveConstants.kMaxTeleopLinAcceleration;
+import static frc.robot.Konstants.DriveConstants.kMaxTeleopRotAcceleration;
+
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.util.DriveFeedforwards;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import com.ctre.phoenix6.swerve.SwerveRequest;
 
@@ -17,6 +24,10 @@ import frc.robot.Konstants.DriveConstants;
  * Contains various swerve drive requests to be used by the drive subsystem.
  */
 public class DriveRequests {
+    public static SlewRateLimiter xSlewRateLimiter = new SlewRateLimiter(kMaxTeleopLinAcceleration.in(MetersPerSecondPerSecond));
+    public static SlewRateLimiter ySlewRateLimiter = new SlewRateLimiter(kMaxTeleopLinAcceleration.in(MetersPerSecondPerSecond));
+    public static SlewRateLimiter rotSlewRateLimiter = new SlewRateLimiter(kMaxTeleopRotAcceleration.in(RadiansPerSecondPerSecond));
+
     public static final SwerveRequest.FieldCentric teleopRequest = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withDeadband(DriveConstants.kMaxSpeed.times(0.05));
 
@@ -24,23 +35,22 @@ public class DriveRequests {
         Supplier<Double> xJoystick, Supplier<Double> yJoystick, Supplier<Double> rotJoystick, Supplier<Boolean> slow, Supplier<Boolean> fast
     ) {
         return (SwerveRequest.FieldCentric request) -> {
-            SmartDashboard.putNumberArray("Drive/Joystick Inputs", new double[] {xJoystick.get(), yJoystick.get(), rotJoystick.get()});
             if(slow.get()) {
                 return request
-                        .withVelocityX(DriveConstants.kMaxSpeedSLOW.times(xJoystick.get()))
-                        .withVelocityY(DriveConstants.kMaxSpeedSLOW.times(yJoystick.get()))
-                        .withRotationalRate(DriveConstants.kMaxAngularRateSLOW.times(rotJoystick.get()));
+                        .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeedSLOW.times(xJoystick.get()).in(MetersPerSecond)))
+                        .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeedSLOW.times(yJoystick.get()).in(MetersPerSecond)))
+                        .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRateSLOW.times(rotJoystick.get()).in(RadiansPerSecond)));
             }
             if(fast.get()) {
                 return request
-                        .withVelocityX(DriveConstants.kMaxSpeedFAST.times(xJoystick.get()))
-                        .withVelocityY(DriveConstants.kMaxSpeedFAST.times(yJoystick.get()))
-                        .withRotationalRate(DriveConstants.kMaxAngularRateFAST.times(rotJoystick.get()));
+                        .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeedFAST.times(xJoystick.get()).in(MetersPerSecond)))
+                        .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeedFAST.times(yJoystick.get()).in(MetersPerSecond)))
+                        .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRateFAST.times(rotJoystick.get()).in(RadiansPerSecond)));
             }
             return request
-                    .withVelocityX(DriveConstants.kMaxSpeed.times(xJoystick.get()))
-                    .withVelocityY((DriveConstants.kMaxSpeed).times(yJoystick.get()))
-                    .withRotationalRate(DriveConstants.kMaxAngularRate.times(rotJoystick.get()));
+                    .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeed.times(xJoystick.get()).in(MetersPerSecond)))
+                    .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeed.times(yJoystick.get()).in(MetersPerSecond)))
+                    .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRate.times(rotJoystick.get()).in(RadiansPerSecond)));
         };
     }
 
@@ -51,23 +61,22 @@ public class DriveRequests {
         Supplier<Double> xJoystick, Supplier<Double> yJoystick, Supplier<Double> rotJoystick, Supplier<Boolean> slow, Supplier<Boolean> fast
     ) {
         return (SwerveRequest.RobotCentric request) -> {
-            SmartDashboard.putNumberArray("Drive/Joystick Inputs", new double[] {xJoystick.get(), yJoystick.get(), rotJoystick.get()});
             if(slow.get()) {
                 return request
-                        .withVelocityX(DriveConstants.kMaxSpeedSLOW.times(xJoystick.get()))
-                        .withVelocityY(DriveConstants.kMaxSpeedSLOW.times(yJoystick.get()))
-                        .withRotationalRate(DriveConstants.kMaxAngularRateSLOW.times(rotJoystick.get()));
+                        .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeedSLOW.times(xJoystick.get()).in(MetersPerSecond)))
+                        .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeedSLOW.times(yJoystick.get()).in(MetersPerSecond)))
+                        .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRateSLOW.times(rotJoystick.get()).in(RadiansPerSecond)));
             }
             if(fast.get()) {
                 return request
-                        .withVelocityX(DriveConstants.kMaxSpeedFAST.times(xJoystick.get()))
-                        .withVelocityY(DriveConstants.kMaxSpeedFAST.times(yJoystick.get()))
-                        .withRotationalRate(DriveConstants.kMaxAngularRateFAST.times(rotJoystick.get()));
+                        .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeedFAST.times(xJoystick.get()).in(MetersPerSecond)))
+                        .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeedFAST.times(yJoystick.get()).in(MetersPerSecond)))
+                        .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRateFAST.times(rotJoystick.get()).in(RadiansPerSecond)));
             }
             return request
-                    .withVelocityX(DriveConstants.kMaxSpeed.times(xJoystick.get()))
-                    .withVelocityY((DriveConstants.kMaxSpeed).times(yJoystick.get()))
-                    .withRotationalRate(DriveConstants.kMaxAngularRate.times(rotJoystick.get()));
+                    .withVelocityX(xSlewRateLimiter.calculate(DriveConstants.kMaxSpeed.times(xJoystick.get()).in(MetersPerSecond)))
+                    .withVelocityY(ySlewRateLimiter.calculate(DriveConstants.kMaxSpeed.times(yJoystick.get()).in(MetersPerSecond)))
+                    .withRotationalRate(rotSlewRateLimiter.calculate(DriveConstants.kMaxAngularRate.times(rotJoystick.get()).in(RadiansPerSecond)));
         };
     }
     

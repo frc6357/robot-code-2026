@@ -4,9 +4,9 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SK26Turret;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
+import frc.robot.subsystems.turret.SK26Turret;
 
 /**
  * Command that makes the turret continuously track a target point in field space.
@@ -50,10 +50,6 @@ public class TurretTrackPointCommand extends Command
 
         // Get the target point position
         Translation2d target = targetPoint.getTargetPoint();
-
-        // Calculate the vector from robot to target
-        double dx = target.getX() - robotPosition.getX();
-        double dy = target.getY() - robotPosition.getY();
 
         // Calculate the field-relative angle to the target (in degrees)
         // atan2 gives angle from positive X-axis, counterclockwise positive

@@ -1,16 +1,26 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.turret;
 
 // Imports from the robot
-import static frc.robot.Konstants.TurretConstants.*;
-import static frc.robot.Ports.LauncherPorts.kTurretMotor;
-import static frc.robot.Ports.LauncherPorts.kTurretEncoder;
+import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
+import static frc.robot.Konstants.TurretConstants.kMaxTurretOutput;
+import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
+import static frc.robot.Konstants.TurretConstants.kTurretD;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderInverted;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
+import static frc.robot.Konstants.TurretConstants.kTurretI;
+import static frc.robot.Konstants.TurretConstants.kTurretMaxPosition;
+import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
+import static frc.robot.Konstants.TurretConstants.kTurretMotorInverted;
+import static frc.robot.Konstants.TurretConstants.kTurretP;
+import static frc.robot.Ports.TurretPorts.kTurretEncoder;
+import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -22,6 +32,8 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Konstants.TurretConstants.TurretPosition;
+import lombok.Getter;
 
 /**
  * Turret subsystem using CANcoder absolute encoder as the ONLY position feedback.
@@ -32,15 +44,19 @@ public class SK26Turret extends SubsystemBase
 {
     // Motor
     private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
-
+    
     // Absolute encoder (CANcoder) - the ONLY position feedback source
     private final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
 
+    @Getter
+    boolean wrapping = false;
+    
     // WPILib PID controller (runs in periodic, uses CANcoder feedback)
     private final PIDController pidController = new PIDController(kTurretP, kTurretI, kTurretD);
+    
 
     // Motor output control
-    private final DutyCycleOut dutyCycleControl = new DutyCycleOut(0.0);
+    private final VoltageOut voltageControl = new VoltageOut(0.0);
 
     // Target angle in degrees
     private double targetAngleDeg = 0.0;
@@ -74,6 +90,10 @@ public class SK26Turret extends SubsystemBase
         // Set initial target to current position (don't move on boot)
         targetAngleDeg = getAngleDegrees();
         pidController.setSetpoint(targetAngleDeg);
+
+        // ========== Dashboard ==========
+        SmartDashboard.putData("Turret", this);
+        SmartDashboard.putData("Turret/PIDController", pidController);
     }
 
     /**
@@ -90,6 +110,11 @@ public class SK26Turret extends SubsystemBase
         double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
         
         return turretDegrees;
+    }
+
+    public void setAngleDegrees(TurretPosition angle) 
+    {
+        setAngleDegrees(angle.angle);
     }
 
     /**
@@ -112,14 +137,16 @@ public class SK26Turret extends SubsystemBase
     {
         // Calculate the total range (from -170 to +170 = 340 degrees)
         double range = kTurretMaxPosition - kTurretMinPosition;
-        
+    
         // Wrap the angle if it exceeds limits
         while (angleDeg > kTurretMaxPosition)
         {
+            wrapping = true;
             angleDeg -= range;
         }
         while (angleDeg < kTurretMinPosition)
         {
+            wrapping = true;
             angleDeg += range;
         }
         
@@ -136,7 +163,7 @@ public class SK26Turret extends SubsystemBase
     }
 
     public double getTurretError() {
-        return getTargetAngleDegrees() - getAngleDegrees();
+        return pidController.getError();//getTargetAngleDegrees() - getAngleDegrees();
     }
 
     /**
@@ -160,7 +187,7 @@ public class SK26Turret extends SubsystemBase
     {
         // ========== Run PID Loop ==========
         double currentAngle = getAngleDegrees();
-        double output = (atTarget() ? 0.0 : pidController.calculate(currentAngle));
+        double output = pidController.calculate(currentAngle);//(atTarget() ? 0.0 : pidController.calculate(currentAngle));
         
         // Clamp output for safety
         output = MathUtil.clamp(output, -kMaxTurretOutput, kMaxTurretOutput);
@@ -172,10 +199,13 @@ public class SK26Turret extends SubsystemBase
         }
         
         // Apply to motor
-        turretMotor.setControl(dutyCycleControl.withOutput(output));
+        turretMotor.setControl(voltageControl.withOutput(output));
 
-        // ========== Dashboard ==========
-        SmartDashboard.putData("Turret", this);
+        if(targetAngleDeg < kTurretMaxPosition && 
+            targetAngleDeg > kTurretMinPosition) 
+        {
+            wrapping = false;
+        }
     }
 
     @Override
@@ -187,5 +217,6 @@ public class SK26Turret extends SubsystemBase
         builder.addDoubleProperty("Turret Error (deg)", this::getTurretError, null);
         builder.addDoubleProperty("Turret Motor DutyCycle Output", () -> turretMotor.getDutyCycle().getValueAsDouble(), null);
         builder.addDoubleProperty("Turret Motor Voltage Output", () -> turretMotor.getMotorVoltage().getValueAsDouble(), null);
+        builder.addBooleanProperty("Turret Wrapping", () -> isWrapping(), null);
     }
 }

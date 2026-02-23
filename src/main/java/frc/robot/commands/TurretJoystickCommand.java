@@ -4,7 +4,7 @@ import java.util.function.DoubleSupplier;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.SK26Turret;
+import frc.robot.subsystems.turret.SK26Turret;
 
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 
@@ -45,6 +45,11 @@ public class TurretJoystickCommand extends Command
 
         double angularVelocity = input * kManualTurretSpeed;
         double newAngle = turret.getTargetAngleDegrees() + angularVelocity * dt;
+
+        // Ignore new angle requests until it's done wrapping
+        if(turret.isWrapping()) {
+            return;
+        }
         turret.setAngleDegreesWrapped(newAngle);
     }
 

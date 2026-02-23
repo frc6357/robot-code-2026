@@ -31,4 +31,8 @@ public class LinearDeadbandFilter implements Filter {
         this.deadband = deadband;
         slope = 1 / (maxInput - deadband);
     }
+
+    public double getMaxInput() {
+        return maxInput;
+    }
 }

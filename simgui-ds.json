@@ -1,7 +1,12 @@
 {
-  "System Joysticks": {
+  "FMS": {
     "window": {
-      "enabled": false
+      "visible": false
+    }
+  },
+  "Joysticks": {
+    "window": {
+      "visible": false
     }
   },
   "keyboardJoysticks": [

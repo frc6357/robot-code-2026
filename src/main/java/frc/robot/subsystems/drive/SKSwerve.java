@@ -1,16 +1,13 @@
 package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
-import static frc.robot.Konstants.SwerveConstants.kChassisLength;
-import static frc.robot.Ports.DriverPorts.kLeftStickY;
-import static frc.robot.Ports.DriverPorts.kLeftStickX;
-import static frc.robot.Ports.DriverPorts.kRightStickX;
+import static frc.robot.RobotContainer.m_field;
 
-import java.util.List;
-import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-import com.ctre.phoenix6.Utils;
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -19,41 +16,28 @@ import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.PathPlannerLogging;
 
-//import choreo.Choreo.TrajectoryLogger;
-//import choreo.auto.AutoFactory;
-//import choreo.trajectory.SwerveSample;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructArrayPublisher;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.Units;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
-import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.utils.Field;
-import frc.lib.utils.Util;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
-import static frc.robot.RobotContainer.m_field;
 
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
  * Subsystem so it can easily be used in command-based projects.
  */
-@SuppressWarnings("unused")
 public class SKSwerve extends SubsystemBase {
     private SwerveDriveState lastReadState;
     private final GeneratedDrivetrain drivetrain = GeneratedConstants.createDrivetrain();
@@ -61,16 +45,8 @@ public class SKSwerve extends SubsystemBase {
     private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
-    private Supplier<Double> translationXSupplier = () -> -kLeftStickY.getFilteredAxis();
-    private Supplier<Double> translationYSupplier = () -> -kLeftStickX.getFilteredAxis();
-    private Supplier<Double> velocityOmegaSupplier = () -> -kRightStickX.getFilteredAxis();
-    
-    private StructPublisher<Pose2d> posePublisher = NetworkTableInstance.getDefault()
-    .getStructTopic("SmartDashboard/Drive/EstimatedPose", Pose2d.struct).publish();
-    
-    private StructArrayPublisher<Pose2d> pathPublisher = NetworkTableInstance.getDefault()
-    .getStructArrayTopic("SmartDashboard/Drive/ActivePath", Pose2d.struct).publish();
-    
+    private Pose2d[] emptyPath = new Pose2d[0];
+            
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
         if(DriverStation.isAutonomousEnabled() && !request.equals(DriveRequests.pathPlannerRequest)) {
@@ -115,9 +91,11 @@ public class SKSwerve extends SubsystemBase {
         setupPoseEstimator();
         configureAutoBuilder();
         
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> telemeterizeActivePath(activePath));
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> Logger.recordOutput("Drive/ActivePath", activePath.toArray(emptyPath)));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
+        SmartDashboard.putData("Elastic Field 2D", m_field);
+        // SmartDashboard.putData("Drive", this);
     }
 
     @Override
@@ -125,146 +103,118 @@ public class SKSwerve extends SubsystemBase {
         poseEstimator.update(getGyroRotation(), drivetrain.getState().ModulePositions);
         lastReadState = drivetrain.getState();
 
-        SmartDashboard.putNumberArray(
-            "Drive/RawJoysticks", 
-            new double[] {
-                 translationXSupplier.get(),
-                translationYSupplier.get(),
-                velocityOmegaSupplier.get()          
-                });
-
         outputTelemetry();
 
-        SmartDashboard.putString("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
-    }
-
-    private void telemeterizeActivePath(List<Pose2d> path) {
-
-        pathPublisher.set(path.toArray(Pose2d[]::new));
+        Logger.recordOutput("PathPlanner/Active Path Name", PathPlannerAuto.currentPathName);
     }
 
     public void outputTelemetry() {
-		posePublisher.set(getRobotPose());
 		telemetry.telemeterize(lastReadState);
-		SmartDashboard.putData("Drive", this);
+        telemeterizeDevices();
 		m_field.setRobotPose(getRobotPose());
-        SmartDashboard.putData("Elastic Field 2D", m_field);
 	}
 
-    @Override
-	public void initSendable(SendableBuilder builder) {
-		builder.addDoubleProperty(
-				"Pitch Velocity Degrees Per Second",
-				() -> drivetrain
+	public void telemeterizeDevices() {
+		Logger.recordOutput(
+				"Drive/Pitch Velocity Degrees Per Second",
+				drivetrain
 						.getPigeon2()
 						.getAngularVelocityYDevice()
 						.getValue()
-						.in(Units.DegreesPerSecond),
-				null);
-		builder.addDoubleProperty(
-				"Pitch Degrees",
-				() -> drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees),
-				null);
+						.in(Units.DegreesPerSecond));
+		Logger.recordOutput(
+				"Drive/Pitch Degrees",
+				drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees));
 
-		builder.addDoubleProperty(
-				"Roll Velocity Degrees Per Second",
-				() -> drivetrain
+		Logger.recordOutput(
+				"Drive/Roll Velocity Degrees Per Second",
+				drivetrain
 						.getPigeon2()
 						.getAngularVelocityXDevice()
 						.getValue()
-						.in(Units.DegreesPerSecond),
-				null);
-		builder.addDoubleProperty(
-				"Roll Degrees",
-				() -> drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees),
-				null);
-
-		addModuleToBuilder(builder, 0);
-		addModuleToBuilder(builder, 1);
-		addModuleToBuilder(builder, 2);
-		addModuleToBuilder(builder, 3);
+						.in(Units.DegreesPerSecond));
+		Logger.recordOutput(
+				"Drive/Roll Degrees",
+				drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees));
+            
+		addModuleToLogger(0);
+		addModuleToLogger(1);
+		addModuleToLogger(2);
+		addModuleToLogger(3);
 	}
 
-	private void addModuleToBuilder(SendableBuilder builder, int module) {
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Volts",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getMotorVoltage()
-						.getValue()
-						.in(Units.Volts),
-				null);
+	private void addModuleToLogger(int module) {
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Volts",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getMotorVoltage()
+                    .getValue()
+                    .in(Units.Volts));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Volts",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getMotorVoltage()
-						.getValue()
-						.in(Units.Volts),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Volts",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getMotorVoltage()
+                    .getValue()
+                    .in(Units.Volts));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Stator Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getStatorCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Stator Current",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getStatorCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Temperature Celsius",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getDeviceTemp()
-						.getValue()
-						.in(Units.Celsius),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Temperature Celsius",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getDeviceTemp()
+                    .getValue()
+                    .in(Units.Celsius));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Stator Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getStatorCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Stator Current",
+                drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getStatorCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Drive/Supply Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getDriveMotor()
-						.getSupplyCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Drive/Supply Current",
+				drivetrain
+                    .getModules()[module]
+                    .getDriveMotor()
+                    .getSupplyCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Supply Current",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getSupplyCurrent()
-						.getValue()
-						.in(Units.Amps),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Supply Current",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getSupplyCurrent()
+                    .getValue()
+                    .in(Units.Amps));
 
-		builder.addDoubleProperty(
-				"ModuleStates/" + module + "/Rotation/Temperature Celsius",
-				() -> drivetrain
-						.getModules()[module]
-						.getSteerMotor()
-						.getDeviceTemp()
-						.getValue()
-						.in(Units.Celsius),
-				null);
+		Logger.recordOutput(
+				"Drive/ModuleStatesInfo/" + module + "/Rotation/Temperature Celsius",
+				drivetrain
+                    .getModules()[module]
+                    .getSteerMotor()
+                    .getDeviceTemp()
+                    .getValue()
+                    .in(Units.Celsius));
 	}
 
 
@@ -279,17 +229,6 @@ public class SKSwerve extends SubsystemBase {
                 new Rotation2d(drivetrain.getPigeon2().getYaw().getValue()), 
                 drivetrain.getState().ModulePositions, 
                 new Pose2d());
-    }
-
-    private void setupPoseEstimatorWithStdDevs(Matrix<N3, N1> odomStdDevs, Matrix<N3, N1> visionStdDevs) {
-        poseEstimator = 
-            new SwerveDrivePoseEstimator(
-                drivetrain.getKinematics(), 
-                new Rotation2d(drivetrain.getPigeon2().getYaw().getValue()), 
-                drivetrain.getState().ModulePositions, 
-                new Pose2d(),
-                odomStdDevs, 
-                visionStdDevs);
     }
 
     /**
@@ -398,30 +337,12 @@ public class SKSwerve extends SubsystemBase {
      * 
      */
 
-    /** 
-     * Keep the robot on the field using the field length from Util by checking if the position is off 
-     * the field, then replacing it with the correct position
-     * @return The new pose after limiting out of field possibilities.
-     */
-    private Pose2d keepPoseOnField(Pose2d pose) {
-        double halfRobot = kChassisLength / 2;
-        double x = pose.getX();
-        double y = pose.getY();
-
-        double newX = Util.limit(x, halfRobot, Field.getFieldLength() - halfRobot);
-        double newY = Util.limit(y, halfRobot, Field.getFieldWidth() - halfRobot);
-
-        if (x != newX || y != newY) {
-            pose = new Pose2d(new Translation2d(newX, newY), pose.getRotation());
-            resetPose(pose);
-        }
-        return pose;
-    }
 
     /**
      * 
      * @return The estimation of the robot's pose
      */
+    @AutoLogOutput(key = "Drive/EstimatedPose")
     public Pose2d getRobotPose() {
         return poseEstimator.getEstimatedPosition();
        // return pose;

@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.launcher;
 
 import static frc.robot.Konstants.LauncherConstants.Slot0;
 import static frc.robot.Konstants.LauncherConstants.Slot1;
@@ -22,10 +22,12 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.subsystems.PathplannerSubsystem;
+
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
 
-public class SK26Launcher extends SubsystemBase {
+public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
 
     //initialize launcher motor
     TalonFX launchermotor;
@@ -45,6 +47,8 @@ public class SK26Launcher extends SubsystemBase {
         //configures motors
         configMotor(launchermotor);
         configMotor(launchermotorFollower);
+
+        SmartDashboard.putData("Static Launcher", this);
     }
 
     public void configMotor(TalonFX motor) {
@@ -128,7 +132,6 @@ public class SK26Launcher extends SubsystemBase {
     //Sends subsystem to the Smart Dashboard
     @Override
     public void periodic() {
-        SmartDashboard.putData("Static Launcher", this);
     }
 
     //Sends data to the Smart Dashboard
@@ -150,5 +153,11 @@ public class SK26Launcher extends SubsystemBase {
             "Target RPS",
             () -> targetMotorRPS,
             null);
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

@@ -9,7 +9,6 @@ import static frc.robot.Ports.DriverPorts.kLeftStickY;
 import static frc.robot.Ports.DriverPorts.kLeftStickX;
 import frc.robot.subsystems.drive.DriveRequests;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.SKSwerve;
@@ -19,7 +18,6 @@ public class AlignAroundPoint extends Command{
     private SKSwerve m_drive;
     private SKTargetPoint targetPoint;
     private PIDController alignController = new PIDController(kP, kI, kD);
-    private Rotation2d targetAngle;
 
     public AlignAroundPoint(SKSwerve m_drive, SKTargetPoint targetPoint) {
         this.targetPoint = targetPoint;
