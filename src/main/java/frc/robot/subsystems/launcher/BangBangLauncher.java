@@ -7,15 +7,17 @@ import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
 
 import java.util.function.Supplier;
 
+import org.littletonrobotics.junction.Logger;
+
 import com.ctre.phoenix6.CANBus;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TorqueCurrentConfigs;
 import com.ctre.phoenix6.controls.CoastOut;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.TorqueCurrentFOC;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
@@ -25,9 +27,7 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
@@ -73,9 +73,11 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         .onChange(
             (newDebounce) -> {torqueCurrentDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);}
         );
-    private Pref<Double> dutyCycleFF = SKPreferences.attach("DutyCycle FF (%/rps)", 0.01489);
+    private Pref<Double> voltageFF = SKPreferences.attach("Voltage FF (V/rps)", 0.01489 * 12.0);
     private Pref<Double> atGoalDebounce = SKPreferences.attach("AtGoalVelocity Debounce (sec)", 0.2)
         .onChange((newDebounce) -> {atGoalDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);});
+    private Pref<Double> targetSpeed = SKPreferences.attach("Target Speed (rps)", 5000.0)
+        .onChange((newSpeed) -> {runVelocity(newSpeed);});
 
     // Signal Debouncers
     private Debouncer torqueCurrentDebouncer =
@@ -89,7 +91,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     
     private AngularVelocity targetVelocity = RotationsPerSecond.zero();
 
-    private DutyCycleOut dutyCycleBangBang = new DutyCycleOut(0);
+    private VoltageOut voltageBangBang = new VoltageOut(0);
     private TorqueCurrentFOC torqueCurrentBangBang = new TorqueCurrentFOC(0);
     private Follower followerControl = new Follower(kFixedLauncherMotor.ID, MotorAlignmentValue.Opposed);
     private CoastOut coastControl = new CoastOut();
@@ -111,16 +113,14 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         }
 
         followingMotor.setControl(followerControl);
-
-        SmartDashboard.putData("BBLauncher", this);
     }
 
     @Override
     public void periodic() {
         switch(activeMode) {
-            case DUTY_CYCLE_BANG_BANG:
-                mainMotor.setControl(dutyCycleBangBang.withEnableFOC(true).withOutput(
-                    MathUtil.clamp(targetVelocity.in(RotationsPerSecond) * dutyCycleFF.get(), -0.75, 0.75)));
+            case VOLTAGE_BANG_BANG:
+                mainMotor.setControl(voltageBangBang.withEnableFOC(true).withOutput(
+                    MathUtil.clamp(targetVelocity.in(RotationsPerSecond) * voltageFF.get(), -9.0, 9.0)));
                 break;
             case TORQUE_CURRENT_BANG_BANG:
                 mainMotor.setControl(torqueCurrentBangBang.withOutput(
@@ -130,6 +130,8 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
                 mainMotor.setControl(coastControl);
                 break;
         }
+
+        telemeterize();
     }
 
     /**
@@ -153,7 +155,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         activeMode =
             isTorqueCurrentRunning
                 ? ControlMode.TORQUE_CURRENT_BANG_BANG
-                : ControlMode.DUTY_CYCLE_BANG_BANG;
+                : ControlMode.VOLTAGE_BANG_BANG;
         
         targetVelocity = RotationsPerSecond.of(rotationsPerSecond);
     }
@@ -165,16 +167,12 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         atGoal = false;
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addBooleanProperty("AtGoal", () -> atGoal, null);
-        builder.addDoubleProperty(
-            "Target Velocity (rps)", 
-            () -> targetVelocity.in(RotationsPerSecond), 
-            (newTarget) -> runVelocity(newTarget));
-        builder.addDoubleProperty("Current Velocity (rps)", () -> getVelocity().in(RotationsPerSecond), null);
-        builder.addStringProperty("Control Mode", () -> activeMode.toString(), null);
-        builder.addBooleanProperty("Too Far", () -> tooFarForTorqueCurrent, null);
+    public void telemeterize() {
+        Logger.recordOutput("AtGoal", atGoal);
+        Logger.recordOutput("Target Velocity (rps)", targetVelocity.in(RotationsPerSecond));
+        Logger.recordOutput("Current Velocity (rps)", getVelocity().in(RotationsPerSecond));
+        Logger.recordOutput("Control Mode", activeMode.toString());
+        Logger.recordOutput("Too Far", tooFarForTorqueCurrent);
     }
 
     public AngularVelocity getVelocity() {
@@ -182,7 +180,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     }
 
     public enum ControlMode {
-        DUTY_CYCLE_BANG_BANG,
+        VOLTAGE_BANG_BANG,
         TORQUE_CURRENT_BANG_BANG,
         COAST
     }
