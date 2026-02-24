@@ -19,13 +19,13 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.subsystems.PathplannerSubsystem;
 
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
+
+import org.littletonrobotics.junction.Logger;
 
 public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
 
@@ -47,8 +47,6 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         //configures motors
         configMotor(launchermotor);
         configMotor(launchermotorFollower);
-
-        SmartDashboard.putData("Static Launcher", this);
     }
 
     public void configMotor(TalonFX motor) {
@@ -129,30 +127,18 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         launcherMotorStatus = "Waiting to Shoot";
     }
 
-    //Sends subsystem to the Smart Dashboard
+   
     @Override
     public void periodic() {
+        telemeterize();
     }
 
-    //Sends data to the Smart Dashboard
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addStringProperty(
-            "Launcher Status", 
-            () -> launcherMotorStatus,
-            null);
-        builder.addBooleanProperty(
-            "Is at launcher speed",
-            () -> isLauncherAtSpeed(),
-            null);
-        builder.addDoubleProperty(
-            "Launcher Velocity",
-            () -> launchermotor.getVelocity().getValueAsDouble()*(2*Math.PI*kWheelRadius),
-            null);
-        builder.addDoubleProperty(
-            "Target RPS",
-            () -> targetMotorRPS,
-            null);
+    public void telemeterize() {
+        Logger.recordOutput("Launcher/Status", launcherMotorStatus);
+        Logger.recordOutput("Launcher/Is at speed", isLauncherAtSpeed());
+        Logger.recordOutput("Launcher/Tangential Velocity", launchermotor.getVelocity().getValueAsDouble()*(2*Math.PI*kWheelRadius));
+        Logger.recordOutput("Launcher/RPS", launchermotor.getVelocity().getValueAsDouble());
+        Logger.recordOutput("Launcher/Target RPS", targetMotorRPS);
     }
 
     @Override
