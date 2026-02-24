@@ -1,0 +1,67 @@
+{
+  "name": "2026 SKBot",
+  "isFTC": false,
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 180
+    },
+    {
+      "axis": "z",
+      "degrees": 90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0.135
+  ],
+  "cameras": [
+    {
+      "name": "Camera",
+      "rotations": [
+        {
+          "axis": "y",
+          "degrees": -25
+        },
+        {
+          "axis": "z",
+          "degrees": 180
+        }
+      ],
+      "position": [
+        0.35,
+        0,
+        0.5
+      ],
+      "resolution": [
+        960,
+        720
+      ],
+      "fov": 90
+    }
+  ],
+  "components": [
+	{
+		"zeroedRotations": [
+			{
+				"axis": "x",
+				"degrees": 90
+			},
+			{
+				"axis": "z",
+				"degrees": 90
+			},
+			{
+				"axis": "y",
+				"degrees": 90
+			}
+		],
+		"zeroedPosition": [
+			0.5,
+			-0.2,
+			0.4
+		]
+	}
+  ]
+}
