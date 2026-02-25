@@ -1,4 +1,4 @@
-package frc.robot.subsystems.launcher;
+package frc.robot.subsystems.launcher.mechanisms;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
@@ -33,11 +33,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.subsystems.PathplannerSubsystem;
+import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
 
 public class BangBangLauncher extends SubsystemBase implements PathplannerSubsystem {
     private TalonFX mainMotor;
     private TalonFX followingMotor;
+
+    @Getter
+    private LauncherTuning launcherTuning = new LauncherTuning("BBLauncher");
 
     private TalonFXConfiguration mainMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -67,16 +71,16 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     boolean tooFarForTorqueCurrent;
 
     // Preferences
-    private Pref<Double> torqueCurrentOutput = SKPreferences.attach("TorqueCurrent Output (A)", 54.0);
-    private Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("TorqueCurrentControl Tolerance (rps)", 0.85);
-    private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("TorqueCurrentControl Debounce (sec)", 0.025)
+    private Pref<Double> torqueCurrentOutput = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrent Output (A)", 54.0);
+    private Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrentControl Tolerance (rps)", 0.85);
+    private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrentControl Debounce (sec)", 0.025)
         .onChange(
             (newDebounce) -> {torqueCurrentDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);}
         );
-    private Pref<Double> voltageFF = SKPreferences.attach("Voltage FF (V/rps)", 0.01489 * 12.0);
-    private Pref<Double> atGoalDebounce = SKPreferences.attach("AtGoalVelocity Debounce (sec)", 0.2)
+    private Pref<Double> voltageFF = SKPreferences.attach("BBLauncher/Prefs/Voltage FF (V/rps)", 0.01489 * 12.0);
+    private Pref<Double> atGoalDebounce = SKPreferences.attach("BBLauncher/Prefs/AtGoalVelocity Debounce (sec)", 0.2)
         .onChange((newDebounce) -> {atGoalDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);});
-    private Pref<Double> targetSpeed = SKPreferences.attach("Target Speed (rps)", 5000.0)
+    private Pref<Double> targetSpeed = SKPreferences.attach("BBLauncher/Prefs/Target Speed (rps)", 5000.0)
         .onChange((newSpeed) -> {runVelocity(newSpeed);});
 
     // Signal Debouncers

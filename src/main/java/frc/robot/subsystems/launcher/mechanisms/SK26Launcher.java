@@ -1,4 +1,4 @@
-package frc.robot.subsystems.launcher;
+package frc.robot.subsystems.launcher.mechanisms;
 
 import static frc.robot.Konstants.LauncherConstants.Slot0;
 import static frc.robot.Konstants.LauncherConstants.Slot1;

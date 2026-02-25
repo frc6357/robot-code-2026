@@ -8,7 +8,7 @@ import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
-import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 
 // Imports from Java/WPILib
 import java.util.Optional;

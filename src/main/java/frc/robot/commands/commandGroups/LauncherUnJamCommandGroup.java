@@ -2,7 +2,7 @@ package frc.robot.commands.commandGroups;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import frc.robot.subsystems.launcher.SK26Launcher;
+import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherPauseTime;

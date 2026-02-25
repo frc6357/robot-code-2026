@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.launcher.SK26Launcher;
+import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 
 public class RunLauncherWithVelCommand extends Command {
 

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.launcher;
+package frc.robot.subsystems.launcher.moveandshoot;
 
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import java.util.Optional;
