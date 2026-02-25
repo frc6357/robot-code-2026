@@ -11,7 +11,7 @@
         "x": 4.714660600034915,
         "y": 0.6253694600759095
       },
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": "TestRTrench"
     },
     {
@@ -72,7 +72,7 @@
         "y": 7.508754636233951
       },
       "nextControl": null,
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": "LeftTrench"
     }
   ],
@@ -89,7 +89,7 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
+    "velocity": 1.0,
     "rotation": 180.0
   },
   "reversed": false,

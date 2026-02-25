@@ -355,6 +355,8 @@ public final class Konstants
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
+        public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
+
         // Motor direction - set true if motor spins opposite to encoder direction
         public static final boolean kTurretMotorInverted = true;
 

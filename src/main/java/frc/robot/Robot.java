@@ -38,6 +38,8 @@ public class Robot extends LoggedRobot {
 
     private final RobotContainer m_robotContainer;
 
+    public static RobotMode Mode = RobotMode.CONTROLLED;
+
     public Robot() {
         this(RobotMode.CONTROLLED);
     }
@@ -48,7 +50,7 @@ public class Robot extends LoggedRobot {
      */
     public Robot(RobotMode mode) {
         /* AdvantageKit Logging Initialization */
-
+        Mode = mode;
         switch(mode) {
             case CONTROLLED: 
                 if (isReal()) {

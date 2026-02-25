@@ -77,6 +77,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
         stateChooser.onChange((state) -> requestState(state));
         SmartDashboard.putData("StateHandler", this);
+
+        addPathPlannerCommands();
     }
 
     /**
