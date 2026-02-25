@@ -34,6 +34,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 // import edu.wpi.first.math.util.Units;
 // import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -124,8 +126,8 @@ public final class Konstants
         // Robot Dimension values
     
         // swerve chassis width and length in inches 
-        public static final int kChassisLength = 28; // TODO: protobot is 28x28, but final bot will be different
-        public static final int kChassisWidth = 28; 
+        public static final double kChassisLength = 27.5;
+        public static final double kChassisWidth = 27.5; 
     }
 
     public static final class AutoConstants
@@ -419,14 +421,11 @@ public final class Konstants
             public static final double kD = 0;
         }
 
-        public static final class BangBangLauncher {
-            
-        }
         // 3D Transform (placeholder - measure from CAD)
-        public static final edu.wpi.first.math.geometry.Transform3d kRobotToShooter =
-            new edu.wpi.first.math.geometry.Transform3d(
-                new edu.wpi.first.math.geometry.Translation3d(0.0, 0.0, 0.5),  // Placeholder: 0.5m height
-                new edu.wpi.first.math.geometry.Rotation3d()                    // No rotation offset
+        public static final Transform3d kRobotToShooter =
+            new Transform3d(
+                new Translation3d(0.0, 0.0, 0.5),  // Placeholder: 0.5m height
+                new Rotation3d()                    // No rotation offset
             );
 
         // Phase delay compensation
@@ -435,11 +434,11 @@ public final class Konstants
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
         public static final LaunchAngleMode kAngleMode = LaunchAngleMode.FIXED;
-        public static final double kFixedLaunchAngleRadians = Math.toRadians(55.0);
+        public static final Angle kFixedLaunchAngle = Degrees.of(55);
 
         // Motion compensation (for InterpolatedShotStrategy)
         public static final int kMaxIterations = 20;
-        public static final double kConvergenceThresholdMeters = 0.01;
+        public static final Distance kConvergenceThresholdMeters = Meters.of(0.01);
 
         // Filtering
         public static final boolean kEnableFiltering = true;
@@ -453,8 +452,8 @@ public final class Konstants
         public static final double kMinVelocityRatio = 0.85;  // Reject shots below 85% target speed
 
         // Valid range
-        public static final double kMinRangeMeters = 1.0;
-        public static final double kMaxRangeMeters = 10.0;
+        public static final Distance kMinRangeMeters = Meters.of(1.0);
+        public static final Distance kMaxRangeMeters = Meters.of(10.0);
 
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization

@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import lombok.Getter;
 
 /**
  * NetworkTables interface for launcher tuning and telemetry.
@@ -16,12 +17,19 @@ public class LauncherTuning {
     private final NetworkTable table;
 
     // Telemetry entries
+    @Getter
     private final NetworkTableEntry flywheelRPMEntry;
+    @Getter
     private final NetworkTableEntry launcherYawEntry;
+    @Getter
     private final NetworkTableEntry distanceEntry;
+    @Getter
     private final NetworkTableEntry timeOfFlightEntry;
+    @Getter
     private final NetworkTableEntry iterationsEntry;
+    @Getter
     private final NetworkTableEntry convergedEntry;
+    @Getter
     private final NetworkTableEntry validShotEntry;
 
     public LauncherTuning(String tableName) {
@@ -60,7 +68,7 @@ public class LauncherTuning {
         validShotEntry.setBoolean(shot.validShot());
 
         // Also publish to SmartDashboard for easy viewing
-        SmartDashboard.putBoolean("Launcher/ValidShot", shot.validShot());
-        SmartDashboard.putNumber("Launcher/Distance", shot.effectiveDistance().in(Meters));
+        SmartDashboard.putBoolean("LauncherTelemetry/ValidShot", shot.validShot());
+        SmartDashboard.putNumber("LauncherTelemetry/Distance", shot.effectiveDistance().in(Meters));
     }
 }
