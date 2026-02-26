@@ -3,8 +3,9 @@ package frc.robot.subsystems.intake;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
-import static frc.robot.Ports.pickupOBPorts.kEaterMotor;
+import static frc.robot.Ports.pickupOBPorts.kIntakeMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
+import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
@@ -36,8 +37,10 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 {
 	// Motors
 	SparkFlex positionerMotor;
+	SparkFlex positionerFollowerMotor;
 	SparkFlex intakeMotor;
 	SparkFlexConfig positionerConfig;
+	SparkFlexConfig positionerFollowerConfig;
 	SparkFlexConfig intakeConfig;
 
 	// Encoders
@@ -85,8 +88,17 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		positionerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60);
 		positionerMotor.configure(positionerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
+		// ========== Positioner Follower Motor Configuration ==========
+		positionerFollowerMotor = new SparkFlex(kPositionerFollowerMotor.ID, MotorType.kBrushless);
+		positionerFollowerConfig = new SparkFlexConfig();
+		positionerFollowerConfig
+			.idleMode(IdleMode.kBrake)
+			.smartCurrentLimit(60)
+			.follow(kPositionerMotor.ID, true); // Follow the main positioner motor, inverted
+		positionerFollowerMotor.configure(positionerFollowerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+
 		// ========== Intake Motor Configuration ==========
-		intakeMotor = new SparkFlex(kEaterMotor.ID, MotorType.kBrushless);
+		intakeMotor = new SparkFlex(kIntakeMotor.ID, MotorType.kBrushless);
 		intakeConfig = new SparkFlexConfig();
 		intakeConfig
 			.idleMode(IdleMode.kCoast)
