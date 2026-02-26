@@ -32,6 +32,13 @@
       "position": [-0.2286, -0.1524, 0.3429],
       "resolution": [1280, 960],
       "fov": 63
+    },
+    {
+      "name": "robot-head",
+      "rotations": [],
+      "position": [0, 0, 0.5],
+      "resolution": [1280, 960],
+      "fov": 75
     }
   ],
   "components": [
