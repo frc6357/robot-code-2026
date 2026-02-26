@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.subsystems.climb;
 
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Rotations;

@@ -7,7 +7,7 @@ import frc.robot.commands.ClimbButtonCommand;
 import frc.robot.commands.ClimbDownCommand;
 
 import frc.robot.commands.ClimbUpCommand;
-import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.climb.Climb;
 
 import static frc.robot.Ports.OperatorPorts.climbGoButton;
 import static frc.robot.Ports.OperatorPorts.climbUpButton;

@@ -2,10 +2,9 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.climb.Climb;
 
 import static frc.robot.Konstants.ClimbConstants.kClimbMotorSpeed;
-
-import frc.robot.subsystems.Climb;
 
 public class ClimbDownCommand extends Command{
 
