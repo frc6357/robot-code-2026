@@ -18,27 +18,20 @@
   ],
   "cameras": [
     {
-      "name": "Camera",
+      "name": "limelight-three",
+      "rotations": [],
+      "position": [-0.127, -0.1524, 0.3429],
+      "resolution": [1280, 960],
+      "fov": 63
+    },
+    {
+      "name": "limelight-four",
       "rotations": [
-        {
-          "axis": "y",
-          "degrees": -25
-        },
-        {
-          "axis": "z",
-          "degrees": 180
-        }
+        { "axis": "z", "degrees": 180 }
       ],
-      "position": [
-        0.35,
-        0,
-        0.5
-      ],
-      "resolution": [
-        960,
-        720
-      ],
-      "fov": 90
+      "position": [-0.2286, -0.1524, 0.3429],
+      "resolution": [1280, 960],
+      "fov": 63
     }
   ],
   "components": [
