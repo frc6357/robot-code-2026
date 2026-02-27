@@ -496,7 +496,21 @@ public final class Konstants
 
     public static final class IntakeConstants
     {
-        public static final double kEaterMotorSpeed = 0.5;
+        public static enum IntakePosition
+        {
+            /** Set the intake angle to X degrees **/
+            kIntakeGroundPosition(90.0), //TODO This angle needs to be set to a safe angle above the ground
+            /** Set the turret angle to 0 degrees (zero position) **/
+            kIntakeZeroPosition(0.0); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
+
+            public final double angle;
+            IntakePosition(double angle)
+            {
+                this.angle = angle;
+            }
+        }
+
+        public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
 
         public static final double kPositionerMotorMinPosition = 0.5;
