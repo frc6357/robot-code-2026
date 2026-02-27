@@ -148,6 +148,10 @@ public class RobotContainer {
                     m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
                     m_visionInstance = m_visionContainer.get();
                 }
+                if(subsystems.isPickupPresent()) {
+                    m_pickupContainer = Optional.of(new SK26Intake());
+                    m_pickupInstance = m_pickupContainer.get();
+                }
             }
             else {
                 if(subsystems.isSwervePresent()) {
