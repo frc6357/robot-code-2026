@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition;
 import static frc.robot.Ports.pickupOBPorts.kIntakeMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
@@ -161,10 +162,15 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 * Runs the positioner motor towards the specified position.
 	 * @param position Target position in rotations
 	 */
-	public void runPositionerMotor(double position) 
+	public void setPositionerPosition(double position) 
 	{
 		setTargetPosition(position);
 	}
+
+	public void setPositionerPosition(IntakePosition angle) 
+    {
+        setPositionerPosition(angle.angle);
+    }
 
 	/**
 	 * Sets the intake motor voltage directly.
