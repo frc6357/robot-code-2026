@@ -35,7 +35,6 @@ public class LauncherTuning {
     public LauncherTuning(String tableName) {
         this.table = NetworkTableInstance.getDefault().getTable(tableName);
 
-        // TODO: STUDENT EXERCISE - Set up telemetry entries
         // Create entries for each value you want to publish.
         // Use table.getEntry("Telemetry/Name") to create entries.
 
@@ -51,12 +50,10 @@ public class LauncherTuning {
     /**
      * Publish shot parameters to telemetry.
      *
-     * TODO: STUDENT EXERCISE - Implement telemetry publishing
      * Extract values from ShotParameters and publish to NetworkTables.
      * Remember to convert Measure types: shot.flywheelSpeed().in(RPM)
      */
     public void publishTelemetry(ShotParameters shot) {
-        // TODO: Publish each value
         // Example: flywheelRPMEntry.setDouble(shot.flywheelSpeed().in(RPM));
 
         flywheelRPMEntry.setDouble(shot.flywheelSpeed().in(RPM));

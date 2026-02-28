@@ -51,19 +51,17 @@ public class ShotCalculator {
     public ShotParameters calculate(
         Pose2d robotPose,
         ChassisSpeeds robotVelocity,
-        Translation2d target,
+        Translation3d target,
         double timestamp
     ) {
-        // TODO: STUDENT EXERCISE - Phase delay compensation
         // The shot won't execute instantly - there's delay from code execution,
         // motor response, etc. Predict where the robot will be after phaseDelay.
         //
         // Steps:
-        // 1. Create Twist2d: (vx * delay, vy * delay, omega * delay)
+        // 1. Use ChassisSpeeds to create a Twist2d representing the robot's velocity
         // 2. Apply to pose: pose.exp(twist) returns future pose
-        //
-        // For now, just use current pose (no compensation):
-        Pose2d compensatedPose = robotPose;
+
+        Pose2d compensatedPose = robotPose.exp(robotVelocity.toTwist2d(phaseDelay));
 
         // Transform robot pose to shooter pose (3D)
         Pose3d shooterPose = new Pose3d(compensatedPose).plus(robotToShooter);
@@ -77,17 +75,23 @@ public class ShotCalculator {
             0.0,  // No pitch rate
             robotVelocity.omegaRadiansPerSecond
         );
-
-        // Target at ground level (Z = 0)
-        Translation3d target3d = new Translation3d(target.getX(), target.getY(), 0.0);
-
+        
         // Delegate to strategy
         return strategy.calculate(
             shooterPose,
             shooterVelocity,
-            target3d,
+            target,
             CalculationContext.create(timestamp)
         );
+    }
+
+    public ShotParameters calculate(
+        Pose2d robotPose,
+        ChassisSpeeds robotVelocity,
+        Translation2d target,
+        double timestamp
+    ) {
+        return calculate(robotPose, robotVelocity, new Translation3d(target.getX(), target.getY(), 0.0), timestamp);
     }
 
     /**

@@ -21,6 +21,8 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.subsystems.PathplannerSubsystem;
+import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
+import lombok.Getter;
 
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
 import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
@@ -28,6 +30,9 @@ import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
 import org.littletonrobotics.junction.Logger;
 
 public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
+
+    @Getter
+    private LauncherTuning tuning = new LauncherTuning("SK26Launcher");
 
     //initialize launcher motor
     TalonFX launchermotor;

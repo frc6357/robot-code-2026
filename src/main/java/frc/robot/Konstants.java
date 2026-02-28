@@ -455,6 +455,9 @@ public final class Konstants
         public static final Distance kMinRangeMeters = Meters.of(1.0);
         public static final Distance kMaxRangeMeters = Meters.of(10.0);
 
+        // "Stationary" speed threshold for deciding when to apply motion compensation
+        public static final LinearVelocity kStationaryThresholdMetersPerSecond = MetersPerSecond.of(0.3);
+
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization
         public static InterpolatingDoubleTreeMap createFlywheelSpeedMap() {
@@ -482,11 +485,6 @@ public final class Konstants
 
             return map;
         }
-
-        // Motor IDs (placeholder - update with actual CAN IDs)
-        public static final int kFlywheelMotorID = 1000;  // TODO: Update with actual CAN ID
-        public static final int kYawMotorID = 1001;       // TODO: Update with actual CAN ID
-        public static final int kAngleMotorID = 1002;     // TODO: Update with actual CAN ID
     }
 
     public static final class ExampleConstants
