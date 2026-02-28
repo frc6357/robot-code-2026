@@ -7,15 +7,21 @@ import static frc.robot.Konstants.LauncherConstants.kMaxRangeMeters;
 import static frc.robot.Konstants.LauncherConstants.kMinRangeMeters;
 import static frc.robot.Konstants.LauncherConstants.kPhaseDelaySeconds;
 
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Konstants.LauncherConstants;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.moveandshoot.ShotCalculationStrategy.Range;
 import frc.robot.subsystems.turret.SK26Turret;
+import frc.lib.utils.Field;
 
 public class ShootingCoordinator {
     SKSwerve drive;
@@ -44,6 +50,26 @@ public class ShootingCoordinator {
     //     this.turret = new SK26Turret();
     //     this.tuning = launcher.getLauncherTuning();
     //     this.coordinator = new ShootingCoordinator(launcher, turret, shotCalculator);
+    // }
+
+    /* ======= Shooting Coordination Commands ======= */
+
+    // public Command scoreStationary() {
+    //     return Commands
+    // }
+
+    // public Command scoreMoving() {
+    //     return Commands.sequence(
+    //         updateShotCalculationCommand(Field.isBlue() ? TargetPoint.kBlueHub.point.getTargetPoint() : TargetPoint.kRedHub.point.getTargetPoint())
+    //     );
+    // }
+
+    // public Command shuttleStationary() {
+
+    // }
+
+    // public Command shuttleMoving() {
+
     // }
 
     /* ======= Subsystem getters ======= */
@@ -136,10 +162,35 @@ public class ShootingCoordinator {
         tuning.publishTelemetry(currentShot);
     }
 
+    public void updateShotCalculation(
+        Pose2d robotPose,
+        ChassisSpeeds robotVelocity,
+        Translation3d targetPosition
+    ) {
+        currentShot = shotCalculator.calculate(
+            robotPose, 
+            robotVelocity, 
+            targetPosition, 
+            Timer.getFPGATimestamp());
+        
+        tuning.publishTelemetry(currentShot);
+    }
+
+    public void updateShotCalculation(Translation3d targetPosition) {
+        updateShotCalculation(drive.getRobotPose(), drive.getVelocity(true), targetPosition);
+    }
+
     public void updateShotCalculation(Translation2d targetPosition) {
         updateShotCalculation(drive.getRobotPose(), drive.getVelocity(true), targetPosition);
     }
 
+    public Command updateShotCalculationCommand(Translation2d targetPosition) {
+        return Commands.run(() -> updateShotCalculation(targetPosition));
+    }
+
+    public Command updateShotCalculationCommand(Translation3d targetPosition) {
+        return Commands.run(() -> updateShotCalculation(targetPosition));
+    }
 
 
     /* ======= Factories for shot calculation ======= */
