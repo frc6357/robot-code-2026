@@ -7,12 +7,23 @@ import static frc.robot.Konstants.LauncherConstants.kMaxRangeMeters;
 import static frc.robot.Konstants.LauncherConstants.kMinRangeMeters;
 import static frc.robot.Konstants.LauncherConstants.kPhaseDelaySeconds;
 
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint;
+import static frc.robot.Konstants.TurretConstants.kTurretBaseLeadTimeSeconds;
+import static frc.robot.Konstants.TurretConstants.kTurretMaxLeadScale;
+import static frc.robot.Konstants.TurretConstants.kTurretMinLeadScale;
+import static frc.robot.Konstants.TurretConstants.kTurretReferenceYawVelocity;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -31,7 +42,19 @@ public class ShootingCoordinator {
 
     private final ShotCalculator shotCalculator = createShotCalculator();
 
-    ShotParameters currentShot;
+    ShotParameters currentShot = new ShotParameters(
+        RotationsPerSecond.zero(), 
+        Degrees.zero(), 
+        Degrees.zero(), 
+        DegreesPerSecond.zero(), 
+        Translation3d.kZero, 
+        Meters.zero(), 
+        Seconds.zero(), 
+        shotCalculator.getStrategy().getName(), 
+        0, 
+        false,
+        false, 
+        0.0);
 
     private final LauncherTuning tuning;
 
@@ -44,6 +67,8 @@ public class ShootingCoordinator {
         this.turret = turret;
         this.drive = drive;
         this.tuning = launcher.getLauncherTuning();
+
+        System.out.println("ShootingCoordinator online");
     }
 
     // public MoveAndShootSystem() {
@@ -68,8 +93,12 @@ public class ShootingCoordinator {
                     : FieldConstants.Hub.redTopCenterPoint
             )),
             // Continuously run flywheel at calculated speed
-            launcher.runVelocityCommand(() -> currentShot.flywheelSpeed())
-        );
+            launcher.runVelocityCommand(() -> currentShot.flywheelSpeed()),
+            // Continuously aim turret with lead angle compensation
+            Commands.run(() -> {
+                turret.setAngleDegrees(MathUtil.inputModulus(calculateAdjustedTurretAngle(currentShot).in(Degrees), -180, 180));
+            }, turret)
+        ).withName("ScoreAndMoveCommand");
     }
 
     // public Command shuttleStationary() {
@@ -143,6 +172,56 @@ public class ShootingCoordinator {
      */
     public boolean isReadyToShoot() {
         return isValidShot() && isLauncherReady() && isTurretReady();
+    }
+
+    /**
+     * Calculates the turret angle with lead angle compensation applied.
+     * 
+     * <p>Uses Option 3 framework (velocity-dependent lookahead) with configurable scaling.
+     * With default values (minScale=1.0, maxScale=1.0), behaves like Option 2 (fixed lookahead).
+     * 
+     * <p>Formula:
+     * <pre>
+     * scaleFactor = clamp(|yawVelocity| / referenceVelocity, minScale, maxScale)
+     * adaptiveLeadTime = baseLeadTime × scaleFactor
+     * leadAngle = yawVelocity × adaptiveLeadTime
+     * fieldRelativeAngle = baseYaw + leadAngle
+     * robotRelativeAngle = fieldRelativeAngle - robotHeading - (robotYawVelocity × adaptiveLeadTime)
+     * </pre>
+     *
+     * @param shot The shot parameters containing base yaw and yaw velocity (field-relative)
+     * @return The adjusted turret angle in degrees with lead compensation applied (robot-relative)
+     */
+    public Angle calculateAdjustedTurretAngle(ShotParameters shot) {
+        double baseAngleDeg = shot.launcherYaw().in(Degrees);
+        double yawVelocityDegPerSec = shot.launcherYawVelocity().in(DegreesPerSecond);
+        
+        // Calculate velocity-dependent scale factor
+        double velocityMagnitude = Math.abs(yawVelocityDegPerSec);
+        double scaleFactor = MathUtil.clamp(
+            velocityMagnitude / kTurretReferenceYawVelocity,
+            kTurretMinLeadScale,
+            kTurretMaxLeadScale
+        );
+        
+        // Apply adaptive lead time
+        double adaptiveLeadTime = kTurretBaseLeadTimeSeconds * scaleFactor;
+        double leadAngleDeg = yawVelocityDegPerSec * adaptiveLeadTime;
+        
+        // Field-relative angle with lead compensation
+        double fieldRelativeAngleDeg = baseAngleDeg + leadAngleDeg;
+        
+        // Convert from field-relative to robot-relative by subtracting robot heading
+        double robotHeadingDeg = drive.getRobotPose().getRotation().getDegrees();
+        double robotRelativeAngleDeg = fieldRelativeAngleDeg - robotHeadingDeg;
+        
+        // Compensate for robot rotation: predict where the robot will be rotated to
+        // and pre-adjust the turret angle to counteract it
+        double robotYawVelocityDegPerSec = Math.toDegrees(drive.getVelocity(false).omegaRadiansPerSecond);
+        double robotRotationCompensationDeg = robotYawVelocityDegPerSec * adaptiveLeadTime;
+        robotRelativeAngleDeg -= robotRotationCompensationDeg;
+        
+        return Degrees.of(robotRelativeAngleDeg);
     }
 
     /**

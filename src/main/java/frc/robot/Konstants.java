@@ -377,6 +377,15 @@ public final class Konstants
 
         // Translation from center of robot to center of turret bearing
         public static final Translation3d kTurretCenter = new Translation3d(Inches.of(-0.125), Inches.of(-8.625), Inches.of(17.5));
+
+        // Turret lead angle compensation (Option 3 framework with Option 2 defaults)
+        // Lead formula: leadAngle = yawVelocity × baseLeadTime × scaleFactor
+        // scaleFactor = clamp(|yawVelocity| / referenceVelocity, minScale, maxScale)
+        // With minScale=1.0 and maxScale=1.0, this behaves like Option 2 (fixed lookahead)
+        public static final double kTurretBaseLeadTimeSeconds = 0.040;   // 40ms base lookahead
+        public static final double kTurretReferenceYawVelocity = 30.0;   // deg/s for scaling
+        public static final double kTurretMinLeadScale = 1.0;            // Start as Option 2
+        public static final double kTurretMaxLeadScale = 1.0;            // Start as Option 2
     }
 
     public static final class ClimbConstants
@@ -424,7 +433,7 @@ public final class Konstants
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(0.0, 0.0, 0.5),  // Placeholder: 0.5m height
+                new Translation3d(Inches.of(5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
                 new Rotation3d()                    // No rotation offset
             );
 
