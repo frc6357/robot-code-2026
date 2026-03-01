@@ -189,7 +189,11 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         COAST
     }
 
-    public Command runFixedSpeedCommand(Supplier<AngularVelocity> velocity) {
+    // public Command runFixedSpeedCommand(Supplier<AngularVelocity> velocity) {
+    //     return runEnd(() -> runVelocity(velocity.get().in(RotationsPerSecond)), this::stop);
+    // }
+
+    public Command runVelocityCommand(Supplier<AngularVelocity> velocity) {
         return runEnd(() -> runVelocity(velocity.get().in(RotationsPerSecond)), this::stop);
     }
 

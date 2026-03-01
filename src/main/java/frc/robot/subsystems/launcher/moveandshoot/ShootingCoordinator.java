@@ -22,6 +22,7 @@ import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.moveandshoot.ShotCalculationStrategy.Range;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants;
 
 public class ShootingCoordinator {
     SKSwerve drive;
@@ -58,11 +59,18 @@ public class ShootingCoordinator {
     //     return Commands
     // }
 
-    // public Command scoreMoving() {
-    //     return Commands.sequence(
-    //         updateShotCalculationCommand(Field.isBlue() ? TargetPoint.kBlueHub.point.getTargetPoint() : TargetPoint.kRedHub.point.getTargetPoint())
-    //     );
-    // }
+    public Command scoreMoving() {
+        return Commands.parallel(
+            // Continuously update shot calculation
+            Commands.run(() -> updateShotCalculation(
+                Field.isBlue() 
+                    ? FieldConstants.Hub.topCenterPoint 
+                    : FieldConstants.Hub.redTopCenterPoint
+            )),
+            // Continuously run flywheel at calculated speed
+            launcher.runVelocityCommand(() -> currentShot.flywheelSpeed())
+        );
+    }
 
     // public Command shuttleStationary() {
 

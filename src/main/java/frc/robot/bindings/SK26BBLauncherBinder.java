@@ -46,10 +46,10 @@ public class SK26BBLauncherBinder implements CommandBinder {
         if(launcherSubsystem.isPresent()) {
             BangBangLauncher launcher = launcherSubsystem.get();
 
-            ShootRPS.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
+            // ShootRPS.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
 
             //TODO: This will need to be changed to a velocity control command when we implement velocity control
-            Shoot.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
+            Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
         }
     }
     

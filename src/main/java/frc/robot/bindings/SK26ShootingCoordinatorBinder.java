@@ -43,6 +43,8 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
         // score.and(stationary).whileTrue();
         // score.and(moving).whileTrue();
 
+        score.whileTrue(moveAndShootSystem.scoreMoving());
+
         // shuttle.and(stationary).whileTrue();
         // shuttle.and(moving).whileTrue();
 
