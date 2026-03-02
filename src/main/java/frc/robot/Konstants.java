@@ -105,12 +105,6 @@ public final class Konstants
         public enum TargetPoint {
             kOperatorControlled(
                 new SKTargetPoint(new Translation2d(0, 0), "Operator")
-            ),
-            kBlueHub(
-                new SKTargetPoint(new Translation2d(4.622, 4.0295), "Blue Hub")
-            ),
-            kRedHub(
-                new SKTargetPoint(new Pose2d(11.929, 4.0295, Rotation2d.k180deg), "Red Hub")
             );
 
             public SKTargetPoint point;

@@ -80,8 +80,10 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     private Pref<Double> voltageFF = SKPreferences.attach("BBLauncher/Prefs/Voltage FF (V/rps)", 0.01489 * 12.0);
     private Pref<Double> atGoalDebounce = SKPreferences.attach("BBLauncher/Prefs/AtGoalVelocity Debounce (sec)", 0.2)
         .onChange((newDebounce) -> {atGoalDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);});
+        
+    @SuppressWarnings("unused")
     private Pref<Double> targetSpeed = SKPreferences.attach("BBLauncher/Prefs/Target Speed (rps)", 5000.0)
-        .onChange((newSpeed) -> {runVelocity(newSpeed);});
+        .onChange((newSpeed) -> {this.runVelocity(newSpeed);});
 
     // Signal Debouncers
     private Debouncer torqueCurrentDebouncer =

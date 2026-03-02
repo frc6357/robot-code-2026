@@ -12,6 +12,9 @@ import static frc.robot.Konstants.TurretConstants.kTurretMaxLeadScale;
 import static frc.robot.Konstants.TurretConstants.kTurretMinLeadScale;
 import static frc.robot.Konstants.TurretConstants.kTurretReferenceYawVelocity;
 
+import org.littletonrobotics.junction.Logger;
+
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Meters;
@@ -34,6 +37,7 @@ import frc.robot.subsystems.launcher.moveandshoot.ShotCalculationStrategy.Range;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants;
+import frc.lib.utils.FieldConstants.LinesHorizontal;
 
 public class ShootingCoordinator {
     SKSwerve drive;
@@ -58,6 +62,12 @@ public class ShootingCoordinator {
 
     private final LauncherTuning tuning;
 
+    // Hysteresis for shuttle target selection to prevent oscillation near center line
+    // When true, mirror the shuttle point's Y coordinate (aim at the opposite side)
+    private boolean shouldMirrorShuttleTarget = false;
+    private static final double SHUTTLE_MIRROR_THRESHOLD = 0.3; // meters past center to trigger mirror
+    private static final double SHUTTLE_UNMIRROR_THRESHOLD = 0.3; // meters back from center to un-mirror
+
     public ShootingCoordinator(
         BangBangLauncher launcher,
         SK26Turret turret,
@@ -68,7 +78,7 @@ public class ShootingCoordinator {
         this.drive = drive;
         this.tuning = launcher.getLauncherTuning();
 
-        System.out.println("ShootingCoordinator online");
+        System.out.println("[ShootingCoordinator] Initialized");
     }
 
     // public MoveAndShootSystem() {
@@ -105,9 +115,75 @@ public class ShootingCoordinator {
 
     // }
 
-    // public Command shuttleMoving() {
+    public Command shuttleMoving() {
+        return Commands.parallel(
+            // Continuously update shot calculation with hysteresis for target selection
+            Commands.run(() ->
+                updateShotCalculation(getEffectiveShuttleTarget(kOperatorControlled.point.getTargetPoint()))
+            ),
+            // Continuously run flywheel at calculated speed
+            launcher.runVelocityCommand(() -> currentShot.flywheelSpeed()),
+            Commands.run(() -> {
+                turret.setAngleDegrees(MathUtil.inputModulus(calculateAdjustedTurretAngle(currentShot).in(Degrees), -180, 180));
+            }, turret)
+        ).withName("ShuttleAndMoveCommand");
+    }
 
-    // }
+    /**
+     * Updates the shuttle mirror state with hysteresis and returns the effective target.
+     * 
+     * <p>When the robot crosses far enough past the center line (Y axis), it should aim
+     * at the mirrored shuttle point to avoid shooting through the net. Hysteresis prevents
+     * oscillation when hovering near the center line.
+     * 
+     * @param shuttlePoint The operator-controlled shuttle point
+     * @return The effective target, potentially mirrored across the center line
+     */
+    private Translation2d getEffectiveShuttleTarget(Translation2d shuttlePoint) {
+        double robotY = drive.getRobotPose().getTranslation().getY();
+        double shuttleY = shuttlePoint.getY();
+        
+        // Determine which side of center the shuttle point is on
+        boolean shuttleOnPositiveSide = shuttleY > LinesHorizontal.center;
+        
+        // Calculate distance from center line (positive = towards positive Y, negative = towards negative Y)
+        double distanceFromCenter = robotY - LinesHorizontal.center;
+        
+        // Apply hysteresis for mirror state changes
+        // Mirror when robot crosses SHUTTLE_MIRROR_THRESHOLD past center (opposite side from shuttle)
+        // Unmirror when robot returns SHUTTLE_UNMIRROR_THRESHOLD onto shuttle's side of center
+        if (shuttleOnPositiveSide) {
+            // Shuttle is on positive Y side
+            // Mirror when robot is too far on negative side
+            if (distanceFromCenter < -SHUTTLE_MIRROR_THRESHOLD) {
+                shouldMirrorShuttleTarget = true;
+            }
+            // Unmirror when robot returns to positive side with buffer
+            else if (distanceFromCenter > SHUTTLE_UNMIRROR_THRESHOLD) {
+                shouldMirrorShuttleTarget = false;
+            }
+        } else {
+            // Shuttle is on negative Y side
+            // Mirror when robot is too far on positive side
+            if (distanceFromCenter > SHUTTLE_MIRROR_THRESHOLD) {
+                shouldMirrorShuttleTarget = true;
+            }
+            // Unmirror when robot returns to negative side with buffer
+            else if (distanceFromCenter < -SHUTTLE_UNMIRROR_THRESHOLD) {
+                shouldMirrorShuttleTarget = false;
+            }
+        }
+        
+        // Return mirrored or original target
+        if (shouldMirrorShuttleTarget) {
+            double mirroredY = 2 * LinesHorizontal.center - shuttleY;
+            Translation2d mirroredTarget = new Translation2d(shuttlePoint.getX(), mirroredY);
+            Logger.recordOutput("EffectiveShuttleTarget", mirroredTarget);
+            return mirroredTarget;
+        }
+        Logger.recordOutput("EffectiveShuttleTarget", shuttlePoint);
+        return shuttlePoint;
+    }
 
     /* ======= Subsystem getters ======= */
 
@@ -237,6 +313,7 @@ public class ShootingCoordinator {
         ChassisSpeeds robotVelocity,
         Translation2d targetPosition
     ) {
+        Logger.recordOutput("LaunchingTarget", targetPosition);
         // Calculate new shot parameters
         currentShot = shotCalculator.calculate(
             robotPose,
@@ -254,6 +331,7 @@ public class ShootingCoordinator {
         ChassisSpeeds robotVelocity,
         Translation3d targetPosition
     ) {
+        Logger.recordOutput("LaunchingTarget", targetPosition.toTranslation2d());
         currentShot = shotCalculator.calculate(
             robotPose, 
             robotVelocity, 

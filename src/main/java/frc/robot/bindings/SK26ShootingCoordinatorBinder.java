@@ -17,6 +17,7 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
     Trigger shuttle = StateHandler.whenCurrentState(MacroState.SHUTTLING).or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
     Trigger stationary;
     Trigger moving;
+    Trigger idle = StateHandler.whenCurrentState(MacroState.IDLE);
 
     public SK26ShootingCoordinatorBinder(Optional<ShootingCoordinator> moveAndShootSystemContainer) {
         this.moveAndShootSystemContainer = moveAndShootSystemContainer;
@@ -44,7 +45,7 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
         // score.and(moving).whileTrue();
 
         score.whileTrue(moveAndShootSystem.scoreMoving());
-
+        shuttle.whileTrue(moveAndShootSystem.shuttleMoving());
         // shuttle.and(stationary).whileTrue();
         // shuttle.and(moving).whileTrue();
 
