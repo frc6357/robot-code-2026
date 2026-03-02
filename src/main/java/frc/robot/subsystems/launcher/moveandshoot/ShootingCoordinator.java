@@ -52,6 +52,7 @@ public class ShootingCoordinator {
         Degrees.zero(), 
         DegreesPerSecond.zero(), 
         Translation3d.kZero, 
+        Translation3d.kZero, 
         Meters.zero(), 
         Seconds.zero(), 
         shotCalculator.getStrategy().getName(), 
@@ -178,10 +179,8 @@ public class ShootingCoordinator {
         if (shouldMirrorShuttleTarget) {
             double mirroredY = 2 * LinesHorizontal.center - shuttleY;
             Translation2d mirroredTarget = new Translation2d(shuttlePoint.getX(), mirroredY);
-            Logger.recordOutput("EffectiveShuttleTarget", mirroredTarget);
             return mirroredTarget;
         }
-        Logger.recordOutput("EffectiveShuttleTarget", shuttlePoint);
         return shuttlePoint;
     }
 
@@ -321,6 +320,7 @@ public class ShootingCoordinator {
             targetPosition,
             Timer.getFPGATimestamp()
         );
+        Logger.recordOutput("EffectiveLaunchingTarget", drive.getRobotPose().getTranslation().plus(currentShot.effectiveTarget().toTranslation2d()));
         
         // Publish telemetry for debugging
         tuning.publishTelemetry(currentShot);
@@ -337,6 +337,7 @@ public class ShootingCoordinator {
             robotVelocity, 
             targetPosition, 
             Timer.getFPGATimestamp());
+        Logger.recordOutput("EffectiveLaunchingTarget", drive.getRobotPose().getTranslation().plus(currentShot.effectiveTarget().toTranslation2d()));
         
         tuning.publishTelemetry(currentShot);
     }

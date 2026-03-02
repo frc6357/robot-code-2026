@@ -24,6 +24,7 @@ public record ShotParameters(
     Angle launcherYaw,
     AngularVelocity launcherYawVelocity,
 
+    Translation3d initialTarget,
     // Target information (after motion compensation)
     Translation3d effectiveTarget,
     Distance effectiveDistance,

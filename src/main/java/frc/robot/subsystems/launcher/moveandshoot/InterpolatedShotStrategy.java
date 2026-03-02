@@ -143,6 +143,7 @@ public final class InterpolatedShotStrategy implements ShotCalculationStrategy {
             Radians.of(launcherYaw.getRadians()),
             RadiansPerSecond.of(yawVelocity),
             target,
+            new Translation3d(distance, new Rotation3d(launcherYaw)),
             Meters.of(distance),
             Seconds.of(tof),
             getName(),
