@@ -211,9 +211,6 @@ public class RobotContainer {
 
     public void configurePathPlannerCommands()
     {
-        // Register the FuelHunt trench decision command
-        PathPlannerCommands.registerFuelHuntCommands();
-
         NamedCommands.registerCommands(PathPlannerCommands.getAvailableCommands());
     }
 
