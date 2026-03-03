@@ -33,9 +33,6 @@ import frc.robot.RobotContainer;
 import frc.robot.Ports.DriverPorts;
 import frc.robot.commands.AlignAroundPoint;
 
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
 
 @SuppressWarnings("unused")
 public class SKSwerveBinder implements CommandBinder{

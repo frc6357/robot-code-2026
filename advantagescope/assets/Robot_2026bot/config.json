@@ -1,0 +1,67 @@
+{
+  "name": "2026 SKBot",
+  "isFTC": false,
+  "rotations": [
+    {
+      "axis": "x",
+      "degrees": 180
+    },
+    {
+      "axis": "z",
+      "degrees": 90
+    }
+  ],
+  "position": [
+    0,
+    0,
+    0.135
+  ],
+  "cameras": [
+    {
+      "name": "limelight-three",
+      "rotations": [],
+      "position": [-0.127, -0.1524, 0.3429],
+      "resolution": [1280, 960],
+      "fov": 63
+    },
+    {
+      "name": "limelight-four",
+      "rotations": [
+        { "axis": "z", "degrees": 180 }
+      ],
+      "position": [-0.2286, -0.1524, 0.3429],
+      "resolution": [1280, 960],
+      "fov": 63
+    },
+    {
+      "name": "robot-head",
+      "rotations": [],
+      "position": [0, 0, 0.5],
+      "resolution": [1280, 960],
+      "fov": 75
+    }
+  ],
+  "components": [
+	{
+		"zeroedRotations": [
+			{
+				"axis": "x",
+				"degrees": 90
+			},
+			{
+				"axis": "z",
+				"degrees": 90
+			},
+			{
+				"axis": "y",
+				"degrees": 90
+			}
+		],
+		"zeroedPosition": [
+			0.5,
+			-0.19,
+			0.4
+		]
+	}
+  ]
+}

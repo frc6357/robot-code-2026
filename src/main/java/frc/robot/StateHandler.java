@@ -12,7 +12,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
-import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 
 /**
  * A class to handle large-scale robot states (macros) such as launching, intaking, climbing, and idling.
@@ -77,6 +77,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
         stateChooser.onChange((state) -> requestState(state));
         SmartDashboard.putData("StateHandler", this);
+
+        addPathPlannerCommands();
     }
 
     /**

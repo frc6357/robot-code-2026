@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
+import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.ClimbBinder;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
@@ -34,18 +35,21 @@ import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26StateBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SKSwerveBinder;
-import frc.robot.subsystems.Climb;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
 import frc.robot.bindings.SK26LightsBinder;
+import frc.robot.bindings.SK26ShootingCoordinatorBinder;
+import frc.robot.subsystems.climb.Climb;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.intake.SK26Intake;
-import frc.robot.subsystems.launcher.BangBangLauncher;
-import frc.robot.subsystems.launcher.SK26Launcher;
+import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
+import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 import frc.robot.bindings.SK26IntakeBinder;
 import frc.robot.subsystems.turret.SK26Turret;
+import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
 
@@ -79,6 +83,7 @@ public class RobotContainer {
   public Optional<SK26Intake> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
 
+  public Optional<ShootingCoordinator> shootingCoordinator = Optional.empty();
   
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
@@ -89,6 +94,7 @@ public class RobotContainer {
   public static Climb m_climbInstance;
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
+
 
   public static Field2d m_field = new Field2d();
 
@@ -133,45 +139,74 @@ public class RobotContainer {
             // The state handler should always be present
             m_stateHandlerContainer = Optional.of(new StateHandler());
 
-            if(subsystems.isSwervePresent()) {
-                m_swerveContainer = Optional.of(new SKSwerve());
-                m_swerveInstance = m_swerveContainer.get(); // Returns new SKSwerve
+            if(Robot.isSimulation() && Robot.Mode == RobotMode.CONTROLLED) {
+                if(subsystems.isSwervePresent()) {
+                    m_swerveContainer = Optional.of(new SKSwerve());
+                    m_swerveInstance = m_swerveContainer.get();
+                }
+                if(subsystems.isTurretPresent()) {
+                    m_turretContainer = Optional.of(new SK26TurretSim());
+                    m_turretInstance = m_turretContainer.get();
+                }
+                if(subsystems.isVisionPresent()) {
+                    m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
+                    m_visionInstance = m_visionContainer.get();
+                }
+                if(subsystems.isPickupPresent()) {
+                    m_pickupContainer = Optional.of(new SK26Intake());
+                    m_pickupInstance = m_pickupContainer.get();
+                }
+                if(subsystems.isBangBangLauncherPresent()) {
+                    m_BBLauncherContainer = Optional.of(new BangBangLauncher());
+                    m_BBlauncherInstance = m_BBLauncherContainer.get();
+                }
             }
-            // if(subsystems.isVisionPresent()) {
-            //     m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
-            //     m_visionInstance = m_visionContainer.get();
-            // }
-            if(subsystems.isVisionPresent()) {
-                m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
-                m_visionInstance = m_visionContainer.get();
+            else {
+                if(subsystems.isSwervePresent()) {
+                    m_swerveContainer = Optional.of(new SKSwerve());
+                    m_swerveInstance = m_swerveContainer.get(); // Returns new SKSwerve
+                }
+                // if(subsystems.isVisionPresent()) {
+                //     m_visionContainer = Optional.of(new SKVision(m_swerveContainer));
+                //     m_visionInstance = m_visionContainer.get();
+                // }
+                if(subsystems.isTurretPresent()) {
+                    m_turretContainer = Optional.of(new SK26Turret());
+                    m_turretInstance = m_turretContainer.get();
+                }
+                if(subsystems.isVisionPresent()) {
+                    m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
+                    m_visionInstance = m_visionContainer.get();
+                }
+                if(subsystems.isClimbPresent()) {
+                    m_climbComtainer = Optional.of(new Climb());
+                    m_climbInstance = m_climbComtainer.get();
+                }
+                if(subsystems.isBangBangLauncherPresent()) {
+                    m_BBLauncherContainer = Optional.of(new BangBangLauncher());
+                    m_BBlauncherInstance = m_BBLauncherContainer.get();
+                }
+                if(subsystems.isLauncherPresent()) {
+                    m_StandardLauncherContainer = Optional.of(new SK26Launcher());
+                    m_standardLauncherInstance = m_StandardLauncherContainer.get();
+                }
+                if(subsystems.isLightsPresent()) {
+                    m_lightsContainer = Optional.of(new SK26Lights());
+                    m_lightsInstance = m_lightsContainer.get();
+                }
+                if(subsystems.isPickupPresent()) {
+                    m_pickupContainer = Optional.of(new SK26Intake());
+                    m_pickupInstance = m_pickupContainer.get();
+                }
+                if(subsystems.isIndexerPresent()) {
+                    m_indexerContainer = Optional.of(new SK26Indexer());
+                    m_indexerInstance = m_indexerContainer.get();
+                }
             }
-            if(subsystems.isClimbPresent()) {
-                m_climbComtainer = Optional.of(new Climb());
-                m_climbInstance = m_climbComtainer.get();
-            }
-            if(subsystems.isTurretPresent()) {
-                m_turretContainer = Optional.of(new SK26Turret());
-                m_turretInstance = m_turretContainer.get();
-            }
-            if(subsystems.isBangBangLauncherPresent()) {
-                m_BBLauncherContainer = Optional.of(new BangBangLauncher());
-                m_BBlauncherInstance = m_BBLauncherContainer.get();
-            }
-            if(subsystems.isLauncherPresent()) {
-                m_StandardLauncherContainer = Optional.of(new SK26Launcher());
-                m_standardLauncherInstance = m_StandardLauncherContainer.get();
-            }
-            if(subsystems.isLightsPresent()) {
-                m_lightsContainer = Optional.of(new SK26Lights());
-                m_lightsInstance = m_lightsContainer.get();
-            }
-            if(subsystems.isPickupPresent()) {
-                m_pickupContainer = Optional.of(new SK26Intake());
-                m_pickupInstance = m_pickupContainer.get();
-            }
-            if(subsystems.isIndexerPresent()) {
-                m_indexerContainer = Optional.of(new SK26Indexer());
-                m_indexerInstance = m_indexerContainer.get(); // Returns new SKSwerve
+
+            if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) {
+                // If both launcher and turret are present, create the shooting coordinator
+                shootingCoordinator = Optional.of(new ShootingCoordinator(m_BBLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
             }
 
             // Give StateHandler a reference to the launcher for state readiness checking
@@ -193,7 +228,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add( new ClimbBinder(m_climbComtainer));
+        buttonBinders.add(new ClimbBinder(m_climbComtainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
@@ -202,6 +237,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
+        buttonBinders.add(new SK26ShootingCoordinatorBinder(shootingCoordinator));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

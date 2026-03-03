@@ -3,39 +3,29 @@ package frc.robot.subsystems.drive;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.RobotContainer.m_field;
+
+import org.littletonrobotics.junction.Logger;
 
 /**
  * Subsystem to manage a target point in the field for the robot to interact with or align around.
  */
 public class SKTargetPoint extends SubsystemBase{
     private Pose2d targetPoint;
-    private String name; // Used for identification if multiple target points are used
+    private final String name; // Used for identification if multiple target points are used
 
-    // Publisher for network tables (especially helpful when displayed in AdvantageScope)
-    private StructPublisher<Pose2d> targetPublisher;
 
     public SKTargetPoint(Translation2d targetPoint, String name) {
         this.targetPoint = new Pose2d(targetPoint, Rotation2d.kZero);
         this.name = name;
-
-        targetPublisher = NetworkTableInstance.getDefault()
-            .getTable("TargetPoints/" + name)
-            .getStructTopic("Pose", Pose2d.struct).publish();
     }
 
     public SKTargetPoint(Pose2d targetPoint, String name) {
         this.targetPoint = targetPoint;
         this.name = name;
-
-        targetPublisher = NetworkTableInstance.getDefault()
-            .getTable("TargetPoints/" + name)
-            .getStructTopic("Pose", Pose2d.struct).publish();
     }
 
     public void setTargetPoint(Translation2d point) {
@@ -84,7 +74,7 @@ public class SKTargetPoint extends SubsystemBase{
 
     @Override
     public void periodic() {
-        targetPublisher.set(targetPoint);
+        Logger.recordOutput("TargetPoint-" + name, targetPoint);
         m_field.getObject("TargetPoint-" + name).setPose(targetPoint);
     }
 }

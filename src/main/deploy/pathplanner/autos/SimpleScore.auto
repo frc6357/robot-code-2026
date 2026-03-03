@@ -32,6 +32,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Left Trench",
+  "folder": null,
   "choreoAuto": false
 }

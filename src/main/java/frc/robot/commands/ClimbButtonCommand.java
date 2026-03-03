@@ -2,8 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
-
-import frc.robot.subsystems.Climb;
+import frc.robot.subsystems.climb.Climb;
 
 public class ClimbButtonCommand extends Command{
 

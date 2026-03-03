@@ -34,6 +34,8 @@ import edu.wpi.first.math.geometry.Pose2d;
 // import edu.wpi.first.math.util.Units;
 // import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
@@ -103,12 +105,6 @@ public final class Konstants
         public enum TargetPoint {
             kOperatorControlled(
                 new SKTargetPoint(new Translation2d(0, 0), "Operator")
-            ),
-            kBlueHub(
-                new SKTargetPoint(new Translation2d(4.622, 4.0295), "Blue Hub")
-            ),
-            kRedHub(
-                new SKTargetPoint(new Pose2d(11.929, 4.0295, Rotation2d.k180deg), "Red Hub")
             );
 
             public SKTargetPoint point;
@@ -124,8 +120,8 @@ public final class Konstants
         // Robot Dimension values
     
         // swerve chassis width and length in inches 
-        public static final int kChassisLength = 28; // TODO: protobot is 28x28, but final bot will be different
-        public static final int kChassisWidth = 28; 
+        public static final double kChassisLength = 27.5;
+        public static final double kChassisWidth = 27.5; 
     }
 
     public static final class AutoConstants
@@ -355,6 +351,8 @@ public final class Konstants
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
+        public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
+
         // Motor direction - set true if motor spins opposite to encoder direction
         public static final boolean kTurretMotorInverted = true;
 
@@ -373,6 +371,15 @@ public final class Konstants
 
         // Translation from center of robot to center of turret bearing
         public static final Translation3d kTurretCenter = new Translation3d(Inches.of(-0.125), Inches.of(-8.625), Inches.of(17.5));
+
+        // Turret lead angle compensation (Option 3 framework with Option 2 defaults)
+        // Lead formula: leadAngle = yawVelocity × baseLeadTime × scaleFactor
+        // scaleFactor = clamp(|yawVelocity| / referenceVelocity, minScale, maxScale)
+        // With minScale=1.0 and maxScale=1.0, this behaves like Option 2 (fixed lookahead)
+        public static final double kTurretBaseLeadTimeSeconds = 0.040;   // 40ms base lookahead
+        public static final double kTurretReferenceYawVelocity = 30.0;   // deg/s for scaling
+        public static final double kTurretMinLeadScale = 1.0;            // Start as Option 2
+        public static final double kTurretMaxLeadScale = 1.0;            // Start as Option 2
     }
 
     public static final class ClimbConstants
@@ -417,14 +424,11 @@ public final class Konstants
             public static final double kD = 0;
         }
 
-        public static final class BangBangLauncher {
-            
-        }
         // 3D Transform (placeholder - measure from CAD)
-        public static final edu.wpi.first.math.geometry.Transform3d kRobotToShooter =
-            new edu.wpi.first.math.geometry.Transform3d(
-                new edu.wpi.first.math.geometry.Translation3d(0.0, 0.0, 0.5),  // Placeholder: 0.5m height
-                new edu.wpi.first.math.geometry.Rotation3d()                    // No rotation offset
+        public static final Transform3d kRobotToShooter =
+            new Transform3d(
+                new Translation3d(Inches.of(5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
+                new Rotation3d()                    // No rotation offset
             );
 
         // Phase delay compensation
@@ -433,11 +437,11 @@ public final class Konstants
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
         public static final LaunchAngleMode kAngleMode = LaunchAngleMode.FIXED;
-        public static final double kFixedLaunchAngleRadians = Math.toRadians(55.0);
+        public static final Angle kFixedLaunchAngle = Degrees.of(55);
 
         // Motion compensation (for InterpolatedShotStrategy)
         public static final int kMaxIterations = 20;
-        public static final double kConvergenceThresholdMeters = 0.01;
+        public static final Distance kConvergenceThresholdMeters = Meters.of(0.01);
 
         // Filtering
         public static final boolean kEnableFiltering = true;
@@ -451,8 +455,11 @@ public final class Konstants
         public static final double kMinVelocityRatio = 0.85;  // Reject shots below 85% target speed
 
         // Valid range
-        public static final double kMinRangeMeters = 1.0;
-        public static final double kMaxRangeMeters = 10.0;
+        public static final Distance kMinRangeMeters = Meters.of(1.0);
+        public static final Distance kMaxRangeMeters = Meters.of(10.0);
+
+        // "Stationary" speed threshold for deciding when to apply motion compensation
+        public static final LinearVelocity kStationaryThresholdMetersPerSecond = MetersPerSecond.of(0.3);
 
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization
@@ -481,11 +488,6 @@ public final class Konstants
 
             return map;
         }
-
-        // Motor IDs (placeholder - update with actual CAN IDs)
-        public static final int kFlywheelMotorID = 1000;  // TODO: Update with actual CAN ID
-        public static final int kYawMotorID = 1001;       // TODO: Update with actual CAN ID
-        public static final int kAngleMotorID = 1002;     // TODO: Update with actual CAN ID
     }
 
     public static final class ExampleConstants
@@ -495,7 +497,21 @@ public final class Konstants
 
     public static final class IntakeConstants
     {
-        public static final double kEaterMotorSpeed = 0.5;
+        public static enum IntakePosition
+        {
+            /** Set the intake angle to X degrees **/
+            kIntakeGroundPosition(90.0), //TODO This angle needs to be set to a safe angle above the ground
+            /** Set the turret angle to 0 degrees (zero position) **/
+            kIntakeZeroPosition(0.0); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
+
+            public final double angle;
+            IntakePosition(double angle)
+            {
+                this.angle = angle;
+            }
+        }
+
+        public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
 
         public static final double kPositionerMotorMinPosition = 0.5;

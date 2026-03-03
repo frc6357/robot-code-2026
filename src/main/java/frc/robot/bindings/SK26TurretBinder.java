@@ -9,11 +9,8 @@ import frc.robot.commands.TurretButtonCommand;
 import frc.robot.commands.TurretTrackPointCommand;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.turret.SK26Turret;
-import frc.lib.utils.Field;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kBlueHub;
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kRedHub;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
@@ -74,8 +71,12 @@ public class SK26TurretBinder implements CommandBinder
             // Field.isBlue() ? kBlueHub.point : kRedHub.point
         ).withName("TurretManualTrackHubCommand"));
 
-        PointAtHub.whileTrue(new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? kBlueHub.point : kRedHub.point)
-            .withName("TurretTrackHubCommand"));
+        // PointAtHub.whileTrue(
+        //     new TurretTrackPointCommand(
+        //         turret, 
+        //         swerve, 
+        //         (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue ? kBlueHub.point : kRedHub.point))
+        //     .withName("TurretTrackHubCommand"));
         PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackShuttleCommand"));
 

@@ -8,7 +8,7 @@ import frc.lib.preferences.SKPreferences;
 import frc.robot.commands.RunLauncherWithRPSCommand;
 import frc.robot.commands.RunLauncherWithVelCommand;
 import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
-import frc.robot.subsystems.launcher.SK26Launcher;
+import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 
 import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
 import static frc.robot.Konstants.LauncherConstants.kTargetlaunchVelocity;

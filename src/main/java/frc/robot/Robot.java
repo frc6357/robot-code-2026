@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import static edu.wpi.first.units.Units.Inches;
 import static frc.robot.Ports.DriverPorts.kDriver;
 import static frc.robot.Ports.OperatorPorts.kOperator;
 
@@ -17,18 +16,13 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
 
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.Konstants.TurretConstants;
 
 /**
  * The methods in this class are called automatically corresponding to each mode, as described in
@@ -44,6 +38,8 @@ public class Robot extends LoggedRobot {
 
     private final RobotContainer m_robotContainer;
 
+    public static RobotMode Mode = RobotMode.CONTROLLED;
+
     public Robot() {
         this(RobotMode.CONTROLLED);
     }
@@ -54,7 +50,7 @@ public class Robot extends LoggedRobot {
      */
     public Robot(RobotMode mode) {
         /* AdvantageKit Logging Initialization */
-
+        Mode = mode;
         switch(mode) {
             case CONTROLLED: 
                 if (isReal()) {
@@ -88,6 +84,10 @@ public class Robot extends LoggedRobot {
 
 
         CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup"));
+
+        
+        SmartDashboard.putData(CommandScheduler.getInstance());
+        SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
     }
 
     /**
@@ -104,15 +104,6 @@ public class Robot extends LoggedRobot {
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
         CommandScheduler.getInstance().run();
-
-
-        // Mechanisms in 3d field on AdvantageScope. Ignore these shenanigans
-        // Logger.recordOutput("Pose3ds/kZeroPose", Pose3d.kZero);
-        // Logger.recordOutput("Pose3ds/kTurretPose", new Pose3d(TurretConstants.kTurretCenter, Rotation3d.kZero));
-        // Logger.recordOutput("Pose3ds/TurretSpinPose", new Pose3d(new Translation3d(Inches.of(Math.cos(Timer.getTimestamp()) * 7.892), Inches.of(Math.cos(Timer.getTimestamp()) * 7.892), Inches.of(0)), new Rotation3d(0, 0, Math.cos(Timer.getTimestamp()))));
-
-        SmartDashboard.putData(CommandScheduler.getInstance());
-        SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
     }
 
     /** This function is called once each time the robot enters Disabled mode. */

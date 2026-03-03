@@ -62,17 +62,19 @@ public class TurretTrackPointCommand extends Command
         if(Double.isNaN(desiredAngle)) {
             desiredAngle = turret.getAngleDegrees();
         }
-        double wrappedAngle = MathUtil.inputModulus(desiredAngle, -180, 180);
 
         // Convert field-relative angle to robot-relative angle for the turret
         // If robot is facing 0° and target is at 45° field-relative, turret should be at 45°
         // If robot is facing 30° and target is at 45° field-relative, turret should be at 15°
-        double turretAngleDeg = wrappedAngle - robotHeadingDeg;
+        double turretAngleDeg = desiredAngle - robotHeadingDeg;
 
-        turret.setAngleDegrees(turretAngleDeg);
+        double wrappedAngle = MathUtil.inputModulus(turretAngleDeg, -180, 180);
+
+        turret.setAngleDegrees(wrappedAngle);
 
         // Debug output
         SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", desiredAngle);
+        SmartDashboard.putNumber("TurretTrack/WrappedDesiredAngle", wrappedAngle);
         SmartDashboard.putNumber("TurretTrack/RobotHeading", robotHeadingDeg);
         SmartDashboard.putNumber("TurretTrack/DesiredTurretAngle", turretAngleDeg);
         SmartDashboard.putNumber("TurretTrack/DistanceToTarget", robotPosition.getDistance(target));

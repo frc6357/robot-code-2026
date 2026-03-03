@@ -1,5 +1,7 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.Inches;
 // Imports from the robot
 import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretOutput;
@@ -15,6 +17,8 @@ import static frc.robot.Konstants.TurretConstants.kTurretP;
 import static frc.robot.Ports.TurretPorts.kTurretEncoder;
 import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
+import org.littletonrobotics.junction.Logger;
+
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -29,7 +33,9 @@ import com.ctre.phoenix6.signals.SensorDirectionValue;
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Konstants.TurretConstants.TurretPosition;
@@ -42,11 +48,12 @@ import lombok.Getter;
  */
 public class SK26Turret extends SubsystemBase
 {
-    // Motor
-    private final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
+    // Motor (protected for simulation subclass access)
+    protected final TalonFX turretMotor = new TalonFX(kTurretMotor.ID);
     
     // Absolute encoder (CANcoder) - the ONLY position feedback source
-    private final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
+    // Protected for simulation subclass access
+    protected final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
 
     @Getter
     boolean wrapping = false;
@@ -166,12 +173,31 @@ public class SK26Turret extends SubsystemBase
         return pidController.getError();//getTargetAngleDegrees() - getAngleDegrees();
     }
 
+    public double getMotorDutyCycle() {
+        return turretMotor.getDutyCycle().getValueAsDouble();
+    }
+
+    public double getMotorVoltage() {
+        return turretMotor.getMotorVoltage().getValueAsDouble();
+    }
+
     /**
      * Check if the turret is at its target position.
      */
     public boolean atTarget()
     {
         return pidController.atSetpoint();
+    }
+
+    /**
+     * Reset the PID controller and sync target to current position.
+     * Useful after simulation initialization or when recovering from errors.
+     */
+    protected void resetPIDController()
+    {
+        pidController.reset();
+        targetAngleDeg = getAngleDegrees();
+        pidController.setSetpoint(targetAngleDeg);
     }
 
     /**
@@ -206,17 +232,24 @@ public class SK26Turret extends SubsystemBase
         {
             wrapping = false;
         }
+
+        telemeterize();
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder)
-    {
-        builder.addDoubleProperty("Turret Angle (deg)", this::getAngleDegrees, null);
-        builder.addDoubleProperty("Turret Target (deg)", this::getTargetAngleDegrees, null);
-        builder.addBooleanProperty("Turret At Target", this::atTarget, null);
-        builder.addDoubleProperty("Turret Error (deg)", this::getTurretError, null);
-        builder.addDoubleProperty("Turret Motor DutyCycle Output", () -> turretMotor.getDutyCycle().getValueAsDouble(), null);
-        builder.addDoubleProperty("Turret Motor Voltage Output", () -> turretMotor.getMotorVoltage().getValueAsDouble(), null);
-        builder.addBooleanProperty("Turret Wrapping", () -> isWrapping(), null);
+    public void telemeterize() {
+        // Sends the needed Pose3d for the turret CAD model to corectly rotate the turret in the 3D visualization on the dashboard
+        Logger.recordOutput("Mechanisms/TurretSpinPose", new Pose3d(
+            Translation3d.kZero.rotateAround(
+                new Translation3d(Inches.of(7.05), Inches.of(-7.05), Inches.of(0)), 
+                new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(getAngleDegrees()))),
+            new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(getAngleDegrees()))));
+        
+        Logger.recordOutput("Turret/Angle (deg)", getAngleDegrees());
+        Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
+        Logger.recordOutput("Turret/At Target", atTarget());
+        Logger.recordOutput("Turret/Error (deg)", getTurretError());
+        Logger.recordOutput("Turret/Motor DutyCycle Output", getMotorDutyCycle());
+        Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
+        Logger.recordOutput("Turret/Wrapping", isWrapping());
     }
 }

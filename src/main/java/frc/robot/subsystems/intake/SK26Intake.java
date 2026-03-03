@@ -3,23 +3,23 @@ package frc.robot.subsystems.intake;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
-import static frc.robot.Ports.pickupOBPorts.kEaterMotor;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition;
+import static frc.robot.Ports.pickupOBPorts.kIntakeMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
+import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 
-// Imports from REV
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.ClosedLoopSlot;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.PersistMode;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkClosedLoopController;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
+// Imports from Phoenix 6
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
 // Imports from WPILib
 import edu.wpi.first.util.sendable.SendableBuilder;
@@ -31,103 +31,119 @@ import edu.wpi.first.math.MathUtil;
  * Subsystem for the pickup mechanism of the robot, which includes a positioner motor and an intake motor.
  * The positioner motor is responsible for moving the pickup mechanism to the correct position using PID control,
  * while the intake motor is responsible for intaking game pieces.
+ * Uses TalonFX (Kraken X44) motors.
  */
 public class SK26Intake extends SubsystemBase implements PathplannerSubsystem 
 {
 	// Motors
-	SparkFlex positionerMotor;
-	SparkFlex intakeMotor;
-	SparkFlexConfig positionerConfig;
-	SparkFlexConfig intakeConfig;
+	private final TalonFX positionerMotor;
+	private final TalonFX positionerFollowerMotor;
+	private final TalonFX intakeMotor;
 
-	// Encoders
-	RelativeEncoder positionerEncoder;
-	RelativeEncoder intakeEncoder;
+	// Control requests
+	private final PositionVoltage positionControl = new PositionVoltage(0).withSlot(0);
+	private final VoltageOut intakeVoltageControl = new VoltageOut(0);
+	private final Follower followerControl;
 
-	// PID Control
-	SparkClosedLoopController positionerPID;
-	double motorCurrentPosition;
-	double motorTargetPosition;
+	// Position tracking
+	private double motorTargetPosition;
 
 	// Target voltage for the intake motor
-    double targetVoltage = 0.0;
+	private double targetVoltage = 0.0;
 
 	// Preferences for tuning
-	final Pref<Double> positionerKp = SKPreferences.attach("positionerKp", 0.1)
+	final Pref<Double> positionerKp = SKPreferences.attach("Intake/positionerKp", 12.0)
 		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKi = SKPreferences.attach("positionerKi", 0.0)
+	final Pref<Double> positionerKi = SKPreferences.attach("Intake/positionerKi", 0.0)
 		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKd = SKPreferences.attach("positionerKd", 0.0)
+	final Pref<Double> positionerKd = SKPreferences.attach("Intake/positionerKd", 0.0)
 		.onChange((newValue) -> reconfigurePositioner());
 
 	private void reconfigurePositioner() 
 	{
-		positionerConfig.closedLoop
-			.p(positionerKp.get())
-		 	.i(positionerKi.get())
-			.d(positionerKd.get());
-		positionerMotor.configure(positionerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+		Slot0Configs slot0 = new Slot0Configs();
+		slot0.kP = positionerKp.get();
+		slot0.kI = positionerKi.get();
+		slot0.kD = positionerKd.get();
+		positionerMotor.getConfigurator().apply(slot0);
 	}
 
 	public SK26Intake() 
 	{
 		// ========== Positioner Motor Configuration ==========
-		positionerMotor = new SparkFlex(kPositionerMotor.ID, MotorType.kBrushless);
-		positionerConfig = new SparkFlexConfig();
-		positionerConfig.closedLoop
-			.p(positionerKp.get())
-			.i(positionerKi.get())
-			.d(positionerKd.get())
-			.outputRange(-1, 1)
-			.maxMotion
-			.maxAcceleration(150)
-			.allowedProfileError(0.5);
-		positionerConfig.idleMode(IdleMode.kBrake).smartCurrentLimit(60);
-		positionerMotor.configure(positionerConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+		positionerMotor = new TalonFX(kPositionerMotor.ID);
+		TalonFXConfiguration positionerConfig = new TalonFXConfiguration();
+		
+		// PID configuration for position control
+		positionerConfig.Slot0.kP = positionerKp.get();
+		positionerConfig.Slot0.kI = positionerKi.get();
+		positionerConfig.Slot0.kD = positionerKd.get();
+		
+		// Motor output configuration
+		positionerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		
+		// Current limits
+		positionerConfig.CurrentLimits.SupplyCurrentLimit = 60;
+		positionerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		positionerConfig.CurrentLimits.StatorCurrentLimit = 80;
+		positionerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+		
+		positionerMotor.getConfigurator().apply(positionerConfig);
+		positionerMotor.setPosition(0); // Zero the encoder on startup
+
+		// ========== Positioner Follower Motor Configuration ==========
+		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);
+		TalonFXConfiguration followerConfig = new TalonFXConfiguration();
+
+		followerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		followerConfig.CurrentLimits.SupplyCurrentLimit = 60;
+		followerConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		followerConfig.CurrentLimits.StatorCurrentLimit = 80;
+		followerConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+		
+		// Set up follower control (Opposed = opposite direction from master)
+		positionerFollowerMotor.getConfigurator().apply(followerConfig);
+		followerControl = new Follower(positionerMotor.getDeviceID(), MotorAlignmentValue.Opposed);
+		positionerFollowerMotor.setControl(followerControl);
 
 		// ========== Intake Motor Configuration ==========
-		intakeMotor = new SparkFlex(kEaterMotor.ID, MotorType.kBrushless);
-		intakeConfig = new SparkFlexConfig();
-		intakeConfig
-			.idleMode(IdleMode.kCoast)
-			.smartCurrentLimit(40)
-			.voltageCompensation(12.0);
-		intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+		intakeMotor = new TalonFX(kIntakeMotor.ID);
+		TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
+		intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
+		intakeConfig.CurrentLimits.SupplyCurrentLimit = 40;
+		intakeConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+		intakeConfig.CurrentLimits.StatorCurrentLimit = 60;
+		intakeConfig.CurrentLimits.StatorCurrentLimitEnable = true;
+		intakeMotor.getConfigurator().apply(intakeConfig);
 
-		motorCurrentPosition = kPositionerMotorMinPosition;
+		// Initialize position tracking
 		motorTargetPosition = kPositionerMotorMinPosition;
-
-		// ========== Encoder Configuration ==========
-		positionerEncoder = positionerMotor.getEncoder();
-		intakeEncoder = intakeMotor.getEncoder();
-		positionerEncoder.setPosition(0);
-
-		// ========== PID Configuration ==========
-		positionerPID = positionerMotor.getClosedLoopController();
 
 		SmartDashboard.putData("SK26Intake", this);
 	}
 
 	/**
 	 * Sets the target position for the positioner motor and updates the PID controller's setpoint.
-	 * @param targetPosition
+	 * @param targetPosition Target position in rotations
 	 */
 	public void setTargetPosition(double targetPosition) 
 	{
 		motorTargetPosition = targetPosition;
-		positionerPID.setSetpoint(motorTargetPosition, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+		positionerMotor.setControl(positionControl.withPosition(targetPosition));
 	}
 
 	/**
 	 * Returns the current position of the positioner motor from the encoder.
+	 * @return Current position in rotations
 	 */
 	public double getCurrentPosition() 
 	{
-		return positionerEncoder.getPosition();
+		return positionerMotor.getPosition().getValueAsDouble();
 	}
 
 	/**
 	 * Returns the current target position for the positioner motor.
+	 * @return Target position in rotations
 	 */
 	public double getTargetPosition() 
 	{
@@ -135,7 +151,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	}
 
 	/**
-	 * Returns true if the positioner motor is within 0.5 units of the target position, indicating it has reached its target.
+	 * Returns true if the positioner motor is within 0.5 rotations of the target position.
 	 */
 	public boolean isPositionerAtTarget() 
 	{
@@ -143,35 +159,73 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	}
 
 	/**
-	 * Runs the positioner motor towards the maximum position by setting the target position.
+	 * Runs the positioner motor towards the specified position.
+	 * @param position Target position in rotations
 	 */
-	public void runPositionerMotor(double position) 
+	public void setPositionerPosition(double position) 
 	{
 		setTargetPosition(position);
 	}
 
+	public void setPositionerPosition(IntakePosition angle) 
+    {
+        setPositionerPosition(angle.angle);
+    }
+
+	/**
+	 * Sets the intake motor voltage directly.
+	 * @param voltage Voltage to apply (clamped to max intake voltage)
+	 */
 	public void setIntakeVoltage(double voltage) 
 	{
-        voltage = MathUtil.clamp(voltage, -kMaxIntakeVoltage, kMaxIntakeVoltage);
-        targetVoltage = voltage;
-        intakeMotor.setVoltage(voltage);
-    }
+		voltage = MathUtil.clamp(voltage, -kMaxIntakeVoltage, kMaxIntakeVoltage);
+		targetVoltage = voltage;
+		intakeMotor.setControl(intakeVoltageControl.withOutput(voltage));
+	}
 
+	/**
+	 * Sets the intake motor velocity by converting to voltage.
+	 * @param velocity Velocity in RPS (rotations per second)
+	 */
 	public void setIntakeVelocity(double velocity) 
 	{
-        // Neo Vortex free speed is ~113 RPS (6784 RPM) at 12V
-        // Convert RPS to voltage (approximate open-loop)
-        double voltage = (velocity / 113.0) * 12.0;
-        setIntakeVoltage(voltage);
-    }
+		// Kraken X44 free speed is ~100 RPS (6000 RPM) at 12V
+		// Convert RPS to voltage (approximate open-loop)
+		double voltage = (velocity / 100.0) * 12.0;
+		setIntakeVoltage(voltage);
+	}
 
+	/**
+	 * Runs the intake motor at the specified speed.
+	 * @param speed Speed in RPS
+	 */
 	public void runIntakeMotor(double speed) 
 	{
 		setIntakeVelocity(speed);
 	}
 
+	/**
+	 * Stops the intake motor.
+	 */
+	public void stopIntake()
+	{
+		setIntakeVoltage(0);
+	}
+
+	/**
+	 * Stops the positioner motor.
+	 */
+	public void stopPositioner()
+	{
+		positionerMotor.stopMotor();
+	}
+
 	@Override
-	public void periodic() {}
+	public void periodic() 
+	{
+		// Continuously apply follower control to ensure follower stays synced
+		positionerFollowerMotor.setControl(followerControl);
+	}
 
 	@Override
 	public void initSendable(SendableBuilder builder) 
@@ -179,7 +233,8 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		builder.addDoubleProperty("Positioner Position", this::getCurrentPosition, null);
 		builder.addDoubleProperty("Positioner Target Position", this::getTargetPosition, null);
 		builder.addBooleanProperty("Positioner At Target", this::isPositionerAtTarget, null);
-		builder.addDoubleProperty("Intake Velocity (RPMs)", intakeMotor::get, null);
+		builder.addDoubleProperty("Intake Voltage", () -> targetVoltage, null);
+		builder.addDoubleProperty("Intake Velocity (RPS)", () -> intakeMotor.getVelocity().getValueAsDouble(), null);
 	}
 
 	@Override

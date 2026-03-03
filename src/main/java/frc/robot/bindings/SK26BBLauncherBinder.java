@@ -4,15 +4,12 @@ package frc.robot.bindings;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
-import frc.lib.preferences.Pref;
-import frc.lib.preferences.SKPreferences;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
-import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 
 // Imports from Java/WPILib
 import java.util.Optional;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 public class SK26BBLauncherBinder implements CommandBinder {
@@ -23,8 +20,6 @@ public class SK26BBLauncherBinder implements CommandBinder {
     Trigger ShootRPS;
     Trigger UnJam;
     Trigger Shoot;
-
-    Pref<Double> kShootVelocity = SKPreferences.attach("BBLauncher/ManualShootVelocity (rps)", 24.5);
     
     public SK26BBLauncherBinder(Optional<BangBangLauncher> launcherSubsystem) 
     {
@@ -44,12 +39,14 @@ public class SK26BBLauncherBinder implements CommandBinder {
     public void bindButtons() {
         
         if(launcherSubsystem.isPresent()) {
+            @SuppressWarnings("unused")
             BangBangLauncher launcher = launcherSubsystem.get();
 
-            ShootRPS.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
+            // ShootRPS.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
 
             //TODO: This will need to be changed to a velocity control command when we implement velocity control
-            Shoot.whileTrue(launcher.runFixedSpeedCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
+            //UPDATE: Launcher is now velocity-controlled, but by the ShootingCoordinator.
+            // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
         }
     }
     
