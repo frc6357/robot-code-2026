@@ -36,7 +36,6 @@ import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.moveandshoot.ShotCalculationStrategy.Range;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.Field;
-import frc.lib.utils.FieldConstants;
 import frc.lib.utils.FieldConstants.LinesHorizontal;
 
 public class ShootingCoordinator {
@@ -97,11 +96,9 @@ public class ShootingCoordinator {
 
     public Command scoreMoving() {
         return Commands.parallel(
-            // Continuously update shot calculation
+            // Continuously update shot calculation using hex rim aim point
             Commands.run(() -> updateShotCalculation(
-                Field.isBlue() 
-                    ? FieldConstants.Hub.topCenterPoint 
-                    : FieldConstants.Hub.redTopCenterPoint
+                HubTargetingSystem.getAimPoint(drive.getRobotPose(), !Field.isBlue())
             )),
             // Continuously run flywheel at calculated speed
             launcher.runVelocityCommand(() -> currentShot.flywheelSpeed()),
