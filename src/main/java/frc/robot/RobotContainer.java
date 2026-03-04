@@ -53,6 +53,7 @@ import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
 import frc.robot.subsystems.fueldetection.FuelDetection;
+import frc.robot.subsystems.vision.VisionConfig;
 
 
 /**
@@ -164,7 +165,7 @@ public class RobotContainer {
                     m_BBlauncherInstance = m_BBLauncherContainer.get();
                 }
                 if(subsystems.isFuelDetectionPresent()) {
-                    m_fuelDetectionContainer = Optional.of(new FuelDetection(m_swerveContainer));
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
                     m_fuelDetectionInstance = m_fuelDetectionContainer.get();
                 }
             }
@@ -210,7 +211,7 @@ public class RobotContainer {
                     m_indexerInstance = m_indexerContainer.get();
                 }
                 if(subsystems.isFuelDetectionPresent()) {
-                    m_fuelDetectionContainer = Optional.of(new FuelDetection(m_swerveContainer));
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
                     m_fuelDetectionInstance = m_fuelDetectionContainer.get();
                 }
             }

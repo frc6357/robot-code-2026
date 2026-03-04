@@ -1,7 +1,5 @@
 package frc.robot.subsystems.fueldetection;
 
-import static frc.robot.Konstants.VisionConstants.LimelightThree;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,52 +14,56 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.vision.Limelight.LimelightConfig;
 import frc.lib.vision.LimelightHelpers;
 import frc.lib.vision.LimelightHelpers.RawDetection;
 import frc.robot.subsystems.drive.SKSwerve;
 
 /**
- * Subsystem that reads the Limelight 3 NN detector pipeline, projects each
- * detected fuel (ball) onto the field using the robot's estimated pose, and
- * maintains a persistent, flicker-resistant {@link FuelMap}.
+ * Subsystem that reads a Limelight NN detector pipeline, projects each
+ * detected fuel onto the field using the robot's estimated pose, and
+ * maintains a persistent {@link FuelMap}.
  *
- * <h2>Projection geometry</h2>
- * The Limelight gives us {@code txnc} / {@code tync} angles (degrees, from
- * principal pixel).  Combined with the known camera height and pitch we can
+ * The limelight to use is supplied via a {@link LimelightConfig} at
+ * construction time, so switching cameras is just a matter of passing a
+ * different config
+ *
+ * Projection geometry
+ * The Limelight gives us {@code txnc} / {@code tync} angles.
+ * Combined with the known camera height and pitch we can
  * compute the ground-plane distance to the ball, then rotate into field space
  * using the robot heading and camera offset.
  *
- * <h2>Dashboard keys</h2>
- * <pre>
- *   FuelDetection/Num Detections      (raw this frame)
- *   FuelDetection/Num Tracked         (persistent map size)
- *   FuelDetection/Fuel 0/X            (field X meters)
- *   FuelDetection/Fuel 0/Y            (field Y meters)
+ * Dashboard keys
+ * 
+ *   FuelDetection/Num Detections
+ *   FuelDetection/Num Tracked
+ *   FuelDetection/Fuel 0/X
+ *   FuelDetection/Fuel 0/Y
  *   FuelDetection/Fuel 0/Confidence
- *   ...
- * </pre>
+ *   
  */
 public class FuelDetection extends SubsystemBase {
 
     private static final String PREFIX = "FuelDetection";
-    private final String limelightName = LimelightThree.kName; // "limelight-three"
 
-    // ---- Camera mounting (from Konstants) ----
+    // ---- Camera config  ----
+    private final String limelightName;
     /** Camera height above the floor, in meters. */
-    private static final double CAMERA_HEIGHT_M = LimelightThree.kUp;
+    private final double cameraHeightM;
     /** Camera forward offset from robot center, in meters. */
-    private static final double CAMERA_FORWARD_M = LimelightThree.kForward;
+    private final double cameraForwardM;
     /** Camera right offset from robot center, in meters. */
-    private static final double CAMERA_RIGHT_M = LimelightThree.kRight;
-    /** Camera pitch above horizontal, in degrees (positive = tilted up). */
-    private static final double CAMERA_PITCH_DEG = LimelightThree.kPitch;
-    /** Camera yaw from robot forward, in degrees. */
-    private static final double CAMERA_YAW_DEG = LimelightThree.kYaw;
+    private final double cameraRightM;
+    /** Camera pitch above horizontal, in degrees */
+    private final double cameraPitchDeg;
+    /** Camera yaw from robot forward, in degrees */
+    private final double cameraYawDeg;
 
     // ---- Ball parameters ----
     /** Ball diameter = 5.91 in. The ball center sits at half its diameter. */
     private static final double BALL_RADIUS_M = Units.inchesToMeters(5.91 / 2.0);
-    /** Effective target height (center of ball on the floor). */
+    /** Effective target height */
     private static final double TARGET_HEIGHT_M = BALL_RADIUS_M;
 
     // ---- Dependencies ----
@@ -75,23 +77,26 @@ public class FuelDetection extends SubsystemBase {
     private double primaryTy = 0.0;
     private double primaryTa = 0.0;
     private String primaryClass = "";
-    private String jsonDump = "";
 
     // ---- Fuel map ----
     private final FuelMap fuelMap = new FuelMap();
 
-    // Track how many dashboard entries we've written so we can clear stale ones
-    private int maxFuelPosted = 0;
-    private int maxDetPosted = 0;
-
     // ==================== Constructor ====================
 
     /**
-     * @param swerve Optional swerve reference for field-space projection.
-     *               If empty, raw detection telemetry is still posted but
-     *               the fuel map will not update.
+     * @param limelightConfig Limelight configuration describing the camera's
+     *                        network name, mounting position, and orientation.
+     *                        Swap this to point at any limelight on the robot.
+     * @param swerve          Optional swerve reference for field-space projection.
+     *
      */
-    public FuelDetection(Optional<SKSwerve> swerve) {
+    public FuelDetection(LimelightConfig limelightConfig, Optional<SKSwerve> swerve) {
+        this.limelightName  = limelightConfig.getName();
+        this.cameraHeightM  = limelightConfig.getUp();
+        this.cameraForwardM = limelightConfig.getForward();
+        this.cameraRightM   = limelightConfig.getRight();
+        this.cameraPitchDeg = limelightConfig.getPitch();
+        this.cameraYawDeg   = limelightConfig.getYaw();
         this.swerve = swerve.orElse(null);
         SmartDashboard.putData(PREFIX, this);
     }
@@ -108,7 +113,6 @@ public class FuelDetection extends SubsystemBase {
         primaryClass = LimelightHelpers.getDetectorClass(limelightName);
         detections   = LimelightHelpers.getRawDetections(limelightName);
         numDetections = detections.length;
-        jsonDump     = LimelightHelpers.getJSONDump(limelightName);
 
         // ---- 2. Project detections to field & update map ----
         if (swerve != null && numDetections > 0) {
@@ -124,9 +128,8 @@ public class FuelDetection extends SubsystemBase {
             fuelMap.update(new Translation2d[0]);
         }
 
-        // ---- 3. Post to SmartDashboard ----
-        postRawTelemetry();
-        postMapTelemetry();
+        // ---- 3. Post summary telemetry ----
+        postTelemetry();
 
         // ---- 4. Log Pose arrays for AdvantageScope ----
         logFuelPoses();
@@ -137,13 +140,12 @@ public class FuelDetection extends SubsystemBase {
     /**
      * Projects a single NN detection onto the field plane.
      *
-     * <p>Uses the pinhole-camera ground-plane intersection:
-     * <ol>
-     *   <li>Vertical angle to target = cameraPitch + tync</li>
-     *   <li>Ground distance = (cameraHeight − targetHeight) / tan(vertAngle)</li>
-     *   <li>Lateral offset  = groundDist × tan(txnc + cameraYaw)</li>
-     *   <li>Convert robot-relative → field-space via the robot pose</li>
-     * </ol>
+     * Uses the pinhole-camera ground-plane intersection:
+     * 
+     *   Vertical angle to target = cameraPitch + tync
+     *   Ground distance = (cameraHeight − targetHeight) / tan(vertAngle)
+     *   Lateral offset  = groundDist × tan(txnc + cameraYaw)
+     *   Convert robot-relative → field-space via the robot pose
      *
      * @param det       Raw detection from the Limelight
      * @param robotPose Current estimated robot pose on the field
@@ -152,28 +154,28 @@ public class FuelDetection extends SubsystemBase {
     private Translation2d projectToField(RawDetection det, Pose2d robotPose) {
         // Vertical angle from the camera's optical axis to the target (degrees)
         // tync is positive-down from principal pixel, pitch is positive-up
-        double vertAngleDeg = CAMERA_PITCH_DEG - det.tync;
+        double vertAngleDeg = cameraPitchDeg - det.tync;
         double vertAngleRad = Math.toRadians(vertAngleDeg);
 
         // Horizontal angle from camera forward to target
-        double horizAngleDeg = det.txnc + CAMERA_YAW_DEG;
+        double horizAngleDeg = det.txnc + cameraYawDeg;
         double horizAngleRad = Math.toRadians(horizAngleDeg);
 
         // Ground-plane distance straight ahead of the camera
-        double heightDiff = CAMERA_HEIGHT_M - TARGET_HEIGHT_M;
+        double heightDiff = cameraHeightM - TARGET_HEIGHT_M;
         double groundDist = heightDiff / Math.tan(vertAngleRad);
 
         // If the math gives us a negative or absurd distance, reject it
         if (groundDist < 0.05 || groundDist > 8.0) {
             // Return robot's own position as a "bad" marker — the map will
-            // mostly merge or reject it anyway
+            // reject it via the off-field bounds check
             return robotPose.getTranslation();
         }
 
-        // Robot-relative offset (forward, left in WPILib convention)
-        double robotRelativeForward = CAMERA_FORWARD_M + groundDist * Math.cos(horizAngleRad);
-        double robotRelativeLeft    = CAMERA_RIGHT_M   - groundDist * Math.sin(horizAngleRad);
-        // Note: CAMERA_RIGHT_M is positive-right, WPILib Y is positive-left
+        // Robot-relative offset
+        double robotRelativeForward = cameraForwardM + groundDist * Math.cos(horizAngleRad);
+        double robotRelativeLeft    = cameraRightM   - groundDist * Math.sin(horizAngleRad);
+        // Note: cameraRightM is positive-right, WPILib Y is positive-left
 
         Translation2d robotRelative = new Translation2d(robotRelativeForward, robotRelativeLeft);
 
@@ -190,7 +192,7 @@ public class FuelDetection extends SubsystemBase {
      * Logs all tracked fuel positions as Pose2d[] and Pose3d[] arrays so
      * AdvantageScope can render them on the 2D and 3D field views.
      *
-     * <p>Pose3d Z is set to the ball's center height (BALL_RADIUS_M) so
+     * Pose3d Z is set to the ball's center height (BALL_RADIUS_M) so
      * the ball appears sitting on the floor in the 3D view.
      */
     private void logFuelPoses() {
@@ -216,61 +218,23 @@ public class FuelDetection extends SubsystemBase {
 
     // ==================== Dashboard ====================
 
-    private void postRawTelemetry() {
+    /**
+     * Posts only summary-level telemetry to SmartDashboard.  Individual fuel
+     * entries are logged via AdvantageScope Pose arrays
+     */
+    private void postTelemetry() {
         SmartDashboard.putBoolean(PREFIX + "/Target Valid",   targetValid);
         SmartDashboard.putNumber( PREFIX + "/Num Detections", numDetections);
+        SmartDashboard.putNumber( PREFIX + "/Num Tracked",    fuelMap.size());
         SmartDashboard.putString( PREFIX + "/Primary Class",  primaryClass);
         SmartDashboard.putNumber( PREFIX + "/Primary TX",     primaryTx);
         SmartDashboard.putNumber( PREFIX + "/Primary TY",     primaryTy);
         SmartDashboard.putNumber( PREFIX + "/Primary TA",     primaryTa);
-
-        for (int i = 0; i < numDetections; i++) {
-            String det = PREFIX + "/Det " + i;
-            RawDetection d = detections[i];
-            SmartDashboard.putNumber(det + "/Class ID",   d.classId);
-            SmartDashboard.putNumber(det + "/TX NoCross",  d.txnc);
-            SmartDashboard.putNumber(det + "/TY NoCross",  d.tync);
-            SmartDashboard.putNumber(det + "/TA",          d.ta);
-        }
-        for (int i = numDetections; i < maxDetPosted; i++) {
-            String det = PREFIX + "/Det " + i;
-            SmartDashboard.putNumber(det + "/Class ID",   0);
-            SmartDashboard.putNumber(det + "/TX NoCross",  0);
-            SmartDashboard.putNumber(det + "/TY NoCross",  0);
-            SmartDashboard.putNumber(det + "/TA",          0);
-        }
-        maxDetPosted = Math.max(maxDetPosted, numDetections);
-
-        SmartDashboard.putString(PREFIX + "/JSON Dump", jsonDump);
-    }
-
-    private void postMapTelemetry() {
-        List<TrackedFuel> fuels = fuelMap.getTrackedFuels();
-        SmartDashboard.putNumber(PREFIX + "/Num Tracked", fuels.size());
-
-        for (int i = 0; i < fuels.size(); i++) {
-            String key = PREFIX + "/Fuel " + i;
-            TrackedFuel f = fuels.get(i);
-            SmartDashboard.putNumber(key + "/ID",         f.id);
-            SmartDashboard.putNumber(key + "/X",          f.getFieldPosition().getX());
-            SmartDashboard.putNumber(key + "/Y",          f.getFieldPosition().getY());
-            SmartDashboard.putNumber(key + "/Confidence",  f.getConfidence());
-            SmartDashboard.putNumber(key + "/Observations", f.getTotalObservations());
-        }
-        for (int i = fuels.size(); i < maxFuelPosted; i++) {
-            String key = PREFIX + "/Fuel " + i;
-            SmartDashboard.putNumber(key + "/ID",         -1);
-            SmartDashboard.putNumber(key + "/X",          0);
-            SmartDashboard.putNumber(key + "/Y",          0);
-            SmartDashboard.putNumber(key + "/Confidence",  0);
-            SmartDashboard.putNumber(key + "/Observations", 0);
-        }
-        maxFuelPosted = Math.max(maxFuelPosted, fuels.size());
     }
 
     // ==================== Public API ====================
 
-    /** The persistent fuel map (for use by commands / auto logic). */
+    /** The persistent fuel map */
     public FuelMap getFuelMap()             { return fuelMap; }
 
     /** All current NN detector results this frame. */
@@ -294,11 +258,31 @@ public class FuelDetection extends SubsystemBase {
     /** Primary detector class name string. */
     public String getPrimaryClass()         { return primaryClass; }
 
-    /** Full raw JSON dump from the Limelight. */
-    public String getJsonDump()             { return jsonDump; }
-
-    /** Clears the fuel map (useful on mode transitions). */
+    /** Clears the fuel map */
     public void clearMap()                  { fuelMap.clear(); }
+
+    /**
+     * Returns the closest tracked fuel to the given field position, or
+     * {@code null} if the map is empty.  Useful for "drive to nearest ball"
+     * commands.
+     *
+     * @param robotPosition The robot's current field-space position
+     * @return The nearest {@link TrackedFuel}, or null
+     */
+    public TrackedFuel getClosestFuel(Translation2d robotPosition) {
+        List<TrackedFuel> fuels = fuelMap.getTrackedFuels();
+        TrackedFuel closest = null;
+        double closestDist = Double.MAX_VALUE;
+
+        for (TrackedFuel f : fuels) {
+            double dist = f.getFieldPosition().getDistance(robotPosition);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closest = f;
+            }
+        }
+        return closest;
+    }
 
     @Override
     public void initSendable(SendableBuilder builder) {
