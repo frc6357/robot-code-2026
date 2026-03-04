@@ -321,6 +321,7 @@ public final class Konstants
         public static final double kUnJamLauncherRunTime = 0.25; //Time between rotating and stopping the motor during unjamming
         public static final double kUnJamLauncherPauseTime = 0.25; //Time between stopping and rotating the motor during unjamming
         public static final double kUnJamLauncherRPS = 1/kUnJamLauncherRunTime; //Velocity of motor when unjamming
+        public static final double kFeederVoltage = 6.0; //TODO: change to actual value
 
         public static final class Slot0 {
             public static final double kP = 1.8;

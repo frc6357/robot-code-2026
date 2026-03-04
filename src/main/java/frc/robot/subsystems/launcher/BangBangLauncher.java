@@ -38,6 +38,7 @@ import lombok.Getter;
 public class BangBangLauncher extends SubsystemBase implements PathplannerSubsystem {
     private TalonFX mainMotor;
     private TalonFX followingMotor;
+    public static boolean isRunning = false;
 
     private TalonFXConfiguration mainMotorConfig = new TalonFXConfiguration()
         .withMotorOutput(
@@ -156,6 +157,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
                 : ControlMode.DUTY_CYCLE_BANG_BANG;
         
         targetVelocity = RotationsPerSecond.of(rotationsPerSecond);
+        isRunning = true;
     }
 
     /** Stops the flywheel. */
@@ -163,6 +165,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         activeMode = ControlMode.COAST;
         targetVelocity = RotationsPerSecond.zero();
         atGoal = false;
+        isRunning = false;
     }
 
     @Override
