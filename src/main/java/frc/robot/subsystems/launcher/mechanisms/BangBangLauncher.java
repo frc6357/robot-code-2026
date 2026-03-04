@@ -174,11 +174,11 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     }
 
     public void telemeterize() {
-        Logger.recordOutput("AtGoal", atGoal);
-        Logger.recordOutput("Target Velocity (rps)", targetVelocity.in(RotationsPerSecond));
-        Logger.recordOutput("Current Velocity (rps)", getVelocity().in(RotationsPerSecond));
-        Logger.recordOutput("Control Mode", activeMode.toString());
-        Logger.recordOutput("Too Far", tooFarForTorqueCurrent);
+        Logger.recordOutput("BBLauncher/AtGoal", atGoal);
+        Logger.recordOutput("BBLauncher/Target Velocity (rps)", targetVelocity.in(RotationsPerSecond));
+        Logger.recordOutput("BBLauncher/Current Velocity (rps)", getVelocity().in(RotationsPerSecond));
+        Logger.recordOutput("BBLauncher/Control Mode", activeMode.toString());
+        Logger.recordOutput("BBLauncher/Too Far", tooFarForTorqueCurrent);
     }
 
     public AngularVelocity getVelocity() {
