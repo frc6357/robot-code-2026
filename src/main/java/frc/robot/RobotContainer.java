@@ -52,6 +52,7 @@ import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.lights.SK26Lights;
+import frc.robot.subsystems.fueldetection.FuelDetection;
 
 
 /**
@@ -82,6 +83,7 @@ public class RobotContainer {
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26Intake> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
+  public Optional<FuelDetection> m_fuelDetectionContainer = Optional.empty();
 
   public Optional<ShootingCoordinator> shootingCoordinator = Optional.empty();
   
@@ -94,6 +96,7 @@ public class RobotContainer {
   public static Climb m_climbInstance;
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
+  public static FuelDetection m_fuelDetectionInstance;
 
 
   public static Field2d m_field = new Field2d();
@@ -160,6 +163,10 @@ public class RobotContainer {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
                     m_BBlauncherInstance = m_BBLauncherContainer.get();
                 }
+                if(subsystems.isFuelDetectionPresent()) {
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(m_swerveContainer));
+                    m_fuelDetectionInstance = m_fuelDetectionContainer.get();
+                }
             }
             else {
                 if(subsystems.isSwervePresent()) {
@@ -201,6 +208,10 @@ public class RobotContainer {
                 if(subsystems.isIndexerPresent()) {
                     m_indexerContainer = Optional.of(new SK26Indexer());
                     m_indexerInstance = m_indexerContainer.get();
+                }
+                if(subsystems.isFuelDetectionPresent()) {
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(m_swerveContainer));
+                    m_fuelDetectionInstance = m_fuelDetectionContainer.get();
                 }
             }
 

@@ -8,5 +8,6 @@
     "lights": false,
     "indexer": false,
     "pickup": true,
-    "climb": false
+    "climb": false,
+    "fueldetection": true
 }
