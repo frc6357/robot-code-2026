@@ -36,7 +36,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Konstants.TurretConstants.TurretPosition;
 import lombok.Getter;
@@ -97,10 +96,6 @@ public class SK26Turret extends SubsystemBase
         // Set initial target to current position (don't move on boot)
         targetAngleDeg = getAngleDegrees();
         pidController.setSetpoint(targetAngleDeg);
-
-        // ========== Dashboard ==========
-        SmartDashboard.putData("Turret", this);
-        SmartDashboard.putData("Turret/PIDController", pidController);
     }
 
     /**
@@ -251,5 +246,8 @@ public class SK26Turret extends SubsystemBase
         Logger.recordOutput("Turret/Motor DutyCycle Output", getMotorDutyCycle());
         Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
         Logger.recordOutput("Turret/Wrapping", isWrapping());
+        Logger.recordOutput("Turret/PID/P", pidController.getP());
+        Logger.recordOutput("Turret/PID/I", pidController.getI());
+        Logger.recordOutput("Turret/PID/D", pidController.getD());
     }
 }

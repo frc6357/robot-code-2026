@@ -3,7 +3,8 @@ package frc.robot.subsystems.lights;
 import static frc.robot.Konstants.LightsConstants.kLEDBufferLength;
 import static frc.robot.Konstants.LightsConstants.kLightsPWMHeader;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -83,8 +84,7 @@ public class SK26Lights extends SubsystemBase {
         patterns = new LightPatterns();
         effects = new LightEffects(patterns);
 
-        // Setup SmartDashboard
-        SmartDashboard.putData("Lights", this);
+        // Setup SmartDashboard inputs
         SmartDashboard.putNumber("Lights/Gamma", DEFAULT_GAMMA);
         SmartDashboard.putNumber("Lights/Red Correction", DEFAULT_RED_CORRECTION);
         SmartDashboard.putNumber("Lights/Green Correction", DEFAULT_GREEN_CORRECTION);
@@ -222,6 +222,8 @@ public class SK26Lights extends SubsystemBase {
 
         applyColorCorrection();
         m_led.setData(m_buffer);
+
+        logOutputs();
     }
 
     // ==================== MODE APPLICATION ====================
@@ -813,16 +815,15 @@ public class SK26Lights extends SubsystemBase {
     public LightMode getCurrentMode() { return currentMode; }
     public boolean isGameModeEnabled() { return gameModeEnabled; }
 
-    // ==================== SENDABLE ====================
+    // ==================== LOGGING ====================
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addStringProperty("Status", () -> ledStatus, null);
-        builder.addStringProperty("Game State", () -> currentGameState.toString(), null);
-        builder.addDoubleProperty("Gamma", () -> gamma, null);
-        builder.addDoubleProperty("Red Correction", () -> redCorrection, null);
-        builder.addDoubleProperty("Green Correction", () -> greenCorrection, null);
-        builder.addDoubleProperty("Blue Correction", () -> blueCorrection, null);
-        builder.addDoubleProperty("Brightness", () -> brightness, null);
+    private void logOutputs() {
+        Logger.recordOutput("Lights/Status", ledStatus);
+        Logger.recordOutput("Lights/Game State", currentGameState.toString());
+        Logger.recordOutput("Lights/Gamma", gamma);
+        Logger.recordOutput("Lights/Red Correction", redCorrection);
+        Logger.recordOutput("Lights/Green Correction", greenCorrection);
+        Logger.recordOutput("Lights/Blue Correction", blueCorrection);
+        Logger.recordOutput("Lights/Brightness", brightness);
     }
 }

@@ -25,10 +25,10 @@ import com.revrobotics.spark.config.LimitSwitchConfig.Behavior;
 import com.revrobotics.spark.config.LimitSwitchConfig.Type;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climb extends SubsystemBase
@@ -217,25 +217,21 @@ public class Climb extends SubsystemBase
 
     @Override
     public void periodic() {
-        SmartDashboard.putData("Climb", this);
+        logOutputs();
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder)
-    {
-        super.initSendable(builder);
-        builder.addDoubleProperty("Current Pos (CANCoder)", this::getClimbPosition, null);
-        //builder.addDoubleProperty("Current Pos (Motor)", () -> climbMotor.getPosition(), null);
-        builder.addDoubleProperty("Target Pos", this::getClimbTargetPosition, null);
-        builder.addDoubleProperty("Motor One Out", climbMotor::get, null);   
-        builder.addDoubleProperty("Motor Two Out", climbMotor2::get, null);  
-        builder.addBooleanProperty("Forward Limit Switch One", forwardLimit::isPressed, null);
-        builder.addBooleanProperty("Forward Limit Switch Two", forwardLimit2::isPressed, null);  
-        builder.addBooleanProperty("Reverse Limit Switch One", reverseLimit::isPressed, null);
-        builder.addBooleanProperty("Reverse Limit Switch Two", reverseLimit2::isPressed, null);
-        builder.addDoubleProperty("Current Pos (Motor 1)", () -> cEncoder.getPosition(), null);
-        builder.addDoubleProperty("Current Pos (Motor 2)", () -> cEncoder2.getPosition(), null);
-        builder.addDoubleProperty("RPMs? 1", cEncoder::getVelocity, null);
-        builder.addDoubleProperty("RPMs? 2", cEncoder2::getVelocity, null);
+    private void logOutputs() {
+        Logger.recordOutput("Climb/Current Pos (CANCoder)", getClimbPosition());
+        Logger.recordOutput("Climb/Target Pos", getClimbTargetPosition());
+        Logger.recordOutput("Climb/Motor One Out", climbMotor.get());
+        Logger.recordOutput("Climb/Motor Two Out", climbMotor2.get());
+        Logger.recordOutput("Climb/Forward Limit Switch One", forwardLimit.isPressed());
+        Logger.recordOutput("Climb/Forward Limit Switch Two", forwardLimit2.isPressed());
+        Logger.recordOutput("Climb/Reverse Limit Switch One", reverseLimit.isPressed());
+        Logger.recordOutput("Climb/Reverse Limit Switch Two", reverseLimit2.isPressed());
+        Logger.recordOutput("Climb/Current Pos (Motor 1)", cEncoder.getPosition());
+        Logger.recordOutput("Climb/Current Pos (Motor 2)", cEncoder2.getPosition());
+        Logger.recordOutput("Climb/RPMs 1", cEncoder.getVelocity());
+        Logger.recordOutput("Climb/RPMs 2", cEncoder2.getVelocity());
     }
 }

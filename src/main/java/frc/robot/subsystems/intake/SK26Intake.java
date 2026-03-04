@@ -21,9 +21,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import org.littletonrobotics.junction.Logger;
+
 // Imports from WPILib
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 
@@ -118,8 +118,6 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 		// Initialize position tracking
 		motorTargetPosition = kPositionerMotorMinPosition;
-
-		SmartDashboard.putData("SK26Intake", this);
 	}
 
 	/**
@@ -225,16 +223,17 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	{
 		// Continuously apply follower control to ensure follower stays synced
 		positionerFollowerMotor.setControl(followerControl);
+
+		logOutputs();
 	}
 
-	@Override
-	public void initSendable(SendableBuilder builder) 
+	private void logOutputs()
 	{
-		builder.addDoubleProperty("Positioner Position", this::getCurrentPosition, null);
-		builder.addDoubleProperty("Positioner Target Position", this::getTargetPosition, null);
-		builder.addBooleanProperty("Positioner At Target", this::isPositionerAtTarget, null);
-		builder.addDoubleProperty("Intake Voltage", () -> targetVoltage, null);
-		builder.addDoubleProperty("Intake Velocity (RPS)", () -> intakeMotor.getVelocity().getValueAsDouble(), null);
+		Logger.recordOutput("Intake/Positioner Position", getCurrentPosition());
+		Logger.recordOutput("Intake/Positioner Target Position", getTargetPosition());
+		Logger.recordOutput("Intake/Positioner At Target", isPositionerAtTarget());
+		Logger.recordOutput("Intake/Intake Voltage", targetVoltage);
+		Logger.recordOutput("Intake/Intake Velocity (RPS)", intakeMotor.getVelocity().getValueAsDouble());
 	}
 
 	@Override

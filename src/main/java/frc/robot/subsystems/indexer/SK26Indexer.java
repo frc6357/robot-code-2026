@@ -18,11 +18,11 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
+import org.littletonrobotics.junction.Logger;
+
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -65,9 +65,6 @@ public class SK26Indexer extends SubsystemBase
 
         // ========== Encoder Configuration ==========
         indexerEncoder = indexerMotor.getEncoder();
-
-        // ========== Dashboard ==========
-        SmartDashboard.putData("Indexer", this);
     }
 
     public void setIsIdle() {
@@ -167,40 +164,21 @@ public class SK26Indexer extends SubsystemBase
     @Override
     public void periodic() 
     {
-        SmartDashboard.putNumber("Indexer/Applied Output", indexerMotor.getAppliedOutput());
-        SmartDashboard.putNumber("Indexer/Actual Velocity RPM", indexerEncoder.getVelocity());
-        SmartDashboard.putNumber("Indexer/Output Current", indexerMotor.getOutputCurrent());
-        SmartDashboard.putNumber("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
-
         checkIfBallLaunched();
         checkIfBallIntaked();
+
+        logOutputs();
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addDoubleProperty(
-            "Indexer Motor Speed (RPS)",
-            () -> indexerEncoder.getVelocity() / 60.0,
-            null);
-
-        builder.addStringProperty(
-            "Status",
-            () -> status,
-            null);
-
-        builder.addDoubleProperty(
-            "Target Indexer Voltage (V)",
-            () -> targetVoltage,
-            null);
-        
-        builder.addIntegerProperty(
-            "Balls In Indexer",
-            () -> numBallsInIndexer,
-            null);
-        
-        builder.addIntegerProperty(
-            "Total Balls Launched",
-            () -> totalNumBallsLaunched,
-            null);
+    private void logOutputs() {
+        Logger.recordOutput("Indexer/Applied Output", indexerMotor.getAppliedOutput());
+        Logger.recordOutput("Indexer/Actual Velocity RPM", indexerEncoder.getVelocity());
+        Logger.recordOutput("Indexer/Output Current", indexerMotor.getOutputCurrent());
+        Logger.recordOutput("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
+        Logger.recordOutput("Indexer/Motor Speed (RPS)", indexerEncoder.getVelocity() / 60.0);
+        Logger.recordOutput("Indexer/Status", status);
+        Logger.recordOutput("Indexer/Target Voltage (V)", targetVoltage);
+        Logger.recordOutput("Indexer/Balls In Indexer", numBallsInIndexer);
+        Logger.recordOutput("Indexer/Total Balls Launched", totalNumBallsLaunched);
     }
 }

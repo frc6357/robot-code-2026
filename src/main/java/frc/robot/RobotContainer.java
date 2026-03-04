@@ -211,6 +211,12 @@ public class RobotContainer {
 
             // Give StateHandler a reference to the launcher for state readiness checking
             m_stateHandlerContainer.ifPresent(sh -> sh.setLauncherSubsystem(m_BBLauncherContainer));
+            // Give StateHandler a reference to the turret for state readiness checking
+            m_stateHandlerContainer.ifPresent(sh -> sh.setTurretSubsystem(m_turretContainer));
+            // Give StateHandler a reference to the intake for state readiness checking
+            m_stateHandlerContainer.ifPresent(sh -> sh.setIntakeSubsystem(m_pickupContainer));
+            // Give StateHandler a reference to the drive for zone-based triggers
+            m_stateHandlerContainer.ifPresent(sh -> sh.setDriveSubsystem(m_swerveContainer));
         }
         catch (IOException e)
         {

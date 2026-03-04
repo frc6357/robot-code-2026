@@ -4,15 +4,26 @@ import java.util.Optional;
 
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
+import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.subsystems.PathplannerSubsystem;
+import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants.LinesVertical;
+import frc.lib.utils.FieldConstants.Tower;
+import frc.robot.Konstants.LauncherConstants;
+import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
+import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.robot.subsystems.intake.SK26Intake;
+import frc.robot.subsystems.turret.SK26Turret;
+import lombok.Getter;
 
 /**
  * A class to handle large-scale robot states (macros) such as launching, intaking, climbing, and idling.
@@ -23,12 +34,12 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
     public enum MacroState {
         IDLE(Status.READY),
-        SCORING(Status.OFF),
-        SHUTTLING(Status.OFF),
-        INTAKING(Status.OFF),
-        CLIMBING(Status.OFF),
-        STEADY_STREAM_SCORING(Status.OFF),
-        STEADY_STREAM_SHUTTLING(Status.OFF);
+        SCORING(Status.WAITING),
+        SHUTTLING(Status.WAITING),
+        INTAKING(Status.WAITING),
+        CLIMBING(Status.WAITING),
+        STEADY_STREAM_SCORING(Status.WAITING),
+        STEADY_STREAM_SHUTTLING(Status.WAITING);
         
         private MacroState(Status status) {
             this.status = status;
@@ -45,12 +56,21 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         
         // Similar to WPILib Command structure
         public enum Status {
-            OFF,
             WAITING,
-            READY,
-            STOPPING
+            READY
         }
     }
+    public Command setMacroStateStatusCommand(MacroState state, MacroState.Status status) {
+        return runOnce(() -> setStatusOf(state, status)).withName("Set" + state.name() + "StatusTo" + status.name());
+    }
+    public Command setMacroStatesStatusCommand(MacroState[] states, MacroState.Status status) {
+        return runOnce(() -> {
+            for (MacroState state : states) {
+                setStatusOf(state, status);
+            }
+        }).withName("SetMultipleStatesStatusTo" + status.name());
+    }
+
     private LoggedDashboardChooser<MacroState> stateChooser = new LoggedDashboardChooser<>("State Chooser");        
 
     private static MacroState currentState = MacroState.IDLE;
@@ -58,13 +78,59 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     private MacroState previousChosenState = MacroState.IDLE;
 
-    // Optional reference to launcher for checking if shooting states are ready
-    private Optional<BangBangLauncher> launcherSubsystem = Optional.empty();
+    /**
+     * Trigger that is true when the launcher is at its target velocity (or no launcher is present).
+     * Defaults to true; remapped to the launcher's atGoal when {@link #setLauncherSubsystem} is called.
+     */
+    @Getter
+    private Trigger launcherReady = new Trigger(() -> true);
+
+    /**
+     * Trigger that is true when the turret is at its target angle (or no turret is present).
+     * Defaults to true; remapped to the turret's atTarget when {@link #setTurretSubsystem} is called.
+     */
+    @Getter
+    private Trigger turretReady = new Trigger(() -> true);
+
+    /**
+     * Trigger that is true when the intake positioner is at its target (or no intake is present).
+     * Defaults to true; remapped to the intake's isPositionerAtTarget when {@link #setIntakeSubsystem} is called.
+     */
+    @Getter
+    private Trigger intakeReady = new Trigger(() -> true);
+
+    /**
+     * Trigger that is true when the robot's chassis is within its own alliance zone.
+     * Defaults to false; remapped when a drive subsystem is provided via {@link #setDriveSubsystem}.
+     *
+     * <p>The check uses the robot's center pose and adds half the chassis length as a buffer,
+     * so the trigger fires when the chassis edge is roughly inside the alliance zone line.
+     */
+    @Getter
+    private Trigger inAllianceZone = new Trigger(() -> false);
+
+    /**
+     * Trigger that is true when the robot's chassis is NOT within its own alliance zone.
+     * Always the logical inverse of {@link #inAllianceZone}.
+     */
+    @Getter
+    private Trigger outOfAllianceZone = inAllianceZone.negate();
+
+    /**
+     * Trigger that is true when the shooter is NOT within 10 inches of the tower structure.
+     * Defaults to true (safe); remapped when a drive subsystem is provided via {@link #setDriveSubsystem}.
+     *
+     * <p>The shooter's field-space position is computed from the robot pose plus the
+     * robot-to-shooter transform. The tower area is the bounding rectangle defined by
+     * its front face, depth, and width, expanded by 10 inches on all sides.
+     */
+    @Getter
+    private Trigger notNearTower = new Trigger(() -> true);
 
     public StateHandler() {
         // Reset all states to default on construction
         for (MacroState state : MacroState.values()) {
-            state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.OFF);
+            state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.WAITING);
         }
 
         stateChooser.addDefaultOption("IDLE", MacroState.IDLE);
@@ -76,18 +142,106 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
 
         stateChooser.onChange((state) -> requestState(state));
-        SmartDashboard.putData("StateHandler", this);
 
         addPathPlannerCommands();
     }
 
     /**
      * Sets the launcher subsystem reference for checking launcher readiness.
-     * Call this from RobotContainer after creating the StateHandler.
-     * @param launcher The BangBangLauncher subsystem (can be empty Optional if not present)
+     * If the Optional is present, remaps the {@link #launcherReady} trigger to the
+     * launcher's {@code isAtGoal()} method. If empty, leaves the trigger unchanged
+     * (defaults to always true).
+     *
+     * @param launcher Optional containing the BangBangLauncher, or empty if not present
      */
     public void setLauncherSubsystem(Optional<BangBangLauncher> launcher) {
-        this.launcherSubsystem = launcher;
+        if (launcher.isEmpty()) {
+            return;
+        }
+        launcherReady = new Trigger(launcher.get()::isAtGoal);
+    }
+
+    /**
+     * Sets the turret subsystem reference for checking turret readiness.
+     * If the Optional is present, remaps the {@link #turretReady} trigger to the
+     * turret's {@code atTarget()} method. If empty, leaves the trigger unchanged
+     * (defaults to always true).
+     *
+     * @param turret Optional containing the SK26Turret, or empty if not present
+     */
+    public void setTurretSubsystem(Optional<SK26Turret> turret) {
+        if (turret.isEmpty()) {
+            return;
+        }
+        turretReady = new Trigger(turret.get()::atTarget);
+    }
+
+    /**
+     * Sets the intake subsystem reference for checking intake readiness.
+     * If the Optional is present, remaps the {@link #intakeReady} trigger to the
+     * intake's {@code isPositionerAtTarget()} method. If empty, leaves the trigger unchanged
+     * (defaults to always true).
+     *
+     * @param intake Optional containing the SK26Intake, or empty if not present
+     */
+    public void setIntakeSubsystem(Optional<SK26Intake> intake) {
+        if (intake.isEmpty()) {
+            return;
+        }
+        intakeReady = new Trigger(intake.get()::isPositionerAtTarget);
+    }
+
+    /**
+     * Sets the drive subsystem reference for zone-based triggers.
+     * If the Optional is present, remaps {@link #inAllianceZone}, {@link #outOfAllianceZone},
+     * and {@link #notNearTower} to evaluate the robot's pose against field boundaries.
+     * If empty, leaves the triggers unchanged at their defaults.
+     *
+     * @param drive Optional containing the SKSwerve, or empty if not present
+     */
+    public void setDriveSubsystem(Optional<SKSwerve> drive) {
+        if (drive.isEmpty()) {
+            return;
+        }
+        SKSwerve swerve = drive.get();
+        inAllianceZone = new Trigger(() -> {
+            double robotX = swerve.getRobotPose().getX();
+            if (Field.isBlue()) {
+                return robotX < LinesVertical.allianceZone + Units.inchesToMeters(SwerveConstants.kChassisLength / 2.0);
+            } else {
+                return robotX > LinesVertical.redAllianceZone - Units.inchesToMeters(SwerveConstants.kChassisLength / 2.0);
+            }
+        });
+        outOfAllianceZone = inAllianceZone.negate();
+
+        notNearTower = new Trigger(() -> {
+            // Compute shooter position in field space from robot pose + robot-to-shooter transform
+            Translation2d shooterPos = new Pose3d(swerve.getRobotPose())
+                .plus(LauncherConstants.kRobotToShooter)
+                .toPose2d()
+                .getTranslation();
+
+            // Pick the correct tower center based on alliance
+            Translation2d towerCenter = Field.isBlue() ? Tower.centerPoint : Tower.redCenterPoint;
+
+            // Tower bounding box expanded by 10 inches on all sides
+            double buffer = Units.inchesToMeters(10.0);
+            double halfWidth = Tower.width / 2.0 + buffer;
+            double halfDepth = Tower.depth / 2.0 + buffer;
+
+            // Tower center X is at the front face; the tower extends backward (toward the wall)
+            // Blue: extends from frontFaceX toward 0; Red: extends from (fieldLength - frontFaceX) toward fieldLength
+            double towerCenterX = Field.isBlue()
+                ? Tower.frontFaceX - Tower.depth / 2.0
+                : towerCenter.getX() + Tower.depth / 2.0;
+            double towerCenterY = towerCenter.getY();
+
+            // Check if shooter is inside the expanded bounding box
+            boolean insideX = Math.abs(shooterPos.getX() - towerCenterX) < halfDepth;
+            boolean insideY = Math.abs(shooterPos.getY() - towerCenterY) < halfWidth;
+
+            return !(insideX && insideY);
+        });
     }
 
     /**
@@ -96,68 +250,27 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      */
     private void handleStateTransition() {
         if(requestedState != currentState) {
-            currentState.setStatus(Status.STOPPING);
             currentState = requestedState;
-            currentState.setStatus(Status.WAITING);
-        }
-    }
-
-    /**
-     * Updates the status of shooting states (SCORING, SHUTTLING, STEADY_STREAM_*) based on launcher readiness.
-     * When the launcher is at its target velocity, the state becomes READY; otherwise it stays WAITING.
-     */
-    private void updateShootingStateReadiness() {
-        boolean launcherReady = launcherSubsystem.map(BangBangLauncher::isAtGoal).orElse(true);
-
-        // States that require the launcher to be ready before they can be "READY"
-        MacroState[] shootingStates = 
-        {
-            MacroState.SCORING,
-            MacroState.SHUTTLING,
-            MacroState.STEADY_STREAM_SCORING,
-            MacroState.STEADY_STREAM_SHUTTLING
-        };
-
-        for (MacroState state : shootingStates) 
-        {
-            // Only update if this is the current state and it's in WAITING status
-            if (currentState == state && state.getStatus() == Status.WAITING) 
-            {
-                if (launcherReady) 
-                {
-                    state.setStatus(Status.READY);
-                }
-            }
-            // If launcher loses readiness while in a shooting state, go back to WAITING
-            else if (currentState == state && state.getStatus() == Status.READY) 
-            {
-                if (!launcherReady) 
-                {
-                    state.setStatus(Status.WAITING);
-                }
-            }
         }
     }
 
     @Override
     public void periodic() {
         handleStateTransition();
-        updateShootingStateReadiness();
         if(stateChooser.get() != previousChosenState) {
             setCurrentState(stateChooser.get());
             previousChosenState = stateChooser.get();
         }
+
+        logOutputs();
     }
 
-    @Override
-    public void initSendable(SendableBuilder builder) {
-        builder.addStringProperty("Current State", () -> getCurrentState().name(), null);
-        builder.addStringProperty("Requested State", () -> getRequestedState().name(), null);
-
-        for(MacroState state : MacroState.values()) {
-            builder.addStringProperty(state.name() + " Status", () -> state.getStatus().name(), null);
+    private void logOutputs() {
+        Logger.recordOutput("StateHandler/Current State", getCurrentState().name());
+        Logger.recordOutput("StateHandler/Requested State", getRequestedState().name());
+        for (MacroState state : MacroState.values()) {
+            Logger.recordOutput("StateHandler/" + state.name() + " Status", state.getStatus().name());
         }
-
     }
 
     /**
@@ -387,15 +500,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         return new Trigger(() -> currentState == state && state.getStatus() == Status.WAITING);
     }
 
-    /**
-     * Creates a Trigger that is true when transitioning away from a state (status == STOPPING).
-     * Useful for cleanup or safe shutdown actions.
-     * @param state The MacroState to check.
-     * @return A Trigger that is true when state.getStatus() == STOPPING.
-     */
-    public static Trigger whenStateStopping(MacroState state) {
-        return new Trigger(() -> state.getStatus() == Status.STOPPING);
-    }
+
 
     public static Trigger whenIntakeNotCurrent() {
         return new Trigger(
