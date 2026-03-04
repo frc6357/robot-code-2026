@@ -28,6 +28,7 @@ import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
+import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26StateBinder;
@@ -40,6 +41,7 @@ import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.subsystems.launcher.SK26Feeder;
 import frc.robot.subsystems.launcher.SK26Launcher;
 import frc.robot.bindings.PickupBinder;
 import frc.robot.subsystems.pickupOB.SK26PickupOB;
@@ -75,7 +77,7 @@ public class RobotContainer {
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26PickupOB> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
-
+  public Optional<SK26Feeder> m_feederContainer = Optional.empty();
   
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
@@ -85,6 +87,7 @@ public class RobotContainer {
   public static SKVision m_visionInstance;
   public static SK26PickupOB m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
+  public static SK26Feeder m_feederInstance;
 
   public static Field2d m_field = new Field2d();
 
@@ -160,7 +163,11 @@ public class RobotContainer {
             }
             if(subsystems.isIndexerPresent()) {
                 m_indexerContainer = Optional.of(new SK26Indexer());
-                m_indexerInstance = m_indexerContainer.get(); // Returns new SKSwerve
+                m_indexerInstance = m_indexerContainer.get();
+            }
+            if(subsystems.isFeederPresent()) {
+                m_feederContainer = Optional.of(new SK26Feeder());
+                m_feederInstance = m_feederContainer.get();
             }
         }
         catch (IOException e)
@@ -187,6 +194,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new PickupBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
+        buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

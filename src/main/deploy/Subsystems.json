@@ -6,5 +6,6 @@
     "bangbanglauncher": false,
     "lights": false,
     "indexer": false,
-    "pickup": false
+    "pickup": false,
+    "feeder": false
 }
