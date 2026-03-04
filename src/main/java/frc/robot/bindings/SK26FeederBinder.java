@@ -2,12 +2,11 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.launcher.SK26Feeder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
-import frc.robot.subsystems.launcher.BangBangLauncher;
 
 public class SK26FeederBinder implements CommandBinder {
 
@@ -28,11 +27,11 @@ public class SK26FeederBinder implements CommandBinder {
         if(feederSubsystem.isPresent()) {
             SK26Feeder feeder = feederSubsystem.get();
 
-            // launcherRunning.whileTrue(new Command(() -> {
-            //     feeder.runFeeder();
-            // }, feeder).onFalse(new Command(() -> {
-            //     feeder.stopFeeder();
-            // }, feeder)));
+            launcherRunning.whileTrue(new InstantCommand(() -> {
+                feeder.runFeeder();
+            }, feeder)).onFalse(new InstantCommand(() -> {
+                feeder.stopFeeder();
+            }, feeder));
         }
     }
     
