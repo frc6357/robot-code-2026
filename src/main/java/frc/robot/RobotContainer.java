@@ -30,6 +30,7 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.ClimbBinder;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
+import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26StateBinder;
@@ -48,6 +49,7 @@ import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 import frc.robot.bindings.SK26IntakeBinder;
+import frc.robot.subsystems.launcher.SK26Feeder;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
@@ -82,8 +84,8 @@ public class RobotContainer {
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26Intake> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
-
   public Optional<ShootingCoordinator> shootingCoordinator = Optional.empty();
+  public Optional<SK26Feeder> m_feederContainer = Optional.empty();
   
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
@@ -94,6 +96,7 @@ public class RobotContainer {
   public static Climb m_climbInstance;
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
+  public static SK26Feeder m_feederInstance;
 
 
   public static Field2d m_field = new Field2d();
@@ -204,7 +207,8 @@ public class RobotContainer {
                 }
             }
 
-            if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) {
+            if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
+            {
                 // If both launcher and turret are present, create the shooting coordinator
                 shootingCoordinator = Optional.of(new ShootingCoordinator(m_BBLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
             }
@@ -244,6 +248,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(shootingCoordinator));
+        buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
