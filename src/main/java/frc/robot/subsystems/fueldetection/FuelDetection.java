@@ -15,55 +15,53 @@ import edu.wpi.first.util.sendable.SendableBuilder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.vision.Limelight.LimelightConfig;
+import frc.lib.subsystems.PathplannerSubsystem;
 import frc.lib.vision.LimelightHelpers;
 import frc.lib.vision.LimelightHelpers.RawDetection;
-import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.drive.SKSwerve; 
 
 /**
- * Subsystem that reads a Limelight NN detector pipeline, projects each
- * detected fuel onto the field using the robot's estimated pose, and
- * maintains a persistent {@link FuelMap}.
+ * Subsystem that reads the Limelight 3 NN detector pipeline, projects each
+ * detected fuel (ball) onto the field using the robot's estimated pose, and
+ * maintains a persistent, flicker-resistant {@link FuelMap}.
  *
- * The limelight to use is supplied via a {@link LimelightConfig} at
- * construction time, so switching cameras is just a matter of passing a
- * different config
- *
- * Projection geometry
- * The Limelight gives us {@code txnc} / {@code tync} angles.
- * Combined with the known camera height and pitch we can
+ * <h2>Projection geometry</h2>
+ * The Limelight gives us {@code txnc} / {@code tync} angles (degrees, from
+ * principal pixel).  Combined with the known camera height and pitch we can
  * compute the ground-plane distance to the ball, then rotate into field space
  * using the robot heading and camera offset.
  *
- * Dashboard keys
- * 
- *   FuelDetection/Num Detections
- *   FuelDetection/Num Tracked
- *   FuelDetection/Fuel 0/X
- *   FuelDetection/Fuel 0/Y
+ * <h2>Dashboard keys</h2>
+ * <pre>
+ *   FuelDetection/Num Detections      (raw this frame)
+ *   FuelDetection/Num Tracked         (persistent map size)
+ *   FuelDetection/Fuel 0/X            (field X meters)
+ *   FuelDetection/Fuel 0/Y            (field Y meters)
  *   FuelDetection/Fuel 0/Confidence
- *   
+ *   ...
+ * </pre>
  */
-public class FuelDetection extends SubsystemBase {
+public class FuelDetection extends SubsystemBase implements PathplannerSubsystem {
 
     private static final String PREFIX = "FuelDetection";
-
-    // ---- Camera config  ----
     private final String limelightName;
+
+    // ---- Camera mounting (populated from LimelightConfig) ----
     /** Camera height above the floor, in meters. */
     private final double cameraHeightM;
     /** Camera forward offset from robot center, in meters. */
     private final double cameraForwardM;
     /** Camera right offset from robot center, in meters. */
     private final double cameraRightM;
-    /** Camera pitch above horizontal, in degrees */
+    /** Camera pitch above horizontal, in degrees (positive = tilted up). */
     private final double cameraPitchDeg;
-    /** Camera yaw from robot forward, in degrees */
+    /** Camera yaw from robot forward, in degrees. */
     private final double cameraYawDeg;
 
     // ---- Ball parameters ----
     /** Ball diameter = 5.91 in. The ball center sits at half its diameter. */
     private static final double BALL_RADIUS_M = Units.inchesToMeters(5.91 / 2.0);
-    /** Effective target height */
+    /** Effective target height (center of ball on the floor). */
     private static final double TARGET_HEIGHT_M = BALL_RADIUS_M;
 
     // ---- Dependencies ----
@@ -77,21 +75,25 @@ public class FuelDetection extends SubsystemBase {
     private double primaryTy = 0.0;
     private double primaryTa = 0.0;
     private String primaryClass = "";
+    private String jsonDump = "";
 
     // ---- Fuel map ----
     private final FuelMap fuelMap = new FuelMap();
 
+    // Track how many dashboard entries we've written so we can clear stale ones
+    private int maxFuelPosted = 0;
+    private int maxDetPosted = 0;
+
     // ==================== Constructor ====================
 
     /**
-     * @param limelightConfig Limelight configuration describing the camera's
-     *                        network name, mounting position, and orientation.
-     *                        Swap this to point at any limelight on the robot.
+     * @param limelightConfig Limelight configuration with camera mounting offsets.
      * @param swerve          Optional swerve reference for field-space projection.
-     *
+     *                        If empty, raw detection telemetry is still posted but
+     *                        the fuel map will not update.
      */
     public FuelDetection(LimelightConfig limelightConfig, Optional<SKSwerve> swerve) {
-        this.limelightName  = limelightConfig.getName();
+        this.limelightName = limelightConfig.getName();
         this.cameraHeightM  = limelightConfig.getUp();
         this.cameraForwardM = limelightConfig.getForward();
         this.cameraRightM   = limelightConfig.getRight();
@@ -113,6 +115,7 @@ public class FuelDetection extends SubsystemBase {
         primaryClass = LimelightHelpers.getDetectorClass(limelightName);
         detections   = LimelightHelpers.getRawDetections(limelightName);
         numDetections = detections.length;
+        jsonDump     = LimelightHelpers.getJSONDump(limelightName);
 
         // ---- 2. Project detections to field & update map ----
         if (swerve != null && numDetections > 0) {
@@ -128,11 +131,15 @@ public class FuelDetection extends SubsystemBase {
             fuelMap.update(new Translation2d[0]);
         }
 
-        // ---- 3. Post summary telemetry ----
-        postTelemetry();
+        // ---- 3. Post to SmartDashboard ----
+        postRawTelemetry();
+        postMapTelemetry();
 
         // ---- 4. Log Pose arrays for AdvantageScope ----
         logFuelPoses();
+
+        // ---- 5. Log best cluster for AdvantageScope ----
+        logBestCluster();
     }
 
     // ==================== Projection ====================
@@ -140,12 +147,13 @@ public class FuelDetection extends SubsystemBase {
     /**
      * Projects a single NN detection onto the field plane.
      *
-     * Uses the pinhole-camera ground-plane intersection:
-     * 
-     *   Vertical angle to target = cameraPitch + tync
-     *   Ground distance = (cameraHeight − targetHeight) / tan(vertAngle)
-     *   Lateral offset  = groundDist × tan(txnc + cameraYaw)
-     *   Convert robot-relative → field-space via the robot pose
+     * <p>Uses the pinhole-camera ground-plane intersection:
+     * <ol>
+     *   <li>Vertical angle to target = cameraPitch + tync</li>
+     *   <li>Ground distance = (cameraHeight − targetHeight) / tan(vertAngle)</li>
+     *   <li>Lateral offset  = groundDist × tan(txnc + cameraYaw)</li>
+     *   <li>Convert robot-relative → field-space via the robot pose</li>
+     * </ol>
      *
      * @param det       Raw detection from the Limelight
      * @param robotPose Current estimated robot pose on the field
@@ -168,14 +176,14 @@ public class FuelDetection extends SubsystemBase {
         // If the math gives us a negative or absurd distance, reject it
         if (groundDist < 0.05 || groundDist > 8.0) {
             // Return robot's own position as a "bad" marker — the map will
-            // reject it via the off-field bounds check
+            // mostly merge or reject it anyway
             return robotPose.getTranslation();
         }
 
-        // Robot-relative offset
+        // Robot-relative offset (forward, left in WPILib convention)
         double robotRelativeForward = cameraForwardM + groundDist * Math.cos(horizAngleRad);
         double robotRelativeLeft    = cameraRightM   - groundDist * Math.sin(horizAngleRad);
-        // Note: cameraRightM is positive-right, WPILib Y is positive-left
+        // Note: CAMERA_RIGHT_M is positive-right, WPILib Y is positive-left
 
         Translation2d robotRelative = new Translation2d(robotRelativeForward, robotRelativeLeft);
 
@@ -192,11 +200,11 @@ public class FuelDetection extends SubsystemBase {
      * Logs all tracked fuel positions as Pose2d[] and Pose3d[] arrays so
      * AdvantageScope can render them on the 2D and 3D field views.
      *
-     * Pose3d Z is set to the ball's center height (BALL_RADIUS_M) so
+     * <p>Pose3d Z is set to the ball's center height (BALL_RADIUS_M) so
      * the ball appears sitting on the floor in the 3D view.
      */
     private void logFuelPoses() {
-        List<TrackedFuel> fuels = fuelMap.getTrackedFuels();
+        List<TrackedFuel> fuels = fuelMap.getConfirmedFuels();
 
         Pose2d[] poses2d = new Pose2d[fuels.size()];
         Pose3d[] poses3d = new Pose3d[fuels.size()];
@@ -216,25 +224,85 @@ public class FuelDetection extends SubsystemBase {
         Logger.recordOutput("FuelDetection/NumTracked", fuels.size());
     }
 
+    /**
+     * Logs the best-scored fuel cluster centroid so it can be visualized
+     * in AdvantageScope as a separate marker / ghost robot pose.
+     */
+    private void logBestCluster() {
+        if (swerve == null) return;
+
+        Translation2d robotPos = swerve.getRobotPose().getTranslation();
+        java.util.Optional<FuelCluster> best = FuelScorer.bestCluster(
+            fuelMap.getConfirmedFuels(), robotPos);
+
+        if (best.isPresent()) {
+            Translation2d c = best.get().getCentroid();
+            Logger.recordOutput("FuelDetection/BestCluster",
+                new Pose2d[] { new Pose2d(c, new Rotation2d()) });
+            Logger.recordOutput("FuelDetection/BestClusterCount", best.get().getCount());
+        } else {
+            Logger.recordOutput("FuelDetection/BestCluster", new Pose2d[0]);
+            Logger.recordOutput("FuelDetection/BestClusterCount", 0);
+        }
+    }
+
     // ==================== Dashboard ====================
 
-    /**
-     * Posts only summary-level telemetry to SmartDashboard.  Individual fuel
-     * entries are logged via AdvantageScope Pose arrays
-     */
-    private void postTelemetry() {
+    private void postRawTelemetry() {
         SmartDashboard.putBoolean(PREFIX + "/Target Valid",   targetValid);
         SmartDashboard.putNumber( PREFIX + "/Num Detections", numDetections);
-        SmartDashboard.putNumber( PREFIX + "/Num Tracked",    fuelMap.size());
         SmartDashboard.putString( PREFIX + "/Primary Class",  primaryClass);
         SmartDashboard.putNumber( PREFIX + "/Primary TX",     primaryTx);
         SmartDashboard.putNumber( PREFIX + "/Primary TY",     primaryTy);
         SmartDashboard.putNumber( PREFIX + "/Primary TA",     primaryTa);
+
+        for (int i = 0; i < numDetections; i++) {
+            String det = PREFIX + "/Det " + i;
+            RawDetection d = detections[i];
+            SmartDashboard.putNumber(det + "/Class ID",   d.classId);
+            SmartDashboard.putNumber(det + "/TX NoCross",  d.txnc);
+            SmartDashboard.putNumber(det + "/TY NoCross",  d.tync);
+            SmartDashboard.putNumber(det + "/TA",          d.ta);
+        }
+        for (int i = numDetections; i < maxDetPosted; i++) {
+            String det = PREFIX + "/Det " + i;
+            SmartDashboard.putNumber(det + "/Class ID",   0);
+            SmartDashboard.putNumber(det + "/TX NoCross",  0);
+            SmartDashboard.putNumber(det + "/TY NoCross",  0);
+            SmartDashboard.putNumber(det + "/TA",          0);
+        }
+        maxDetPosted = Math.max(maxDetPosted, numDetections);
+
+        SmartDashboard.putString(PREFIX + "/JSON Dump", jsonDump);
+    }
+
+    private void postMapTelemetry() {
+        List<TrackedFuel> fuels = fuelMap.getConfirmedFuels();
+        SmartDashboard.putNumber(PREFIX + "/Num Tracked", fuels.size());
+
+        for (int i = 0; i < fuels.size(); i++) {
+            String key = PREFIX + "/Fuel " + i;
+            TrackedFuel f = fuels.get(i);
+            SmartDashboard.putNumber(key + "/ID",         f.id);
+            SmartDashboard.putNumber(key + "/X",          f.getFieldPosition().getX());
+            SmartDashboard.putNumber(key + "/Y",          f.getFieldPosition().getY());
+            SmartDashboard.putNumber(key + "/Confidence",  f.getConfidence());
+            SmartDashboard.putNumber(key + "/Observations", f.getTotalObservations());
+        }
+        for (int i = fuels.size(); i < maxFuelPosted; i++) {
+            String key = PREFIX + "/Fuel " + i;
+            SmartDashboard.putNumber(key + "/ID",         -1);
+            SmartDashboard.putNumber(key + "/X",          0);
+            SmartDashboard.putNumber(key + "/Y",          0);
+            SmartDashboard.putNumber(key + "/Confidence",  0);
+            SmartDashboard.putNumber(key + "/Observations", 0);
+        }
+        maxFuelPosted = Math.max(maxFuelPosted, fuels.size());
     }
 
     // ==================== Public API ====================
 
-    /** The persistent fuel map */
+    /** The persistent fuel map (for use by commands / auto logic). */
     public FuelMap getFuelMap()             { return fuelMap; }
 
     /** All current NN detector results this frame. */
@@ -258,31 +326,11 @@ public class FuelDetection extends SubsystemBase {
     /** Primary detector class name string. */
     public String getPrimaryClass()         { return primaryClass; }
 
-    /** Clears the fuel map */
+    /** Full raw JSON dump from the Limelight. */
+    public String getJsonDump()             { return jsonDump; }
+
+    /** Clears the fuel map (useful on mode transitions). */
     public void clearMap()                  { fuelMap.clear(); }
-
-    /**
-     * Returns the closest tracked fuel to the given field position, or
-     * {@code null} if the map is empty.  Useful for "drive to nearest ball"
-     * commands.
-     *
-     * @param robotPosition The robot's current field-space position
-     * @return The nearest {@link TrackedFuel}, or null
-     */
-    public TrackedFuel getClosestFuel(Translation2d robotPosition) {
-        List<TrackedFuel> fuels = fuelMap.getTrackedFuels();
-        TrackedFuel closest = null;
-        double closestDist = Double.MAX_VALUE;
-
-        for (TrackedFuel f : fuels) {
-            double dist = f.getFieldPosition().getDistance(robotPosition);
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = f;
-            }
-        }
-        return closest;
-    }
 
     @Override
     public void initSendable(SendableBuilder builder) {
@@ -292,5 +340,11 @@ public class FuelDetection extends SubsystemBase {
         builder.addDoubleProperty("Primary TX",      this::getPrimaryTx,     null);
         builder.addDoubleProperty("Primary TY",      this::getPrimaryTy,     null);
         builder.addDoubleProperty("Primary TA",      this::getPrimaryTa,     null);
+    }
+
+    @Override
+    public void addPathPlannerCommands() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

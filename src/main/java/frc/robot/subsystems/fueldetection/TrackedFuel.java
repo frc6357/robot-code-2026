@@ -29,17 +29,24 @@ public class TrackedFuel {
 
     // ==================== Constants ====================
 
-    /** Max confidence value */
-    public static final int MAX_CONFIDENCE = 30; // ~0.6 s at 50 Hz
+    /** Max confidence value — higher = more persistent once established. */
+    public static final int MAX_CONFIDENCE = 40; // ~0.8 s at 50 Hz
 
     /** Starting confidence when a fuel is first created. */
-    public static final int INITIAL_CONFIDENCE = 5;
+    public static final int INITIAL_CONFIDENCE = 8;
 
     /** Confidence gained per frame the fuel is re-observed. */
     public static final int CONFIDENCE_GAIN = 3;
 
     /** Confidence lost per frame the fuel is NOT observed. */
     public static final int CONFIDENCE_DECAY = 1;
+
+    /**
+     * Minimum confidence a fuel must reach before it is considered "confirmed"
+     * and shown in the public fuel list.  This prevents brand-new, single-frame
+     * ghost detections from flickering on screen.
+     */
+    public static final int DISPLAY_CONFIDENCE_THRESHOLD = 10;
 
     // ==================== Constructor ====================
 
@@ -58,12 +65,24 @@ public class TrackedFuel {
      * across frames.  Blends the new position into the existing estimate
      * and bumps confidence.
      *
+     * <p>Uses an <b>adaptive alpha</b>: new / low-confidence fuels blend quickly
+     * so they converge to the right spot, while well-established high-confidence
+     * fuels barely move — dramatically reducing the visible drift when a ball
+     * is stationary.
+     *
      * @param newPosition  New field-space position from the latest detection
      * @param timestamp    FPGA timestamp of this observation
-     * @param alpha        EMA blend weight (0 = ignore new, 1 = snap to new)
+     * @param baseAlpha    Base EMA blend weight (the map-level tuning value).
+     *                     The actual alpha applied is scaled down by confidence.
      */
-    public void update(Translation2d newPosition, double timestamp, double alpha) {
-        fieldPosition = fieldPosition.interpolate(newPosition, alpha);
+    public void update(Translation2d newPosition, double timestamp, double baseAlpha) {
+        // Scale alpha inversely with confidence:
+        //   conf = INITIAL  → factor ≈ 1.0  (snap quickly to new data)
+        //   conf = MAX      → factor ≈ 0.20 (almost locked in place)
+        double confRatio = (double) confidence / MAX_CONFIDENCE; // 0..1
+        double adaptiveAlpha = baseAlpha * (1.0 - 0.80 * confRatio);
+
+        fieldPosition = fieldPosition.interpolate(newPosition, adaptiveAlpha);
         confidence = Math.min(confidence + CONFIDENCE_GAIN, MAX_CONFIDENCE);
         lastSeenTimestamp = timestamp;
         totalObservations++;
@@ -82,6 +101,15 @@ public class TrackedFuel {
 
     public boolean isExpired() {
         return confidence <= 0;
+    }
+
+    /**
+     * Returns true when this fuel has been seen enough times to be considered
+     * a real ball rather than a single-frame ghost.  Use this to filter the
+     * display list and prevent flicker.
+     */
+    public boolean isConfirmed() {
+        return confidence >= DISPLAY_CONFIDENCE_THRESHOLD;
     }
 
     public Translation2d getFieldPosition() {

@@ -29,6 +29,7 @@ import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.ClimbBinder;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.FuelHuntBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SK26LauncherBinder;
@@ -250,6 +251,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(shootingCoordinator));
+        buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

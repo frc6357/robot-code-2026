@@ -40,8 +40,10 @@ public class FuelMap {
     /**
      * EMA blend weight when updating a matched fuel's position.
      * Lower = smoother / slower to move, higher = snappier.
+     * Note: TrackedFuel further scales this down adaptively based on
+     * confidence, so high-confidence balls will barely drift.
      */
-    public static final double POSITION_ALPHA = 0.40;
+    public static final double POSITION_ALPHA = 0.30;
 
     /**
      * Hard cap on tracked fuels.  The Limelight NN can see ~5-10 balls at
@@ -157,9 +159,33 @@ public class FuelMap {
         return List.copyOf(trackedFuels);
     }
 
+    /**
+     * Returns only fuels whose confidence exceeds
+     * {@link TrackedFuel#DISPLAY_CONFIDENCE_THRESHOLD}.  Use this for display
+     * and decision-making to avoid flickering ghost entries.
+     */
+    public List<TrackedFuel> getConfirmedFuels() {
+        List<TrackedFuel> confirmed = new ArrayList<>();
+        for (TrackedFuel f : trackedFuels) {
+            if (f.isConfirmed()) {
+                confirmed.add(f);
+            }
+        }
+        return confirmed;
+    }
+
     /** Number of fuels currently being tracked. */
     public int size() {
         return trackedFuels.size();
+    }
+
+    /** Number of confirmed (display-worthy) fuels. */
+    public int confirmedSize() {
+        int count = 0;
+        for (TrackedFuel f : trackedFuels) {
+            if (f.isConfirmed()) count++;
+        }
+        return count;
     }
 
     /** Removes all tracked fuels (e.g. on mode change). */
