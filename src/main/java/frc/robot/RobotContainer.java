@@ -205,6 +205,10 @@ public class RobotContainer {
                     m_indexerContainer = Optional.of(new SK26Indexer());
                     m_indexerInstance = m_indexerContainer.get();
                 }
+                if(subsystems.isFeederPresent()) {
+                    m_feederContainer = Optional.of(new SK26Feeder());
+                    m_feederInstance = m_feederContainer.get();
+                }
             }
 
             if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
