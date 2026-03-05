@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.launcher.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.SK26Feeder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
