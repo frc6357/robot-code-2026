@@ -163,6 +163,22 @@ public class RobotContainer {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
                     m_BBlauncherInstance = m_BBLauncherContainer.get();
                 }
+                if(subsystems.isLauncherPresent()) {
+                    m_StandardLauncherContainer = Optional.of(new SK26Launcher());
+                    m_standardLauncherInstance = m_StandardLauncherContainer.get();
+                }
+                if(subsystems.isLightsPresent()) {
+                    m_lightsContainer = Optional.of(new SK26Lights());
+                    m_lightsInstance = m_lightsContainer.get();
+                }
+                if(subsystems.isIndexerPresent()) {
+                    m_indexerContainer = Optional.of(new SK26Indexer());
+                    m_indexerInstance = m_indexerContainer.get();
+                }
+                if(subsystems.isFeederPresent()) {
+                    m_feederContainer = Optional.of(new SK26Feeder());
+                    m_feederInstance = m_feederContainer.get();
+                }
             }
             else {
                 if(subsystems.isSwervePresent()) {

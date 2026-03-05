@@ -5,9 +5,9 @@
     "turret": true,
     "launcher": false,
     "bangbanglauncher": true,
-    "lights": false,
-    "indexer": false,
-    "climb": false,
+    "lights": true,
+    "indexer": true,
+    "climb": true,
     "pickup": true,
-    "feeder": false
+    "feeder": true
 }

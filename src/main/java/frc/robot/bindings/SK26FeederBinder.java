@@ -17,6 +17,8 @@ public class SK26FeederBinder implements CommandBinder {
     Trigger launcherRunningState;
     Trigger launcherAtSpeed;
 
+    Trigger runFeederFromState;
+
     /**
      * Binds the feeder subsystem to state-driven triggers.
      *
@@ -24,11 +26,14 @@ public class SK26FeederBinder implements CommandBinder {
      */
     public SK26FeederBinder(Optional<SK26Feeder> feederSubsystem) {
         this.feederSubsystem = feederSubsystem;
-        this.launcherRunningState = StateHandler.whenCurrentState(MacroState.SCORING)
-                .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-                .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
-                .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
-        this.launcherAtSpeed = new Trigger(launcher::isAtGoal);
+        // this.launcherRunningState = StateHandler.whenCurrentState(MacroState.SCORING)
+        //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
+        //         .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
+        //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+        this.runFeederFromState = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
     }
 
     @Override
@@ -36,7 +41,7 @@ public class SK26FeederBinder implements CommandBinder {
         if(feederSubsystem.isPresent()) {
             SK26Feeder feeder = feederSubsystem.get();
 
-            launcherAtSpeed.whileTrue(new StartEndCommand(feeder::runFeeder, feeder::stopFeeder, feeder));
+            runFeederFromState.whileTrue(new StartEndCommand(feeder::runFeeder, feeder::stopFeeder, feeder));
         }
     }
     

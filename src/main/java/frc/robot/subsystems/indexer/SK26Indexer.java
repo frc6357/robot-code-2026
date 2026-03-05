@@ -5,14 +5,13 @@ import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
 import static frc.robot.Ports.Sensors.tofSensor;
 import static frc.robot.Ports.Sensors.launcherSensor;
-import static frc.robot.Ports.Sensors.intakeSensor;
 import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
 import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
 import com.revrobotics.RelativeEncoder;
-import com.revrobotics.spark.SparkBase.PersistMode;
-import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.PersistMode;
+import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkFlexConfig;
@@ -49,9 +48,8 @@ public class SK26Indexer extends SubsystemBase
     public int numBallsInIndexer = 0;
     public int totalNumBallsLaunched = 0;
     private boolean lastLauncherSensorState = false;
-    private boolean lastIntakeSensorState = false;
+    // private boolean lastIntakeSensorState = false;
 
-    @SuppressWarnings("removal")
     public SK26Indexer() 
     {
         // ========== Motor Configuration ==========
@@ -143,29 +141,29 @@ public class SK26Indexer extends SubsystemBase
     }
 
     private void checkIfBallLaunched() {
-        boolean currentState = launcherSensor.get();
+        boolean isBallPresent = launcherSensor.getIsDetected(true).getValue();
 
-        if (lastLauncherSensorState && !currentState) {
+        if (lastLauncherSensorState == false && isBallPresent) {
             numBallsInIndexer--;
             totalNumBallsLaunched++;
         }
-        lastLauncherSensorState = currentState;
+        lastLauncherSensorState = isBallPresent;
     }
 
-    private void checkIfBallIntaked() {
-        boolean currentState = intakeSensor.get();
+    // private void checkIfBallIntaked() {
+    //     boolean currentState = intakeSensor.get();
 
-        if (lastIntakeSensorState && !currentState) {
-            numBallsInIndexer++;
-        }
-        lastIntakeSensorState = currentState;
-    }
+    //     if (lastIntakeSensorState && !currentState) {
+    //         numBallsInIndexer++;
+    //     }
+    //     lastIntakeSensorState = currentState;
+    // }
 
     @Override
     public void periodic() 
     {
         checkIfBallLaunched();
-        checkIfBallIntaked();
+        // checkIfBallIntaked();
 
         logOutputs();
     }
