@@ -491,6 +491,16 @@ public final class Konstants
         }
     }
 
+    public static final class FeederConstants
+    {
+        // Max voltage output for feeder motor (for brownout protection)
+        public static final double kMaxFeederVoltage = 10.0;
+
+        public static final double kFeederIdleVelocity = 0.0;
+        public static final double kFeederRunningVelocity = 8.0;
+    }
+
+
     public static final class ExampleConstants
     {
         public static final double kExampleSpeed = 0.5;  //percentage based where 1.0 is max power and 0.0 is minimum

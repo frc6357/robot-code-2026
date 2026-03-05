@@ -1,13 +1,15 @@
 package frc.robot.bindings;
 
+import static frc.robot.Konstants.FeederConstants.kFeederRunningVelocity;
+
 import java.util.Optional;
 
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
-import frc.robot.subsystems.launcher.SK26Feeder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
+import frc.robot.commands.FeederFeedCommand;
 
 public class SK26FeederBinder implements CommandBinder {
 
@@ -33,10 +35,10 @@ public class SK26FeederBinder implements CommandBinder {
 
     @Override
     public void bindButtons() {
-        if(feederSubsystem.isPresent()) {
+        if(feederSubsystem.isPresent()) 
+        {
             SK26Feeder feeder = feederSubsystem.get();
-
-            launcherAtSpeed.whileTrue(new StartEndCommand(feeder::runFeeder, feeder::stopFeeder, feeder));
+            launcherAtSpeed.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
         }
     }
     
