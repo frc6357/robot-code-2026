@@ -85,12 +85,16 @@ public class SimFuelField {
      * from the robot's camera.  Also removes any ball the robot has driven
      * over (collected).
      *
-     * @param robotPose Current simulated robot pose
+     * @param robotPose    Current simulated robot pose
+     * @param cameraYawDeg Camera yaw offset from robot forward (degrees).
+     *                     180 = camera faces backward (intake side).
      * @return Array of field-space Translation2d for each visible ball
      */
-    public Translation2d[] getVisibleFuelPositions(Pose2d robotPose) {
+    public Translation2d[] getVisibleFuelPositions(Pose2d robotPose, double cameraYawDeg) {
         Translation2d robotPos = robotPose.getTranslation();
-        double robotHeadingRad = robotPose.getRotation().getRadians();
+        // Camera heading = robot heading + camera yaw offset
+        double cameraHeadingRad = robotPose.getRotation().getRadians()
+                                + Math.toRadians(cameraYawDeg);
         double halfFovRad = Math.toRadians(HALF_FOV_DEG);
 
         // ---- Remove collected balls ----
@@ -108,9 +112,9 @@ public class SimFuelField {
                 continue; // too far or too close
             }
 
-            // Angle from robot heading to the ball
+            // Angle from camera heading to the ball
             double angleToBall = Math.atan2(dy, dx);
-            double relativeAngle = angleToBall - robotHeadingRad;
+            double relativeAngle = angleToBall - cameraHeadingRad;
 
             // Normalize to [-π, π]
             relativeAngle = Math.atan2(Math.sin(relativeAngle), Math.cos(relativeAngle));

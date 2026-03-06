@@ -119,7 +119,7 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
         if (simFuelField != null && swerve != null) {
             // ---- SIMULATION MODE: bypass Limelight, inject from SimFuelField ----
             Pose2d robotPose = swerve.getRobotPose();
-            Translation2d[] simPositions = simFuelField.getVisibleFuelPositions(robotPose);
+            Translation2d[] simPositions = simFuelField.getVisibleFuelPositions(robotPose, cameraYawDeg);
             numDetections = simPositions.length;
             targetValid = numDetections > 0;
             fuelMap.update(simPositions);

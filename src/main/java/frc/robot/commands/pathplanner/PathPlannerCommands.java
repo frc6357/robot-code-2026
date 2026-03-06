@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.RobotContainer;
 import frc.robot.commands.commandGroups.FuelHuntCommand;
+// FuelAutoCoordinator removed — corridor system replaced by FuelHuntCommand
 import frc.robot.subsystems.fueldetection.FuelCluster;
 import frc.robot.subsystems.fueldetection.FuelDetection;
 import frc.robot.subsystems.fueldetection.FuelScorer;
@@ -47,14 +48,13 @@ public class PathPlannerCommands {
      * returns through the closest trench.  Works from any starting position.
      */
     public static void registerFuelHuntCommands() {
-        // Full dynamic hunt — usable as a NamedCommand in any auto
+        // Primary fuel collection command — pathfinds to clusters using FuelScorer
         addCommand("FuelHunt Full", FuelHuntCommand.create());
 
         // Simple collect pause — can be inserted in any auto sequence
         addCommand("Collect Fuel", Commands.waitSeconds(1.5).withName("CollectFuelWait"));
 
         // Scored return trench decision — used by the pre-planned FuelHunt.auto
-        // Evaluates fuel clusters at runtime and pathfinds through the closest trench.
         addCommand("FuelHunt Choose Return Trench", createScoredReturnCommand());
     }
 

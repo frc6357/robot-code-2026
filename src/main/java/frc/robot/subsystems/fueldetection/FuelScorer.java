@@ -135,7 +135,7 @@ public class FuelScorer {
      * <p>This is intentionally simple and O(n·k) — with ≤50 confirmed fuels
      * the cost is negligible.
      */
-    static List<FuelCluster> buildClusters(List<TrackedFuel> fuels) {
+    public static List<FuelCluster> buildClusters(List<TrackedFuel> fuels) {
         // Temp mutable lists — one per cluster-in-progress
         List<List<TrackedFuel>> clusterMembers = new ArrayList<>();
         List<Translation2d> clusterCentroids = new ArrayList<>();
