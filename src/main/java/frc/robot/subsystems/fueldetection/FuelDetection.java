@@ -12,6 +12,7 @@ import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.vision.Limelight.LimelightConfig;
@@ -80,6 +81,10 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
     // ---- Fuel map ----
     private final FuelMap fuelMap = new FuelMap();
 
+    // ---- Simulation ----
+    /** Non-null only when running in simulation mode. */
+    private final SimFuelField simFuelField;
+
     // Track how many dashboard entries we've written so we can clear stale ones
     private int maxFuelPosted = 0;
     private int maxDetPosted = 0;
@@ -100,39 +105,56 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
         this.cameraPitchDeg = limelightConfig.getPitch();
         this.cameraYawDeg   = limelightConfig.getYaw();
         this.swerve = swerve.orElse(null);
+        this.simFuelField = RobotBase.isSimulation() ? new SimFuelField() : null;
         SmartDashboard.putData(PREFIX, this);
+
+        // Start file-based debug logger
+        FuelHuntFileLogger.init();
     }
 
     // ==================== Periodic ====================
 
     @Override
     public void periodic() {
-        // ---- 1. Read raw detections from NetworkTables ----
-        targetValid  = LimelightHelpers.getTV(limelightName);
-        primaryTx    = LimelightHelpers.getTX(limelightName);
-        primaryTy    = LimelightHelpers.getTY(limelightName);
-        primaryTa    = LimelightHelpers.getTA(limelightName);
-        primaryClass = LimelightHelpers.getDetectorClass(limelightName);
-        detections   = LimelightHelpers.getRawDetections(limelightName);
-        numDetections = detections.length;
-        jsonDump     = LimelightHelpers.getJSONDump(limelightName);
-
-        // ---- 2. Project detections to field & update map ----
-        if (swerve != null && numDetections > 0) {
-            Translation2d[] fieldPositions = new Translation2d[numDetections];
+        if (simFuelField != null && swerve != null) {
+            // ---- SIMULATION MODE: bypass Limelight, inject from SimFuelField ----
             Pose2d robotPose = swerve.getRobotPose();
+            Translation2d[] simPositions = simFuelField.getVisibleFuelPositions(robotPose);
+            numDetections = simPositions.length;
+            targetValid = numDetections > 0;
+            fuelMap.update(simPositions);
 
-            for (int i = 0; i < numDetections; i++) {
-                fieldPositions[i] = projectToField(detections[i], robotPose);
+            Logger.recordOutput("FuelDetection/SimBallsRemaining", simFuelField.getRemainingCount());
+        } else {
+            // ---- REAL MODE: read from Limelight NN detector ----
+            targetValid  = LimelightHelpers.getTV(limelightName);
+            primaryTx    = LimelightHelpers.getTX(limelightName);
+            primaryTy    = LimelightHelpers.getTY(limelightName);
+            primaryTa    = LimelightHelpers.getTA(limelightName);
+            primaryClass = LimelightHelpers.getDetectorClass(limelightName);
+            detections   = LimelightHelpers.getRawDetections(limelightName);
+            numDetections = detections.length;
+            jsonDump     = LimelightHelpers.getJSONDump(limelightName);
+
+            // ---- Project detections to field & update map ----
+            if (swerve != null && numDetections > 0) {
+                Translation2d[] fieldPositions = new Translation2d[numDetections];
+                Pose2d robotPose = swerve.getRobotPose();
+
+                for (int i = 0; i < numDetections; i++) {
+                    fieldPositions[i] = projectToField(detections[i], robotPose);
+                }
+                fuelMap.update(fieldPositions);
+            } else if (numDetections == 0) {
+                // Still need to decay even when nothing is detected
+                fuelMap.update(new Translation2d[0]);
             }
-            fuelMap.update(fieldPositions);
-        } else if (numDetections == 0) {
-            // Still need to decay even when nothing is detected
-            fuelMap.update(new Translation2d[0]);
         }
 
         // ---- 3. Post to SmartDashboard ----
-        postRawTelemetry();
+        if (simFuelField == null) {
+            postRawTelemetry();
+        }
         postMapTelemetry();
 
         // ---- 4. Log Pose arrays for AdvantageScope ----
@@ -140,6 +162,9 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
 
         // ---- 5. Log best cluster for AdvantageScope ----
         logBestCluster();
+
+        // ---- 6. File-based debug logger ----
+        FuelHuntFileLogger.logCycle();
     }
 
     // ==================== Projection ====================
@@ -329,8 +354,18 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
     /** Full raw JSON dump from the Limelight. */
     public String getJsonDump()             { return jsonDump; }
 
-    /** Clears the fuel map (useful on mode transitions). */
-    public void clearMap()                  { fuelMap.clear(); }
+    /** Clears the fuel map (useful on mode transitions). Also resets sim balls. */
+    public void clearMap() {
+        fuelMap.clear();
+        if (simFuelField != null) {
+            simFuelField.reset();
+        }
+    }
+
+    /** Returns the sim fuel field, or null if not in simulation. */
+    public SimFuelField getSimFuelField() {
+        return simFuelField;
+    }
 
     @Override
     public void initSendable(SendableBuilder builder) {

@@ -147,6 +147,12 @@ public final class Konstants
             4.5, 5.1, 
             540, 720, 
             12, false);
+
+        /** Slower, smoother constraints for FuelHunt pathfinding — gentle curves, no snapping. */
+        public static final PathConstraints kFuelHuntConstraints = new PathConstraints(
+            2.0, 1.2,
+            120, 180,
+            12, false);
     }
 
     public static final class SimulationRobotConstants

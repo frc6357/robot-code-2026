@@ -61,6 +61,7 @@ public class FuelScorer {
     /**
      * Builds clusters from the confirmed fuel list, scores them relative to
      * the robot's current position, and returns them sorted best-first.
+     * Path cost is scored against the <b>nearest</b> trench.
      *
      * @param confirmedFuels Only fuels that have passed the confidence
      *                       threshold (use {@link FuelMap#getConfirmedFuels()}).
@@ -71,6 +72,26 @@ public class FuelScorer {
     public static List<ScoredCluster> rankClusters(
             List<TrackedFuel> confirmedFuels,
             Translation2d robotPosition) {
+        return rankClusters(confirmedFuels, robotPosition, Double.NaN);
+    }
+
+    /**
+     * Builds clusters from the confirmed fuel list, scores them relative to
+     * the robot's current position, and returns them sorted best-first.
+     *
+     * @param confirmedFuels  Only fuels that have passed the confidence
+     *                        threshold (use {@link FuelMap#getConfirmedFuels()}).
+     * @param robotPosition   Current robot field-space position.
+     * @param returnTrenchY   Y coordinate of the trench the robot will
+     *                        return through.  If {@code NaN}, the nearest
+     *                        trench is used (original behaviour).
+     * @return Scored clusters, sorted descending by score (index 0 = best).
+     *         Empty list if no confirmed fuels exist.
+     */
+    public static List<ScoredCluster> rankClusters(
+            List<TrackedFuel> confirmedFuels,
+            Translation2d robotPosition,
+            double returnTrenchY) {
 
         if (confirmedFuels.isEmpty()) {
             return List.of();
@@ -82,7 +103,7 @@ public class FuelScorer {
         // 2. Score each cluster
         List<ScoredCluster> scored = new ArrayList<>();
         for (FuelCluster c : clusters) {
-            double score = scoreCluster(c, robotPosition);
+            double score = scoreCluster(c, robotPosition, returnTrenchY);
             scored.add(new ScoredCluster(c, score));
         }
 
@@ -176,11 +197,15 @@ public class FuelScorer {
      * </pre>
      *
      * Each sub-score is normalized to roughly [0, 1].
+     *
+     * @param returnTrenchY  Y of the return trench, or {@code NaN} to use
+     *                       the nearest trench (legacy behaviour).
      */
-    static double scoreCluster(FuelCluster cluster, Translation2d robotPos) {
+    static double scoreCluster(FuelCluster cluster, Translation2d robotPos,
+                               double returnTrenchY) {
         double density    = densityScore(cluster);
         double proximity  = proximityScore(cluster, robotPos);
-        double pathCost   = pathCostScore(cluster);
+        double pathCost   = pathCostScore(cluster, returnTrenchY);
         double confidence = confidenceScore(cluster);
 
         return W_DENSITY   * density
@@ -208,18 +233,28 @@ public class FuelScorer {
     }
 
     /**
-     * Clusters near a trench center line are cheaper to return through.
-     * Score is 1.0 if centroid is on the trench line, falling off to ~0.3
-     * at the midfield center (Y ≈ 4.0).
+     * Clusters near the return trench are cheaper to route through.
+     * Score is 1.0 if centroid is on the trench line, falling off with
+     * distance.
+     *
+     * @param returnTrenchY  Y of the return trench, or {@code NaN} to use
+     *                       the nearest trench.
      */
-    private static double pathCostScore(FuelCluster c) {
+    private static double pathCostScore(FuelCluster c, double returnTrenchY) {
         double y = c.getCentroid().getY();
-        double distToLeft  = Math.abs(y - LEFT_TRENCH_Y);
-        double distToRight = Math.abs(y - RIGHT_TRENCH_Y);
-        double distToNearest = Math.min(distToLeft, distToRight);
+        double distToTrench;
+
+        if (Double.isNaN(returnTrenchY)) {
+            // Legacy: use nearest trench
+            double distToLeft  = Math.abs(y - LEFT_TRENCH_Y);
+            double distToRight = Math.abs(y - RIGHT_TRENCH_Y);
+            distToTrench = Math.min(distToLeft, distToRight);
+        } else {
+            distToTrench = Math.abs(y - returnTrenchY);
+        }
 
         // Normalize: 0 distance → 1.0, TRENCH_HALF_WIDTH → 0.5, far → approaches 0
-        return 1.0 / (1.0 + distToNearest / TRENCH_HALF_WIDTH);
+        return 1.0 / (1.0 + distToTrench / TRENCH_HALF_WIDTH);
     }
 
     /**

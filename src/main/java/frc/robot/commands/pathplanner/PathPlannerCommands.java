@@ -1,5 +1,7 @@
 package frc.robot.commands.pathplanner;
 
+import static frc.robot.Konstants.AutoConstants.kFuelHuntConstraints;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -8,7 +10,6 @@ import java.util.Set;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathPlannerPath;
 
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -40,31 +41,38 @@ public class PathPlannerCommands {
     /**
      * Registers all FuelHunt-related commands as PathPlanner NamedCommands.
      * This must be called after the swerve and fuel detection subsystems are created.
+     *
+     * <p>The "FuelHunt Full" command is now fully dynamic — it pathfinds to the
+     * closest trench, goes through, pathfinds to the best fuel cluster, and
+     * returns through the closest trench.  Works from any starting position.
      */
     public static void registerFuelHuntCommands() {
-        addCommand("FuelHunt Choose Return Trench", createScoredTrenchDecisionCommand());
-        addCommand("Collect Fuel", Commands.waitSeconds(1.5).withName("CollectFuelWait"));
+        // Full dynamic hunt — usable as a NamedCommand in any auto
         addCommand("FuelHunt Full", FuelHuntCommand.create());
+
+        // Simple collect pause — can be inserted in any auto sequence
+        addCommand("Collect Fuel", Commands.waitSeconds(1.5).withName("CollectFuelWait"));
+
+        // Scored return trench decision — used by the pre-planned FuelHunt.auto
+        // Evaluates fuel clusters at runtime and pathfinds through the closest trench.
+        addCommand("FuelHunt Choose Return Trench", createScoredReturnCommand());
     }
 
     /**
-     * Creates a command that uses the {@link FuelScorer} to evaluate fuel
-     * clusters and pick the optimal return trench.  Falls back to simple
-     * Y-proximity if no confirmed fuels are available.
+     * Creates a deferred command that picks the optimal return trench based on
+     * fuel scoring, then pathfinds to its start and follows the return path.
+     * Used by the pre-planned FuelHunt.auto sequence.
      */
-    private static Command createScoredTrenchDecisionCommand() {
+    private static Command createScoredReturnCommand() {
         final double LEFT_TRENCH_Y = 0.615;
         final double RIGHT_TRENCH_Y = 7.428;
 
         return Commands.defer(() -> {
             try {
-                Pose2d currentPose = RobotContainer.m_swerveInstance.getRobotPose();
-                Translation2d robotPos = currentPose.getTranslation();
-
-                // Try fuel-map-based scoring
-                FuelDetection fuelDet = RobotContainer.m_fuelDetectionInstance;
+                Translation2d robotPos = RobotContainer.m_swerveInstance.getRobotPose().getTranslation();
                 String chosenPath;
 
+                FuelDetection fuelDet = RobotContainer.m_fuelDetectionInstance;
                 if (fuelDet != null) {
                     Optional<FuelCluster> best = FuelScorer.bestCluster(
                         fuelDet.getFuelMap().getConfirmedFuels(), robotPos);
@@ -76,37 +84,32 @@ public class PathPlannerCommands {
                         chosenPath = (distL <= distR)
                             ? "FuelHunt_ReturnLTrench"
                             : "FuelHunt_ReturnRTrench";
-
                         DriverStation.reportWarning(
-                            String.format("[FuelHunt] Scored return — cluster at Y=%.2f → %s",
+                            String.format("[FuelHunt Auto] Scored return — cluster Y=%.2f → %s",
                                 clusterY, chosenPath), false);
                     } else {
-                        // No confirmed fuels — fallback
-                        chosenPath = fallbackTrench(robotPos.getY(), LEFT_TRENCH_Y, RIGHT_TRENCH_Y);
+                        chosenPath = closestTrench(robotPos.getY(), LEFT_TRENCH_Y, RIGHT_TRENCH_Y);
                     }
                 } else {
-                    chosenPath = fallbackTrench(robotPos.getY(), LEFT_TRENCH_Y, RIGHT_TRENCH_Y);
+                    chosenPath = closestTrench(robotPos.getY(), LEFT_TRENCH_Y, RIGHT_TRENCH_Y);
                 }
 
-                return AutoBuilder.followPath(PathPlannerPath.fromPathFile(chosenPath));
+                PathPlannerPath path = PathPlannerPath.fromPathFile(chosenPath);
+                return AutoBuilder.pathfindThenFollowPath(path, kFuelHuntConstraints);
             } catch (Exception e) {
-                DriverStation.reportError("[FuelHunt] Failed to load return trench path: "
+                DriverStation.reportError("[FuelHunt Auto] Return path error: "
                     + e.getMessage(), e.getStackTrace());
                 return Commands.none();
             }
         }, Set.of(RobotContainer.m_swerveInstance));
     }
 
-    private static String fallbackTrench(double y, double leftY, double rightY) {
-        double distL = Math.abs(y - leftY);
-        double distR = Math.abs(y - rightY);
-        String chosenPath = (distL <= distR)
+    private static String closestTrench(double y, double leftY, double rightY) {
+        String chosen = (Math.abs(y - leftY) <= Math.abs(y - rightY))
             ? "FuelHunt_ReturnLTrench"
             : "FuelHunt_ReturnRTrench";
         DriverStation.reportWarning(
-            String.format("[FuelHunt] No confirmed fuels — fallback Y=%.2f → %s", y, chosenPath),
-            false);
-        return chosenPath;
+            String.format("[FuelHunt Auto] No fuels — fallback Y=%.2f → %s", y, chosen), false);
+        return chosen;
     }
-
 }
