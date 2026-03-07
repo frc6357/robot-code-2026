@@ -15,6 +15,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
+import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -85,8 +86,8 @@ public class Robot extends LoggedRobot {
         kOperator.setRumble(RumbleType.kBothRumble, 0.0);
 
 
-        m_commandScheduler.schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup"));
-
+        m_commandScheduler.schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup")
+            .andThen(PathfindingCommand.warmupCommand().withName("PathfindingWarmup")));
         
         SmartDashboard.putData(m_commandScheduler);
         SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());

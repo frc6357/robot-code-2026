@@ -2,6 +2,7 @@ package frc.robot.subsystems.turret;
 
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 // Imports from the robot
@@ -21,6 +22,7 @@ import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.StatusSignal;
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
@@ -39,6 +41,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -74,6 +77,8 @@ public class SK26Turret extends SubsystemBase
 
     // Cached per-cycle value to avoid redundant CAN reads
     private double cachedAngleDeg = 0.0;
+
+    private final StatusSignal<Angle> turretAngleStatusSignal;
 
     // Create the SysId routine
     SysIdRoutine sysIdRoutine = new SysIdRoutine(
@@ -120,6 +125,8 @@ public class SK26Turret extends SubsystemBase
         motorConfig.MotorOutput = outputConfigs;
         turretMotor.getConfigurator().apply(motorConfig);
 
+        turretAngleStatusSignal = turretEncoder.getPosition();
+
         // ========== PID Configuration ==========
         pidController.setTolerance(kTurretAngleTolerance);
         pidController.setIZone(8); // 8 degrees
@@ -138,7 +145,7 @@ public class SK26Turret extends SubsystemBase
     public double getAngleDegrees()
     {
         // Use continuous position to track across full range
-        double encoderRotations = turretEncoder.getPosition().getValueAsDouble();
+        double encoderRotations = turretAngleStatusSignal.refresh().getValue().in(Rotations);
         
         // 2:1 ratio: turret degrees = encoder rotations * (360 / 2) = encoder rotations * 180
         double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);

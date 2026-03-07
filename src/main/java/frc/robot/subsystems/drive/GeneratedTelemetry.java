@@ -10,14 +10,17 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 
 public class GeneratedTelemetry {
 	private final double MaxSpeed;
+	private final boolean isReal;
 
 	/**
 	 * Construct a telemetry object, with the specified max speed of the robot
 	 *
 	 * @param maxSpeed Maximum speed in meters per second
+	 * @param isReal Whether the robot is real or simulated, for any simulation-specific telemetry
 	 */
-	public GeneratedTelemetry(double maxSpeed) {
+	public GeneratedTelemetry(double maxSpeed, boolean isReal) {
 		MaxSpeed = maxSpeed;
+		this.isReal = isReal;
 	}
 
 	/* Mechanisms to represent the swerve module states */
@@ -69,6 +72,9 @@ public class GeneratedTelemetry {
 
 		Logger.recordOutput("Drive/OdometryPeriod", state.OdometryPeriod);
 
+		if(isReal){
+			return;
+		}
 		/* Telemeterize the module states to a Mechanism2d */
 		for (int i = 0; i < 4; ++i) {
 			m_moduleSpeeds[i].setAngle(state.ModuleStates[i].angle);

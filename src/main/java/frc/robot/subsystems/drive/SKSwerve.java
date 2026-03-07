@@ -1,14 +1,27 @@
 package frc.robot.subsystems.drive;
 
+import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Fahrenheit;
+import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Konstants.AutoConstants.pathConfig;
 import static frc.robot.RobotContainer.m_field;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.UnaryOperator;
 
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 import com.ctre.phoenix6.swerve.SwerveDrivetrain.SwerveDriveState;
+import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.hardware.CANcoder;
+import com.ctre.phoenix6.hardware.Pigeon2;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.swerve.SwerveModule;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -26,6 +39,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.units.Units;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Current;
+import edu.wpi.first.units.measure.Temperature;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,10 +60,114 @@ public class SKSwerve extends SubsystemBase {
     private SwerveDriveState lastReadState;
     private final GeneratedDrivetrain drivetrain = GeneratedConstants.createDrivetrain();
     private SwerveDrivePoseEstimator poseEstimator;
-    private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
+    private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude(), Robot.isReal());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
     private Pose2d[] emptyPath = new Pose2d[0];
+    private TelemetrySignals telemetrySignals;
+    private boolean telemetryToggle;
+
+    private static class TelemetrySignals {
+        static record MotorSnapshot(
+            Voltage voltage,
+            Current statorCurrent,
+            Current supplyCurrent,
+            Temperature temperature
+        ) {}
+        
+        static record Snapshot(
+            MotorSnapshot[] driveMotors,
+            Angle pigeonRoll,
+            Angle pigeonPitch,
+            AngularVelocity pigeonRollVelocity,
+            AngularVelocity pigeonPitchVelocity
+        ) {}
+        final StatusSignal<Voltage>[] driveMotorVoltages;
+        final StatusSignal<Current>[] driveMotorStatorCurrents;
+        final StatusSignal<Current>[] driveMotorSupplyCurrents;
+        final StatusSignal<Temperature>[] driveMotorTemperatures;
+        final StatusSignal<Angle> pigeonRoll;
+        final StatusSignal<Angle> pigeonPitch;
+        final StatusSignal<AngularVelocity> pigeonRollVelocity;
+        final StatusSignal<AngularVelocity> pigeonPitchVelocity;
+
+        final BaseStatusSignal[] allSignals;
+
+        final AtomicReference<Snapshot> latestSnapshot = new AtomicReference<Snapshot>(
+            new Snapshot(
+                new MotorSnapshot[] {
+                    new MotorSnapshot(Volts.zero(), Amps.zero(), Amps.zero(), Fahrenheit.zero()),
+                    new MotorSnapshot(Volts.zero(), Amps.zero(), Amps.zero(), Fahrenheit.zero()),
+                    new MotorSnapshot(Volts.zero(), Amps.zero(), Amps.zero(), Fahrenheit.zero()),
+                    new MotorSnapshot(Volts.zero(), Amps.zero(), Amps.zero(), Fahrenheit.zero())
+                },
+                Degrees.zero(),
+                Degrees.zero(),
+                DegreesPerSecond.zero(),
+                DegreesPerSecond.zero()
+            )
+        );
+
+        @SuppressWarnings("unchecked")
+        TelemetrySignals(SwerveModule<TalonFX, TalonFX, CANcoder>[] modules, Pigeon2 pigeon) {
+            driveMotorVoltages = new StatusSignal[modules.length];
+            driveMotorStatorCurrents = new StatusSignal[modules.length];
+            driveMotorSupplyCurrents = new StatusSignal[modules.length];
+            driveMotorTemperatures = new StatusSignal[modules.length];
+            for(int i = 0; i < modules.length; i++) {
+                driveMotorVoltages[i] = modules[i].getDriveMotor().getMotorVoltage();
+                driveMotorStatorCurrents[i] = modules[i].getDriveMotor().getStatorCurrent();
+                driveMotorSupplyCurrents[i] = modules[i].getDriveMotor().getSupplyCurrent();
+                driveMotorTemperatures[i] = modules[i].getDriveMotor().getDeviceTemp();
+            }
+            pigeonRoll = pigeon.getRoll();
+            pigeonPitch = pigeon.getPitch();
+            pigeonRollVelocity = pigeon.getAngularVelocityXDevice();
+            pigeonPitchVelocity = pigeon.getAngularVelocityYDevice();
+
+            allSignals = new BaseStatusSignal[] {
+                driveMotorVoltages[0], driveMotorVoltages[1], driveMotorVoltages[2], driveMotorVoltages[3],
+                driveMotorStatorCurrents[0], driveMotorStatorCurrents[1], driveMotorStatorCurrents[2], driveMotorStatorCurrents[3],
+                driveMotorSupplyCurrents[0], driveMotorSupplyCurrents[1], driveMotorSupplyCurrents[2], driveMotorSupplyCurrents[3],
+                driveMotorTemperatures[0], driveMotorTemperatures[1], driveMotorTemperatures[2], driveMotorTemperatures[3],
+                pigeonRoll, pigeonPitch, pigeonRollVelocity, pigeonPitchVelocity
+            };
+
+            Executors.newSingleThreadExecutor().execute(() -> {
+                while(true) {
+                    BaseStatusSignal.refreshAll(allSignals);
+                    MotorSnapshot[] motorSnapshots = new MotorSnapshot[modules.length];
+                    for(int i = 0; i < modules.length; i++) {
+                        motorSnapshots[i] = new MotorSnapshot(
+                            driveMotorVoltages[i].getValue(),
+                            driveMotorStatorCurrents[i].getValue(),
+                            driveMotorSupplyCurrents[i].getValue(),
+                            driveMotorTemperatures[i].getValue()
+                        );
+                    }
+                    Snapshot snapshot = new Snapshot(
+                        motorSnapshots,
+                        pigeonRoll.getValue(),
+                        pigeonPitch.getValue(),
+                        pigeonRollVelocity.getValue(),
+                        pigeonPitchVelocity.getValue()
+                    );
+                    latestSnapshot.set(snapshot);
+                    try {
+                        Thread.sleep(40);
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            });
+        }
+
+        public Snapshot getLatestSnapshot() {
+            return latestSnapshot.get();
+        }
+
+    }
             
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
@@ -96,6 +218,8 @@ public class SKSwerve extends SubsystemBase {
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
         SmartDashboard.putData("Elastic Field 2D", m_field);
         // SmartDashboard.putData("Drive", this);
+
+        this.telemetrySignals = new TelemetrySignals(drivetrain.getModules(), drivetrain.getPigeon2());
     }
 
     @Override
@@ -109,112 +233,58 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void outputTelemetry() {
-		telemetry.telemeterize(lastReadState);
-        telemeterizeDevices();
+        if (telemetryToggle) {
+		    telemetry.telemeterize(lastReadState);
+        } else {
+            telemeterizeDevices();
+        }
 		m_field.setRobotPose(getRobotPose());
+        telemetryToggle = !telemetryToggle;
 	}
 
 	public void telemeterizeDevices() {
+        final var snapshot = telemetrySignals.getLatestSnapshot();
 		Logger.recordOutput(
 				"Drive/Pitch Velocity Degrees Per Second",
-				drivetrain
-						.getPigeon2()
-						.getAngularVelocityYDevice()
-						.getValue()
+				snapshot.pigeonPitchVelocity
 						.in(Units.DegreesPerSecond));
 		Logger.recordOutput(
 				"Drive/Pitch Degrees",
-				drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees));
+				snapshot.pigeonPitch.in(Units.Degrees));
 
 		Logger.recordOutput(
 				"Drive/Roll Velocity Degrees Per Second",
-				drivetrain
-						.getPigeon2()
-						.getAngularVelocityXDevice()
-						.getValue()
-						.in(Units.DegreesPerSecond));
+				snapshot.pigeonRollVelocity.in(Units.DegreesPerSecond));
 		Logger.recordOutput(
 				"Drive/Roll Degrees",
-				drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees));
-            
-		addModuleToLogger(0);
-		addModuleToLogger(1);
-		addModuleToLogger(2);
-		addModuleToLogger(3);
+				snapshot.pigeonRoll.in(Units.Degrees));
+        
+        for (int i = 0; i < 4; ++i) {
+            final var motor = snapshot.driveMotors[i];
+            addModuleToLogger(motor, i);
+        }
 	}
 
-	private void addModuleToLogger(int module) {
+	private static void addModuleToLogger(TelemetrySignals.MotorSnapshot module, int moduleNumber) {
 		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Volts",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getMotorVoltage()
-                    .getValue()
+				"Drive/ModuleStatesInfo/" + moduleNumber + "/Drive/Volts",
+				module.voltage
                     .in(Units.Volts));
 
 		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Volts",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getMotorVoltage()
-                    .getValue()
-                    .in(Units.Volts));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Stator Current",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getStatorCurrent()
-                    .getValue()
+				"Drive/ModuleStatesInfo/" + moduleNumber + "/Drive/Stator Current",
+				module.statorCurrent
                     .in(Units.Amps));
 
 		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Temperature Celsius",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getDeviceTemp()
-                    .getValue()
+				"Drive/ModuleStatesInfo/" + moduleNumber + "/Drive/Temperature Celsius",
+				module.temperature
                     .in(Units.Celsius));
 
 		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Stator Current",
-                drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getStatorCurrent()
-                    .getValue()
+				"Drive/ModuleStatesInfo/" + moduleNumber + "/Drive/Supply Current",
+				module.supplyCurrent
                     .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Supply Current",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getSupplyCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Supply Current",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getSupplyCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Temperature Celsius",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getDeviceTemp()
-                    .getValue()
-                    .in(Units.Celsius));
 	}
 
 

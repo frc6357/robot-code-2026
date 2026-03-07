@@ -125,11 +125,6 @@ public class RobotContainer {
   
     autoCommandSelector = new LoggedDashboardChooser<>("Select an Auto", AutoBuilder.buildAutoChooser());
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-
-    // Warm up PathPlanner's pathfinding to avoid first-use hitching.
-    // PathPlanner recommends this for Java users.
-    edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance()
-        .schedule(com.pathplanner.lib.commands.PathfindingCommand.warmupCommand());
   }
   
   /**
