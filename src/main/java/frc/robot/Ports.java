@@ -178,7 +178,7 @@ public class Ports
         public static final CANPort kPositionerFollowerMotor = new CANPort(31, busName);
         public static final CANPort kIntakeMotor = new CANPort(32, busName);
 
-        public static final CANPort kIndexerMotor = new CANPort(59, busName);
+        //public static final CANPort kIndexerMotor = new CANPort(59, busName);
     }
 
     public static class Sensors {
