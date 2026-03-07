@@ -9,5 +9,6 @@
     "indexer": true,
     "climb": true,
     "pickup": true,
-    "feeder": true
+    "feeder": true,
+    "fueldetection": false
 }

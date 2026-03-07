@@ -1,24 +1,25 @@
 Swerve:
 FrontLeftSensor : 4
-FrontLeftDrive : 14
-FrontLeftSteer : 24
+FrontLeftDrive : 24
+FrontLeftSteer : 14
 
 FrontRightSensor : 1
-FrontRightDrive : 11
-FrontRightSteer : 21
+FrontRightDrive : 21
+FrontRightSteer : 11
 
 BackLeftSensor : 2
-BackLeftSteer : 12
-BackLeftDrive : 22
+BackLeftSteer : 22
+BackLeftDrive : 12
 
 BackRightSensor : 3
-BackRightSteer : 13
-BackRightDrive : 23
+BackRightSteer : 23
+BackRightDrive : 13
 
 
 Intake:
 Pivot : 30
-Roller : 31
+PivotFollower : 31
+Roller : 32
 
 Launcher:
 Roller1 : 40

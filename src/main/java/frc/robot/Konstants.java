@@ -141,7 +141,68 @@ public final class Konstants
             4.5, 5.1, 
             540, 720, 
             12, false);
+
+        /** Slower, smoother constraints for FuelHunt pathfinding — gentle curves, no snapping. */
+        public static final PathConstraints kFuelHuntConstraints = new PathConstraints(
+            4.0, 1.2,
+            120, 180,
+            12, false);
     }
+
+    // ==================== Fuel Hunt Tuning ====================
+    // ▼▼▼  CHANGE THESE TO ADJUST FUEL HUNT BEHAVIOUR  ▼▼▼
+    //
+    // Robot speed / acceleration during fuel hunts are in
+    //   AutoConstants.kFuelHuntConstraints  (PathConstraints)
+    //   ↑ Increase maxVelocity / maxAcceleration for a faster robot.
+    //
+    // The constants below control the fuel-hunt decision logic:
+    public static final class FuelHuntConstants {
+
+        /** Balls to collect before heading home. (200 on field in sim.) */
+        public static final int    kCollectionTarget    = 50;
+
+        /** Max extra metres a detour may add vs. the direct-return cost.
+         *  ↑ bigger = robot chases fuel farther off the direct path.
+         *  ↓ smaller = tighter hunt corridor. */
+        public static final double kMaxDetourExtraM     = 1.5;
+
+        /** End-velocity (m/s) when arriving at a fuel cluster.
+         *  Higher = plows through faster (less accurate aim).
+         *  Lower  = more precise but slower cycle time. */
+        public static final double kFuelGoalEndVel      = 4.0;
+
+        /** End-velocity (m/s) when arriving at the trench entry. */
+        public static final double kEntryGoalEndVel     = 2.5;
+
+        /** Safety-timeout seconds — generous; primary exit is the target. */
+        public static final double kMaxHuntTimeSec      = 30.0;
+
+        /** Per-leg timeout seconds — prevents a single pathfind from stalling. */
+        public static final double kLegTimeoutSec       = 4.0;
+
+        /** Proximity (m) at which a fuel-leg is considered "arrived" and
+         *  the robot immediately starts the next leg, no pause. */
+        public static final double kFuelProximityM      = 1.0;
+
+        /** Max lateral distance (m) the robot may stray from the entry
+         *  trench Y coordinate. Clusters farther away are skipped.
+         *  ↑ bigger = robot roams deeper into the neutral zone.
+         *  ↓ smaller = robot hugs the trench. */
+        public static final double kMaxTrenchLateralM   = 2.5;
+
+        /** Neutral-zone X boundaries — clusters outside are ignored.
+         *  ↑ MAX = let robot go deeper;  ↓ MIN = keep robot closer. */
+        public static final double kNzMinX              = 4.5;
+        public static final double kNzMaxX              = 9.0;
+
+        /** Field bounds for clamping fuel targets (rarely need changing). */
+        public static final double kFieldMinX           = kNzMinX;
+        public static final double kFieldMaxX           = kNzMaxX;
+        public static final double kFieldMinY           = 0.3;
+        public static final double kFieldMaxY           = 7.8;
+    }
+    // ▲▲▲  END FUEL HUNT TUNING  ▲▲▲
 
     public static final class SimulationRobotConstants
     {
@@ -225,7 +286,7 @@ public final class Konstants
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kYaw = 180; // (yaw) faces backward (same direction as intake)
 
             public static final boolean kAttached = true;
         }
