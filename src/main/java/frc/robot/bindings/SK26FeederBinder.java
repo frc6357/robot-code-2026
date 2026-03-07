@@ -43,7 +43,7 @@ public class SK26FeederBinder implements CommandBinder {
         if(feederSubsystem.isPresent()) 
         {
             SK26Feeder feeder = feederSubsystem.get();
-            launcherAtSpeed.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
+            runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
         }
     }
     

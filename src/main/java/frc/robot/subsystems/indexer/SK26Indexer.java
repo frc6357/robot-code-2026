@@ -32,22 +32,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class SK26Indexer extends SubsystemBase
 {
+    // Neo Vortex free speed: ~113 RPS (6784 RPM) at 12V
+    private static final double kNeoVortexFreeSpeedRPS = 113.0;
+
     // Motor
     private final SparkFlex indexerMotor;
 
     // Built-in motor encoder
     private final RelativeEncoder indexerEncoder;
 
-    // String to represent the current status of the indexer
-    public String status = "Idle";
-
     // Target voltage for the indexer motor
     private double targetVoltage = 0.0;
 
     // Sensor values
-    public int numBallsInIndexer = 0;
-    public int totalNumBallsLaunched = 0;
+    private int numBallsInIndexer = 0;
+    private int totalNumBallsLaunched = 0;
     private boolean lastLauncherSensorState = false;
+
+    // Display status
+    private String status = "Idle";
     // private boolean lastIntakeSensorState = false;
 
     public SK26Indexer() 
@@ -95,9 +98,7 @@ public class SK26Indexer extends SubsystemBase
      * @param velocity The desired velocity in RPS.
      */
     public void setIndexerVelocity(double velocity) {
-        // Neo Vortex free speed is ~113 RPS (6784 RPM) at 12V
-        // Convert RPS to voltage (approximate open-loop)
-        double voltage = (velocity / 113.0) * 12.0;
+        double voltage = (velocity / kNeoVortexFreeSpeedRPS) * 12.0;
         setIndexerVoltage(voltage);
     }
 
@@ -143,7 +144,7 @@ public class SK26Indexer extends SubsystemBase
     private void checkIfBallLaunched() {
         boolean isBallPresent = launcherSensor.getIsDetected(true).getValue();
 
-        if (lastLauncherSensorState == false && isBallPresent) {
+        if (!lastLauncherSensorState && isBallPresent) {
             numBallsInIndexer--;
             totalNumBallsLaunched++;
         }
@@ -169,11 +170,12 @@ public class SK26Indexer extends SubsystemBase
     }
 
     private void logOutputs() {
+        double velocityRPM = indexerEncoder.getVelocity();
         Logger.recordOutput("Indexer/Applied Output", indexerMotor.getAppliedOutput());
-        Logger.recordOutput("Indexer/Actual Velocity RPM", indexerEncoder.getVelocity());
+        Logger.recordOutput("Indexer/Actual Velocity RPM", velocityRPM);
         Logger.recordOutput("Indexer/Output Current", indexerMotor.getOutputCurrent());
         Logger.recordOutput("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
-        Logger.recordOutput("Indexer/Motor Speed (RPS)", indexerEncoder.getVelocity() / 60.0);
+        Logger.recordOutput("Indexer/Motor Speed (RPS)", velocityRPM / 60.0);
         Logger.recordOutput("Indexer/Status", status);
         Logger.recordOutput("Indexer/Target Voltage (V)", targetVoltage);
         Logger.recordOutput("Indexer/Balls In Indexer", numBallsInIndexer);

@@ -32,6 +32,8 @@ import lombok.Getter;
  */
 public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
+    private static final MacroState[] MACRO_STATES = MacroState.values();
+
     public enum MacroState {
         IDLE(Status.READY),
         SCORING(Status.WAITING),
@@ -129,7 +131,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     public StateHandler() {
         // Reset all states to default on construction
-        for (MacroState state : MacroState.values()) {
+        for (MacroState state : MACRO_STATES) {
             state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.WAITING);
         }
 
@@ -244,22 +246,17 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         });
     }
 
-    /**
-     * Handles changes in the desired state by stopping the current state and initializing the desired state.
-     * This method should be called periodically to ensure state transitions are managed.
-     */
-    private void handleStateTransition() {
-        if(requestedState != currentState) {
-            currentState = requestedState;
-        }
-    }
-
     @Override
     public void periodic() {
-        handleStateTransition();
-        if(stateChooser.get() != previousChosenState) {
-            setCurrentState(stateChooser.get());
-            previousChosenState = stateChooser.get();
+        // Handle state transition
+        if (requestedState != currentState) {
+            currentState = requestedState;
+        }
+
+        MacroState chosen = stateChooser.get();
+        if (chosen != previousChosenState) {
+            setCurrentState(chosen);
+            previousChosenState = chosen;
         }
 
         logOutputs();
@@ -268,7 +265,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     private void logOutputs() {
         Logger.recordOutput("StateHandler/Current State", getCurrentState().name());
         Logger.recordOutput("StateHandler/Requested State", getRequestedState().name());
-        for (MacroState state : MacroState.values()) {
+        for (MacroState state : MACRO_STATES) {
             Logger.recordOutput("StateHandler/" + state.name() + " Status", state.getStatus().name());
         }
     }

@@ -65,10 +65,10 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         );
 
     @Getter
-    boolean atGoal;
+    private boolean atGoal;
 
     @Getter
-    boolean tooFarForTorqueCurrent;
+    private boolean tooFarForTorqueCurrent;
 
     // Preferences
     private Pref<Double> torqueCurrentOutput = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrent Output (A)", 54.0);
@@ -92,10 +92,17 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
 
     private boolean isTorqueCurrentRunning = false;
 
+    /** Factor beyond tolerance at which torque-current control is too far behind to be effective. */
+    private static final double kTorqueCurrentFarMultiplier = 16.0;
+
     @Getter
-    ControlMode activeMode = ControlMode.COAST;
+    private ControlMode activeMode = ControlMode.COAST;
     
-    private AngularVelocity targetVelocity = RotationsPerSecond.zero();
+    /** Target flywheel velocity in rotations per second. */
+    private double targetVelocityRps = 0.0;
+
+    /** Cached current motor velocity (rps), refreshed once per periodic cycle. */
+    private double cachedVelocityRps = 0.0;
 
     private VoltageOut voltageBangBang = new VoltageOut(0);
     private TorqueCurrentFOC torqueCurrentBangBang = new TorqueCurrentFOC(0);
@@ -123,14 +130,16 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
 
     @Override
     public void periodic() {
+        cachedVelocityRps = mainMotor.getVelocity().getValueAsDouble();
+
         switch(activeMode) {
             case VOLTAGE_BANG_BANG:
                 mainMotor.setControl(voltageBangBang.withEnableFOC(true).withOutput(
-                    MathUtil.clamp(targetVelocity.in(RotationsPerSecond) * voltageFF.get(), -9.0, 9.0)));
+                    MathUtil.clamp(targetVelocityRps * voltageFF.get(), -9.0, 9.0)));
                 break;
             case TORQUE_CURRENT_BANG_BANG:
                 mainMotor.setControl(torqueCurrentBangBang.withOutput(
-                    Math.signum(targetVelocity.minus(getVelocity()).in(RotationsPerSecond)) * torqueCurrentOutput.get()));
+                    Math.signum(targetVelocityRps - cachedVelocityRps) * torqueCurrentOutput.get()));
                 break;
             case COAST:
                 mainMotor.setControl(coastControl);
@@ -145,44 +154,40 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
      * @param rotationsPerSecond The target velocity in rotations per second.
      */
     private void runVelocity(double rotationsPerSecond) {
-        boolean inTolerance =
-            Math.abs(getVelocity().in(RotationsPerSecond) - rotationsPerSecond)
-                <= torqueCurrentControlTolerance.get();
-        boolean tooFar = 
-            Math.abs(getVelocity().in(RotationsPerSecond) - rotationsPerSecond)
-                > 16 * torqueCurrentControlTolerance.get(); // Ooooooo magic number 16
-        boolean runTorqueCurrent = torqueCurrentDebouncer.calculate(!inTolerance && !tooFar);
+        double error = Math.abs(cachedVelocityRps - rotationsPerSecond);
+        boolean inTolerance = error <= torqueCurrentControlTolerance.get();
+        boolean tooFar = error > kTorqueCurrentFarMultiplier * torqueCurrentControlTolerance.get();
 
         atGoal = atGoalDebouncer.calculate(inTolerance);
         tooFarForTorqueCurrent = tooFar;
 
-        isTorqueCurrentRunning = runTorqueCurrent;
-
+        isTorqueCurrentRunning = torqueCurrentDebouncer.calculate(!inTolerance && !tooFar);
         activeMode =
             isTorqueCurrentRunning
                 ? ControlMode.TORQUE_CURRENT_BANG_BANG
                 : ControlMode.VOLTAGE_BANG_BANG;
         
-        targetVelocity = RotationsPerSecond.of(rotationsPerSecond);
+        targetVelocityRps = rotationsPerSecond;
     }
 
     /** Stops the flywheel. */
     private void stop() {
         activeMode = ControlMode.COAST;
-        targetVelocity = RotationsPerSecond.zero();
+        targetVelocityRps = 0.0;
         atGoal = false;
     }
 
     public void telemeterize() {
         Logger.recordOutput("BBLauncher/AtGoal", atGoal);
-        Logger.recordOutput("BBLauncher/Target Velocity (rps)", targetVelocity.in(RotationsPerSecond));
-        Logger.recordOutput("BBLauncher/Current Velocity (rps)", getVelocity().in(RotationsPerSecond));
+        Logger.recordOutput("BBLauncher/Target Velocity (rps)", targetVelocityRps);
+        Logger.recordOutput("BBLauncher/Current Velocity (rps)", cachedVelocityRps);
         Logger.recordOutput("BBLauncher/Control Mode", activeMode.toString());
         Logger.recordOutput("BBLauncher/Too Far", tooFarForTorqueCurrent);
     }
 
-    public AngularVelocity getVelocity() {
-        return mainMotor.getVelocity().getValue();
+    /** Returns the current flywheel velocity in rotations per second. */
+    public double getVelocityRps() {
+        return cachedVelocityRps;
     }
 
     public enum ControlMode {
@@ -190,10 +195,6 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         TORQUE_CURRENT_BANG_BANG,
         COAST
     }
-
-    // public Command runFixedSpeedCommand(Supplier<AngularVelocity> velocity) {
-    //     return runEnd(() -> runVelocity(velocity.get().in(RotationsPerSecond)), this::stop);
-    // }
 
     public Command runVelocityCommand(Supplier<AngularVelocity> velocity) {
         return runEnd(() -> runVelocity(velocity.get().in(RotationsPerSecond)), this::stop);

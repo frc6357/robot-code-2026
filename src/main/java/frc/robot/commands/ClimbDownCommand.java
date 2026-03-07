@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.climb.Climb;
 
@@ -24,9 +23,8 @@ public class ClimbDownCommand extends Command{
     @Override
     public void execute()
     {
-        SmartDashboard.putNumber("speed", kClimbMotorSpeed);
         climb.runMotors(-kClimbMotorSpeed);
-        climb.isRunning = true;
+        climb.setIsRunning(true);
     }
 
     @Override

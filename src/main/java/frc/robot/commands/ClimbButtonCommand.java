@@ -1,6 +1,5 @@
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.climb.Climb;
 
@@ -17,36 +16,16 @@ public class ClimbButtonCommand extends Command{
         addRequirements(climb);
     }
 
+    @Override
     public void initialize()
     {
         climb.setClimbHeight(height);
-        climb.isRunning = true;
+        climb.setIsRunning(true);
     }
 
+    @Override
     public boolean isFinished()
     {
-        if(DriverStation.isAutonomousEnabled())
-        {
-            if (climb.climbIsAtHeight())
-            {
-                return true;
-            }
-
-            else
-            {
-                return false;
-            }
-        }
-        else
-        {
-            if (climb.climbIsAtHeight())
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
+        return climb.climbIsAtHeight();
     }
 }

@@ -10,7 +10,6 @@ import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
 import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
 
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -33,33 +32,25 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class Climb extends SubsystemBase
 {
-
-    SparkFlex climbMotor; // figure out if actually spark. depends on what motor is being used.
-    SparkFlex climbMotor2;
-    DigitalInput cLimitSwitch;
-    PositionVoltage request;
-    SparkLimitSwitch forwardLimit;
-    SparkLimitSwitch reverseLimit;
-    SparkLimitSwitch forwardLimit2;
-    SparkLimitSwitch reverseLimit2;
+    private final SparkFlex climbMotor;
+    private final SparkFlex climbMotor2;
+    private final DigitalInput cLimitSwitch;
+    private final SparkLimitSwitch forwardLimit;
+    private final SparkLimitSwitch reverseLimit;
+    private final SparkLimitSwitch forwardLimit2;
+    private final SparkLimitSwitch reverseLimit2;
     
-    SparkClosedLoopController cPID;
+    private final SparkClosedLoopController cPID;
+    private final SparkClosedLoopController cpid2;
 
-    final double motorRatio = 1.0; //change once we know gear ratio
-    final double climbFactor = 1.0; // change once fingure out what the conversion factor is from the encoder to the height
+    private final RelativeEncoder cEncoder;
+    private final RelativeEncoder cEncoder2;
 
-    double cTargetHieight = 0.0;
-    double cCurrentHeight = 0.0;
+    private final double motorRatio = 1.0;   // TODO: change once we know gear ratio
+    private final double climbFactor = 1.0;   // TODO: change once we know encoder-to-height conversion
 
-    SparkFlexConfig climbConfig;
-    SparkFlexConfig climbConfig2;
-
-    public RelativeEncoder cEncoder; // would absolute work or would it need to be a relative? how many rotations will hex sharft make beofre it eches l1?
-    public RelativeEncoder cEncoder2;
-
-    SparkClosedLoopController cpid2;
-
-    public boolean isRunning;
+    private double cTargetHeight = 0.0;
+    private boolean isRunning = false;
 
     public Climb()
     {
@@ -68,40 +59,37 @@ public class Climb extends SubsystemBase
         cEncoder = climbMotor.getEncoder(); 
         cEncoder2 = climbMotor2.getEncoder();
         cLimitSwitch = new DigitalInput(0);
-        request = new PositionVoltage(0).withSlot(0);
         forwardLimit = climbMotor.getForwardLimitSwitch();
         reverseLimit = climbMotor.getReverseLimitSwitch();
         forwardLimit2 = climbMotor2.getForwardLimitSwitch();
         reverseLimit2 = climbMotor2.getReverseLimitSwitch();
 
-        climbConfig = new SparkFlexConfig();
-        climbConfig2 = new SparkFlexConfig();
+        SparkFlexConfig climbConfig = new SparkFlexConfig();
+        SparkFlexConfig climbConfig2 = new SparkFlexConfig();
 
         climbConfig.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(kClimbP)
-        .i(kClimbI)
-        .d(kClimbD);
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(kClimbP)
+            .i(kClimbI)
+            .d(kClimbD);
 
         climbConfig2.closedLoop
-        .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-        .p(kClimbP)
-        .i(kClimbI)
-        .d(kClimbD);
-        //climbConfig2.follow(41);
-
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(kClimbP)
+            .i(kClimbI)
+            .d(kClimbD);
 
         climbConfig.limitSwitch
-        .forwardLimitSwitchType(Type.kNormallyOpen)
-        .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
-        .reverseLimitSwitchType(Type.kNormallyOpen)
-        .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+            .forwardLimitSwitchType(Type.kNormallyOpen)
+            .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
+            .reverseLimitSwitchType(Type.kNormallyOpen)
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbConfig2.limitSwitch
-        .forwardLimitSwitchType(Type.kNormallyOpen)
-        .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
-        .reverseLimitSwitchType(Type.kNormallyOpen)
-        .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+            .forwardLimitSwitchType(Type.kNormallyOpen)
+            .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
+            .reverseLimitSwitchType(Type.kNormallyOpen)
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         climbMotor2.configure(climbConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -110,109 +98,77 @@ public class Climb extends SubsystemBase
         cEncoder2.setPosition(0);
         cPID = climbMotor.getClosedLoopController();
         cpid2 = climbMotor2.getClosedLoopController();
-
-        //climbConfig = new TalonFXConfiguration();
-        //climbConfig.Slot0.kP = kClimbP.get();
-        //climbConfig.Slot0.kI = kClimbI;
-        //climbConfig.Slot0.kD = kClimbD;
-        //climbConfig.Slot0.kV = kClimbV;
-
-        /*climbMotor.getConfigurator().apply(climbConfig);
-        kClimbP.onChange((newkClimbP) -> {
-            climbConfig.Slot0.kP = newkClimbP;
-            climbMotor.getConfigurator().apply(climbConfig);
-        });*/
     }
 
-
-//runs the motor at a given speed
+    /** Runs both climb motors at the given speed. */
     public void runMotors(double motorSpeed)
     {
         climbMotor.set(motorSpeed);
         climbMotor2.set(motorSpeed);
     }
 
-    // stops the motor by setting the speed to 0
+    /** Stops both climb motors. */
     public void stopMotors()
     {
         climbMotor.stopMotor();
         climbMotor2.stopMotor();
     }
 
-    // checks if the climb is at the target height
+    /** Checks if the climb is within tolerance of the target height. */
     public boolean climbIsAtHeight()
     {
-        if (DriverStation.isTeleop())
-        {
-            return Math.abs(getClimbTargetPosition()- getClimbPosition()) < kClimbTolerance;
-        }
-        else
-        {
-           return Math.abs(getClimbTargetPosition() - getClimbPosition()) <  Rotations.of(0.1).in(Degrees);
-        }
+        double tolerance = DriverStation.isTeleop() 
+            ? kClimbTolerance 
+            : Rotations.of(0.1).in(Degrees);
+        return Math.abs(getClimbTargetPosition() - getClimbPosition()) < tolerance;
     }
 
-    // etreives the saved target position for the climb
     public double getClimbTargetPosition()
     {
-        return cTargetHieight;
+        return cTargetHeight;
     }
 
-    // gets the current position of the climb
     public double getClimbPosition()
     {
-        double pos = cEncoder.getPosition();
-        return pos * climbFactor;
+        return cEncoder.getPosition() * climbFactor;
     }
 
-    // chacks the limit switch to see if it is true or false
     public boolean isSwitchPressed()
     {
         return cLimitSwitch.get();
     }
 
-    // sets a target height for the climb
-    public void setClimbHeight(double targetHieight)
+    /** Sets the target height for the climb and commands both PID controllers. */
+    public void setClimbHeight(double targetHeight)
     {
-        cTargetHieight = targetHieight;
-        
-
-        double motorRotations =  targetHieight * motorRatio; // / scale factor of encode to height
+        cTargetHeight = targetHeight;
+        double motorRotations = targetHeight * motorRatio;
         cPID.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
         cpid2.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
-    // gets the current position of the encoder
-    public double getEncoderPos()
-    {
-        double pos = cEncoder.getPosition();
-        return pos;//cEncoder.getPosition();
-    }
-
-    // hold command, may be necessary to ensure the robot doesnt get pulled back down by gravity
+    /** Holds the current position to resist gravity. */
     public void hold()
     {
-        if(isRunning == true)
+        if (isRunning)
         {
-            cTargetHieight = getClimbPosition();
+            cTargetHeight = getClimbPosition();
             isRunning = false;
         }
-        setClimbHeight(cTargetHieight);
+        setClimbHeight(cTargetHeight);
     }
 
-    // checks if the climb arm is at its max height
+    /** Checks if the climb arm is at its max height (within tolerance). */
     public boolean cAtMaxHeight()
     {
-        if(getEncoderPos() == kCLimbMax)
-        {
-            return true;
-        }
+        double currentPosition = getClimbPosition();
+        Logger.recordOutput("Climb/Check Max/CurrentPosition", currentPosition);
+        Logger.recordOutput("Climb/Check Max/MaxHeight", kCLimbMax);
+        return Math.abs(currentPosition - kCLimbMax) < kClimbTolerance;
+    }
 
-        else
-        {
-            return false;
-        }
-        
+    public void setIsRunning(boolean running) {
+        isRunning = running;
     }
 
     @Override
