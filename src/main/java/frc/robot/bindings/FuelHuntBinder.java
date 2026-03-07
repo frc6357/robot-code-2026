@@ -2,7 +2,7 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
-import static frc.robot.Ports.DriverPorts.kAButton;
+import static frc.robot.Ports.DriverPorts.kAbutton;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.commandGroups.FuelHuntCommand;
@@ -22,7 +22,7 @@ public class FuelHuntBinder implements CommandBinder {
     private final Optional<SKSwerve> m_swerve;
     private final Optional<FuelDetection> m_fuelDetection;
 
-    private final Trigger fuelHuntButton = kAButton.button;
+    private final Trigger fuelHuntButton = kAbutton.button;
 
     public FuelHuntBinder(Optional<SKSwerve> m_swerve, Optional<FuelDetection> m_fuelDetection) {
         this.m_swerve = m_swerve;
