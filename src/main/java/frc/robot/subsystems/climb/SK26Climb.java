@@ -32,19 +32,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SK26Climb extends SubsystemBase
 {
-    private final SparkFlex climbMotor;
-    private final SparkFlex climbMotor2;
+    private final SparkFlex climbMotorRight;
+    private final SparkFlex climbMotorLeft;
     private final DigitalInput cLimitSwitch;
-    private final SparkLimitSwitch forwardLimit;
-    private final SparkLimitSwitch reverseLimit;
-    private final SparkLimitSwitch forwardLimit2;
-    private final SparkLimitSwitch reverseLimit2;
+    private final SparkLimitSwitch forwardLimitRight;
+    private final SparkLimitSwitch reverseLimitRight;
+    private final SparkLimitSwitch forwardLimitLeft;
+    private final SparkLimitSwitch reverseLimitLeft;
     
-    private final SparkClosedLoopController cPID;
-    private final SparkClosedLoopController cpid2;
+    private final SparkClosedLoopController cpidRight;
+    private final SparkClosedLoopController cpidLeft;
 
-    private final RelativeEncoder cEncoder;
-    private final RelativeEncoder cEncoder2;
+    private final RelativeEncoder cEncoderRight;
+    private final RelativeEncoder cEncoderLeft;
 
     private final double motorRatio = 1.0;   // TODO: change once we know gear ratio
     private final double climbFactor = 1.0;   // TODO: change once we know encoder-to-height conversion
@@ -54,64 +54,64 @@ public class SK26Climb extends SubsystemBase
 
     public SK26Climb()
     {
-        climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
-        climbMotor2 = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
-        cEncoder = climbMotor.getEncoder(); 
-        cEncoder2 = climbMotor2.getEncoder();
+        climbMotorRight = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
+        climbMotorLeft = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
+        cEncoderRight = climbMotorRight.getEncoder(); 
+        cEncoderLeft = climbMotorLeft.getEncoder();
         cLimitSwitch = new DigitalInput(0);
-        forwardLimit = climbMotor.getForwardLimitSwitch();
-        reverseLimit = climbMotor.getReverseLimitSwitch();
-        forwardLimit2 = climbMotor2.getForwardLimitSwitch();
-        reverseLimit2 = climbMotor2.getReverseLimitSwitch();
+        forwardLimitRight = climbMotorRight.getForwardLimitSwitch();
+        reverseLimitRight = climbMotorRight.getReverseLimitSwitch();
+        forwardLimitLeft = climbMotorLeft.getForwardLimitSwitch();
+        reverseLimitLeft = climbMotorLeft.getReverseLimitSwitch();
 
-        SparkFlexConfig climbConfig = new SparkFlexConfig();
-        SparkFlexConfig climbConfig2 = new SparkFlexConfig();
+        SparkFlexConfig climbConfigRight = new SparkFlexConfig();
+        SparkFlexConfig climbConfigLeft = new SparkFlexConfig();
 
-        climbConfig.closedLoop
+        climbConfigRight.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(kClimbP)
             .i(kClimbI)
             .d(kClimbD);
 
-        climbConfig2.closedLoop
+        climbConfigLeft.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
             .p(kClimbP)
             .i(kClimbI)
             .d(kClimbD);
 
-        climbConfig.limitSwitch
+        climbConfigRight.limitSwitch
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
             .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
-        climbConfig2.limitSwitch
+        climbConfigLeft.limitSwitch
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
             .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
-        climbMotor.configure(climbConfig, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
-        climbMotor2.configure(climbConfig2, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        climbMotorRight.configure(climbConfigRight, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
+        climbMotorLeft.configure(climbConfigLeft, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
 
-        cEncoder.setPosition(0);
-        cEncoder2.setPosition(0);
-        cPID = climbMotor.getClosedLoopController();
-        cpid2 = climbMotor2.getClosedLoopController();
+        cEncoderRight.setPosition(0);
+        cEncoderLeft.setPosition(0);
+        cpidRight = climbMotorRight.getClosedLoopController();
+        cpidLeft = climbMotorLeft.getClosedLoopController();
     }
 
     /** Runs both climb motors at the given speed. */
     public void runMotors(double motorSpeed)
     {
-        climbMotor.set(motorSpeed);
-        climbMotor2.set(motorSpeed);
+        climbMotorRight.set(motorSpeed);
+        climbMotorLeft.set(motorSpeed);
     }
 
     /** Stops both climb motors. */
     public void stopMotors()
     {
-        climbMotor.stopMotor();
-        climbMotor2.stopMotor();
+        climbMotorRight.stopMotor();
+        climbMotorLeft.stopMotor();
     }
 
     /** Checks if the climb is within tolerance of the target height. */
@@ -130,7 +130,36 @@ public class SK26Climb extends SubsystemBase
 
     public double getClimbPosition()
     {
-        return cEncoder.getPosition() * climbFactor;
+        return cEncoderRight.getPosition() * climbFactor;
+    }
+
+    public boolean isForwardLimitReached()
+    {
+        if(forwardLimitRight.isPressed() || forwardLimitLeft.isPressed())
+        {
+            return true;
+        }
+        
+        else
+        {
+            return false;
+        }
+        
+    } 
+
+   
+    public boolean isReverseLimitReached()
+    {
+        if (reverseLimitLeft.isPressed() || reverseLimitRight.isPressed())
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+        
     }
 
     public boolean isSwitchPressed()
@@ -143,8 +172,8 @@ public class SK26Climb extends SubsystemBase
     {
         cTargetHeight = targetHeight;
         double motorRotations = targetHeight * motorRatio;
-        cPID.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
-        cpid2.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        cpidRight.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
+        cpidLeft.setSetpoint(motorRotations, ControlType.kPosition, ClosedLoopSlot.kSlot0);
     }
 
     /** Holds the current position to resist gravity. */
@@ -179,15 +208,15 @@ public class SK26Climb extends SubsystemBase
     private void logOutputs() {
         Logger.recordOutput("Climb/Current Pos (CANCoder)", getClimbPosition());
         Logger.recordOutput("Climb/Target Pos", getClimbTargetPosition());
-        Logger.recordOutput("Climb/Motor One Out", climbMotor.get());
-        Logger.recordOutput("Climb/Motor Two Out", climbMotor2.get());
-        Logger.recordOutput("Climb/Forward Limit Switch One", forwardLimit.isPressed());
-        Logger.recordOutput("Climb/Forward Limit Switch Two", forwardLimit2.isPressed());
-        Logger.recordOutput("Climb/Reverse Limit Switch One", reverseLimit.isPressed());
-        Logger.recordOutput("Climb/Reverse Limit Switch Two", reverseLimit2.isPressed());
-        Logger.recordOutput("Climb/Current Pos (Motor 1)", cEncoder.getPosition());
-        Logger.recordOutput("Climb/Current Pos (Motor 2)", cEncoder2.getPosition());
-        Logger.recordOutput("Climb/RPMs 1", cEncoder.getVelocity());
-        Logger.recordOutput("Climb/RPMs 2", cEncoder2.getVelocity());
+        Logger.recordOutput("Climb/Motor One Out", climbMotorRight.get());
+        Logger.recordOutput("Climb/Motor Two Out", climbMotorLeft.get());
+        Logger.recordOutput("Climb/Forward Limit Switch One", forwardLimitRight.isPressed());
+        Logger.recordOutput("Climb/Forward Limit Switch Two", forwardLimitLeft.isPressed());
+        Logger.recordOutput("Climb/Reverse Limit Switch One", reverseLimitRight.isPressed());
+        Logger.recordOutput("Climb/Reverse Limit Switch Two", reverseLimitLeft.isPressed());
+        Logger.recordOutput("Climb/Current Pos (Motor 1)", cEncoderRight.getPosition());
+        Logger.recordOutput("Climb/Current Pos (Motor 2)", cEncoderLeft.getPosition());
+        Logger.recordOutput("Climb/RPMs 1", cEncoderRight.getVelocity());
+        Logger.recordOutput("Climb/RPMs 2", cEncoderLeft.getVelocity());
     }
 }

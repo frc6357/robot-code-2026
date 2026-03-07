@@ -44,8 +44,8 @@ public class SK26ClimbBinder implements CommandBinder {
             t1Button.onTrue(new ClimbButtonCommand(kTOne, climb).withName("L1ButtomClimb"));
             returnButton.onTrue(new ClimbButtonCommand(kClimbReturn, climb).withName("Returm to Home"));
             //t1Button.onTrue(Commands.sequence(new ClimbButtonCommand(kTOne, climb), new WaitCommand(0.5), new ClimbButtonCommand(kClimbReturn, climb)).withName("L1Command"));
-            upButton.whileTrue(new ClimbUpCommand(climb).withName("ClimbUpCommand"));
-            downButton.whileTrue(new ClimbDownCommand(climb).withName("ClimbDownCommand"));
+            upButton.whileTrue(new ClimbUpCommand(climb).until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
+            downButton.whileTrue(new ClimbDownCommand(climb).until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
         }
     }
 }
