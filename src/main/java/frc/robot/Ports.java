@@ -144,15 +144,15 @@ public class Ports
         private static final String busName = "";
         public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
         public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
-        public static final CANPort kFeederMotor = new CANPort(42, busName);
+        public static final CANPort kFeederMotor = new CANPort(43, busName);
     }
     
     public static class ClimbPorts
     {
         private static final String busName = kCANivoreName;
-        public static final CANPort kClimbMotor = new CANPort(41, busName);
-        public static final CANPort kClimbMotorTwo = new CANPort (42, busName);
-        public static final CANPort kClimbEncoder = new CANPort(61, busName);
+        public static final CANPort kClimbMotor = new CANPort(60, busName);
+        public static final CANPort kClimbMotorTwo = new CANPort (61, busName);
+        public static final CANPort kClimbEncoder = new CANPort(62, busName);
     }
     
     public static class TurretPorts {
@@ -164,8 +164,8 @@ public class Ports
     public static class IndexerPorts
     {
         private static final String busName = "";
-        public static final CANPort kIndexerMotor = new CANPort(62, busName);
-        public static final CANPort kSpindexerMotor = new CANPort(60, busName);
+        public static final CANPort kIndexerMotor = new CANPort(55, busName);
+        //public static final CANPort kSpindexerMotor = new CANPort(60, busName);
     }
 
     public static class pickupOBPorts
@@ -183,18 +183,15 @@ public class Ports
 
     public static class Sensors {
         private static final String busName = "";
-        public static final CANPort kCANrange = new CANPort(61, busName);
+        // public static final CANPort kCANrange = new CANPort(61, busName);
         public static final CANPort kLauncherSensor = new CANPort(42, busName);
-        public static final CANPort kIntakeSensor = new CANPort(32, busName);
-        public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
-        public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        // public static final CANPort kIntakeSensor = new CANPort(32, busName);
+        // public static final CANPort kIntakeSensor2 = new CANPort(33, busName);
+        // public static CANrange tofSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
 
-        public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
+        // public static CANrange hopperSensor = new CANrange(kCANrange.ID, CANBus.roboRIO());
         public static CANrange launcherSensor = new CANrange(kLauncherSensor.ID, CANBus.roboRIO());
-        // public static CANrange intakeSensor = new CANrange(kIntakeSensor.ID, CANBus.roboRIO());
-        public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
-        // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
-        // public static DigitalInput intakeSensor = new DigitalInput(kIntakeSensor.ID);
+        // public static CANrange intakeSensor2 = new CANrange(kIntakeSensor2.ID, CANBus.roboRIO());
 
         private static CANrangeConfiguration tofConfig = new CANrangeConfiguration()
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
@@ -205,16 +202,12 @@ public class Ports
                                                  .withFOVRangeY(6.25))
             .withToFParams(new ToFParamsConfigs().withUpdateFrequency(50));
 
-        // public static DigitalInput launcherSensor = new DigitalInput(kLauncherSensor.ID);
-        // public static DigitalInput intakeSensor1 = new DigitalInput(kIntakeSensor1.ID);
-        // public static DigitalInput intakeSensor2 = new DigitalInput(kIntakeSensor2.ID);
-
         /* Sensor configurating */
         static {
-            hopperSensor.getConfigurator().apply(tofConfig);
+            // hopperSensor.getConfigurator().apply(tofConfig);
             launcherSensor.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.1)));
             // intakeSensor1.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
-            intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
+            // intakeSensor2.getConfigurator().apply(beamConfig.withProximityParams(new ProximityParamsConfigs().withProximityThreshold(.21)));
         }
 
 
