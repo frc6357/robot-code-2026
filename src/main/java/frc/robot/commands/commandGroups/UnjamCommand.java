@@ -5,6 +5,7 @@ import static frc.robot.Konstants.IndexerConstants.*;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.subsystems.indexer.SK26Indexer;
+import frc.robot.subsystems.indexer.SK26Indexer.IndexerStatus;
 
 public class UnjamCommand extends SequentialCommandGroup {
   public UnjamCommand(SK26Indexer indexer) {
@@ -13,6 +14,9 @@ public class UnjamCommand extends SequentialCommandGroup {
 
     addCommands(
         Commands.sequence(
+                // Set status to unjamming
+                Commands.runOnce(() -> indexer.setStatus(IndexerStatus.UNJAMMING), indexer),
+
                 // Reverse
                 Commands.runOnce(() -> indexer.unjamIndexer(kIndexerUnjamReverseRPS), indexer),
                 Commands.waitSeconds(kIndexerUnjamReverseDuration),
@@ -32,8 +36,11 @@ public class UnjamCommand extends SequentialCommandGroup {
             // Repeat until interrupted
             .repeatedly()
 
-            // When interrupted, set indexer to idle
-            .finallyDo(() -> indexer.idleIndexer()));
+            // When interrupted, reset status and idle
+            .finallyDo(() -> {
+                indexer.setStatus(IndexerStatus.IDLE);
+                indexer.idleIndexer();
+            }));
             
   }
 }

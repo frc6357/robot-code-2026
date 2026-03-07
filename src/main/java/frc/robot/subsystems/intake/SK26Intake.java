@@ -35,6 +35,9 @@ import edu.wpi.first.math.MathUtil;
  */
 public class SK26Intake extends SubsystemBase implements PathplannerSubsystem 
 {
+	// Kraken X44 free speed: ~100 RPS (6000 RPM) at 12V
+	private static final double kKrakenX44FreeSpeedRPS = 100.0;
+
 	// Motors
 	private final TalonFX positionerMotor;
 	private final TalonFX positionerFollowerMotor;
@@ -156,18 +159,9 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		return Math.abs(getTargetPosition() - getCurrentPosition()) < 0.5;
 	}
 
-	/**
-	 * Runs the positioner motor towards the specified position.
-	 * @param position Target position in rotations
-	 */
-	public void setPositionerPosition(double position) 
-	{
-		setTargetPosition(position);
-	}
-
 	public void setPositionerPosition(IntakePosition angle) 
     {
-        setPositionerPosition(angle.angle);
+        setTargetPosition(angle.angle);
     }
 
 	/**
@@ -187,19 +181,8 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void setIntakeVelocity(double velocity) 
 	{
-		// Kraken X44 free speed is ~100 RPS (6000 RPM) at 12V
-		// Convert RPS to voltage (approximate open-loop)
-		double voltage = (velocity / 100.0) * 12.0;
+		double voltage = (velocity / kKrakenX44FreeSpeedRPS) * 12.0;
 		setIntakeVoltage(voltage);
-	}
-
-	/**
-	 * Runs the intake motor at the specified speed.
-	 * @param speed Speed in RPS
-	 */
-	public void runIntakeMotor(double speed) 
-	{
-		setIntakeVelocity(speed);
 	}
 
 	/**
@@ -221,9 +204,6 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void periodic() 
 	{
-		// Continuously apply follower control to ensure follower stays synced
-		positionerFollowerMotor.setControl(followerControl);
-
 		logOutputs();
 	}
 
@@ -239,7 +219,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		// TODO Auto-generated method stub
+		// TODO: Implement PathPlanner commands for intake
 		throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
 	}
 }

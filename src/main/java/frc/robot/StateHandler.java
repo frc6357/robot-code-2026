@@ -32,6 +32,8 @@ import lombok.Getter;
  */
 public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     
+    private static final MacroState[] MACRO_STATES = MacroState.values();
+
     public enum MacroState {
         IDLE(Status.READY),
         SCORING(Status.WAITING),
@@ -39,7 +41,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         INTAKING(Status.WAITING),
         CLIMBING(Status.WAITING),
         STEADY_STREAM_SCORING(Status.WAITING),
-        STEADY_STREAM_SHUTTLING(Status.WAITING);
+        STEADY_STREAM_SHUTTLING(Status.WAITING),
+        CLIMB_AND_SCORE(Status.WAITING);
         
         private MacroState(Status status) {
             this.status = status;
@@ -76,7 +79,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     private static MacroState currentState = MacroState.IDLE;
     private static MacroState requestedState = MacroState.IDLE;
 
-    private MacroState previousChosenState = MacroState.IDLE;
+    // private MacroState previousChosenState = MacroState.IDLE;
 
     /**
      * Trigger that is true when the launcher is at its target velocity (or no launcher is present).
@@ -129,7 +132,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     public StateHandler() {
         // Reset all states to default on construction
-        for (MacroState state : MacroState.values()) {
+        for (MacroState state : MACRO_STATES) {
             state.setStatus(state == MacroState.IDLE ? MacroState.Status.READY : MacroState.Status.WAITING);
         }
 
@@ -140,8 +143,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("CLIMBING", MacroState.CLIMBING);
         stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
+        stateChooser.addOption("CLIMB_AND_SCORE", MacroState.CLIMB_AND_SCORE);
 
-        stateChooser.onChange((state) -> requestState(state));
+        stateChooser.onChange((state) -> this.requestState(state));
 
         addPathPlannerCommands();
     }
@@ -244,31 +248,27 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         });
     }
 
-    /**
-     * Handles changes in the desired state by stopping the current state and initializing the desired state.
-     * This method should be called periodically to ensure state transitions are managed.
-     */
-    private void handleStateTransition() {
-        if(requestedState != currentState) {
-            currentState = requestedState;
-        }
-    }
-
     @Override
     public void periodic() {
-        handleStateTransition();
-        if(stateChooser.get() != previousChosenState) {
-            setCurrentState(stateChooser.get());
-            previousChosenState = stateChooser.get();
+        // Handle state transition
+        if (requestedState != currentState) {
+            currentState = requestedState;
         }
+
+        // MacroState chosen = stateChooser.get();
+        // if (chosen != previousChosenState) {
+        //     setCurrentState(chosen);
+        //     previousChosenState = chosen;
+        // }
 
         logOutputs();
     }
 
     private void logOutputs() {
         Logger.recordOutput("StateHandler/Current State", getCurrentState().name());
+        Logger.recordOutput("StateHandler/Current State Status", getCurrentState().getStatus().name());
         Logger.recordOutput("StateHandler/Requested State", getRequestedState().name());
-        for (MacroState state : MacroState.values()) {
+        for (MacroState state : MACRO_STATES) {
             Logger.recordOutput("StateHandler/" + state.name() + " Status", state.getStatus().name());
         }
     }
@@ -491,12 +491,12 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     /**
-     * Creates a Trigger that is true when the current state matches and has INITIALIZING status.
+     * Creates a Trigger that is true when the current state matches and has WAITING status.
      * Useful for triggering spin-up or preparation actions.
      * @param state The MacroState to check.
-     * @return A Trigger that is true when currentState == state AND status == INITIALIZING.
+     * @return A Trigger that is true when currentState == state AND status == WAITING.
      */
-    public static Trigger whenCurrentStateInitializing(MacroState state) {
+    public static Trigger whenCurrentStateWaiting(MacroState state) {
         return new Trigger(() -> currentState == state && state.getStatus() == Status.WAITING);
     }
 

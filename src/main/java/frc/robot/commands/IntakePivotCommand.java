@@ -28,13 +28,6 @@ public class IntakePivotCommand extends Command{
     @Override
     public boolean isFinished()
     {
-        if(intake.isPositionerAtTarget())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return intake.isPositionerAtTarget();
     }
 }

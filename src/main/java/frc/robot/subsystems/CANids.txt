@@ -1,38 +1,42 @@
 Swerve:
 FrontLeftSensor : 4
-FrontLeftDrive : 14
-FrontLeftSteer : 24
+FrontLeftDrive : 24
+FrontLeftSteer : 14
 
 FrontRightSensor : 1
-FrontRightDrive : 11
-FrontRightSteer : 21
+FrontRightDrive : 21
+FrontRightSteer : 11
 
 BackLeftSensor : 2
-BackLeftSteer : 12
-BackLeftDrive : 22
+BackLeftSteer : 22
+BackLeftDrive : 12
 
 BackRightSensor : 3
-BackRightSteer : 13
-BackRightDrive : 23
+BackRightSteer : 23
+BackRightDrive : 13
 
 
 Intake:
 Pivot : 30
-Roller : 31
-Sensor1 : 32
-Sensor2 : 33
+PivotFollower : 31
+Roller : 32
 
 Launcher:
 Roller1 : 40
 Roller2 : 41
 CountingSensor : 42
 
+Feeder:
+Roller : 43
+
 Turret:
 DrivingMotor : 50
 AbsEncoder : 51
 
 Indexer:
-SpinningMotor : 60
-HopperSensor : 61
+SpinningMotor : 55
 
 Climb:
+Motor1 : 60
+Motor2 : 61
+AbsEncoder : 62

@@ -1,7 +1,9 @@
 package frc.robot.subsystems.turret;
 
-import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 // Imports from the robot
 import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretOutput;
@@ -27,6 +29,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 
@@ -36,7 +39,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Konstants.TurretConstants.TurretPosition;
 import lombok.Getter;
 
@@ -67,6 +72,30 @@ public class SK26Turret extends SubsystemBase
     // Target angle in degrees
     private double targetAngleDeg = 0.0;
 
+    // Cached per-cycle value to avoid redundant CAN reads
+    private double cachedAngleDeg = 0.0;
+
+    // Create the SysId routine
+    SysIdRoutine sysIdRoutine = new SysIdRoutine(
+    new SysIdRoutine.Config(
+        Volts.of(1).div(Seconds.of(0.25)), Volts.of(5), Seconds.of(1.35), // Use default config
+        (state) -> Logger.recordOutput("SysIDs/TurretSysIdTestState", state.toString())
+    ),
+    new SysIdRoutine.Mechanism(
+        (voltage) -> turretMotor.setControl(voltageControl.withOutput(voltage).withEnableFOC(true)),
+        null, // No log consumer, since data is recorded by AdvantageKit
+        this
+    )
+    );
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
+    }
+
     public SK26Turret()
     {
         // ========== CANcoder Configuration ==========
@@ -85,12 +114,15 @@ public class SK26Turret extends SubsystemBase
         TalonFXConfiguration motorConfig = new TalonFXConfiguration();
         MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
         outputConfigs.NeutralMode = NeutralModeValue.Coast;
+        outputConfigs.Inverted = kTurretMotorInverted 
+            ? InvertedValue.Clockwise_Positive 
+            : InvertedValue.CounterClockwise_Positive;
         motorConfig.MotorOutput = outputConfigs;
         turretMotor.getConfigurator().apply(motorConfig);
 
         // ========== PID Configuration ==========
         pidController.setTolerance(kTurretAngleTolerance);
-        pidController.setIZone(8); // 5 degrees
+        pidController.setIZone(8); // 8 degrees
 
         // ========== Initialize ==========
         // Set initial target to current position (don't move on boot)
@@ -206,20 +238,16 @@ public class SK26Turret extends SubsystemBase
     @Override
     public void periodic()
     {
+        // ========== Cache sensor read ==========
+        cachedAngleDeg = getAngleDegrees();
+
         // ========== Run PID Loop ==========
-        double currentAngle = getAngleDegrees();
-        double output = pidController.calculate(currentAngle);//(atTarget() ? 0.0 : pidController.calculate(currentAngle));
+        double output = pidController.calculate(cachedAngleDeg);
         
         // Clamp output for safety
         output = MathUtil.clamp(output, -kMaxTurretOutput, kMaxTurretOutput);
         
-        // Invert if needed
-        if (kTurretMotorInverted)
-        {
-            output = -output;
-        }
-        
-        // Apply to motor
+        // Apply to motor (inversion handled in motor config)
         turretMotor.setControl(voltageControl.withOutput(output));
 
         if(targetAngleDeg < kTurretMaxPosition && 
@@ -232,22 +260,22 @@ public class SK26Turret extends SubsystemBase
     }
 
     public void telemeterize() {
-        // Sends the needed Pose3d for the turret CAD model to corectly rotate the turret in the 3D visualization on the dashboard
+        // Sends the needed Pose3d for the turret CAD model to correctly rotate the turret in the 3D visualization on the dashboard
+        double angle = cachedAngleDeg;
+        Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(angle));
+
         Logger.recordOutput("Mechanisms/TurretSpinPose", new Pose3d(
             Translation3d.kZero.rotateAround(
                 new Translation3d(Inches.of(7.05), Inches.of(-7.05), Inches.of(0)), 
-                new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(getAngleDegrees()))),
-            new Rotation3d(Degrees.of(0), Degrees.of(0), Degrees.of(getAngleDegrees()))));
+                turretRotation),
+            turretRotation));
         
-        Logger.recordOutput("Turret/Angle (deg)", getAngleDegrees());
+        Logger.recordOutput("Turret/Angle (deg)", angle);
+        Logger.recordOutput("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
         Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
         Logger.recordOutput("Turret/At Target", atTarget());
         Logger.recordOutput("Turret/Error (deg)", getTurretError());
-        Logger.recordOutput("Turret/Motor DutyCycle Output", getMotorDutyCycle());
         Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
         Logger.recordOutput("Turret/Wrapping", isWrapping());
-        Logger.recordOutput("Turret/PID/P", pidController.getP());
-        Logger.recordOutput("Turret/PID/I", pidController.getI());
-        Logger.recordOutput("Turret/PID/D", pidController.getD());
     }
 }

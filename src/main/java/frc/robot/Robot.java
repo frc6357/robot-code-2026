@@ -18,6 +18,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.subsystems.fueldetection.FuelHuntFileLogger;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -33,12 +34,13 @@ public class Robot extends LoggedRobot {
     public static enum RobotMode {
         CONTROLLED, REPLAY
     }
-
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
 
     public static RobotMode Mode = RobotMode.CONTROLLED;
+
+    private static CommandScheduler m_commandScheduler = CommandScheduler.getInstance();
 
     public Robot() {
         this(RobotMode.CONTROLLED);
@@ -83,10 +85,10 @@ public class Robot extends LoggedRobot {
         kOperator.setRumble(RumbleType.kBothRumble, 0.0);
 
 
-        CommandScheduler.getInstance().schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup"));
+        m_commandScheduler.schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup"));
 
         
-        SmartDashboard.putData(CommandScheduler.getInstance());
+        SmartDashboard.putData(m_commandScheduler);
         SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
     }
 
@@ -103,12 +105,14 @@ public class Robot extends LoggedRobot {
         // commands, running already-scheduled commands, removing finished or interrupted commands,
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
-        CommandScheduler.getInstance().run();
+        m_commandScheduler.run();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        FuelHuntFileLogger.close();
+    }
 
     @Override
     public void disabledPeriodic() {}
@@ -142,14 +146,14 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically during operator control. */
     @Override
     public void teleopPeriodic() {
-        m_robotContainer.teleopPeriodic();
+        
     }
 
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-    }
+            }
 
     /** This function is called periodically during test mode. */
     @Override
