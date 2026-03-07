@@ -49,7 +49,7 @@ import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 import frc.robot.bindings.SK26IntakeBinder;
-import frc.robot.subsystems.launcher.SK26Feeder;
+import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
