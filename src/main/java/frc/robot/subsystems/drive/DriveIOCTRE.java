@@ -1,5 +1,7 @@
 package frc.robot.subsystems.drive;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 
@@ -11,6 +13,8 @@ import edu.wpi.first.units.measure.Temperature;
 import edu.wpi.first.units.measure.Voltage;
 
 public class DriveIOCTRE implements DriveIO {
+    private static final long REFRESH_INTERVAL_MS = 20;
+
     private final StatusSignal<Angle> pitchSignal;
     private final StatusSignal<AngularVelocity> pitchVelocitySignal;
     private final StatusSignal<Angle> rollSignal;
@@ -26,6 +30,7 @@ public class DriveIOCTRE implements DriveIO {
     private final StatusSignal<Temperature>[] steerTempSignals;
 
     private final BaseStatusSignal[] allSignals;
+    private final AtomicReference<DriveIOInputs> latestSnapshot = new AtomicReference<>(new DriveIOInputs());
 
     @SuppressWarnings("unchecked")
     public DriveIOCTRE(GeneratedDrivetrain drivetrain) {
@@ -67,26 +72,59 @@ public class DriveIOCTRE implements DriveIO {
             driveTempSignals[0], driveTempSignals[1], driveTempSignals[2], driveTempSignals[3],
             steerTempSignals[0], steerTempSignals[1], steerTempSignals[2], steerTempSignals[3],
         };
+
+        var thread = new Thread(this::refreshLoop, "DriveIOCTRE-CAN");
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    private void refreshLoop() {
+        while (!Thread.interrupted()) {
+            try {
+                BaseStatusSignal.refreshAll(allSignals);
+
+                var snapshot = new DriveIOInputs();
+                snapshot.pitchDegrees = pitchSignal.getValue().in(Units.Degrees);
+                snapshot.pitchVelocityDegreesPerSecond = pitchVelocitySignal.getValue().in(Units.DegreesPerSecond);
+                snapshot.rollDegrees = rollSignal.getValue().in(Units.Degrees);
+                snapshot.rollVelocityDegreesPerSecond = rollVelocitySignal.getValue().in(Units.DegreesPerSecond);
+
+                for (int i = 0; i < 4; i++) {
+                    snapshot.driveVolts[i] = driveVoltageSignals[i].getValue().in(Units.Volts);
+                    snapshot.steerVolts[i] = steerVoltageSignals[i].getValue().in(Units.Volts);
+                    snapshot.driveStatorCurrentAmps[i] = driveStatorCurrentSignals[i].getValue().in(Units.Amps);
+                    snapshot.steerStatorCurrentAmps[i] = steerStatorCurrentSignals[i].getValue().in(Units.Amps);
+                    snapshot.driveSupplyCurrentAmps[i] = driveSupplyCurrentSignals[i].getValue().in(Units.Amps);
+                    snapshot.steerSupplyCurrentAmps[i] = steerSupplyCurrentSignals[i].getValue().in(Units.Amps);
+                    snapshot.driveTempCelsius[i] = driveTempSignals[i].getValue().in(Units.Celsius);
+                    snapshot.steerTempCelsius[i] = steerTempSignals[i].getValue().in(Units.Celsius);
+                }
+
+                latestSnapshot.set(snapshot);
+                Thread.sleep(REFRESH_INTERVAL_MS);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
     }
 
     @Override
     public void updateInputs(DriveIOInputs inputs) {
-        BaseStatusSignal.refreshAll(allSignals);
+        var snapshot = latestSnapshot.get();
 
-        inputs.pitchDegrees = pitchSignal.getValue().in(Units.Degrees);
-        inputs.pitchVelocityDegreesPerSecond = pitchVelocitySignal.getValue().in(Units.DegreesPerSecond);
-        inputs.rollDegrees = rollSignal.getValue().in(Units.Degrees);
-        inputs.rollVelocityDegreesPerSecond = rollVelocitySignal.getValue().in(Units.DegreesPerSecond);
+        inputs.pitchDegrees = snapshot.pitchDegrees;
+        inputs.pitchVelocityDegreesPerSecond = snapshot.pitchVelocityDegreesPerSecond;
+        inputs.rollDegrees = snapshot.rollDegrees;
+        inputs.rollVelocityDegreesPerSecond = snapshot.rollVelocityDegreesPerSecond;
 
-        for (int i = 0; i < 4; i++) {
-            inputs.driveVolts[i] = driveVoltageSignals[i].getValue().in(Units.Volts);
-            inputs.steerVolts[i] = steerVoltageSignals[i].getValue().in(Units.Volts);
-            inputs.driveStatorCurrentAmps[i] = driveStatorCurrentSignals[i].getValue().in(Units.Amps);
-            inputs.steerStatorCurrentAmps[i] = steerStatorCurrentSignals[i].getValue().in(Units.Amps);
-            inputs.driveSupplyCurrentAmps[i] = driveSupplyCurrentSignals[i].getValue().in(Units.Amps);
-            inputs.steerSupplyCurrentAmps[i] = steerSupplyCurrentSignals[i].getValue().in(Units.Amps);
-            inputs.driveTempCelsius[i] = driveTempSignals[i].getValue().in(Units.Celsius);
-            inputs.steerTempCelsius[i] = steerTempSignals[i].getValue().in(Units.Celsius);
-        }
+        System.arraycopy(snapshot.driveVolts, 0, inputs.driveVolts, 0, 4);
+        System.arraycopy(snapshot.steerVolts, 0, inputs.steerVolts, 0, 4);
+        System.arraycopy(snapshot.driveStatorCurrentAmps, 0, inputs.driveStatorCurrentAmps, 0, 4);
+        System.arraycopy(snapshot.steerStatorCurrentAmps, 0, inputs.steerStatorCurrentAmps, 0, 4);
+        System.arraycopy(snapshot.driveSupplyCurrentAmps, 0, inputs.driveSupplyCurrentAmps, 0, 4);
+        System.arraycopy(snapshot.steerSupplyCurrentAmps, 0, inputs.steerSupplyCurrentAmps, 0, 4);
+        System.arraycopy(snapshot.driveTempCelsius, 0, inputs.driveTempCelsius, 0, 4);
+        System.arraycopy(snapshot.steerTempCelsius, 0, inputs.steerTempCelsius, 0, 4);
     }
 }
