@@ -512,7 +512,7 @@ public final class Konstants
         {
             /** Set the intake angle to X degrees **/
             kIntakeGroundPosition(90.0), //TODO This angle needs to be set to a safe angle above the ground
-            /** Set the turret angle to 0 degrees (zero position) **/
+            /** Set the intake angle to 0 degrees (zero position) **/
             kIntakeZeroPosition(0.0); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
 
             public final double angle;

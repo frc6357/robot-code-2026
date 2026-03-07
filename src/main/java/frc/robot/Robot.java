@@ -33,7 +33,6 @@ public class Robot extends LoggedRobot {
     public static enum RobotMode {
         CONTROLLED, REPLAY
     }
-
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
@@ -142,14 +141,14 @@ public class Robot extends LoggedRobot {
     /** This function is called periodically during operator control. */
     @Override
     public void teleopPeriodic() {
-        m_robotContainer.teleopPeriodic();
+        
     }
 
     @Override
     public void testInit() {
         // Cancels all running commands at the start of test mode.
         CommandScheduler.getInstance().cancelAll();
-    }
+            }
 
     /** This function is called periodically during test mode. */
     @Override

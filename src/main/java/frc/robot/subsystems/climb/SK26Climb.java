@@ -30,7 +30,7 @@ import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class Climb extends SubsystemBase
+public class SK26Climb extends SubsystemBase
 {
     private final SparkFlex climbMotor;
     private final SparkFlex climbMotor2;
@@ -52,7 +52,7 @@ public class Climb extends SubsystemBase
     private double cTargetHeight = 0.0;
     private boolean isRunning = false;
 
-    public Climb()
+    public SK26Climb()
     {
         climbMotor = new SparkFlex(kClimbMotor.ID, MotorType.kBrushless);
         climbMotor2 = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);

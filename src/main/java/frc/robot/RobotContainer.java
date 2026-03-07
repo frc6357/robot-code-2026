@@ -6,7 +6,6 @@ package frc.robot;
 
 import java.io.File;
 import java.io.IOException;
-//import java.lang.StackWalker.Option;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,33 +26,33 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.lib.utils.SubsystemControls;
 import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.Robot.RobotMode;
-import frc.robot.bindings.ClimbBinder;
+import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.CommandBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
-import frc.robot.bindings.SK26TurretBinder;
-import frc.robot.bindings.SK26LauncherBinder;
-import frc.robot.bindings.SK26StateBinder;
 import frc.robot.bindings.SK26IndexerBinder;
+import frc.robot.bindings.SK26IntakeBinder;
+import frc.robot.bindings.SK26LauncherBinder;
+import frc.robot.bindings.SK26LightsBinder;
+import frc.robot.bindings.SK26ShootingCoordinatorBinder;
+import frc.robot.bindings.SK26StateBinder;
+import frc.robot.bindings.SK26TurretBinder;
 import frc.robot.bindings.SKSwerveBinder;
 import frc.robot.bindings.SKTargetPointsBinder;
 import frc.robot.bindings.SKVisionBinder;
 import frc.robot.commands.pathplanner.PathPlannerCommands;
-import frc.robot.bindings.SK26LightsBinder;
-import frc.robot.bindings.SK26ShootingCoordinatorBinder;
-import frc.robot.subsystems.climb.Climb;
+import frc.robot.subsystems.climb.SK26Climb;
 import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.intake.SK26Intake;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
-import frc.robot.bindings.SK26IntakeBinder;
-import frc.robot.subsystems.feeder.SK26Feeder;
+import frc.robot.subsystems.lights.SK26Lights;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
-import frc.robot.subsystems.lights.SK26Lights;
 
 
 /**
@@ -76,7 +75,7 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
-  public Optional<Climb> m_climbComtainer = Optional.empty();
+  public Optional<SK26Climb> m_climbComtainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
@@ -93,7 +92,7 @@ public class RobotContainer {
   public static SK26Lights m_lightsInstance;
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
-  public static Climb m_climbInstance;
+  public static SK26Climb m_climbInstance;
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
   public static SK26Feeder m_feederInstance;
@@ -198,7 +197,7 @@ public class RobotContainer {
                     m_visionInstance = m_visionContainer.get();
                 }
                 if(subsystems.isClimbPresent()) {
-                    m_climbComtainer = Optional.of(new Climb());
+                    m_climbComtainer = Optional.of(new SK26Climb());
                     m_climbInstance = m_climbComtainer.get();
                 }
                 if(subsystems.isBangBangLauncherPresent()) {
@@ -258,7 +257,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add(new ClimbBinder(m_climbComtainer));
+        buttonBinders.add(new SK26ClimbBinder(m_climbComtainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
@@ -295,6 +294,9 @@ public class RobotContainer {
         return autoCommandSelector.get();
     }
 
+    public void disabledInit() {
+    }
+
     public void testPeriodic()
     {
       // Kept this as an example of what should go here.
@@ -307,21 +309,4 @@ public class RobotContainer {
     public void testInit()
     {
     }
-
-    public void matchInit()
-    {
-    }
-
-    public void teleopPeriodic()
-    {
-        
-    }
-
-    public void teleopInit(){
-    }
-
-    public void autonomousInit()
-    {
-    }
-
 }

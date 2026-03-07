@@ -41,7 +41,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         INTAKING(Status.WAITING),
         CLIMBING(Status.WAITING),
         STEADY_STREAM_SCORING(Status.WAITING),
-        STEADY_STREAM_SHUTTLING(Status.WAITING);
+        STEADY_STREAM_SHUTTLING(Status.WAITING),
+        CLIMB_AND_SCORE(Status.WAITING);
         
         private MacroState(Status status) {
             this.status = status;
@@ -78,7 +79,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     private static MacroState currentState = MacroState.IDLE;
     private static MacroState requestedState = MacroState.IDLE;
 
-    private MacroState previousChosenState = MacroState.IDLE;
+    // private MacroState previousChosenState = MacroState.IDLE;
 
     /**
      * Trigger that is true when the launcher is at its target velocity (or no launcher is present).
@@ -142,8 +143,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("CLIMBING", MacroState.CLIMBING);
         stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
+        stateChooser.addOption("CLIMB_AND_SCORE", MacroState.CLIMB_AND_SCORE);
 
-        stateChooser.onChange((state) -> requestState(state));
+        stateChooser.onChange((state) -> this.requestState(state));
 
         addPathPlannerCommands();
     }
@@ -253,17 +255,18 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             currentState = requestedState;
         }
 
-        MacroState chosen = stateChooser.get();
-        if (chosen != previousChosenState) {
-            setCurrentState(chosen);
-            previousChosenState = chosen;
-        }
+        // MacroState chosen = stateChooser.get();
+        // if (chosen != previousChosenState) {
+        //     setCurrentState(chosen);
+        //     previousChosenState = chosen;
+        // }
 
         logOutputs();
     }
 
     private void logOutputs() {
         Logger.recordOutput("StateHandler/Current State", getCurrentState().name());
+        Logger.recordOutput("StateHandler/Current State Status", getCurrentState().getStatus().name());
         Logger.recordOutput("StateHandler/Requested State", getRequestedState().name());
         for (MacroState state : MACRO_STATES) {
             Logger.recordOutput("StateHandler/" + state.name() + " Status", state.getStatus().name());

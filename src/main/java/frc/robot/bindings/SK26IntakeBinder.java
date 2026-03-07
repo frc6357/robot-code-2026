@@ -6,7 +6,6 @@ import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.*;
 import frc.robot.subsystems.intake.SK26Intake;
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullSpeed;
-import static frc.robot.Konstants.IntakeConstants.kIntakeIdleSpeed;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.kIntakeZeroPosition;
 
 // Imports from Java/WPILib
@@ -17,7 +16,7 @@ public class SK26IntakeBinder implements CommandBinder
 {
     private final Optional<SK26Intake> intakeSubsystem;
 
-    Trigger intakeFullSpeed;
+    Trigger intakeRollersFullSpeed;
     Trigger intakeIdleSpeed;
     Trigger intakeZeroPosition;
     Trigger IsIdle;
@@ -27,12 +26,10 @@ public class SK26IntakeBinder implements CommandBinder
         this.intakeSubsystem = intakeSubsystem;
 
         // For integration with other states
-        intakeFullSpeed = StateHandler.whenCurrentState(MacroState.INTAKING)
+        intakeRollersFullSpeed = StateHandler.whenCurrentState(MacroState.INTAKING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
-        intakeIdleSpeed = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
-        intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING);
+        intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING).or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
@@ -47,8 +44,8 @@ public class SK26IntakeBinder implements CommandBinder
         
         SK26Intake intake = intakeSubsystem.get();
 
-        intakeFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullSpeed));
-        intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleSpeed));
+        intakeRollersFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullSpeed));
+        // intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleSpeed)); There is no point for this. Just stop the intake
         intakeZeroPosition.whileTrue(new IntakePivotCommand(intake, kIntakeZeroPosition));
     }
 }

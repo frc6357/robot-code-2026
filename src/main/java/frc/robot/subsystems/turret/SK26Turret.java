@@ -1,6 +1,9 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
+import static edu.wpi.first.units.Units.Seconds;
+import static edu.wpi.first.units.Units.Volts;
 // Imports from the robot
 import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretOutput;
@@ -36,7 +39,9 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Konstants.TurretConstants.TurretPosition;
 import lombok.Getter;
 
@@ -69,6 +74,27 @@ public class SK26Turret extends SubsystemBase
 
     // Cached per-cycle value to avoid redundant CAN reads
     private double cachedAngleDeg = 0.0;
+
+    // Create the SysId routine
+    SysIdRoutine sysIdRoutine = new SysIdRoutine(
+    new SysIdRoutine.Config(
+        Volts.of(1).div(Seconds.of(0.25)), Volts.of(5), Seconds.of(1.35), // Use default config
+        (state) -> Logger.recordOutput("SysIDs/TurretSysIdTestState", state.toString())
+    ),
+    new SysIdRoutine.Mechanism(
+        (voltage) -> turretMotor.setControl(voltageControl.withOutput(voltage).withEnableFOC(true)),
+        null, // No log consumer, since data is recorded by AdvantageKit
+        this
+    )
+    );
+
+    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.quasistatic(direction);
+    }
+
+    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+        return sysIdRoutine.dynamic(direction);
+    }
 
     public SK26Turret()
     {
@@ -245,10 +271,10 @@ public class SK26Turret extends SubsystemBase
             turretRotation));
         
         Logger.recordOutput("Turret/Angle (deg)", angle);
+        Logger.recordOutput("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
         Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
         Logger.recordOutput("Turret/At Target", atTarget());
         Logger.recordOutput("Turret/Error (deg)", getTurretError());
-        Logger.recordOutput("Turret/Motor DutyCycle Output", getMotorDutyCycle());
         Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
         Logger.recordOutput("Turret/Wrapping", isWrapping());
     }
