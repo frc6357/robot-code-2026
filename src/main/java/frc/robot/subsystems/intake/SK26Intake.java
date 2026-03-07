@@ -219,7 +219,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		// TODO Auto-generated method stub
+		// TODO: Implement PathPlanner commands for intake
 		throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
 	}
 }

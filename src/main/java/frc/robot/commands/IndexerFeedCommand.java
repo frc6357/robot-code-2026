@@ -2,6 +2,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.indexer.SK26Indexer;
+import frc.robot.subsystems.indexer.SK26Indexer.IndexerStatus;
 
 // Command to feed fuel using the indexer subsystem
 public class IndexerFeedCommand extends Command 
@@ -23,6 +24,7 @@ public class IndexerFeedCommand extends Command
     @Override
     public void initialize()
     {
+        Subsystem.setStatus(IndexerStatus.FEEDING);
         Subsystem.feedFuel(velocity);
     }
 
@@ -33,7 +35,9 @@ public class IndexerFeedCommand extends Command
         return false;
     }
 
-    // When the command ends or is interrupted, set the indexer to idle
+    // When the command ends or is interrupted, reset status to idle
     @Override
-    public void end(boolean interrupted) {}
+    public void end(boolean interrupted) {
+        Subsystem.setStatus(IndexerStatus.IDLE);
+    }
 }

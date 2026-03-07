@@ -491,12 +491,12 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     /**
-     * Creates a Trigger that is true when the current state matches and has INITIALIZING status.
+     * Creates a Trigger that is true when the current state matches and has WAITING status.
      * Useful for triggering spin-up or preparation actions.
      * @param state The MacroState to check.
-     * @return A Trigger that is true when currentState == state AND status == INITIALIZING.
+     * @return A Trigger that is true when currentState == state AND status == WAITING.
      */
-    public static Trigger whenCurrentStateInitializing(MacroState state) {
+    public static Trigger whenCurrentStateWaiting(MacroState state) {
         return new Trigger(() -> currentState == state && state.getStatus() == Status.WAITING);
     }
 

@@ -3,9 +3,7 @@ package frc.robot.subsystems.indexer;
 // Imports from robot
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
-import static frc.robot.Ports.Sensors.tofSensor;
-import static frc.robot.Ports.Sensors.launcherSensor;
-import static frc.robot.Konstants.IndexerConstants.kIndexerHeight;
+
 import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
@@ -21,7 +19,6 @@ import org.littletonrobotics.junction.Logger;
 
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -44,14 +41,19 @@ public class SK26Indexer extends SubsystemBase
     // Target voltage for the indexer motor
     private double targetVoltage = 0.0;
 
-    // Sensor values
+    // Ball count tracked by external events (intake sensor, feeder notification, etc.)
     private int numBallsInIndexer = 0;
-    private int totalNumBallsLaunched = 0;
-    private boolean lastLauncherSensorState = false;
 
     // Display status
-    private String status = "Idle";
+    private IndexerStatus status = IndexerStatus.IDLE;
     // private boolean lastIntakeSensorState = false;
+
+    /** Possible operational states of the indexer, for telemetry/logging. */
+    public enum IndexerStatus {
+        IDLE,
+        FEEDING,
+        UNJAMMING
+    }
 
     public SK26Indexer() 
     {
@@ -68,16 +70,9 @@ public class SK26Indexer extends SubsystemBase
         indexerEncoder = indexerMotor.getEncoder();
     }
 
-    public void setIsIdle() {
-        status = "Idle";
-    }
-
-    public void setIsUnjamming() {
-        status = "Unjamming";
-    }
-
-    public void setIsFeeding() {
-        status = "Feeding";
+    /** Sets the current status of the indexer (for telemetry). Should be called by commands. */
+    public void setStatus(IndexerStatus status) {
+        this.status = status;
     }
 
     /**
@@ -111,7 +106,6 @@ public class SK26Indexer extends SubsystemBase
     }
 
     public void idleIndexer() {
-        setIsIdle();
         setIndexerVelocity(kIndexerIdleSpeed);
     }
 
@@ -120,7 +114,6 @@ public class SK26Indexer extends SubsystemBase
      * @param indexerFeedRPS The feed speed in RPS.
      */
     public void feedFuel(double indexerFeedRPS) {
-        setIsFeeding(); // TODO This should eventually be implemented in the command itself.
         setIndexerVelocity(indexerFeedRPS);
     }
 
@@ -129,26 +122,27 @@ public class SK26Indexer extends SubsystemBase
      * @param speed The speed to target in RPS.
      */
     public void unjamIndexer(double speed) {
-        setIsUnjamming();
         setIndexerVelocity(speed);
     }
 
-    public double getFullness() {
-        return kIndexerHeight.minus(getTofDistance()).div(kIndexerHeight).baseUnitMagnitude();
+    /** Returns the current tracked ball count in the indexer. */
+    public int getNumBalls() {
+        return numBallsInIndexer;
     }
 
-    private Distance getTofDistance() {
-        return tofSensor.getDistance().refresh().getValue();
+    /** Sets the tracked ball count (e.g. after a reset or manual correction). */
+    public void setNumBalls(int count) {
+        numBallsInIndexer = count;
     }
 
-    private void checkIfBallLaunched() {
-        boolean isBallPresent = launcherSensor.getIsDetected(true).getValue();
+    /** Call when a ball enters the indexer (e.g. from the intake sensor). */
+    public void incrementBallCount() {
+        numBallsInIndexer++;
+    }
 
-        if (!lastLauncherSensorState && isBallPresent) {
-            numBallsInIndexer--;
-            totalNumBallsLaunched++;
-        }
-        lastLauncherSensorState = isBallPresent;
+    /** Call when a ball leaves the indexer (e.g. notified by the feeder after launch). */
+    public void decrementBallCount() {
+        numBallsInIndexer = Math.max(0, numBallsInIndexer - 1);
     }
 
     // private void checkIfBallIntaked() {
@@ -163,7 +157,6 @@ public class SK26Indexer extends SubsystemBase
     @Override
     public void periodic() 
     {
-        checkIfBallLaunched();
         // checkIfBallIntaked();
 
         logOutputs();
@@ -176,9 +169,8 @@ public class SK26Indexer extends SubsystemBase
         Logger.recordOutput("Indexer/Output Current", indexerMotor.getOutputCurrent());
         Logger.recordOutput("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
         Logger.recordOutput("Indexer/Motor Speed (RPS)", velocityRPM / 60.0);
-        Logger.recordOutput("Indexer/Status", status);
+        Logger.recordOutput("Indexer/Status", status.toString());
         Logger.recordOutput("Indexer/Target Voltage (V)", targetVoltage);
         Logger.recordOutput("Indexer/Balls In Indexer", numBallsInIndexer);
-        Logger.recordOutput("Indexer/Total Balls Launched", totalNumBallsLaunched);
     }
 }

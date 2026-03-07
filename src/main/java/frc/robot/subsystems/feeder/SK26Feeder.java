@@ -3,9 +3,9 @@ package frc.robot.subsystems.feeder;
 import static frc.robot.Konstants.FeederConstants.kMaxFeederVoltage;
 import static frc.robot.Konstants.FeederConstants.kFeederIdleVelocity;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
+import static frc.robot.Ports.Sensors.launcherSensor;
 
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -16,13 +16,15 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-@SuppressWarnings("unused")
+import org.littletonrobotics.junction.Logger;
+
 public class SK26Feeder extends SubsystemBase
 {
     private final SparkFlex feederMotor;
-    private final RelativeEncoder feederEncoder;
 
-    private double targetVoltage = 0.0;
+    // Ball launch tracking
+    private int numBallsLaunched = 0;
+    private boolean lastLauncherSensorState = false;
 
     public SK26Feeder() 
     {
@@ -34,9 +36,6 @@ public class SK26Feeder extends SubsystemBase
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         feederMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-
-        // ========== Encoder Configuration ==========
-        feederEncoder = feederMotor.getEncoder();
     }
 
     /**
@@ -47,7 +46,6 @@ public class SK26Feeder extends SubsystemBase
     public void setFeederVoltage(double voltage) {
         // Clamp output for safety
         voltage = MathUtil.clamp(voltage, -kMaxFeederVoltage, kMaxFeederVoltage);
-        targetVoltage = voltage;
         feederMotor.setVoltage(voltage);
     }
 
@@ -86,5 +84,25 @@ public class SK26Feeder extends SubsystemBase
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        checkIfBallLaunched();
+        logOutputs();
+    }
+
+    /**
+     * Checks the launcher sensor for a rising edge (ball passing through).
+     * Increments the launched ball count on each detection.
+     */
+    private void checkIfBallLaunched() {
+        boolean isBallPresent = launcherSensor.getIsDetected(true).getValue();
+
+        if (!lastLauncherSensorState && isBallPresent) {
+            numBallsLaunched++;
+        }
+        lastLauncherSensorState = isBallPresent;
+    }
+
+    private void logOutputs() {
+        Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
+    }
 }
