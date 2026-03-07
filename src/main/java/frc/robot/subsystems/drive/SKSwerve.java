@@ -100,8 +100,8 @@ public class SKSwerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        poseEstimator.update(getGyroRotation(), drivetrain.getState().ModulePositions);
         lastReadState = drivetrain.getState();
+        poseEstimator.update(getGyroRotation(), lastReadState.ModulePositions);
 
         outputTelemetry();
 

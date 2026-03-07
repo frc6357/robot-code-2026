@@ -28,6 +28,7 @@ import frc.lib.utils.filters.FilteredJoystick;
 import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.CommandBinder;
+import frc.robot.bindings.FuelHuntBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26IndexerBinder;
@@ -53,6 +54,8 @@ import frc.robot.subsystems.lights.SK26Lights;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
+import frc.robot.subsystems.fueldetection.FuelDetection;
+import frc.robot.subsystems.vision.VisionConfig;
 
 
 /**
@@ -83,6 +86,8 @@ public class RobotContainer {
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26Intake> m_pickupContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
+  public Optional<FuelDetection> m_fuelDetectionContainer = Optional.empty();
+
   public Optional<ShootingCoordinator> shootingCoordinator = Optional.empty();
   public Optional<SK26Feeder> m_feederContainer = Optional.empty();
   
@@ -96,6 +101,7 @@ public class RobotContainer {
   public static SK26Intake m_pickupInstance;
   public static SK26Indexer m_indexerInstance;
   public static SK26Feeder m_feederInstance;
+  public static FuelDetection m_fuelDetectionInstance;
 
 
   public static Field2d m_field = new Field2d();
@@ -119,6 +125,11 @@ public class RobotContainer {
   
     autoCommandSelector = new LoggedDashboardChooser<>("Select an Auto", AutoBuilder.buildAutoChooser());
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
+
+    // Warm up PathPlanner's pathfinding to avoid first-use hitching.
+    // PathPlanner recommends this for Java users.
+    edu.wpi.first.wpilibj2.command.CommandScheduler.getInstance()
+        .schedule(com.pathplanner.lib.commands.PathfindingCommand.warmupCommand());
   }
   
   /**
@@ -178,6 +189,10 @@ public class RobotContainer {
                     m_feederContainer = Optional.of(new SK26Feeder());
                     m_feederInstance = m_feederContainer.get();
                 }
+                if(subsystems.isFuelDetectionPresent()) {
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
+                    m_fuelDetectionInstance = m_fuelDetectionContainer.get();
+                }
             }
             else {
                 if(subsystems.isSwervePresent()) {
@@ -224,6 +239,10 @@ public class RobotContainer {
                     m_feederContainer = Optional.of(new SK26Feeder());
                     m_feederInstance = m_feederContainer.get();
                 }
+                if(subsystems.isFuelDetectionPresent()) {
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
+                    m_fuelDetectionInstance = m_fuelDetectionContainer.get();
+                }
             }
 
             if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
@@ -268,6 +287,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
+        buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
@@ -277,6 +297,9 @@ public class RobotContainer {
 
     public void configurePathPlannerCommands()
     {
+        // Register the FuelHunt trench decision command
+        PathPlannerCommands.registerFuelHuntCommands();
+
         NamedCommands.registerCommands(PathPlannerCommands.getAvailableCommands());
     }
 

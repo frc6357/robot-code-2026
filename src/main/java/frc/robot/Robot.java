@@ -18,6 +18,7 @@ import com.pathplanner.lib.commands.FollowPathCommand;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.subsystems.fueldetection.FuelHuntFileLogger;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -109,7 +110,9 @@ public class Robot extends LoggedRobot {
 
     /** This function is called once each time the robot enters Disabled mode. */
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        FuelHuntFileLogger.close();
+    }
 
     @Override
     public void disabledPeriodic() {}

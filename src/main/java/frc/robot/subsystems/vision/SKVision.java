@@ -52,7 +52,7 @@ public class SKVision extends SubsystemBase {
     // Array of all limelights
     public final Limelight[] allLimelights = {threeLL, fourLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {threeLL, fourLL}; 
+    public final Limelight[] poseLimelights = {fourLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
