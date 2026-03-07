@@ -2,8 +2,6 @@ package frc.robot.bindings;
 
 import static frc.robot.Ports.OperatorPorts.kLeftStickY;
 
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-
 import static frc.robot.Ports.OperatorPorts.kLeftStickX;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 import frc.lib.utils.Field;
@@ -20,11 +18,10 @@ public class SKTargetPointsBinder implements CommandBinder {
     @Override
     public void bindButtons() {
         kOperatorControlled.point.setDefaultCommand(
-            new InstantCommand(
-                () -> kOperatorControlled.point.moveTargetPoint(
-                    (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
-                    (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis()), 
-                    kOperatorControlled.point).ignoringDisable(true).withName("OperatorTargetPointMover")
+            kOperatorControlled.point.movePointCommand(
+                    () -> (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickY.getFilteredAxis(), 
+                    () -> (Field.isBlue() ? -1 : 1) * 0.1 * kLeftStickX.getFilteredAxis())
+                    .ignoringDisable(true).withName("OperatorTargetPointMover")
         );
 
         // kOperatorControlled.point.setDefaultCommand(

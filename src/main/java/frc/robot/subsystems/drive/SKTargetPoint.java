@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import static frc.robot.RobotContainer.m_field;
 
+import java.util.function.Supplier;
+
 import org.littletonrobotics.junction.Logger;
 
 /**
@@ -68,8 +70,8 @@ public class SKTargetPoint extends SubsystemBase{
         );
     }
 
-    public Command movePointCommand(double deltaX, double deltaY) {
-        return runOnce(() -> moveTargetPoint(deltaX, deltaY));
+    public Command movePointCommand(Supplier<Double> deltaX, Supplier<Double> deltaY) {
+        return this.run(() -> moveTargetPoint(deltaX.get(), deltaY.get()));
     }
 
     @Override
