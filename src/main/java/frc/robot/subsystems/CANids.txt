@@ -1,19 +1,19 @@
 Swerve:
 FrontLeftSensor : 4
-FrontLeftDrive : 24
-FrontLeftSteer : 14
+FrontLeftDrive : 14
+FrontLeftSteer : 24
 
 FrontRightSensor : 1
-FrontRightDrive : 21
-FrontRightSteer : 11
+FrontRightDrive : 11
+FrontRightSteer : 21
 
 BackLeftSensor : 2
-BackLeftSteer : 22
-BackLeftDrive : 12
+BackLeftSteer : 12
+BackLeftDrive : 22
 
 BackRightSensor : 3
-BackRightSteer : 23
-BackRightDrive : 13
+BackRightSteer : 13
+BackRightDrive : 23
 
 
 Intake:
