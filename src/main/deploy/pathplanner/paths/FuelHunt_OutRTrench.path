@@ -1,0 +1,82 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.627,
+        "y": 7.428
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 5.2,
+        "y": 7.47
+      },
+      "isLocked": false,
+      "linkedName": "RightTrenchEntry"
+    },
+    {
+      "anchor": {
+        "x": 6.0,
+        "y": 7.50
+      },
+      "prevControl": {
+        "x": 5.4,
+        "y": 7.47
+      },
+      "nextControl": {
+        "x": 6.6,
+        "y": 7.50
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.5,
+        "y": 7.428
+      },
+      "prevControl": {
+        "x": 7.0,
+        "y": 7.49
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "FuelHunt_RTrenchFar"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Request Intaking State",
+      "waypointRelativePos": 0.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Request Intaking State"
+        }
+      }
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 2.0,
+    "maxAngularVelocity": 360.0,
+    "maxAngularAcceleration": 540.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 1.5,
+    "rotation": 180.0
+  },
+  "reversed": false,
+  "folder": "Chaos",
+  "idealStartingState": {
+    "velocity": 1.5,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": false
+}

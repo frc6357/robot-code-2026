@@ -18,6 +18,13 @@ public class SK26StateBinder implements CommandBinder {
     Trigger turnOnScoring;
     Trigger turnOnShuttling;
 
+    Trigger launcherReady;
+    Trigger intakeReady;
+    Trigger turretReady;
+    Trigger inAllianceZone;
+    Trigger outOfAllianceZone;
+    Trigger notNearTower;
+
     // Trigger that is true when launcher is in an active launching state
     Trigger launcherActive;
     // Debouncer to ensure launcher has been active for 0.8 seconds before allowing turn off
@@ -27,6 +34,18 @@ public class SK26StateBinder implements CommandBinder {
         this.stateHandlerContainer = stateHandlerContainer;
         this.stateHandler = stateHandlerContainer.orElse(null);
 
+        // Trigger definitions:
+        /* Subsystem States */
+        if (stateHandler != null) {
+            launcherReady = stateHandler.getLauncherReady();
+            intakeReady = stateHandler.getIntakeReady();
+            turretReady = stateHandler.getTurretReady();
+            inAllianceZone = stateHandler.getInAllianceZone();
+            outOfAllianceZone = stateHandler.getOutOfAllianceZone();
+            notNearTower = stateHandler.getNotNearTower();
+        }
+
+        /* Buttons */
         turnOnScoring = DriverPorts.kRTrigger.button;
         turnOnShuttling = DriverPorts.kRTrigger.button.debounce(0.55);
 
@@ -53,10 +72,20 @@ public class SK26StateBinder implements CommandBinder {
         if(stateHandlerContainer.isEmpty()) {
             return;
         }
+        bindRobotStates();
         bindDriverButtons();
         bindOperatorButtons();
     }
-    
+
+    private void bindRobotStates() {
+        inAllianceZone.and(notNearTower).and(launcherReady).and(turretReady)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING));
+        outOfAllianceZone.and(launcherReady).and(turretReady)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING));
+    }
+
     private void bindDriverButtons() 
     {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.toggleIntakeInRequestedStateCommand());

@@ -16,9 +16,121 @@
     }
   },
   {
+    "name": "/Preferences/turretP",
+    "type": "double",
+    "value": 1.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/turretI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/turretD",
+    "type": "double",
+    "value": 0.1,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrent Output (A)",
+    "type": "double",
+    "value": 54.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Tolerance (rps)",
+    "type": "double",
+    "value": 0.85,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Debounce (sec)",
+    "type": "double",
+    "value": 0.025,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DutyCycle FF (%/rps)",
+    "type": "double",
+    "value": 0.01489,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/AtGoalVelocity Debounce (sec)",
+    "type": "double",
+    "value": 0.2,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/BBLauncher/ManualShootVelocity (rps)",
     "type": "double",
     "value": 24.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/p",
+    "type": "double",
+    "value": 0.07,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/i",
+    "type": "double",
+    "value": 0.02,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/d",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Intake/positionerKp",
+    "type": "double",
+    "value": 12.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Intake/positionerKi",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Intake/positionerKd",
+    "type": "double",
+    "value": 0.0,
     "properties": {
       "persistent": true
     }

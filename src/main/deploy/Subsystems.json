@@ -4,9 +4,11 @@
     "vision": true,
     "turret": true,
     "launcher": false,
-    "bangbanglauncher": true,
+    "bangbanglauncher": false,
     "lights": false,
-    "indexer": false,
+    "indexer": true,
+    "climb": true,
     "pickup": true,
-    "climb": false
+    "feeder": true,
+    "fueldetection": false
 }

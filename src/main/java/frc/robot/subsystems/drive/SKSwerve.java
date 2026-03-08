@@ -25,7 +25,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.units.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -42,11 +41,14 @@ public class SKSwerve extends SubsystemBase {
     private SwerveDriveState lastReadState;
     private final GeneratedDrivetrain drivetrain = GeneratedConstants.createDrivetrain();
     private SwerveDrivePoseEstimator poseEstimator;
-    private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude());
+    private final GeneratedTelemetry telemetry = new GeneratedTelemetry(DriveConstants.kMaxSpeed.baseUnitMagnitude(), Robot.isReal());
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
+    private final DriveIO io;
+    private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
+
     private Pose2d[] emptyPath = new Pose2d[0];
-            
+
     public void setSwerveRequest(SwerveRequest request) {
         // Only allows PathPlanner to control the drivetrain during auto period through its own request
         if(DriverStation.isAutonomousEnabled() && !request.equals(DriveRequests.pathPlannerRequest)) {
@@ -63,7 +65,7 @@ public class SKSwerve extends SubsystemBase {
      * @return The command.
      */
     public Command followSwerveRequestCommand(
-        SwerveRequest.FieldCentric request, 
+        SwerveRequest.FieldCentric request,
         UnaryOperator<SwerveRequest.FieldCentric> updater) {
         return run(() -> setSwerveRequest(updater.apply(request)))
                 .handleInterrupt(() -> setSwerveRequest(new SwerveRequest.FieldCentric()));
@@ -78,19 +80,20 @@ public class SKSwerve extends SubsystemBase {
      * @return The command.
      */
     public Command followSwerveRequestCommand(
-        SwerveRequest.RobotCentric request, 
+        SwerveRequest.RobotCentric request,
         UnaryOperator<SwerveRequest.RobotCentric> updater) {
         return run(() -> setSwerveRequest(updater.apply(request)))
                 .handleInterrupt(() -> setSwerveRequest(new SwerveRequest.RobotCentric()));
     }
 
-    
+
     public SKSwerve() {
+        io = new DriveIOCTRE(drivetrain);
         lastReadState = drivetrain.getState();
-        
+
         setupPoseEstimator();
         configureAutoBuilder();
-        
+
         PathPlannerLogging.setLogActivePathCallback((activePath) -> Logger.recordOutput("Drive/ActivePath", activePath.toArray(emptyPath)));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
@@ -100,8 +103,8 @@ public class SKSwerve extends SubsystemBase {
 
     @Override
     public void periodic() {
-        poseEstimator.update(getGyroRotation(), drivetrain.getState().ModulePositions);
         lastReadState = drivetrain.getState();
+        poseEstimator.update(getGyroRotation(), lastReadState.ModulePositions);
 
         outputTelemetry();
 
@@ -109,125 +112,24 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void outputTelemetry() {
-		telemetry.telemeterize(lastReadState);
-        telemeterizeDevices();
-		m_field.setRobotPose(getRobotPose());
+        Logger.runEveryN(2, () -> telemetry.telemeterize(lastReadState));
+        Logger.runEveryN(2, () -> {
+            io.updateInputs(inputs); 
+            Logger.processInputs("Drive/DeviceInputs", inputs);
+        });
+		// m_field.setRobotPose(getRobotPose());
 	}
-
-	public void telemeterizeDevices() {
-		Logger.recordOutput(
-				"Drive/Pitch Velocity Degrees Per Second",
-				drivetrain
-						.getPigeon2()
-						.getAngularVelocityYDevice()
-						.getValue()
-						.in(Units.DegreesPerSecond));
-		Logger.recordOutput(
-				"Drive/Pitch Degrees",
-				drivetrain.getPigeon2().getPitch().getValue().in(Units.Degrees));
-
-		Logger.recordOutput(
-				"Drive/Roll Velocity Degrees Per Second",
-				drivetrain
-						.getPigeon2()
-						.getAngularVelocityXDevice()
-						.getValue()
-						.in(Units.DegreesPerSecond));
-		Logger.recordOutput(
-				"Drive/Roll Degrees",
-				drivetrain.getPigeon2().getRoll().getValue().in(Units.Degrees));
-            
-		addModuleToLogger(0);
-		addModuleToLogger(1);
-		addModuleToLogger(2);
-		addModuleToLogger(3);
-	}
-
-	private void addModuleToLogger(int module) {
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Volts",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getMotorVoltage()
-                    .getValue()
-                    .in(Units.Volts));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Volts",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getMotorVoltage()
-                    .getValue()
-                    .in(Units.Volts));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Stator Current",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getStatorCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Temperature Celsius",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getDeviceTemp()
-                    .getValue()
-                    .in(Units.Celsius));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Stator Current",
-                drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getStatorCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Drive/Supply Current",
-				drivetrain
-                    .getModules()[module]
-                    .getDriveMotor()
-                    .getSupplyCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Supply Current",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getSupplyCurrent()
-                    .getValue()
-                    .in(Units.Amps));
-
-		Logger.recordOutput(
-				"Drive/ModuleStatesInfo/" + module + "/Rotation/Temperature Celsius",
-				drivetrain
-                    .getModules()[module]
-                    .getSteerMotor()
-                    .getDeviceTemp()
-                    .getValue()
-                    .in(Units.Celsius));
-	}
-
 
     public GeneratedDrivetrain getDrivetrain() {
         return drivetrain;
     }
 
     private void setupPoseEstimator() {
-        poseEstimator = 
+        poseEstimator =
             new SwerveDrivePoseEstimator(
-                drivetrain.getKinematics(), 
-                new Rotation2d(drivetrain.getPigeon2().getYaw().getValue()), 
-                drivetrain.getState().ModulePositions, 
+                drivetrain.getKinematics(),
+                new Rotation2d(drivetrain.getPigeon2().getYaw().getValue()),
+                drivetrain.getState().ModulePositions,
                 new Pose2d());
     }
 
@@ -278,10 +180,10 @@ public class SKSwerve extends SubsystemBase {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 
-    /* 
+    /*
      *
      * Autonomous
-     * 
+     *
      */
 
     private void configureAutoBuilder() {
@@ -331,15 +233,15 @@ public class SKSwerve extends SubsystemBase {
     //                 .withRotationalRate(speeds.omegaRadiansPerSecond)); // Drive counterclockwise with negative X (left)
     // }
 
-    /* 
+    /*
      *
-     * Odemetry Methods 
-     * 
+     * Odemetry Methods
+     *
      */
 
 
     /**
-     * 
+     *
      * @return The estimation of the robot's pose
      */
     @AutoLogOutput(key = "Drive/EstimatedPose")

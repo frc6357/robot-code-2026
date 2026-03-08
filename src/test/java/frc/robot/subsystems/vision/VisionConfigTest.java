@@ -121,8 +121,8 @@ class VisionConfigTest {
 
     @Test
     void testThresholds_Scoring() {
-        assertEquals(20.0, VisionConfig.Thresholds.TAG_COUNT_WEIGHT,
-                "TAG_COUNT_WEIGHT should be 20.0");
+        assertEquals(25.0, VisionConfig.Thresholds.TAG_COUNT_WEIGHT,
+                "TAG_COUNT_WEIGHT should be 25.0");
     }
 
     @Test

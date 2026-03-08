@@ -21,9 +21,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 
+import org.littletonrobotics.junction.Logger;
+
 // Imports from WPILib
-import edu.wpi.first.util.sendable.SendableBuilder;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 
@@ -35,6 +35,9 @@ import edu.wpi.first.math.MathUtil;
  */
 public class SK26Intake extends SubsystemBase implements PathplannerSubsystem 
 {
+	// Kraken X44 free speed: ~100 RPS (6000 RPM) at 12V
+	private static final double kKrakenX44FreeSpeedRPS = 100.0;
+
 	// Motors
 	private final TalonFX positionerMotor;
 	private final TalonFX positionerFollowerMotor;
@@ -118,8 +121,6 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 		// Initialize position tracking
 		motorTargetPosition = kPositionerMotorMinPosition;
-
-		SmartDashboard.putData("SK26Intake", this);
 	}
 
 	/**
@@ -158,18 +159,9 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		return Math.abs(getTargetPosition() - getCurrentPosition()) < 0.5;
 	}
 
-	/**
-	 * Runs the positioner motor towards the specified position.
-	 * @param position Target position in rotations
-	 */
-	public void setPositionerPosition(double position) 
-	{
-		setTargetPosition(position);
-	}
-
 	public void setPositionerPosition(IntakePosition angle) 
     {
-        setPositionerPosition(angle.angle);
+        setTargetPosition(angle.angle);
     }
 
 	/**
@@ -189,19 +181,8 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void setIntakeVelocity(double velocity) 
 	{
-		// Kraken X44 free speed is ~100 RPS (6000 RPM) at 12V
-		// Convert RPS to voltage (approximate open-loop)
-		double voltage = (velocity / 100.0) * 12.0;
+		double voltage = (velocity / kKrakenX44FreeSpeedRPS) * 12.0;
 		setIntakeVoltage(voltage);
-	}
-
-	/**
-	 * Runs the intake motor at the specified speed.
-	 * @param speed Speed in RPS
-	 */
-	public void runIntakeMotor(double speed) 
-	{
-		setIntakeVelocity(speed);
 	}
 
 	/**
@@ -223,24 +204,22 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void periodic() 
 	{
-		// Continuously apply follower control to ensure follower stays synced
-		positionerFollowerMotor.setControl(followerControl);
+		logOutputs();
 	}
 
-	@Override
-	public void initSendable(SendableBuilder builder) 
+	private void logOutputs()
 	{
-		builder.addDoubleProperty("Positioner Position", this::getCurrentPosition, null);
-		builder.addDoubleProperty("Positioner Target Position", this::getTargetPosition, null);
-		builder.addBooleanProperty("Positioner At Target", this::isPositionerAtTarget, null);
-		builder.addDoubleProperty("Intake Voltage", () -> targetVoltage, null);
-		builder.addDoubleProperty("Intake Velocity (RPS)", () -> intakeMotor.getVelocity().getValueAsDouble(), null);
+		Logger.recordOutput("Intake/Positioner Position", getCurrentPosition());
+		Logger.recordOutput("Intake/Positioner Target Position", getTargetPosition());
+		Logger.recordOutput("Intake/Positioner At Target", isPositionerAtTarget());
+		Logger.recordOutput("Intake/Intake Voltage", targetVoltage);
+		Logger.recordOutput("Intake/Intake Velocity (RPS)", intakeMotor.getVelocity().getValueAsDouble());
 	}
 
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		// TODO Auto-generated method stub
+		// TODO: Implement PathPlanner commands for intake
 		throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
 	}
 }

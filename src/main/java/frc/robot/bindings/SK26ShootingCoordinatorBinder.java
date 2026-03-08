@@ -1,8 +1,5 @@
 package frc.robot.bindings;
 
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static frc.robot.Konstants.LauncherConstants.kStationaryThresholdMetersPerSecond;
-
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -32,22 +29,15 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
         ShootingCoordinator moveAndShootSystem = moveAndShootSystemContainer.get();
 
         // Bind triggers for stationary vs moving shots based on robot velocity
-        stationary = new Trigger(() -> {
-            double vx = moveAndShootSystem.getDrive().getVelocity(true).vxMetersPerSecond;
-            double vy = moveAndShootSystem.getDrive().getVelocity(true).vyMetersPerSecond;
-            return Math.hypot(vx, vy) < kStationaryThresholdMetersPerSecond.in(MetersPerSecond);  // Consider stationary if speed is less than threshold
-        });
-        moving = stationary.negate();
+        // stationary = new Trigger(() -> {
+        //     double vx = moveAndShootSystem.getDrive().getVelocity(true).vxMetersPerSecond;
+        //     double vy = moveAndShootSystem.getDrive().getVelocity(true).vyMetersPerSecond;
+        //     return Math.hypot(vx, vy) < kStationaryThresholdMetersPerSecond.in(MetersPerSecond);  // Consider stationary if speed is less than threshold
+        // });
+        // moving = stationary.negate();
 
-        // When score or shuttle triggers are active, run the appropriate shooting command based on whether we're stationary or moving
-        //TODO: Create commands that choreograph the appropriate shooting sequence for stationary vs moving shots, add them into Trigger bindings
-        // score.and(stationary).whileTrue();
-        // score.and(moving).whileTrue();
-
+        // When score or shuttle triggers are active, run the appropriate shooting command
         score.whileTrue(moveAndShootSystem.scoreMoving());
         shuttle.whileTrue(moveAndShootSystem.shuttleMoving());
-        // shuttle.and(stationary).whileTrue();
-        // shuttle.and(moving).whileTrue();
-
     }
 }

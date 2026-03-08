@@ -44,8 +44,7 @@ public class SK26BBLauncherBinder implements CommandBinder {
 
             // ShootRPS.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
 
-            //TODO: This will need to be changed to a velocity control command when we implement velocity control
-            //UPDATE: Launcher is now velocity-controlled, but by the ShootingCoordinator.
+            // UPDATE: Launcher is now velocity-controlled, but by the ShootingCoordinator.
             // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kShootVelocity.get() / 2)));
         }
     }

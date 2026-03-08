@@ -13,6 +13,7 @@ public class IntakeCommand extends Command {
     public IntakeCommand(SK26Intake intake, double velocity)
     {
         this.intake = intake;
+        this.velocity = velocity;
 
         addRequirements(intake);
     }
@@ -21,7 +22,7 @@ public class IntakeCommand extends Command {
     @Override
     public void initialize()
     {
-        intake.runIntakeMotor(velocity);
+        intake.setIntakeVelocity(velocity);
     }
 
     // This command never finishes on its own

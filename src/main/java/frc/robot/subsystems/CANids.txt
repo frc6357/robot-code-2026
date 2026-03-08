@@ -18,21 +18,25 @@ BackRightDrive : 23
 
 Intake:
 Pivot : 30
-Roller : 31
-Sensor1 : 32
-Sensor2 : 33
+PivotFollower : 31
+Roller : 32
 
 Launcher:
 Roller1 : 40
 Roller2 : 41
 CountingSensor : 42
 
+Feeder:
+Roller : 43
+
 Turret:
 DrivingMotor : 50
 AbsEncoder : 51
 
 Indexer:
-SpinningMotor : 60
-HopperSensor : 61
+SpinningMotor : 55
 
 Climb:
+Motor1 : 60
+Motor2 : 61
+AbsEncoder : 62

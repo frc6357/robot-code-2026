@@ -117,7 +117,7 @@ public final class VisionConfig {
         public static final double PROXIMITY_POSE_DIFF = 0.3;
 
         // Scoring
-        public static final double TAG_COUNT_WEIGHT = 20.0;
+        public static final double TAG_COUNT_WEIGHT = 25.0;
     }
 
     // Command configs for vision-based commands
