@@ -112,10 +112,12 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void outputTelemetry() {
-		telemetry.telemeterize(lastReadState);
-        io.updateInputs(inputs);
-        Logger.processInputs("Drive/DeviceInputs", inputs);
-		m_field.setRobotPose(getRobotPose());
+        Logger.runEveryN(2, () -> telemetry.telemeterize(lastReadState));
+        Logger.runEveryN(2, () -> {
+            io.updateInputs(inputs); 
+            Logger.processInputs("Drive/DeviceInputs", inputs);
+        });
+		// m_field.setRobotPose(getRobotPose());
 	}
 
     public GeneratedDrivetrain getDrivetrain() {
