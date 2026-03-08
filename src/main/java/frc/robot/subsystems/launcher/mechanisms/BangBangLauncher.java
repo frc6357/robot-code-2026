@@ -57,12 +57,6 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
             new TorqueCurrentConfigs()
                 .withTorqueNeutralDeadband(Amps.of(4))
         );
-    private TalonFXConfiguration followerMotorConfig = new TalonFXConfiguration()
-        .withMotorOutput(
-            new MotorOutputConfigs()
-                .withInverted(InvertedValue.CounterClockwise_Positive)
-                .withNeutralMode(NeutralModeValue.Coast)
-        );
 
     @Getter
     private boolean atGoal;
@@ -73,22 +67,26 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
     // Preferences
     private Pref<Double> torqueCurrentOutput = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrent Output (A)", 54.0);
     private Pref<Double> torqueCurrentControlTolerance = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrentControl Tolerance (rps)", 0.85);
-    private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrentControl Debounce (sec)", 0.025)
-        .onChange(
-            (newDebounce) -> {torqueCurrentDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);}
-        );
+    private Pref<Double> torqueCurrentControlDebounce = SKPreferences.attach("BBLauncher/Prefs/TorqueCurrentControl Debounce (sec)", 0.025);
     private Pref<Double> voltageFF = SKPreferences.attach("BBLauncher/Prefs/Voltage FF (V/rps)", 0.01489 * 12.0);
-    private Pref<Double> atGoalDebounce = SKPreferences.attach("BBLauncher/Prefs/AtGoalVelocity Debounce (sec)", 0.2)
-        .onChange((newDebounce) -> {atGoalDebouncer = new Debouncer(newDebounce, DebounceType.kFalling);});
+    private Pref<Double> atGoalDebounce = SKPreferences.attach("BBLauncher/Prefs/AtGoalVelocity Debounce (sec)", 0.2);
         
     @SuppressWarnings("unused")
-    private Pref<Double> targetSpeed = SKPreferences.attach("BBLauncher/Prefs/Target Speed (rps)", 5000.0)
-        .onChange((newSpeed) -> {this.runVelocity(newSpeed);});
+    private Pref<Double> targetSpeed = SKPreferences.attach("BBLauncher/Prefs/Target Speed (RPM)", 5000.0)
+        .onChange((newSpeed) -> {this.runVelocity(newSpeed / 60.0);});
 
     // Signal Debouncers
-    private Debouncer torqueCurrentDebouncer =
+    private final Debouncer torqueCurrentDebouncer =
         new Debouncer(torqueCurrentControlDebounce.get(), DebounceType.kFalling);
-    private Debouncer atGoalDebouncer = new Debouncer(atGoalDebounce.get(), DebounceType.kFalling);
+    private final Debouncer atGoalDebouncer = new Debouncer(atGoalDebounce.get(), DebounceType.kFalling);
+
+    // Wire up debounce time changes after debouncers are initialized
+    {
+        torqueCurrentControlDebounce.onChange(
+            (newDebounce) -> torqueCurrentDebouncer.setDebounceTime(newDebounce));
+        atGoalDebounce.onChange(
+            (newDebounce) -> atGoalDebouncer.setDebounceTime(newDebounce));
+    }
 
     private boolean isTorqueCurrentRunning = false;
 
@@ -114,15 +112,10 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         followingMotor = new TalonFX(kFixedLauncherMotorFollower.ID, CANBus.roboRIO());
 
         var mainMotorStatus = mainMotor.getConfigurator().apply(mainMotorConfig);
-        var followerMotorStatus = followingMotor.getConfigurator().apply(followerMotorConfig);
 
         if(!mainMotorStatus.isOK()) {
             DriverStation.reportError(
-                "Main motor config failed: " + mainMotorStatus, false);
-        }
-        if(!followerMotorStatus.isOK()) {
-            DriverStation.reportError(
-                "Follower motor config failed: " + followerMotorStatus, false);
+                "[BangBangLauncher] Main motor config failed: " + mainMotorStatus, false);
         }
 
         followingMotor.setControl(followerControl);
@@ -130,6 +123,7 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
 
     @Override
     public void periodic() {
+        SKPreferences.refreshIfNeeded();
         cachedVelocityRps = mainMotor.getVelocity().getValueAsDouble();
 
         switch(activeMode) {
@@ -170,17 +164,25 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
         targetVelocityRps = rotationsPerSecond;
     }
 
-    /** Stops the flywheel. */
+    /** Stops the flywheel and resets all control state. */
     private void stop() {
         activeMode = ControlMode.COAST;
         targetVelocityRps = 0.0;
         atGoal = false;
+        tooFarForTorqueCurrent = false;
+        isTorqueCurrentRunning = false;
+
+        // Feed resting values into debouncers so stale history doesn't
+        // produce a wrong output on the first cycle of the next spinup.
+        atGoalDebouncer.calculate(false);
+        torqueCurrentDebouncer.calculate(false);
     }
 
     public void telemeterize() {
         Logger.recordOutput("BBLauncher/AtGoal", atGoal);
         Logger.recordOutput("BBLauncher/Target Velocity (rps)", targetVelocityRps);
         Logger.recordOutput("BBLauncher/Current Velocity (rps)", cachedVelocityRps);
+        Logger.recordOutput("BBLauncher/Velocity Error (rps)", targetVelocityRps - cachedVelocityRps);
         Logger.recordOutput("BBLauncher/Control Mode", activeMode.toString());
         Logger.recordOutput("BBLauncher/Too Far", tooFarForTorqueCurrent);
     }
