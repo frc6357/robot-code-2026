@@ -5,6 +5,7 @@ import java.util.Optional;
 import static frc.robot.Ports.DriverPorts.kAbutton;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.bindings.CommandBinder;
 import frc.robot.commands.commandGroups.FuelHuntCommand;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.fueldetection.FuelDetection;

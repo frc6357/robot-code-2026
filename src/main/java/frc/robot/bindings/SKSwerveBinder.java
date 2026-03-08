@@ -20,6 +20,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.auto.Pathfinder;
+import frc.lib.bindings.CommandBinder;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.filters.LinearDeadbandFilter;

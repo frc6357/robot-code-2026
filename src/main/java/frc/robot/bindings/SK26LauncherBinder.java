@@ -3,6 +3,7 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.bindings.CommandBinder;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
 import frc.robot.commands.RunLauncherWithRPSCommand;

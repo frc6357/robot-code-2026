@@ -1,5 +1,6 @@
 package frc.robot.bindings;
 
+import frc.lib.bindings.CommandBinder;
 // Imports from robot
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;

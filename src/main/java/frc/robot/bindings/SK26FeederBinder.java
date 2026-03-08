@@ -7,6 +7,7 @@ import java.util.Optional;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.FeederFeedCommand;

@@ -57,19 +57,19 @@ public class Pathfinder {
         }
         catch (Exception e) {
             if(e instanceof IOException) {
-                System.out.println("Path not found");
+                System.out.println("Path not found: " + pathName);
             }
             else if(e instanceof ParseException) {
-                System.out.println("JSON could not be parsed");
+                System.out.println("JSON could not be parsed: " + pathName);
             }
             else if(e instanceof FileNotFoundException) {
-                System.out.println("Path file not found");
+                System.out.println("Path file not found: " + pathName);
             }
             else if(e instanceof FileVersionException) {
-                System.out.println("Path file version is not compatible with this version of PathPlanner");
+                System.out.println("Path file version is not compatible with this version of PathPlanner: " + pathName);
             }
             else {
-                System.out.println("Unknown error occurred while loading path");
+                System.out.println("Unknown error occurred while loading path: " + pathName);
             }
         }
         return Commands.none();
@@ -83,10 +83,10 @@ public class Pathfinder {
         }
         catch (Exception e) {
             if(e instanceof IOException) {
-                System.out.println("Auto file not found");
+                System.out.println("Path file not found: " + pathName);
             }
             else if(e instanceof ParseException) {
-                System.out.println("JSON could not be parsed");
+                System.out.println("JSON could not be parsed: " + pathName);
             }
         }
 
@@ -119,10 +119,10 @@ public class Pathfinder {
         }
         catch (Exception e) {
             if(e instanceof IOException) {
-                System.out.println("Auto file not found");
+                System.out.println("Auto file not found: " + autoName);
             }
             else if(e instanceof ParseException) {
-                System.out.println("JSON could not be parsed");
+                System.out.println("JSON could not be parsed: " + autoName);
             }
         }
 

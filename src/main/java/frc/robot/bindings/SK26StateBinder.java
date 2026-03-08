@@ -5,6 +5,7 @@ import java.util.Optional;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
 import frc.robot.Ports.OperatorPorts;

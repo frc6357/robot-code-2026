@@ -4,6 +4,8 @@ package frc.robot.bindings;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
+
+import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;

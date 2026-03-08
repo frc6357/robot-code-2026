@@ -1,4 +1,4 @@
-package frc.robot.bindings;
+package frc.lib.bindings;
 
 /** An interface that defines a method on how to bind buttons for each subsystem */
 public interface CommandBinder

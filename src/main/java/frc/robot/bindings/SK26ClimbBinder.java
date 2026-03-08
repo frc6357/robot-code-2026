@@ -3,6 +3,7 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.bindings.CommandBinder;
 import frc.robot.commands.ClimbButtonCommand;
 import frc.robot.commands.ClimbDownCommand;
 

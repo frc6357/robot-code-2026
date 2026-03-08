@@ -4,6 +4,7 @@ import static frc.robot.Ports.OperatorPorts.kLeftStickY;
 
 import static frc.robot.Ports.OperatorPorts.kLeftStickX;
 import frc.lib.utils.filters.LinearDeadbandFilter;
+import frc.lib.bindings.CommandBinder;
 import frc.lib.utils.Field;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 

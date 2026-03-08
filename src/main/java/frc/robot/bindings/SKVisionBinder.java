@@ -1,6 +1,8 @@
 package frc.robot.bindings;
 
 import java.util.Optional;
+
+import frc.lib.bindings.CommandBinder;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.vision.SKVision;
 
