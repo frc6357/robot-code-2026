@@ -4,9 +4,6 @@ import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.TurretJoystickCommand;
-import frc.robot.commands.TurretButtonCommand;
-import frc.robot.commands.TurretTrackPointCommand;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.filters.LinearDeadbandFilter;
@@ -22,6 +19,9 @@ import static frc.robot.Ports.OperatorPorts.kBbutton;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
+import frc.robot.commands.turret.TurretButtonCommand;
+import frc.robot.commands.turret.TurretJoystickCommand;
+import frc.robot.commands.turret.TurretTrackPointCommand;
 
 public class SK26TurretBinder implements CommandBinder
 {

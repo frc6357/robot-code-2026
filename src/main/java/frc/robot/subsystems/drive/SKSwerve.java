@@ -34,8 +34,10 @@ import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
 
 /**
- * Class that extends the Phoenix 6 SwerveDrivetrain class and implements
- * Subsystem so it can easily be used in command-based projects.
+ * The Spring Konstant's swerve subsystem. This subsystem is responsible for controlling the swerve drivetrain, including
+ * applying swerve requests, estimating the robot's pose using a Kalman Filter, and interfacing with the 
+ * PathPlanner library for autonomous path following.
+ * <p>It features custom logging threads and timings in order to telemeterize important drivetrain information without impacting the main control loop. </p>
  */
 public class SKSwerve extends SubsystemBase {
     private SwerveDriveState lastReadState;
@@ -45,6 +47,7 @@ public class SKSwerve extends SubsystemBase {
     private SwerveRequest currentRequest = DriveRequests.teleopRequest;
 
     private final DriveIO io;
+    // If this has an error, just build the project and it should go away.
     private final DriveIOInputsAutoLogged inputs = new DriveIOInputsAutoLogged();
 
     private Pose2d[] emptyPath = new Pose2d[0];

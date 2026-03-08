@@ -1,5 +1,6 @@
-package frc.robot.commands;
+package frc.robot.commands.automatedDriving;
 
+import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kBumpJumpAngles;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kD;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kI;
 import static frc.robot.Konstants.DriveConstants.RotationAligningConstants.kP;
@@ -7,45 +8,37 @@ import static frc.robot.Ports.DriverPorts.kLSbutton;
 import static frc.robot.Ports.DriverPorts.kLBbutton;
 import static frc.robot.Ports.DriverPorts.kLeftStickY;
 import static frc.robot.Ports.DriverPorts.kLeftStickX;
-import frc.robot.subsystems.drive.DriveRequests;
+
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.drive.SKTargetPoint;
 
-public class AlignAroundPoint extends Command{
+public class AlignForBumpJump extends Command {
     private SKSwerve m_drive;
-    private SKTargetPoint targetPoint;
     private PIDController alignController = new PIDController(kP, kI, kD);
+    private Rotation2d targetAngle;
 
-    public AlignAroundPoint(SKSwerve m_drive, SKTargetPoint targetPoint) {
-        this.targetPoint = targetPoint;
-        this.m_drive = m_drive;
+    public AlignForBumpJump(SKSwerve drive) {
+        m_drive = drive;
         addRequirements(m_drive);
 
         alignController.enableContinuousInput(-180, 180);
-        alignController.setTolerance(2); // 2 degree tolerance for alignment
+        alignController.setTolerance(10); // 10 degree tolerance since the bump is forgiving
     }
-
+    
     @Override
     public void initialize() {
         alignController.reset();
+        targetAngle = findClosestAngle();
+        alignController.setSetpoint(targetAngle.getDegrees());
     }
 
     @Override
     public void execute() {
-        double desiredAngle = Math.toDegrees(
-            Math.signum(m_drive.getRobotPose().getTranslation().getY() - targetPoint.getTargetPoint().getY()) *
-            Math.acos(
-                (m_drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
-                m_drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))
-                 + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
-        if(Double.isNaN(desiredAngle)) {
-            desiredAngle = m_drive.getRobotRotation().getDegrees();
-        }
-        double output = alignController.calculate(m_drive.getRobotRotation().getDegrees(), desiredAngle);
-        
+        double output = alignController.calculate(m_drive.getRobotRotation().getDegrees());
         m_drive.setSwerveRequest(
             DriveRequests.getTeleopRequestUpdater(
                 () -> -kLeftStickY.getFilteredAxis(), 
@@ -55,19 +48,31 @@ public class AlignAroundPoint extends Command{
                 () -> kLSbutton.button.getAsBoolean())
             .apply(DriveRequests.teleopRequest)
         );
-
-        SmartDashboard.putNumber("PointAlign/Rottarget", desiredAngle);
-        SmartDashboard.putNumber("PointAlign/RotOutput", output);
-        SmartDashboard.putNumber("PointAlign/CurrentRot", m_drive.getRobotRotation().getDegrees());
-    }
-
-    @Override
-    public void end(boolean interrupted) {
-        
+        SmartDashboard.putNumber("BumpAlign/Rottarget", targetAngle.getDegrees());
+        SmartDashboard.putNumber("BumpAlign/RotOutput", output);
+        SmartDashboard.putNumber("BumpAlign/CurrentRot", m_drive.getRobotRotation().getDegrees());
     }
 
     @Override
     public boolean isFinished() {
         return false;
     }
+
+     @Override
+     public void end(boolean interrupted) {
+
+     }
+
+     private Rotation2d findClosestAngle() {
+        Rotation2d currentAngle = m_drive.getRobotRotation();
+
+        for (Rotation2d angle : kBumpJumpAngles) {
+            if (Math.abs(currentAngle.minus(angle).getDegrees()) < 45) { 
+                return angle;
+            }
+        }
+
+        return kBumpJumpAngles[0]; // default to first angle if somehow no angles are within 45 degrees (literally impossible but the compiler needs it)
+     }
+    
 }

@@ -25,13 +25,13 @@ import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.filters.LinearDeadbandFilter;
 import frc.lib.utils.Field;
 import frc.lib.utils.filters.DriveStickFilter;
-import frc.robot.commands.AlignForBumpJump;
+import frc.robot.commands.automatedDriving.AlignAroundPoint;
+import frc.robot.commands.automatedDriving.AlignForBumpJump;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
 import frc.robot.RobotContainer;
 import frc.robot.Ports.DriverPorts;
-import frc.robot.commands.AlignAroundPoint;
 
 
 @SuppressWarnings("unused")
