@@ -55,10 +55,10 @@ public class SK26TurretSim extends SK26Turret {
         encoderSimState.setRawPosition(0);
         encoderSimState.setVelocity(0);
         
-        // CRITICAL: Reset the PID controller and sync target to current position
+        // CRITICAL: Reset the controller and sync target to current position
         // The parent constructor ran before encoder sim was initialized, which may have
-        // caused incorrect initial readings and PID integral accumulation
-        resetPIDController();
+        // caused incorrect initial readings
+        resetController();
     }
 
     @Override

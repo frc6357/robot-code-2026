@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.767346647646219,
-        "y": 0.6127246790299581
+        "x": 3.4,
+        "y": 7.431398002853067
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.767346647646218,
-        "y": 0.6127246790299581
+        "x": 4.4,
+        "y": 7.431398002853067
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 5.837532097004279,
-        "y": 0.6127246790299581
+        "x": 5.838,
+        "y": 7.431
       },
       "prevControl": {
-        "x": 4.837532097004279,
-        "y": 0.6127246790299581
+        "x": 4.838,
+        "y": 7.431
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 3.0,
-    "rotation": 0.0
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": "Automations",
   "idealStartingState": {
-    "velocity": 2.6,
-    "rotation": 0.0
+    "velocity": 1.5,
+    "rotation": -90.0
   },
   "useDefaultConstraints": true
 }

@@ -61,6 +61,8 @@ public class SK26TurretBinder implements CommandBinder
         SK26Turret turret = turretSubsystem.get();
         SKSwerve swerve = swerveSubsystem.get();
 
+        // Using operator controller buttons:
+
         kRightStickX.setFilter(new LinearDeadbandFilter(kTurretJoystickDeadband, 1.0));
 
         kBbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretLeftPosition, turret));
@@ -78,8 +80,8 @@ public class SK26TurretBinder implements CommandBinder
         //         swerve, 
         //         (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue ? kBlueHub.point : kRedHub.point))
         //     .withName("TurretTrackHubCommand"));
-        PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
-            .withName("TurretTrackShuttleCommand"));
+        // PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
+        //     .withName("TurretTrackShuttleCommand"));
 
 
         // Default command: Use the right joystick to manually move the turret when idle

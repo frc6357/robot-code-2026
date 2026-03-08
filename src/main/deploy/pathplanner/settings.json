@@ -1,6 +1,6 @@
 {
   "robotWidth": 0.851,
-  "robotLength": 0.8509,
+  "robotLength": 0.851,
   "holonomicMode": true,
   "pathFolders": [
     "Chaos",
@@ -24,8 +24,8 @@
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 720.0,
   "defaultNominalVoltage": 12.0,
-  "robotMass": 74.088,
-  "robotMOI": 6.883,
+  "robotMass": 58.97,
+  "robotMOI": 7.118,
   "robotTrackwidth": 0.546,
   "driveWheelRadius": 0.0508,
   "driveGearing": 6.03,
@@ -44,7 +44,7 @@
   "bumperOffsetX": 0.0,
   "bumperOffsetY": 0.0,
   "robotFeatures": [
-    "{\"name\":\"Intake\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.391,\"y\":0.0},\"size\":{\"width\":0.89,\"length\":0.1},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}",
-    "{\"name\":\"Launcher\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.31,\"y\":-0.275},\"size\":{\"width\":0.275,\"length\":0.275},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}"
+    "{\"name\":\"Intake\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":0.391,\"y\":0.0},\"size\":{\"width\":0.89,\"length\":0.1},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}",
+    "{\"name\":\"Launcher\",\"type\":\"rounded_rect\",\"data\":{\"center\":{\"x\":-0.27,\"y\":0.27},\"size\":{\"width\":0.275,\"length\":0.275},\"borderRadius\":0.05,\"strokeWidth\":0.02,\"filled\":true}}"
   ]
 }

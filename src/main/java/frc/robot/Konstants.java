@@ -65,7 +65,7 @@ public final class Konstants
         
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
         public static final LinearVelocity kMaxSpeedFAST = kMaxSpeed.times(1.75);
-        public static final LinearVelocity kMaxSpeedSLOW = kMaxSpeed.times(0.3);
+        public static final LinearVelocity kMaxSpeedSLOW = kMaxSpeed.times(0.35);
         
         public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(1.25); // 3/4 of a rotation per second max angular velocity
         public static final AngularVelocity kMaxAngularRateFAST = kMaxAngularRate.times(2); // 1.5 rotations per second max angular velocity
@@ -138,8 +138,13 @@ public final class Konstants
         public static final PPHolonomicDriveController pathConfig = new PPHolonomicDriveController(kTranslationPIDConstants, kRotationPIDConstants);
 
         public static final PathConstraints kDefaultPathfindingConstraints = new PathConstraints(
-            4.5, 5.1, 
+            4.0, 3.65, 
             540, 720, 
+            12, false);
+        
+        public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
+            4.0, 3.65, 
+            360, 540, 
             12, false);
 
         /** Slower, smoother constraints for FuelHunt pathfinding — gentle curves, no snapping. */
@@ -412,15 +417,18 @@ public final class Konstants
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
+        // TODO: Find the actual gearing ratio from the motor to the turret (motor rotations per turret rotation)
         public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
 
         // Motor direction - set true if motor spins opposite to encoder direction
         public static final boolean kTurretMotorInverted = true;
 
-        // Turret PID (WPILib PIDController - input is degrees, output is duty cycle)
-        public static final double kTurretP = 0.07; //0.00375
-        public static final double kTurretI = 0.02;
-        public static final double kTurretD = 0.005; //0.00005
+        // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
+        // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
+        public static final double kTurretP = 25.2;  // was 0.07 V/deg
+        public static final double kTurretI = 7.2;   // was 0.02 V/(deg·s)
+        public static final double kTurretD = 1.8;   // was 0.005 V/(deg/s)
+        public static final double kTurretS = 0.0;   // Static friction feedforward (volts)
         public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
 
         public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
@@ -431,7 +439,7 @@ public final class Konstants
         public static final double kTurretJoystickDeadband = 0.15;
 
         // Translation from center of robot to center of turret bearing
-        public static final Translation3d kTurretCenter = new Translation3d(Inches.of(-0.125), Inches.of(-8.625), Inches.of(17.5));
+        public static final Translation3d kTurretCenter = new Translation3d(Inches.of(0.125), Inches.of(8.625), Inches.of(17.5));
 
         // Turret lead angle compensation (Option 3 framework with Option 2 defaults)
         // Lead formula: leadAngle = yawVelocity × baseLeadTime × scaleFactor
@@ -488,7 +496,7 @@ public final class Konstants
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(Inches.of(5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
+                new Translation3d(Inches.of(-5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
                 new Rotation3d()                    // No rotation offset
             );
 
