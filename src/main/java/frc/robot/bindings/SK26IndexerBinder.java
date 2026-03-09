@@ -45,7 +45,7 @@ public class SK26IndexerBinder implements CommandBinder
         SK26Indexer indexer = indexerSubsystem.get();
 
         kUpDpad.button.and(IsIdle).whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
-        //IndexFeed.whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
+        //IndexFeed.whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed)); //TODO Bring this back after testing
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead
     }

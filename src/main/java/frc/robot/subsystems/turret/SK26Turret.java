@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretMMAcceleration;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretMMVelocity;
+import static frc.robot.Konstants.TurretConstants.kTurretA;
 import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
 import static frc.robot.Konstants.TurretConstants.kTurretD;
 import static frc.robot.Konstants.TurretConstants.kTurretEncoderInverted;
@@ -21,6 +22,7 @@ import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
 import static frc.robot.Konstants.TurretConstants.kTurretMotorInverted;
 import static frc.robot.Konstants.TurretConstants.kTurretP;
 import static frc.robot.Konstants.TurretConstants.kTurretS;
+import static frc.robot.Konstants.TurretConstants.kTurretV;
 import static frc.robot.Ports.TurretPorts.kTurretEncoder;
 import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
@@ -29,6 +31,7 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.StatusSignal;
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
@@ -40,6 +43,7 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -142,13 +146,17 @@ public class SK26Turret extends SubsystemBase
             .withKI(kTurretI)
             .withKD(kTurretD)
             .withKS(kTurretS)
-            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+            .withKV(kTurretV)
+            .withKA(kTurretA)
+            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+            .withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput);
 
         // FusedCANcoder feedback — motor firmware fuses rotor + CANcoder position
         motorConfig.Feedback = new FeedbackConfigs()
             .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
             .withFeedbackRemoteSensorID(kTurretEncoder.ID)
-            .withSensorToMechanismRatio(kEncoderGearRatio);     // 2 encoder rotations = 1 turret rotation
+            .withSensorToMechanismRatio(kEncoderGearRatio)
+            .withVelocityFilterTimeConstant(0.1);     // 2 encoder rotations = 1 turret rotation
             // .withRotorToSensorRatio(kTurretMotorGearRatio / kEncoderGearRatio); // motor → encoder ratio
 
         // Motion Magic velocity / acceleration (converted from deg/s → turret rot/s)
@@ -157,10 +165,13 @@ public class SK26Turret extends SubsystemBase
                 kMaxTurretMMVelocity.in(RotationsPerSecond))
             .withMotionMagicAcceleration(
                 kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond));
+        
+        motorConfig.ClosedLoopGeneral = new ClosedLoopGeneralConfigs()
+            .withGainSchedErrorThreshold(Rotations.of(0.008));
 
         turretMotor.getConfigurator().apply(motorConfig);
 
-        turretAngleStatusSignal = turretEncoder.getPosition();
+        turretAngleStatusSignal = turretMotor.getPosition();
 
         // ========== Initialize ==========
         // Set initial target to current position (don't move on boot)
@@ -300,12 +311,12 @@ public class SK26Turret extends SubsystemBase
                 turretRotation));
         }
         
-        SmartDashboard.putNumber("Turret/Angle (deg)", angle);
-        SmartDashboard.putNumber("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
-        SmartDashboard.putNumber("Turret/Target (deg)", getTargetAngleDegrees());
-        SmartDashboard.putBoolean("Turret/At Target", atTarget());
-        SmartDashboard.putNumber("Turret/Error (deg)", getTurretError());
-        SmartDashboard.putNumber("Turret/Motor Voltage Output", getMotorVoltage());
-        SmartDashboard.putBoolean("Turret/Wrapping", isWrapping());
+        Logger.recordOutput("Turret/Angle (deg)", angle);
+        Logger.recordOutput("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
+        Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
+        Logger.recordOutput("Turret/At Target", atTarget());
+        Logger.recordOutput("Turret/Error (deg)", getTurretError());
+        Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
+        Logger.recordOutput("Turret/Wrapping", isWrapping());
     }
 }

@@ -421,14 +421,16 @@ public final class Konstants
         public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
 
         // Motor direction - set true if motor spins opposite to encoder direction
-        public static final boolean kTurretMotorInverted = true;
+        public static final boolean kTurretMotorInverted = false;
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 25.2;  // was 0.07 V/deg
-        public static final double kTurretI = 7.2;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 1.8;   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.0;   // Static friction feedforward (volts)
+        public static final double kTurretP = 20;  // was 0.07 V/deg
+        public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
+        public static final double kTurretD = 0.0;   // was 0.005 V/(deg/s)
+        public static final double kTurretS = 0.35;   // Static friction feedforward (volts)
+        public static final double kTurretV = 3.0;
+        public static final double kTurretA = 1.542;
         public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
 
         public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
