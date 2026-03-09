@@ -3,40 +3,42 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.453095577746077,
-        "y": 7.457
+        "x": 3.1265474060822895,
+        "y": 1.484
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.390204819277107,
-        "y": 7.73921865493357
+        "x": 3.1514233358375394,
+        "y": 1.732759297552497
       },
       "isLocked": false,
-      "linkedName": "LeftTrench"
+      "linkedName": "RScore"
     },
     {
       "anchor": {
-        "x": 8.127939759036146,
-        "y": 2.2647108433734933
+        "x": 4.453,
+        "y": 0.65
       },
       "prevControl": {
-        "x": 8.543192771084337,
-        "y": 4.603240963855422
+        "x": 2.704591363219934,
+        "y": 0.6272218246869414
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "TrenchWarfare_Sweep"
+      "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 90.82278081754518
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Request Intaking State",
+      "waypointRelativePos": 0.9634146341463421,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.5,
     "maxAcceleration": 3.0,
@@ -46,11 +48,11 @@
     "unlimited": false
   },
   "goalEndState": {
-    "velocity": 0,
-    "rotation": 91.54815769897806
+    "velocity": 2.0,
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Chaos",
+  "folder": "Right Trench",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 0.0

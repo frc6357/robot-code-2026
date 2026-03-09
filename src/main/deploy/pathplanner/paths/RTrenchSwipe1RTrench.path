@@ -1,0 +1,124 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 4.453,
+        "y": 0.65
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 6.416273675541185,
+        "y": 0.682452468713898
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.816,
+        "y": 1.662
+      },
+      "prevControl": {
+        "x": 7.816,
+        "y": 0.8831806797853305
+      },
+      "nextControl": {
+        "x": 7.816,
+        "y": 2.570767398368586
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 7.815688729874777,
+        "y": 3.414
+      },
+      "prevControl": {
+        "x": 7.877535725038939,
+        "y": 3.1717708746059547
+      },
+      "nextControl": {
+        "x": 7.620980172796408,
+        "y": 4.176592966119723
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 6.6312343470483,
+        "y": 2.96
+      },
+      "prevControl": {
+        "x": 6.482320844098943,
+        "y": 3.508017138891401
+      },
+      "nextControl": {
+        "x": 7.036858761477669,
+        "y": 1.4672600761014971
+      },
+      "isLocked": false,
+      "linkedName": null
+    },
+    {
+      "anchor": {
+        "x": 4.453095577746077,
+        "y": 0.65
+      },
+      "prevControl": {
+        "x": 7.195188601001891,
+        "y": 0.5850983899821116
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": null
+    }
+  ],
+  "rotationTargets": [
+    {
+      "waypointRelativePos": 1.0,
+      "rotationDegrees": 135.0
+    },
+    {
+      "waypointRelativePos": 2.0,
+      "rotationDegrees": 135.0
+    }
+  ],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
+    {
+      "name": "Request Intaking State",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
+    {
+      "name": "Request SS Scoring State",
+      "waypointRelativePos": 3.4024390243902465,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
+  "globalConstraints": {
+    "maxVelocity": 4.5,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 1.25,
+    "rotation": -90.0
+  },
+  "reversed": false,
+  "folder": "Right Trench",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 180.0
+  },
+  "useDefaultConstraints": true
+}

@@ -56,6 +56,7 @@ import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.fueldetection.FuelDetection;
 import frc.robot.subsystems.vision.VisionConfig;
+import static frc.robot.StateHandler.MacroState;
 
 
 /**
@@ -306,10 +307,26 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand()
     {
-        return autoCommandSelector.get();
+        return autoCommandSelector.get().withName(autoCommandSelector.getSendableChooser().getSelected());
     }
 
     public void disabledInit() {
+    }
+
+    public void autonomousInit() {
+        if(m_stateHandlerContainer.isPresent()) {
+            m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
+        }
+    }
+
+    public void teleopInit() {
+        // This preserves the StateHandler's continuity in behavior from autonomous to teleop.
+        // It basically "refreshes" the Triggers that use the StateHandler's current state as a condition.
+        if(m_stateHandlerContainer.isPresent()) {
+            MacroState endAutoState = m_stateHandlerContainer.get().getCurrentState();
+            m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
+            m_stateHandlerContainer.get().setCurrentState(endAutoState);
+        }
     }
 
     public void testPeriodic()

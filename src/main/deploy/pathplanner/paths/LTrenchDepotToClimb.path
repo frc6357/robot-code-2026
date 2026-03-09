@@ -3,62 +3,41 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.453095577746077,
-        "y": 7.457
+        "x": 0.5791592128801428,
+        "y": 5.973935599284436
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.203095577746077,
-        "y": 7.457
-      },
-      "isLocked": false,
-      "linkedName": "LeftTrench"
-    },
-    {
-      "anchor": {
-        "x": 3.353703041144901,
-        "y": 7.434221824686941
-      },
-      "prevControl": {
-        "x": 3.954262155980423,
-        "y": 7.434221824686941
-      },
-      "nextControl": {
-        "x": 1.9484482913121726,
-        "y": 7.434221824686941
-      },
-      "isLocked": false,
-      "linkedName": null
-    },
-    {
-      "anchor": {
-        "x": 0.4655813953488368,
+        "x": 1.5791592128801428,
         "y": 5.973935599284436
       },
+      "isLocked": false,
+      "linkedName": "Depot"
+    },
+    {
+      "anchor": {
+        "x": 1.8122898032200352,
+        "y": 4.108014311270125
+      },
       "prevControl": {
-        "x": 2.428855098389982,
-        "y": 6.055062611806798
+        "x": 1.796064400715563,
+        "y": 5.9414847942754925
       },
       "nextControl": null,
       "isLocked": false,
       "linkedName": null
     }
   ],
-  "rotationTargets": [
-    {
-      "waypointRelativePos": 1.159705159705158,
-      "rotationDegrees": 0.0
-    }
-  ],
+  "rotationTargets": [],
   "constraintZones": [
     {
       "name": "Constraints Zone",
-      "minWaypointRelativePos": 0.8475609756097563,
-      "maxWaypointRelativePos": 2.0,
+      "minWaypointRelativePos": 0.0884146341463415,
+      "maxWaypointRelativePos": 0.9664634146341466,
       "constraints": {
-        "maxVelocity": 1.0,
+        "maxVelocity": 1.25,
         "maxAcceleration": 3.0,
-        "maxAngularVelocity": 180.0,
+        "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,
         "unlimited": false
@@ -68,13 +47,13 @@
   "pointTowardsZones": [],
   "eventMarkers": [
     {
-      "name": "Request Scoring State",
-      "waypointRelativePos": 0.4024390243902438,
+      "name": "Request ClimbAndScore State",
+      "waypointRelativePos": 0.2896341463414633,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "Request Scoring State"
+          "name": "Request ClimbAndScore State"
         }
       }
     }
@@ -94,8 +73,8 @@
   "reversed": false,
   "folder": "Left Trench",
   "idealStartingState": {
-    "velocity": 1.0,
-    "rotation": 0.0
+    "velocity": 0,
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

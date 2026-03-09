@@ -8,33 +8,42 @@
       },
       "prevControl": null,
       "nextControl": {
-        "x": 8.390204819277107,
-        "y": 7.73921865493357
+        "x": 2.8020393559928443,
+        "y": 7.434221824686941
       },
       "isLocked": false,
       "linkedName": "LeftTrench"
     },
     {
       "anchor": {
-        "x": 8.127939759036146,
-        "y": 2.2647108433734933
+        "x": 0.5791592128801428,
+        "y": 5.973935599284436
       },
       "prevControl": {
-        "x": 8.543192771084337,
-        "y": 4.603240963855422
+        "x": 2.234150268336314,
+        "y": 5.990161001788908
       },
       "nextControl": null,
-      "isLocked": false,
-      "linkedName": "TrenchWarfare_Sweep"
+      "isLocked": true,
+      "linkedName": "Depot"
     }
   ],
-  "rotationTargets": [
+  "rotationTargets": [],
+  "constraintZones": [
     {
-      "waypointRelativePos": 0.5,
-      "rotationDegrees": 90.82278081754518
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.1615853658536585,
+      "maxWaypointRelativePos": 1.0,
+      "constraints": {
+        "maxVelocity": 1.25,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
     }
   ],
-  "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
@@ -47,12 +56,12 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 91.54815769897806
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Chaos",
+  "folder": "Left Trench",
   "idealStartingState": {
-    "velocity": 0,
+    "velocity": 1.5,
     "rotation": 0.0
   },
   "useDefaultConstraints": true

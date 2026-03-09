@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchSwipe1LTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchToLScore"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LScoreToLTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchSwipe2LTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchToLScore"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Left Trench",
+  "choreoAuto": false
+}

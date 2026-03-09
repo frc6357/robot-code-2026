@@ -516,20 +516,24 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     @Override
     public void addPathPlannerCommands() {
-        PathPlannerCommands.addCommand("Request Idle State", requestStateCommand(MacroState.IDLE));
-        PathPlannerCommands.addCommand("Request Scoring State", requestStateCommand(MacroState.SCORING));
-        PathPlannerCommands.addCommand("Request Shuttling State", requestStateCommand(MacroState.SHUTTLING));
-        PathPlannerCommands.addCommand("Request Intaking State", requestStateCommand(MacroState.INTAKING));
-        PathPlannerCommands.addCommand("Request Climbing State", requestStateCommand(MacroState.CLIMBING));
-        PathPlannerCommands.addCommand("Request SS Scoring State", requestStateCommand(MacroState.STEADY_STREAM_SCORING));
-        PathPlannerCommands.addCommand("Request SS Shuttling State", requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        System.out.println("[StateHandler] Added StateHandler Commands to PathPlanner");
 
-        PathPlannerCommands.addCommand("Force Idle State", setCurrentStateCommand(MacroState.IDLE));
-        PathPlannerCommands.addCommand("Force Scoring State", setCurrentStateCommand(MacroState.SCORING));
-        PathPlannerCommands.addCommand("Force Shuttling State", setCurrentStateCommand(MacroState.SHUTTLING));
-        PathPlannerCommands.addCommand("Force Intaking State", setCurrentStateCommand(MacroState.INTAKING));
-        PathPlannerCommands.addCommand("Force Climbing State", setCurrentStateCommand(MacroState.CLIMBING));
-        PathPlannerCommands.addCommand("Force SS Scoring State", setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
-        PathPlannerCommands.addCommand("Force SS Shuttling State", setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        PathPlannerCommands.addCommand("Request Idle State", this.requestStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Request Scoring State", this.requestStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Request Shuttling State", this.requestStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Request Intaking State", this.requestStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Request Climbing State", this.requestStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Request ClimbAndScore State", this.requestStateCommand(MacroState.CLIMB_AND_SCORE));
+        PathPlannerCommands.addCommand("Request SS Scoring State", this.requestStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Request SS Shuttling State", this.requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+
+        PathPlannerCommands.addCommand("Force Idle State", this.setCurrentStateCommand(MacroState.IDLE));
+        PathPlannerCommands.addCommand("Force Scoring State", this.setCurrentStateCommand(MacroState.SCORING));
+        PathPlannerCommands.addCommand("Force Shuttling State", this.setCurrentStateCommand(MacroState.SHUTTLING));
+        PathPlannerCommands.addCommand("Force Intaking State", this.setCurrentStateCommand(MacroState.INTAKING));
+        PathPlannerCommands.addCommand("Force Climbing State", this.setCurrentStateCommand(MacroState.CLIMBING));
+        PathPlannerCommands.addCommand("Force ClimbAndScore State", this.setCurrentStateCommand(MacroState.CLIMB_AND_SCORE));
+        PathPlannerCommands.addCommand("Force SS Scoring State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
+        PathPlannerCommands.addCommand("Force SS Shuttling State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
     }
 }

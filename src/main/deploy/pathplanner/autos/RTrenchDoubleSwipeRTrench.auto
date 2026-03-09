@@ -1,0 +1,49 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchSwipe1RTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchToRScore"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RScoreToRTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchSwipe2RTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchToRScore"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "Right Trench",
+  "choreoAuto": false
+}
