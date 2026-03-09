@@ -51,6 +51,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -299,12 +300,12 @@ public class SK26Turret extends SubsystemBase
                 turretRotation));
         }
         
-        Logger.recordOutput("Turret/Angle (deg)", angle);
-        Logger.recordOutput("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
-        Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
-        Logger.recordOutput("Turret/At Target", atTarget());
-        Logger.recordOutput("Turret/Error (deg)", getTurretError());
-        Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
-        Logger.recordOutput("Turret/Wrapping", isWrapping());
+        SmartDashboard.putNumber("Turret/Angle (deg)", angle);
+        SmartDashboard.putNumber("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
+        SmartDashboard.putNumber("Turret/Target (deg)", getTargetAngleDegrees());
+        SmartDashboard.putBoolean("Turret/At Target", atTarget());
+        SmartDashboard.putNumber("Turret/Error (deg)", getTurretError());
+        SmartDashboard.putNumber("Turret/Motor Voltage Output", getMotorVoltage());
+        SmartDashboard.putBoolean("Turret/Wrapping", isWrapping());
     }
 }

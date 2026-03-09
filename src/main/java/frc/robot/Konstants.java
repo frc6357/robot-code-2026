@@ -321,7 +321,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullSpeed = 8.0;
+        public static final double kIndexerFullSpeed = -35.0;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleSpeed = 0.0;
@@ -338,7 +338,7 @@ public final class Konstants
         public static final Distance kIndexerHeight = Inches.of(18);
 
         // Max voltage output for indexer motor (for brownout protection)
-        public static final double kMaxIndexerVoltage = 10.0;
+        public static final double kMaxIndexerVoltage = 7.0;
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -413,7 +413,7 @@ public final class Konstants
         public static final double kTurretAngleTolerance = 0.5;
 
         // CANcoder / Absolute Encoder constants
-        public static final double kTurretEncoderOffset = -0.3828125; // Rotations (-0.5 to +0.5) //-0.111
+        public static final double kTurretEncoderOffset = -0.200928 ; // Rotations (-0.5 to +0.5) //-0.111
         public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
