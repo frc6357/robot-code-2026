@@ -12,6 +12,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.DriveConstants.kMaxAngularRate;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
@@ -433,8 +434,8 @@ public final class Konstants
         public static final double kTurretA = 1.542;
         public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
 
-        public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
-        public static final AngularAcceleration kMaxTurretMMAcceleration = DegreesPerSecondPerSecond.of(1320);
+        public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(1.25);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(2.5);
 
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
