@@ -1,6 +1,7 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.FeederConstants.kFeederRunningVelocity;
+import static frc.robot.Ports.OperatorPorts.kAbutton;
 
 import java.util.Optional;
 
@@ -44,7 +45,8 @@ public class SK26FeederBinder implements CommandBinder {
         if(feederSubsystem.isPresent()) 
         {
             SK26Feeder feeder = feederSubsystem.get();
-            runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
+            //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
+            kAbutton.button.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
         }
     }
     
