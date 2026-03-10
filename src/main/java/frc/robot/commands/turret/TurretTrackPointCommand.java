@@ -1,12 +1,12 @@
 package frc.robot.commands.turret;
 
 import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
+import static frc.robot.Konstants.TurretConstants.kTurretCoordinateOffset;
 
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
@@ -55,29 +55,28 @@ public class TurretTrackPointCommand extends Command
         // Get the target point position
         Translation2d target = targetPoint.getTargetPoint();
 
-        // Calculate the field-relative angle to the target (in degrees)
-        // atan2 gives angle from positive X-axis, counterclockwise positive
-        double desiredAngle = Math.toDegrees(
-            Math.signum(shooterPosition.getY() - targetPoint.getTargetPoint().getY()) *
-            Math.acos(
-                (shooterPosition.getX() - targetPoint.getTargetPoint().getX()) / 
-                shooterPosition.getDistance(targetPoint.getTargetPoint())))
-                 + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
-        if(Double.isNaN(desiredAngle)) {
-            desiredAngle = turret.getAngleDegrees();
+        // Calculate the field-relative angle FROM the shooter TO the target (in degrees)
+        // atan2(dy, dx) gives the angle from positive X-axis, counterclockwise positive
+        double dx = target.getX() - shooterPosition.getX();
+        double dy = target.getY() - shooterPosition.getY();
+        double fieldAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
+        
+        if(Double.isNaN(fieldAngleToTarget)) {
+            fieldAngleToTarget = robotHeadingDeg + turret.getAngleDegrees();
         }
 
         // Convert field-relative angle to robot-relative angle for the turret
-        // If robot is facing 0° and target is at 45° field-relative, turret should be at 45°
-        // If robot is facing 30° and target is at 45° field-relative, turret should be at 15°
-        double turretAngleDeg = desiredAngle - robotHeadingDeg;
+        // Standard robot-relative: 0° = front, +90° = left
+        // Turret coordinates: 0° = left, +90° = front
+        // turretAngle = (fieldAngle - robotHeading) - kTurretCoordinateOffset
+        double turretAngleDeg = fieldAngleToTarget - robotHeadingDeg - kTurretCoordinateOffset;
 
         double wrappedAngle = MathUtil.inputModulus(turretAngleDeg, -180, 180);
 
         turret.setAngleDegrees(wrappedAngle);
 
         // Debug output
-        Logger.recordOutput("TurretTrack/FieldAngleToTarget", desiredAngle);
+        Logger.recordOutput("TurretTrack/FieldAngleToTarget", fieldAngleToTarget);
         Logger.recordOutput("TurretTrack/WrappedDesiredAngle", wrappedAngle);
         Logger.recordOutput("TurretTrack/RobotHeading", robotHeadingDeg);
         Logger.recordOutput("TurretTrack/DesiredTurretAngle", turretAngleDeg);

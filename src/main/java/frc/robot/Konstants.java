@@ -11,6 +11,7 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -18,6 +19,7 @@ import static frc.robot.Konstants.DriveConstants.kMaxAngularRate;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
 
 import java.util.HashMap;
 import java.util.List;
@@ -414,27 +416,27 @@ public final class Konstants
         public static final double kTurretAngleTolerance = 6.7; // Degrees of tolerance for considering the turret "at position"
 
         // CANcoder / Absolute Encoder constants
-        public static final double kTurretEncoderOffset = -0.200928 ; // Rotations (-0.5 to +0.5) //-0.111
-        public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+        public static final double kTurretEncoderOffset = 0.200928 ; // Rotations (-0.5 to +0.5) - negated due to encoder inversion
+        public static final boolean kTurretEncoderInverted = true; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
         // TODO: Find the actual gearing ratio from the motor to the turret (motor rotations per turret rotation)
         public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
 
         // Motor direction - set true if motor spins opposite to encoder direction
-        public static final boolean kTurretMotorInverted = false;
+        public static final boolean kTurretMotorInverted = true;
 
         // Gain scheduler constants for turret PID control
-        public static final double kTurretGainSchedulerDeadbandDegrees = 1.5; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+        public static final double kTurretGainSchedulerDeadbandDegrees = 1.2; // 0.85 // Degrees of error until the turret's gain scheduler turns on
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 69.0;  // was 0.07 V/deg (20)
+        public static final double kTurretP = 60.0; //50.0  // was 0.07 V/deg (20)
         public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 2.0;   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.1; //(0.3)   // Static friction feedforward (volts)
-        public static final double kTurretV = 1.75; // 1.4    // Velocity feedforward (volts per rotation per second) 1.0
-        public static final double kTurretA = 0.25;   // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
+        public static final double kTurretS = 0.375; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 1.9; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.35; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
         public static final double kMaxTurretOutputVolts = 3.5; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
@@ -444,6 +446,12 @@ public final class Konstants
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
         public static final double kTurretJoystickDeadband = 0.15;
+
+        // Turret coordinate system offset
+        // Standard robot-relative: 0° = front, +90° = left (CCW positive)
+        // Turret coordinates: 0° = left, +90° = front
+        // To convert: turretAngle = standardAngle - kTurretCoordinateOffset
+        public static final double kTurretCoordinateOffset = 90.0;
 
         // Translation from center of robot to center of turret bearing
         public static final Translation3d kTurretCenter = new Translation3d(Inches.of(0.125), Inches.of(8.625), Inches.of(17.5));
@@ -503,8 +511,8 @@ public final class Konstants
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(Inches.of(-5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
-                new Rotation3d()                    // No rotation offset
+                new Translation3d(Inches.of(-5.75), Inches.of(5.534), Inches.of(19.874)),  // Placeholder: 0.5m height Was: 9.427
+                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.of(-kTurretEncoderOffset))                    // No rotation offset
             );
 
         // Phase delay compensation
@@ -586,9 +594,9 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to X degrees **/
-            kIntakeGroundPosition(90.0), //TODO This angle needs to be set to a safe angle above the ground
+            kIntakeGroundPosition(0), //TODO This angle needs to be set to a safe angle above the ground
             /** Set the intake angle to 0 degrees (zero position) **/
-            kIntakeZeroPosition(0.0); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
+            kIntakeZeroPosition(4.747); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
 
             public final double angle;
             IntakePosition(double angle)

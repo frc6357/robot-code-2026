@@ -327,7 +327,7 @@ public class SK26Turret extends SubsystemBase
                 turretRotation));
         }
         
-        Logger.recordOutput("Turret/Angle (deg)", angle);
+        Logger.recordOutput("Turret/Angle (deg)", cachedAngleDeg);
         Logger.recordOutput("Turret/Velocity (degpersec)", getAngularVelocityDegreesPerSecond());
         Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
         Logger.recordOutput("Turret/At Target", atTarget());

@@ -8,6 +8,7 @@ import static frc.robot.Konstants.LauncherConstants.kMinRangeMeters;
 import static frc.robot.Konstants.LauncherConstants.kPhaseDelaySeconds;
 
 import static frc.robot.Konstants.TurretConstants.kTurretBaseLeadTimeSeconds;
+import static frc.robot.Konstants.TurretConstants.kTurretCoordinateOffset;
 import static frc.robot.Konstants.TurretConstants.kTurretMaxLeadScale;
 import static frc.robot.Konstants.TurretConstants.kTurretMinLeadScale;
 import static frc.robot.Konstants.TurretConstants.kTurretReferenceYawVelocity;
@@ -293,7 +294,11 @@ public class ShootingCoordinator {
         double robotRotationCompensationDeg = robotYawVelocityDegPerSec * adaptiveLeadTime;
         robotRelativeAngleDeg -= robotRotationCompensationDeg;
         
-        return Degrees.of(robotRelativeAngleDeg);
+        // Convert from standard robot-relative (0° = front) to turret coordinates (0° = left, +90° = front)
+        // turretAngle = robotRelativeAngle - kTurretCoordinateOffset
+        double turretAngleDeg = robotRelativeAngleDeg - kTurretCoordinateOffset;
+        
+        return Degrees.of(turretAngleDeg);
     }
 
     /**

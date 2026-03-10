@@ -4,7 +4,7 @@
     "vision": false,
     "turret": true,
     "launcher": false,
-    "bangbanglauncher": true,
+    "bangbanglauncher": false,
     "lights": false,
     "indexer": false,
     "climb": false,

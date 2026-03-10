@@ -8,6 +8,7 @@ import frc.robot.commands.*;
 import frc.robot.subsystems.intake.SK26Intake;
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullSpeed;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.kIntakeZeroPosition;
+import static frc.robot.Ports.OperatorPorts.kBackbutton;
 
 // Imports from Java/WPILib
 import java.util.Optional;
@@ -47,6 +48,6 @@ public class SK26IntakeBinder implements CommandBinder
 
         intakeRollersFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullSpeed));
         // intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleSpeed)); There is no point for this. Just stop the intake
-        intakeZeroPosition.whileTrue(new IntakePivotCommand(intake, kIntakeZeroPosition));
+        kBackbutton.button.whileTrue(new IntakePivotCommand(intake, kIntakeZeroPosition));
     }
 }
