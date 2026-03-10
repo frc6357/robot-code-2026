@@ -1,6 +1,7 @@
 package frc.robot.bindings;
 
-import static frc.robot.Konstants.FeederConstants.kFeederRunningVelocity;
+import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
+import static frc.robot.Konstants.FeederConstants.kFeederWaitingVoltage;
 
 import java.util.Optional;
 
@@ -21,6 +22,7 @@ public class SK26FeederBinder implements CommandBinder {
     Trigger launcherAtSpeed;
 
     Trigger runFeederFromState;
+    Trigger runLowVoltage;
 
     /**
      * Binds the feeder subsystem to state-driven triggers.
@@ -37,6 +39,12 @@ public class SK26FeederBinder implements CommandBinder {
             .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
             .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
             .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
+
+        this.runLowVoltage = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SHUTTLING))
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.CLIMB_AND_SCORE));
     }
 
     @Override
@@ -44,7 +52,8 @@ public class SK26FeederBinder implements CommandBinder {
         if(feederSubsystem.isPresent()) 
         {
             SK26Feeder feeder = feederSubsystem.get();
-            runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
+            runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVoltage));
+            runLowVoltage.whileTrue(new FeederFeedCommand(feeder, kFeederWaitingVoltage));
         }
     }
     

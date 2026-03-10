@@ -6,6 +6,7 @@ import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -21,6 +22,7 @@ import org.littletonrobotics.junction.Logger;
 public class SK26Feeder extends SubsystemBase
 {
     private final SparkFlex feederMotor;
+    private final RelativeEncoder encoder;
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
@@ -36,6 +38,8 @@ public class SK26Feeder extends SubsystemBase
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         feederMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        encoder = feederMotor.getEncoder();
     }
 
     /**
@@ -83,6 +87,14 @@ public class SK26Feeder extends SubsystemBase
         setFeederVelocity(feederFeedRPS);
     }
 
+    public double getVoltage() {
+        return feederMotor.getAppliedOutput();
+    }
+
+    public double getVelocity() {
+        return encoder.getVelocity()/60;
+    }
+
     @Override
     public void periodic() {
         checkIfBallLaunched();
@@ -104,5 +116,7 @@ public class SK26Feeder extends SubsystemBase
 
     private void logOutputs() {
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
+        Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
+        Logger.recordOutput("Feeder/Current Voltage", getVoltage());
     }
 }
