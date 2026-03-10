@@ -70,7 +70,7 @@ public final class Konstants
         
         public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(1.25); // 3/4 of a rotation per second max angular velocity
         public static final AngularVelocity kMaxAngularRateFAST = kMaxAngularRate.times(2); // 1.5 rotations per second max angular velocity
-        public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
+        public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.333); // 1/4 of a rotation per second max angular velocity
         
         public static final LinearAcceleration kMaxTeleopLinAcceleration = kMaxSpeed.div(Seconds.of(0.33));
         public static final AngularAcceleration kMaxTeleopRotAcceleration = kMaxAngularRate.div(Seconds.of(0.33));
@@ -411,7 +411,7 @@ public final class Konstants
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;
-        public static final double kTurretAngleTolerance = 0.5;
+        public static final double kTurretAngleTolerance = 6.7; // Degrees of tolerance for considering the turret "at position"
 
         // CANcoder / Absolute Encoder constants
         public static final double kTurretEncoderOffset = -0.200928 ; // Rotations (-0.5 to +0.5) //-0.111
@@ -424,18 +424,22 @@ public final class Konstants
         // Motor direction - set true if motor spins opposite to encoder direction
         public static final boolean kTurretMotorInverted = false;
 
+        // Gain scheduler constants for turret PID control
+        public static final double kTurretGainSchedulerDeadbandDegrees = 1.5; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 20;  // was 0.07 V/deg
+        public static final double kTurretP = 69.0;  // was 0.07 V/deg (20)
         public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 0.0;   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.35;   // Static friction feedforward (volts)
-        public static final double kTurretV = 3.0;
-        public static final double kTurretA = 1.542;
-        public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
+        public static final double kTurretD = 2.0;   // was 0.005 V/(deg/s)
+        public static final double kTurretS = 0.1; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 1.75; // 1.4    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.25;   // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kMaxTurretOutputVolts = 3.5; // Max voltage output to turret motor (for brownout protection)
 
-        public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(1.25);
-        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(2.5);
+        public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(6.0);
+        public static final double kMaxTurretMMJerk = kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond) * 10; // Jerk is typically 10x acceleration
 
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection

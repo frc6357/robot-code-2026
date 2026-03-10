@@ -18,6 +18,8 @@ import static frc.robot.Ports.OperatorPorts.kRightStickX;
 import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
+
+import frc.robot.RobotContainer;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.turret.TurretButtonCommand;
@@ -41,8 +43,8 @@ public class SK26TurretBinder implements CommandBinder
         this.swerveSubsystem = swerveSubsystem;
         slewLimiter = new SlewRateLimiter(kManualTurretSpeed * 1.75);
 
-        PointAtHub = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+        PointAtHub = (StateHandler.whenCurrentState(MacroState.SCORING)
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))).and(() -> RobotContainer.m_shootingCoordinatorInstance == null);
 
         PointAtShuttlePoint = StateHandler.whenCurrentState(MacroState.SHUTTLING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
@@ -74,14 +76,8 @@ public class SK26TurretBinder implements CommandBinder
             // Field.isBlue() ? kBlueHub.point : kRedHub.point
         ).withName("TurretManualTrackHubCommand"));
 
-        // PointAtHub.whileTrue(
-        //     new TurretTrackPointCommand(
-        //         turret, 
-        //         swerve, 
-        //         (DriverStation.getAlliance().orElseGet(() -> DriverStation.Alliance.Blue) == DriverStation.Alliance.Blue ? kBlueHub.point : kRedHub.point))
-        //     .withName("TurretTrackHubCommand"));
-        // PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
-        //     .withName("TurretTrackShuttleCommand"));
+        PointAtHub.or(PointAtShuttlePoint).whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
+            .withName("TurretTrackOperatorCommand"));
 
 
         // Default command: Use the right joystick to manually move the turret when idle

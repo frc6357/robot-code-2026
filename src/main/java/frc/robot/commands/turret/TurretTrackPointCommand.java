@@ -1,5 +1,9 @@
 package frc.robot.commands.turret;
 
+import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
+
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -45,7 +49,7 @@ public class TurretTrackPointCommand extends Command
     public void execute()
     {
         // Get the robot's current position and rotation
-        Translation2d robotPosition = drive.getRobotPose().getTranslation();
+        Translation2d shooterPosition = drive.getRobotPose().getTranslation().plus(kRobotToShooter.getTranslation().toTranslation2d());
         double robotHeadingDeg = drive.getRobotRotation().getDegrees();
 
         // Get the target point position
@@ -54,10 +58,10 @@ public class TurretTrackPointCommand extends Command
         // Calculate the field-relative angle to the target (in degrees)
         // atan2 gives angle from positive X-axis, counterclockwise positive
         double desiredAngle = Math.toDegrees(
-            Math.signum(drive.getRobotPose().getTranslation().getY() - targetPoint.getTargetPoint().getY()) *
+            Math.signum(shooterPosition.getY() - targetPoint.getTargetPoint().getY()) *
             Math.acos(
-                (drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
-                drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))
+                (shooterPosition.getX() - targetPoint.getTargetPoint().getX()) / 
+                shooterPosition.getDistance(targetPoint.getTargetPoint())))
                  + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
         if(Double.isNaN(desiredAngle)) {
             desiredAngle = turret.getAngleDegrees();
@@ -73,11 +77,11 @@ public class TurretTrackPointCommand extends Command
         turret.setAngleDegrees(wrappedAngle);
 
         // Debug output
-        SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", desiredAngle);
-        SmartDashboard.putNumber("TurretTrack/WrappedDesiredAngle", wrappedAngle);
-        SmartDashboard.putNumber("TurretTrack/RobotHeading", robotHeadingDeg);
-        SmartDashboard.putNumber("TurretTrack/DesiredTurretAngle", turretAngleDeg);
-        SmartDashboard.putNumber("TurretTrack/DistanceToTarget", robotPosition.getDistance(target));
+        Logger.recordOutput("TurretTrack/FieldAngleToTarget", desiredAngle);
+        Logger.recordOutput("TurretTrack/WrappedDesiredAngle", wrappedAngle);
+        Logger.recordOutput("TurretTrack/RobotHeading", robotHeadingDeg);
+        Logger.recordOutput("TurretTrack/DesiredTurretAngle", turretAngleDeg);
+        Logger.recordOutput("TurretTrack/DistanceToTarget", shooterPosition.getDistance(target));
     }
 
     @Override

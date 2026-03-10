@@ -89,7 +89,7 @@ public class RobotContainer {
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
   public Optional<FuelDetection> m_fuelDetectionContainer = Optional.empty();
 
-  public Optional<ShootingCoordinator> shootingCoordinator = Optional.empty();
+  public Optional<ShootingCoordinator> m_shootingCoordinator = Optional.empty();
   public Optional<SK26Feeder> m_feederContainer = Optional.empty();
   
   public static SK26Turret m_turretInstance;
@@ -103,6 +103,8 @@ public class RobotContainer {
   public static SK26Indexer m_indexerInstance;
   public static SK26Feeder m_feederInstance;
   public static FuelDetection m_fuelDetectionInstance;
+  public static StateHandler m_stateHandlerInstance;
+  public static ShootingCoordinator m_shootingCoordinatorInstance;
 
 
   public static Field2d m_field = new Field2d();
@@ -147,6 +149,7 @@ public class RobotContainer {
 
             // The state handler should always be present
             m_stateHandlerContainer = Optional.of(new StateHandler());
+            m_stateHandlerInstance = m_stateHandlerContainer.get();
 
             if(Robot.isSimulation() && Robot.Mode == RobotMode.CONTROLLED) {
                 if(subsystems.isSwervePresent()) {
@@ -244,7 +247,8 @@ public class RobotContainer {
             if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
             {
                 // If both launcher and turret are present, create the shooting coordinator
-                shootingCoordinator = Optional.of(new ShootingCoordinator(m_BBLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
+                m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_BBLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
+                m_shootingCoordinatorInstance = m_shootingCoordinator.get();
             }
 
             // Give StateHandler a reference to the launcher for state readiness checking
@@ -281,7 +285,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
-        buttonBinders.add(new SK26ShootingCoordinatorBinder(shootingCoordinator));
+        buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
         // Traversing through all the binding classes to actually bind the buttons
