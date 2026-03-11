@@ -5,9 +5,8 @@ import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.IndexerFeedCommand;
-import frc.robot.commands.turret.TurretButtonCommand;
 import frc.robot.subsystems.indexer.SK26Indexer;
-import static frc.robot.Konstants.IndexerConstants.kIndexerFullSpeed;
+import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
 import static frc.robot.Ports.OperatorPorts.kUpDpad;
 
 // Imports from Java/WPILib
@@ -44,7 +43,7 @@ public class SK26IndexerBinder implements CommandBinder
 
         SK26Indexer indexer = indexerSubsystem.get();
 
-        kUpDpad.button.and(IsIdle).whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed));
+        kUpDpad.button.and(IsIdle).whileTrue(new IndexerFeedCommand(indexer, kIndexerFullVoltage));
         //IndexFeed.whileTrue(new IndexerFeedCommand(indexer, kIndexerFullSpeed)); //TODO Bring this back after testing
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead

@@ -1,9 +1,8 @@
 package frc.robot.subsystems.indexer;
 
 // Imports from robot
-import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
+import static frc.robot.Konstants.IndexerConstants.kIndexerIdleVoltage;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
-
 import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
@@ -87,56 +86,44 @@ public class SK26Indexer extends SubsystemBase
         indexerMotor.setVoltage(voltage);
     }
 
-    /**
-     * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
-     * Internally converts to voltage control.
-     * @param velocity The desired velocity in RPS.
-     */
-    public void setIndexerVelocity(double velocity) {
-        double voltage = (velocity / kNeoVortexFreeSpeedRPS) * 12.0;
-        setIndexerVoltage(voltage);
-    }
-
-    public Command setIndexerVelCommand(double velocityRPS) {
-        return run(() -> setIndexerVelocity(velocityRPS));
-    }
-
-    public Command setIndexerVoltageCommand(double voltage) {
-        return run(() -> setIndexerVoltage(voltage));
-    }
-
-    public void idleIndexer() {
-        setIndexerVelocity(kIndexerIdleSpeed);
+    public void idleIndexer() 
+    {
+        setIndexerVoltage(kIndexerIdleVoltage);
     }
 
     /**
      * Feeds fuel by setting the indexer to the feed speed.
      * @param indexerFeedRPS The feed speed in RPS.
      */
-    public void feedFuel(double indexerFeedRPS) {
-        setIndexerVelocity(indexerFeedRPS);
+    public void feedFuel(double voltage) 
+    {
+        setIndexerVoltage(voltage);
     }
 
     /**
      * Runs the indexer at the speed, specifically for unjamming purposes.
      * @param speed The speed to target in RPS.
      */
-    public void unjamIndexer(double speed) {
-        setIndexerVelocity(speed);
+    public void unjamIndexer(double voltage) 
+    {
+        setIndexerVoltage(voltage);
     }
 
     /** Returns the current tracked ball count in the indexer. */
-    public int getNumBalls() {
+    public int getNumBalls() 
+    {
         return numBallsInIndexer;
     }
 
     /** Sets the tracked ball count (e.g. after a reset or manual correction). */
-    public void setNumBalls(int count) {
+    public void setNumBalls(int count) 
+    {
         numBallsInIndexer = count;
     }
 
     /** Call when a ball enters the indexer (e.g. from the intake sensor). */
-    public void incrementBallCount() {
+    public void incrementBallCount() 
+    {
         numBallsInIndexer++;
     }
 

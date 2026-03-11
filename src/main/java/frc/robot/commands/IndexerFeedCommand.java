@@ -9,14 +9,13 @@ public class IndexerFeedCommand extends Command
 {
 
     private final SK26Indexer Subsystem;
-
-    double velocity;
+    double voltage;
 
     // Constructor
-    public IndexerFeedCommand(SK26Indexer Subsystem, double velocity)
+    public IndexerFeedCommand(SK26Indexer Subsystem, double voltage)
     {
         this.Subsystem = Subsystem;
-        this.velocity = velocity;
+        this.voltage = voltage;
         addRequirements(Subsystem);
     }
 
@@ -25,7 +24,7 @@ public class IndexerFeedCommand extends Command
     public void initialize()
     {
         Subsystem.setStatus(IndexerStatus.FEEDING);
-        Subsystem.feedFuel(velocity);
+        Subsystem.feedFuel(voltage);
     }
 
     // This command never finishes on its own
