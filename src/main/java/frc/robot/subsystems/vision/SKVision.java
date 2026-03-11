@@ -46,8 +46,7 @@ public class SKVision extends SubsystemBase {
     */
     public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
-    public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
-    public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
+    public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
     
     // Array of all limelights
     public final Limelight[] allLimelights = {turretLL, backLL}; 

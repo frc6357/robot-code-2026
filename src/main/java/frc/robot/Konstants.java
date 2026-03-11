@@ -271,8 +271,8 @@ public final class Konstants
             public static final String kName = "limelight-turret"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = Units.inchesToMeters(-8.0); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Units.inchesToMeters(-13.25); // (x) meters right of center; negative is left
+            public static final double kForward = Units.inchesToMeters(-5.729); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Units.inchesToMeters(-12.018); // (x) meters right of center; negative is left
             public static final double kUp = Units.inchesToMeters(17.833); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
@@ -299,23 +299,6 @@ public final class Konstants
             public static final boolean kAttached = true;
         }
 
-        public static final class LimelightFour {
-            // Network/pipeline values
-            public static final String kName = "limelight-four"; // NetworkTable name and hostname
-
-            // Translation (in meters) from center of robot
-            public static final double kForward = Inches.of(-9).in(Meters); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Inches.of(6).in(Meters); // (x) meters right of center; negative is left
-            public static final double kUp = Inches.of(13.5).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
-
-            // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
-
-            public static final boolean kAttached = true;
-        }
-
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
@@ -323,21 +306,13 @@ public final class Konstants
         // The turret pivot point in WPILib robot-space (X=forward, Y=left, Z=up) in meters.
         // Derived from the turret LL position at turret 0° and the known 6.718" offset
         // from the LL to the turret center (behind the LL when it faces left/west).
-        //   forward: same as LL (-8.0")
-        //   left:    LL is at +13.25" left, pivot is 6.718" behind (toward right = less left) → 13.25 - 6.718 = 6.532"
+        //   forward: same as LL (-5.729")
+        //   left:    LL is at +12.018" left, pivot is 6.718" behind (toward right = less left) → 12.018 - 6.718 = 5.318" left
         //   up:      same as LL (17.833")
         public static final Translation3d kTurretPivotInRobotSpace = new Translation3d(
-            Units.inchesToMeters(-8.0),   // forward  (same as turret LL)
-            Units.inchesToMeters(6.532),  // left     (WPILib Y=left; LL right was -6.532, so left = +6.532)
+            Units.inchesToMeters(-5.729),   // forward  (same as turret LL)
+            Units.inchesToMeters(5.318),  // left     (WPILib Y=left; LL right was -6.532, so left = +5.318 from center)
             Units.inchesToMeters(17.833)); // up       (same as turret LL)
-
-        //TODO: look into this piece of crap
-        // Translation from the turret limelight to the center of the turret
-        public static final Translation2d kTurretCenterFromLimelight = new Translation2d
-            (Inches.of(0.0), Inches.of(6.718));
-
-
-        
     }
 
     public static final class IndexerConstants 
@@ -439,7 +414,6 @@ public final class Konstants
         public static final boolean kTurretEncoderInverted = true; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
-        // TODO: Find the actual gearing ratio from the motor to the turret (motor rotations per turret rotation)
         public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
 
         // Motor direction - set true if motor spins opposite to encoder direction

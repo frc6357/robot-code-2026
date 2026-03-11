@@ -49,21 +49,13 @@ public final class VisionConfig {
                                         .withRotation(TurretLimelight.kRoll, TurretLimelight.kPitch, TurretLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(TurretLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
 
-    public static final String LL_THREE = LimelightThree.kName;
-    public static final int THREE_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig THREE_CONFIG = 
+    public static final String LL_INTAKE = LimelightThree.kName;
+    public static final int INTAKE_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig INTAKE_CONFIG = 
                                         new LimelightConfig(LimelightThree.kName)
                                         .withTranslation(LimelightThree.kForward, LimelightThree.kRight, LimelightThree.kUp)
                                         .withRotation(LimelightThree.kRoll, LimelightThree.kPitch, LimelightThree.kYaw)
                                         .withAttached(LimelightThree.kAttached);
-
-    public static final String LL_FOUR = LimelightFour.kName;
-    public static final int FOUR_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig FOUR_CONFIG = 
-                                        new LimelightConfig(LimelightFour.kName)
-                                        .withTranslation(LimelightFour.kForward, LimelightFour.kRight, LimelightFour.kUp)
-                                        .withRotation(LimelightFour.kRoll, LimelightFour.kPitch, LimelightFour.kYaw)
-                                        .withAttached(LimelightFour.kAttached);
 
 
     // Standard deviations for vision measurements (in meters and degrees)

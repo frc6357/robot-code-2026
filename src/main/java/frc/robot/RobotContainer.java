@@ -189,7 +189,7 @@ public class RobotContainer {
                     m_feederInstance = m_feederContainer.get();
                 }
                 if(subsystems.isFuelDetectionPresent()) {
-                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.INTAKE_CONFIG, m_swerveContainer));
                     m_fuelDetectionInstance = m_fuelDetectionContainer.get();
                 }
             }
@@ -239,7 +239,7 @@ public class RobotContainer {
                     m_feederInstance = m_feederContainer.get();
                 }
                 if(subsystems.isFuelDetectionPresent()) {
-                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.THREE_CONFIG, m_swerveContainer));
+                    m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.INTAKE_CONFIG, m_swerveContainer));
                     m_fuelDetectionInstance = m_fuelDetectionContainer.get();
                 }
             }
