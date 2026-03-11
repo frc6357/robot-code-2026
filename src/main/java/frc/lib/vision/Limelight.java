@@ -46,6 +46,8 @@ public class Limelight {
 
         /**
          * Applies the translation of the limelight from the center of the robot.
+         * The raw fields (forward, right, up) use Limelight convention (right-positive).
+         * The cameraPose3d stores the equivalent in WPILib convention (Y = left-positive).
          * @param forward (meters) forward from center of robot
          * @param right (meters) right from center of robot
          * @param up (meters) up from center of robot
@@ -55,12 +57,18 @@ public class Limelight {
             this.forward = forward;
             this.right = right;
             this.up = up;
-            this.cameraPose3d = new Pose3d(forward, right, up, cameraPose3d.getRotation());
+            // WPILib convention: X = forward, Y = LEFT (negate right), Z = up
+            this.cameraPose3d = new Pose3d(forward, -right, up, cameraPose3d.getRotation());
             return this;
         }
 
         /**
          * Applies the rotation of the limelight from its default position.
+         * The raw fields (roll, pitch, yaw) use Limelight convention.
+         * The cameraPose3d stores the equivalent in WPILib convention:
+         *   - roll:  positive = lean right (same as LL)
+         *   - pitch: positive = nose DOWN  (LL positive = nose UP, so negate)
+         *   - yaw:   positive = CCW        (same as LL)
          * @param roll (degrees) roll of limelight || positive is rotated right
          * @param pitch (degrees) pitch of limelight || positive is camera tilted up
          * @param yaw (degrees) yaw of limelight || positive is rotated left
@@ -70,9 +78,10 @@ public class Limelight {
             this.roll = roll;
             this.pitch = pitch;
             this.yaw = yaw;
+            // WPILib convention: roll same sign, pitch NEGATED, yaw same sign
             this.cameraPose3d = new Pose3d(cameraPose3d.getTranslation(), new Rotation3d(
                 Units.degreesToRadians(roll), 
-                Units.degreesToRadians(pitch), 
+                Units.degreesToRadians(-pitch), 
                 Units.degreesToRadians(yaw)));
             return this;
         }
@@ -157,13 +166,15 @@ public class Limelight {
     }
 
     /**
-     * Sets the Limelight's camera pose in robot space using the provided translation and rotation values. This is used when the limelight's position on the robot changes, such as with a turret limelight.
+     * Sets the Limelight's camera pose in robot space using the provided translation and rotation values
+     * in Limelight convention. This is used when the limelight's position on the robot changes, such as
+     * with a turret limelight. Prefer {@link #setCameraPoseInRobotSpace(Pose3d)} for WPILib-convention input.
      * @param forward The distance of the limelight forward from the center of the robot in meters, where positive is forward.
      * @param right The distance of the limelight right from the center of the robot in meters, where positive is right.
      * @param up The distance of the limelight up from the center of the robot in meters, where positive is up.
-     * @param roll The roll of the limelight in degrees, where positive is rotated right.
-     * @param pitch The pitch of the limelight in degrees, where positive is rotated up.
-     * @param yaw The yaw of the limelight in degrees, where positive is rotated clockwise.
+     * @param roll The roll of the limelight in degrees, where positive is tilted right.
+     * @param pitch The pitch of the limelight in degrees, where positive is tilted up.
+     * @param yaw The yaw of the limelight in degrees, where positive is rotated left (CCW from above).
      */
     public void setCameraPoseInRobotSpace(double forward, double right, double up, double roll, double pitch, double yaw) {
         if (!isAttached()) {
@@ -179,18 +190,24 @@ public class Limelight {
             yaw);
     }
 
+    /**
+     * Sets the Limelight's camera pose in robot space from a WPILib-convention Pose3d.
+     * Converts from WPILib (X=forward, Y=left, Z=up, pitch+=nose-down) to
+     * Limelight convention (forward, right, up, pitch+=nose-up).
+     * @param pose WPILib-convention Pose3d representing the camera pose in robot space.
+     */
     public void setCameraPoseInRobotSpace(Pose3d pose) {
         if (!isAttached()) {
             return;
         }
         LimelightHelpers.setCameraPose_RobotSpace(
             config.name, 
-            pose.getTranslation().getX(), 
-            pose.getTranslation().getY(), 
-            pose.getTranslation().getZ(), 
-            Units.radiansToDegrees(pose.getRotation().getX()), 
-            Units.radiansToDegrees(pose.getRotation().getY()), 
-            Units.radiansToDegrees(pose.getRotation().getZ()));
+            pose.getTranslation().getX(),             // forward (same)
+            -pose.getTranslation().getY(),            // side: WPILib Y=left → LL side=right (negate)
+            pose.getTranslation().getZ(),             // up (same)
+            Units.radiansToDegrees(pose.getRotation().getX()),    // roll (same sign)
+            -Units.radiansToDegrees(pose.getRotation().getY()),   // pitch: WPILib=nose-down → LL=nose-up (negate)
+            Units.radiansToDegrees(pose.getRotation().getZ()));   // yaw (same sign, both CCW+)
     }
 
     /* ::: Basic Information Retrieval ::: */

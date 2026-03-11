@@ -320,11 +320,23 @@ public final class Konstants
             public static double kRejectDistance = 1.4; // 1.4m
         }
 
-    
+        // The turret pivot point in WPILib robot-space (X=forward, Y=left, Z=up) in meters.
+        // Derived from the turret LL position at turret 0° and the known 6.718" offset
+        // from the LL to the turret center (behind the LL when it faces left/west).
+        //   forward: same as LL (-8.0")
+        //   left:    LL is at +13.25" left, pivot is 6.718" behind (toward right = less left) → 13.25 - 6.718 = 6.532"
+        //   up:      same as LL (17.833")
+        public static final Translation3d kTurretPivotInRobotSpace = new Translation3d(
+            Units.inchesToMeters(-8.0),   // forward  (same as turret LL)
+            Units.inchesToMeters(6.532),  // left     (WPILib Y=left; LL right was -6.532, so left = +6.532)
+            Units.inchesToMeters(17.833)); // up       (same as turret LL)
+
         //TODO: look into this piece of crap
         // Translation from the turret limelight to the center of the turret
         public static final Translation2d kTurretCenterFromLimelight = new Translation2d
             (Inches.of(0.0), Inches.of(6.718));
+
+
         
     }
 

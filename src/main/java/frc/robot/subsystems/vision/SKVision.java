@@ -7,6 +7,7 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Konstants.VisionConstants.kAprilTagFieldLayout;
 import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
 import static frc.robot.Konstants.VisionConstants.kTurretCenterFromLimelight;
+import static frc.robot.Konstants.VisionConstants.kTurretPivotInRobotSpace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -111,16 +112,20 @@ public class SKVision extends SubsystemBase {
         tagLOSTransforms.clear();
 
         for(Limelight ll : poseLimelights) {
-            ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
             if(ll == turretLL) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
                     continue;
                 }
-                //TODO FIX THIS PIECE OF CRAP
-                // ll.setCameraPoseInRobotSpace(
-                //     ll.getConfig().getCameraPose3d().getTranslation()
+                // Rotate the turret LL's 0° pose around the turret pivot by the current turret angle.
+                // cameraPose3d uses WPILib convention (X=forward, Y=left, Z=up).
+                // WPILib +Z rotation = CCW from above, which matches the turret's CCW-positive convention.
+                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()));
+                Pose3d dynamicCameraPose = ll.getConfig().getCameraPose3d()
+                    .rotateAround(kTurretPivotInRobotSpace, turretRotation);
+                ll.setCameraPoseInRobotSpace(dynamicCameraPose);
             }
+            ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
             scanForTags(ll);
         }
 
