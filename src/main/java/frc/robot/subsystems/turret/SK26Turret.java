@@ -3,7 +3,6 @@ package frc.robot.subsystems.turret;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -44,7 +43,6 @@ import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -88,8 +86,6 @@ public class SK26Turret extends SubsystemBase
     
     // MotionMagic position control request (Phoenix6 firmware-side closed loop)
     private final MotionMagicVoltage motionMagicControl = new MotionMagicVoltage(0.0);
-
-    private final PositionVoltage positionControl = new PositionVoltage(0.0).withSlot(0).withEnableFOC(true);
 
     // Voltage-only control for SysId (no closed loop)
     private final VoltageOut voltageControl = new VoltageOut(0.0);

@@ -6,7 +6,6 @@ import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static frc.robot.Konstants.VisionConstants.kAprilTagFieldLayout;
 import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
-import static frc.robot.Konstants.VisionConstants.kTurretCenterFromLimelight;
 import static frc.robot.Konstants.VisionConstants.kTurretPivotInRobotSpace;
 
 import java.util.ArrayList;
