@@ -12,7 +12,7 @@ import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
-import frc.robot.Konstants.VisionConstants.FrontLimelight;
+import frc.robot.Konstants.VisionConstants.BackLimelight;
 import frc.robot.Konstants.VisionConstants.TurretLimelight;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -32,13 +32,14 @@ public final class VisionConfig {
                                         .withRotation(RightLimelight.kRoll, RightLimelight.kPitch, RightLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(RightLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
     */
-    public static final String FRONT_LL = FrontLimelight.kName;
-    public static final int FRONT_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig FRONT_CONFIG = 
-                                        new LimelightConfig(FrontLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
-                                        .withTranslation(FrontLimelight.kForward, FrontLimelight.kRight, FrontLimelight.kUp) // Feeds in the position of the limelight on the bot
-                                        .withRotation(FrontLimelight.kRoll, FrontLimelight.kPitch, FrontLimelight.kYaw) // Feeds in rotation of limelight
-                                        .withAttached(FrontLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+    public static final String BACK_LL = BackLimelight.kName;
+    public static final int BACK_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig BACK_CONFIG = 
+                                        new LimelightConfig(BackLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
+                                        .withTranslation(BackLimelight.kForward, BackLimelight.kRight, BackLimelight.kUp) // Feeds in the position of the limelight on the bot
+                                        .withRotation(BackLimelight.kRoll, BackLimelight.kPitch, BackLimelight.kYaw) // Feeds in rotation of limelight
+                                        .withAttached(BackLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+    
     
     public static final String TURRET_LL = TurretLimelight.kName;
     public static final int TURRET_TAG_PIPELINE = kAprilTagPipeline;

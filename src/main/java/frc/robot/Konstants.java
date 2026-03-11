@@ -248,21 +248,21 @@ public final class Konstants
         }
         */
 
-        public static final class FrontLimelight {
+        public static final class BackLimelight {
             // Network/pipeline values
-            public static final String kName = "limelight-front"; // NetworkTable name and hostname
+            public static final String kName = "limelight-back"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = 0.3; // (z) meters forward of center; negative is backwards
-            public static final double kRight = 0.0; // (x) meters right of center; negative is left
-            public static final double kUp = 0.25; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+            public static final double kForward = Inches.of(-11.5).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(11.25).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(8.75).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kPitch = 15; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 205; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = false;
+            public static final boolean kAttached = true;
         }
 
         /* NOTE: this config should be representative of the Limelight's position when the turret is at 0 degrees */
@@ -272,15 +272,15 @@ public final class Konstants
 
             // Translation (in meters) from center of robot
             public static final double kForward = Units.inchesToMeters(-8.0); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Units.inchesToMeters(-9.5); // (x) meters right of center; negative is left
-            public static final double kUp = Units.inchesToMeters(19.625); // (y) meters up of center; negative is down (how did you get a limelight down there???)
+            public static final double kRight = Units.inchesToMeters(-13.25); // (x) meters right of center; negative is left
+            public static final double kUp = Units.inchesToMeters(17.833); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 180; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 1; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 9; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 90; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = false;
+            public static final boolean kAttached = true;
         }
         public static final class LimelightThree {
             // Network/pipeline values
@@ -319,6 +319,13 @@ public final class Konstants
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
+
+    
+        //TODO: look into this piece of crap
+        // Translation from the turret limelight to the center of the turret
+        public static final Translation2d kTurretCenterFromLimelight = new Translation2d
+            (Inches.of(0.0), Inches.of(6.718));
+        
     }
 
     public static final class IndexerConstants 
@@ -452,9 +459,6 @@ public final class Konstants
         // Turret coordinates: 0° = left, +90° = front
         // To convert: turretAngle = standardAngle - kTurretCoordinateOffset
         public static final double kTurretCoordinateOffset = 90.0;
-
-        // Translation from center of robot to center of turret bearing
-        public static final Translation3d kTurretCenter = new Translation3d(Inches.of(0.125), Inches.of(8.625), Inches.of(17.5));
 
         // Turret lead angle compensation (Option 3 framework with Option 2 defaults)
         // Lead formula: leadAngle = yawVelocity × baseLeadTime × scaleFactor

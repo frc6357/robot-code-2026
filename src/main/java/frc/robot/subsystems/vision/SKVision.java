@@ -4,9 +4,9 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.Konstants.TurretConstants.kTurretCenter;
 import static frc.robot.Konstants.VisionConstants.kAprilTagFieldLayout;
 import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
+import static frc.robot.Konstants.VisionConstants.kTurretCenterFromLimelight;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +44,15 @@ public class SKVision extends SubsystemBase {
     /* Example:
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
-    public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
+    public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
     public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
     public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {threeLL, fourLL}; 
+    public final Limelight[] allLimelights = {turretLL, backLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {fourLL}; 
+    public final Limelight[] poseLimelights = {turretLL, backLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
@@ -117,9 +117,9 @@ public class SKVision extends SubsystemBase {
                     ll.setLogStatus("Disabled");
                     continue;
                 }
-                ll.setCameraPoseInRobotSpace(
-                    ll.getConfig().getCameraPose3d()
-                    .rotateAround(kTurretCenter, new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()))));
+                //TODO FIX THIS PIECE OF CRAP
+                // ll.setCameraPoseInRobotSpace(
+                //     ll.getConfig().getCameraPose3d().getTranslation()
             }
             scanForTags(ll);
         }
