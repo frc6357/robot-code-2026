@@ -611,6 +611,14 @@ public final class Konstants
             }
         }
 
+        // PID Constants
+        public static final double kPositionerKp = 0.0;
+        public static final double kPositionerKi = 0.0;
+        public static final double kPositionerKd = 0.0;
+        public static final double kPositionerKs = 0.0;
+        public static final double kPositionerKv = 0.0;
+        public static final double kPositionerKa = 0.0;
+
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
 
@@ -619,8 +627,8 @@ public final class Konstants
 
         public static final double kMaxIntakeVoltage = 10.0;
 
-        public static final double kIntakeFullSpeed = 8.0;
-        public static final double kIntakeIdleSpeed = 2.0;
+        public static final double kIntakeFullVoltage = 8.0;
+        public static final double kIntakeIdleVoltage = 0.0;
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

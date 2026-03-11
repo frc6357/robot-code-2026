@@ -7,13 +7,13 @@ import frc.robot.subsystems.intake.SK26Intake;
 public class IntakeCommand extends Command {
 
     private final SK26Intake intake;
-    double velocity;
+    double voltage;
 
     // Constructor
-    public IntakeCommand(SK26Intake intake, double velocity)
+    public IntakeCommand(SK26Intake intake, double voltage)
     {
         this.intake = intake;
-        this.velocity = velocity;
+        this.voltage = voltage;
 
         addRequirements(intake);
     }
@@ -22,7 +22,7 @@ public class IntakeCommand extends Command {
     @Override
     public void initialize()
     {
-        intake.setIntakeVelocity(velocity);
+        intake.setIntakeVoltage(voltage);
     }
 
     // This command never finishes on its own

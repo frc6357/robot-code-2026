@@ -7,7 +7,8 @@ import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.*;
 import frc.robot.subsystems.intake.SK26Intake;
 
-import static frc.robot.Konstants.IntakeConstants.kIntakeFullSpeed;
+import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
+import static frc.robot.Konstants.IntakeConstants.kIntakeIdleVoltage;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.kIntakeZeroPosition;
 import static frc.robot.Ports.OperatorPorts.kBackbutton;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
@@ -48,9 +49,9 @@ public class SK26IntakeBinder implements CommandBinder
         
         SK26Intake intake = intakeSubsystem.get();
 
-        // intakeRollersFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullSpeed));
-        kLTrigger.button.whileTrue(new IntakeCommand(intake, kIntakeFullSpeed));
-        // intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleSpeed)); There is no point for this. Just stop the intake
+        // intakeRollersFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullVoltage));
+        kLTrigger.button.whileTrue(new IntakeCommand(intake, kIntakeFullVoltage));
+        // intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleVoltage));
         kBackbutton.button.whileTrue(new IntakePivotCommand(intake, kIntakeZeroPosition));
     }
 }
