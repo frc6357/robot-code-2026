@@ -318,7 +318,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = 5.0;
+        public static final double kIndexerFullVoltage = -5.0;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;

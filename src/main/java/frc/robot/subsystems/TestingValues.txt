@@ -1,0 +1,19 @@
+Intake Pivot:
+-3.95 (half-way point, motor rotations)
+0.0 (stow position, motor rotations)
+-4.45 (ground position, motor rotations)
+
+kG: (To tune, find the voltage where it barely moves up from deployed position) 1.65V works fine for the entire motion
+KG: 1.2V
+
+
+Intake Rollers:
+5.5 volts 
+
+Indexer:
+
+
+Launcher:
+
+
+

@@ -126,10 +126,13 @@ public class RobotContainer {
     // Configure the trigger bindings
     configureButtonBindings();
   
-    autoCommandSelector = new LoggedDashboardChooser<>("Select an Auto", AutoBuilder.buildAutoChooser());
+    if(m_swerveContainer.isPresent()) {
+        autoCommandSelector = new LoggedDashboardChooser<>("Select an Auto", AutoBuilder.buildAutoChooser());
+    }
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
-  }
   
+}
+
   /**
      * Will create all the optional subsystems using the json file in the deploy directory
      */

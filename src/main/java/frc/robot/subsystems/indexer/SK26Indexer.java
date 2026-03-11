@@ -7,6 +7,10 @@ import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
 import com.revrobotics.RelativeEncoder;
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
+import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
@@ -20,6 +24,8 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 
 /**
  * Indexer subsystem using CANrange sensor for gamepiece recognition
@@ -28,6 +34,16 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class SK26Indexer extends SubsystemBase
 {
+
+    Pref<Double> indexerVoltage = SKPreferences.attach("Indexer Voltage", 0.0)
+		.onChange((newValue) -> updateVoltage());
+
+    private void updateVoltage() 
+    {
+        targetVoltage = indexerVoltage.get();
+        indexerMotor.setVoltage(targetVoltage);
+    }
+
     // Neo Vortex free speed: ~113 RPS (6784 RPM) at 12V
     private static final double kNeoVortexFreeSpeedRPS = 113.0;
 
@@ -56,6 +72,7 @@ public class SK26Indexer extends SubsystemBase
 
     public SK26Indexer() 
     {
+        System.out.println("Indexer initialized");
         // ========== Motor Configuration ==========
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
