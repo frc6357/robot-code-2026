@@ -33,7 +33,7 @@ public class IntakeCompactCommand extends Command {
      * @param stowPosition The high position in rotations
      */
     public IntakeCompactCommand(SK26Intake intake, double groundPosition, double stowPosition) {
-        this(intake, groundPosition, stowPosition, 1.0);
+        this(intake, groundPosition, stowPosition, 0.67);
     }
 
     /**
