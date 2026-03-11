@@ -630,6 +630,7 @@ public final class Konstants
         public static final double kPositionerKs = 0.0;
         public static final double kPositionerKv = 0.0;
         public static final double kPositionerKa = 0.0;
+        public static final double kPositionerKG = 0.0;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;

@@ -3,6 +3,7 @@ package frc.robot.subsystems.intake;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
+import static frc.robot.Konstants.IntakeConstants.kPositionerKG;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKp;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKi;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKd;
@@ -132,6 +133,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 			.withKS(kPositionerKs)
 			.withKV(kPositionerKv)
 			.withKA(kPositionerKa)
+			.withKG(kPositionerKG)
 			.withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
 			.withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput);
 
