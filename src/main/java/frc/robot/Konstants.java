@@ -603,7 +603,7 @@ public final class Konstants
         }
 
         // PID Constants
-        public static final double kPositionerKp = 22.0; //20
+        public static final double kPositionerKp = 28.67; //20
         public static final double kPositionerKi = 6.0;
         public static final double kPositionerKd = 1.0;
         public static final double kPositionerKs = 0.0;

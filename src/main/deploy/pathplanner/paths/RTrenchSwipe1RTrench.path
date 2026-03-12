@@ -86,7 +86,21 @@
       "rotationDegrees": 135.0
     }
   ],
-  "constraintZones": [],
+  "constraintZones": [
+    {
+      "name": "Constraints Zone",
+      "minWaypointRelativePos": 0.6374071573261217,
+      "maxWaypointRelativePos": 2.506414584740045,
+      "constraints": {
+        "maxVelocity": 1.5,
+        "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    }
+  ],
   "pointTowardsZones": [],
   "eventMarkers": [
     {
@@ -96,7 +110,18 @@
       "command": null
     },
     {
-      "name": "Request SS Scoring State",
+      "name": "Intake Deploy",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Intake Deploy"
+        }
+      }
+    },
+    {
+      "name": "Request Scoring State",
       "waypointRelativePos": 3.4024390243902465,
       "endWaypointRelativePos": null,
       "command": null
@@ -112,7 +137,7 @@
   },
   "goalEndState": {
     "velocity": 1.25,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Right Trench",

@@ -19,13 +19,31 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchScoreAndDepot"
+            "pathName": "LTrenchToLScore"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 2.5
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchDepotToClimb"
+            "pathName": "LScoreToLTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchSwipe2LTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LTrenchToLScore"
           }
         }
       ]

@@ -308,5 +308,6 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	{
 		PathPlannerCommands.addCommand("Intake Deploy", this.runOnce(() -> setTargetPosition(IntakePosition.kGroundPosition.rotations)));
 		PathPlannerCommands.addCommand("Intake Stow", this.runOnce(() -> setTargetPosition(IntakePosition.kZeroPosition.rotations)));
+		System.out.println("[SK26Intake] PathPlanner commands added");
 	}
 }

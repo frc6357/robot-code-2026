@@ -5,15 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "LTrenchSwipe1LTrench"
+            "waitTime": 0.4
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToLScore"
+            "pathName": "RTrenchSwipe1RTrench"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "RTrenchToRScore"
           }
         },
         {
@@ -25,25 +31,25 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LScoreToLTrench"
+            "pathName": "RScoreToRTrench"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchSwipe2LTrench"
+            "pathName": "RTrenchSwipe2RTrench"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToLScore"
+            "pathName": "RTrenchToRScore"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Left Trench",
+  "folder": "Right Trench",
   "choreoAuto": false
 }

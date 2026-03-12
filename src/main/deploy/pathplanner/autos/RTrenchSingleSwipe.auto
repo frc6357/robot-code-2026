@@ -5,33 +5,15 @@
     "data": {
       "commands": [
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.4
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "RTrenchSwipe1RTrench"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RTrenchToRScore"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 2.5
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RScoreToRTrench"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "RTrenchSwipe2RTrench"
           }
         },
         {

@@ -516,8 +516,6 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     @Override
     public void addPathPlannerCommands() {
-        System.out.println("[StateHandler] Added StateHandler Commands to PathPlanner");
-
         PathPlannerCommands.addCommand("Request Idle State", this.requestStateCommand(MacroState.IDLE));
         PathPlannerCommands.addCommand("Request Scoring State", this.requestStateCommand(MacroState.SCORING));
         PathPlannerCommands.addCommand("Request Shuttling State", this.requestStateCommand(MacroState.SHUTTLING));
@@ -526,7 +524,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Request ClimbAndScore State", this.requestStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Request SS Scoring State", this.requestStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Request SS Shuttling State", this.requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
-
+        
         PathPlannerCommands.addCommand("Force Idle State", this.setCurrentStateCommand(MacroState.IDLE));
         PathPlannerCommands.addCommand("Force Scoring State", this.setCurrentStateCommand(MacroState.SCORING));
         PathPlannerCommands.addCommand("Force Shuttling State", this.setCurrentStateCommand(MacroState.SHUTTLING));
@@ -535,5 +533,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Force ClimbAndScore State", this.setCurrentStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Force SS Scoring State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Force SS Shuttling State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+
+        System.out.println("[StateHandler] Added commands to PathPlanner");
     }
 }
