@@ -23,14 +23,14 @@ public class FeederFeedCommand extends Command
     @Override
     public void initialize()
     {
-        Subsystem.setFeederVoltage(voltage);
+        Subsystem.feedFuel(voltage);
     }
 
     // This command never finishes on its own
     @Override
     public boolean isFinished()
     {
-        return false;
+        return true;
     }
 
     @Override

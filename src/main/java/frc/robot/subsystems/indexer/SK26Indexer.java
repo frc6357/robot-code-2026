@@ -77,7 +77,7 @@ public class SK26Indexer extends SubsystemBase
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
         config
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         indexerMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);

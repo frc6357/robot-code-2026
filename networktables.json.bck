@@ -182,5 +182,13 @@
     "properties": {
       "persistent": true
     }
+  },
+  {
+    "name": "/Preferences/BBLauncher/Prefs/Target Speed (RPM)",
+    "type": "double",
+    "value": 5000.0,
+    "properties": {
+      "persistent": true
+    }
   }
 ]

@@ -1,7 +1,7 @@
 package frc.robot.subsystems.feeder;
 
 import static frc.robot.Konstants.FeederConstants.kMaxFeederVoltage;
-import static frc.robot.Konstants.FeederConstants.kFeederIdleVelocity;
+import static frc.robot.Konstants.FeederConstants.kFeederIdleVoltage;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
@@ -53,38 +53,18 @@ public class SK26Feeder extends SubsystemBase
         feederMotor.setVoltage(voltage);
     }
 
-    /**
-     * Sets the velocity of the feeder motor in RPS (Rotations Per Second).
-     * Internally converts to voltage control.
-     * @param velocity The desired velocity in RPS.
-     */
-    public void setFeederVelocity(double velocity) {
-        // Neo Vortex free speed is ~113 RPS (6784 RPM) at 12V
-        // Convert RPS to voltage (approximate open-loop)
-        double voltage = (velocity / 113.0) * 12.0;
-        setFeederVoltage(voltage);
-    }
-
-    public Command setFeederVelCommand(double velocityRPS) {
-        return run(() -> setFeederVelocity(velocityRPS));
-    }
-
-    public Command setFeederVoltageCommand(double voltage) {
-        return run(() -> setFeederVoltage(voltage));
-    }
-
     public void idleFeeder() 
     {
-        setFeederVelocity(kFeederIdleVelocity);
+        setFeederVoltage(kFeederIdleVoltage);
     }
 
     /**
      * Feeds fuel by setting the feeder to the feed speed.
-     * @param feederFeedRPS The feed speed in RPS.
+     * @param feederVoltage The feed speed in RPS.
      */
-    public void feedFuel(double feederFeedRPS) 
+    public void feedFuel(double feederVoltage) 
     {
-        setFeederVelocity(feederFeedRPS);
+        setFeederVoltage(feederVoltage);
     }
 
     public double getVoltage() {

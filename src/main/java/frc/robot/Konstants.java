@@ -318,7 +318,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -5.0;
+        public static final double kIndexerFullVoltage = -3.0;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -569,9 +569,8 @@ public final class Konstants
         // Max voltage output for feeder motor (for brownout protection)
         public static final double kMaxFeederVoltage = 8.0;
 
-        public static final double kFeederIdleVelocity = 0.0;
-        public static final double kFeederRunningVelocity = 8.0;
-        public static final double kFeederRunningVoltage = 6.0;
+        public static final double kFeederIdleVoltage = 0.0;
+        public static final double kFeederRunningVoltage = 0.0;
         public static final double kFeederWaitingVoltage = 2.0;
     }
 
