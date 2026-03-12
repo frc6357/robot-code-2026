@@ -142,8 +142,8 @@ public class Ports
     public static class LauncherPorts {
         
         private static final String busName = "";
-        public static final CANPort kFixedLauncherMotor = new CANPort(40, busName);
-        public static final CANPort kFixedLauncherMotorFollower = new CANPort(41, busName);
+        public static final CANPort kLauncherFrontRollers = new CANPort(40, busName);
+        public static final CANPort kLauncherBackRollers = new CANPort(41, busName);
         public static final CANPort kFeederMotor = new CANPort(43, busName);
     }
     

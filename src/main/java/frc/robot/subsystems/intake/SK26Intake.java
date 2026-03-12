@@ -17,6 +17,7 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerMMJerk;
 import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKV;
 import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKA;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
 import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSensorToMechanismRatio;
 import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
@@ -57,6 +58,7 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 
@@ -88,6 +90,8 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 	private final StatusSignal<Angle> positionerAngleStatusSignal;
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
+
+	private String targetPositionEnum = "Off";
 
 	// // Preferences for tuning
 	// final Pref<Double> positionerKp = SKPreferences.attach("Intake/positionerKp", 0.0)
@@ -179,7 +183,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 			.withSensorToMechanismRatio(kPositionerSensorToMechanismRatio);
 
 		positionerMotor.getConfigurator().apply(positionerConfig);
-		positionerMotor.setPosition(IntakePosition.kZeroPosition.rotations);
+		positionerMotor.setPosition(IntakePosition.ZERO.rotations);
 
 		// ========== Positioner Follower Motor Configuration ==========
 		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);		
@@ -207,7 +211,8 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		positionerAngularVelocityStatusSignal = positionerMotor.getVelocity();
 
 		// Initialize position tracking
-		motorTargetPosition = IntakePosition.kZeroPosition.rotations;
+		motorTargetPosition = IntakePosition.ZERO.rotations;
+		targetPositionEnum = IntakePosition.ZERO.name();
 
 		addPathPlannerCommands();
 	}
@@ -253,7 +258,13 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void setPositionerPosition(IntakePosition angle) 
 	{
+		targetPositionEnum = angle.name();
 		setTargetPosition(angle.rotations);
+	}
+
+	public Command setIntakePivotTargetCommand(IntakePosition angle) 
+	{
+		return this.runOnce(() -> setPositionerPosition(angle));
 	}
 
 	/**
@@ -265,6 +276,11 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		voltage = MathUtil.clamp(voltage, -kMaxIntakeVoltage, kMaxIntakeVoltage);
 		targetVoltage = voltage;
 		intakeMotor.setControl(intakeVoltageControl.withOutput(voltage));
+	}
+
+	public Command runAtVoltageCommand(double voltage) 
+	{
+		return this.runOnce(() -> setIntakeVoltage(voltage));
 	}
 
 	/**
@@ -301,13 +317,14 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		Logger.recordOutput("Intake/Positioner Error (rot)", getTargetPosition() - getCurrentPosition());
 		Logger.recordOutput("Intake/Intake Voltage", targetVoltage);
 		Logger.recordOutput("Intake/Intake Velocity (RPS)", intakeMotor.getVelocity().getValueAsDouble());
+		Logger.recordOutput("Intake/Intake Target (enum)", targetPositionEnum);
 	}
 
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		PathPlannerCommands.addCommand("Intake Deploy", this.runOnce(() -> setTargetPosition(IntakePosition.kGroundPosition.rotations)));
-		PathPlannerCommands.addCommand("Intake Stow", this.runOnce(() -> setTargetPosition(IntakePosition.kZeroPosition.rotations)));
+		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(GROUND));
+		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.ZERO));
 		System.out.println("[SK26Intake] PathPlanner commands added");
 	}
 }

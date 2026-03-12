@@ -585,11 +585,11 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to -0.271 intake rotations */
-            kGroundPosition(-0.271),
+            GROUND(-0.271),
             /** Set the intake angle -0.113 intake rotations */
-            kCompactingPosition(-0.113),
+            COMPACTING(-0.113),
             /** Set the intake angle to 0 rotations (zero position) */
-            kZeroPosition(0.0);
+            ZERO(0.0);
             
 
             /**

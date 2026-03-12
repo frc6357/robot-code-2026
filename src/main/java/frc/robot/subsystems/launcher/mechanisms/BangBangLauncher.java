@@ -2,8 +2,8 @@ package frc.robot.subsystems.launcher.mechanisms;
 
 import static edu.wpi.first.units.Units.Amps;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
+import static frc.robot.Ports.LauncherPorts.kLauncherFrontRollers;
+import static frc.robot.Ports.LauncherPorts.kLauncherBackRollers;
 
 import java.util.function.Supplier;
 
@@ -104,12 +104,12 @@ public class BangBangLauncher extends SubsystemBase implements PathplannerSubsys
 
     private VoltageOut voltageBangBang = new VoltageOut(0);
     private TorqueCurrentFOC torqueCurrentBangBang = new TorqueCurrentFOC(0);
-    private Follower followerControl = new Follower(kFixedLauncherMotor.ID, MotorAlignmentValue.Opposed);
+    private Follower followerControl = new Follower(kLauncherFrontRollers.ID, MotorAlignmentValue.Opposed);
     private CoastOut coastControl = new CoastOut();
 
     public BangBangLauncher() {
-        mainMotor = new TalonFX(kFixedLauncherMotor.ID, CANBus.roboRIO());
-        followingMotor = new TalonFX(kFixedLauncherMotorFollower.ID, CANBus.roboRIO());
+        mainMotor = new TalonFX(kLauncherFrontRollers.ID, CANBus.roboRIO());
+        followingMotor = new TalonFX(kLauncherBackRollers.ID, CANBus.roboRIO());
 
         var mainMotorStatus = mainMotor.getConfigurator().apply(mainMotorConfig);
 

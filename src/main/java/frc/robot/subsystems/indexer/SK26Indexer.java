@@ -7,10 +7,6 @@ import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
 import com.revrobotics.RelativeEncoder;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
-import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;

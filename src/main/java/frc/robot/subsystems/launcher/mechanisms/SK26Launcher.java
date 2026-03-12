@@ -24,8 +24,8 @@ import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
 
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
+import static frc.robot.Ports.LauncherPorts.kLauncherFrontRollers;
+import static frc.robot.Ports.LauncherPorts.kLauncherBackRollers;
 
 import org.littletonrobotics.junction.Logger;
 
@@ -45,8 +45,8 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
     public SK26Launcher() {
 
         //defines motor objects
-        launchermotor = new TalonFX(kFixedLauncherMotor.ID);
-        launchermotorFollower = new TalonFX(kFixedLauncherMotorFollower.ID);
+        launchermotor = new TalonFX(kLauncherFrontRollers.ID);
+        launchermotorFollower = new TalonFX(kLauncherBackRollers.ID);
         launchermotorFollower.setControl(new Follower(launchermotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         //configures motors
