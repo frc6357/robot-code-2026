@@ -31,6 +31,7 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.FuelHuntBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
+import frc.robot.bindings.SK26DualLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SK26IntakeBinder;
@@ -48,6 +49,7 @@ import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.intake.SK26Intake;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 import frc.robot.subsystems.lights.SK26Lights;
@@ -83,6 +85,7 @@ public class RobotContainer {
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
+  public Optional<SK26DualLauncher> m_DualLauncherContainer = Optional.empty();
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
   public Optional<SK26Intake> m_pickupContainer = Optional.empty();
@@ -95,6 +98,7 @@ public class RobotContainer {
   public static SK26Turret m_turretInstance;
   public static BangBangLauncher m_BBlauncherInstance;
   public static SK26Launcher m_standardLauncherInstance;
+  public static SK26DualLauncher m_dualLauncherInstance;
   public static SK26Lights m_lightsInstance;
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
@@ -179,6 +183,10 @@ public class RobotContainer {
                     m_StandardLauncherContainer = Optional.of(new SK26Launcher());
                     m_standardLauncherInstance = m_StandardLauncherContainer.get();
                 }
+                if(subsystems.isDualLauncherPresent()) {
+                    m_DualLauncherContainer = Optional.of(new SK26DualLauncher());
+                    m_dualLauncherInstance = m_DualLauncherContainer.get();
+                }
                 if(subsystems.isLightsPresent()) {
                     m_lightsContainer = Optional.of(new SK26Lights());
                     m_lightsInstance = m_lightsContainer.get();
@@ -224,6 +232,10 @@ public class RobotContainer {
                 if(subsystems.isLauncherPresent()) {
                     m_StandardLauncherContainer = Optional.of(new SK26Launcher());
                     m_standardLauncherInstance = m_StandardLauncherContainer.get();
+                }
+                if(subsystems.isDualLauncherPresent()) {
+                    m_DualLauncherContainer = Optional.of(new SK26DualLauncher());
+                    m_dualLauncherInstance = m_DualLauncherContainer.get();
                 }
                 if(subsystems.isLightsPresent()) {
                     m_lightsContainer = Optional.of(new SK26Lights());
@@ -284,6 +296,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
+        buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));

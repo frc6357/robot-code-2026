@@ -5,6 +5,7 @@
     "turret": false,
     "launcher": false,
     "bangbanglauncher": false,
+    "duallauncher": false,
     "lights": false,
     "indexer": false,
     "climb": false,

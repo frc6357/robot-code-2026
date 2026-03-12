@@ -498,6 +498,39 @@ public final class Konstants
             public static final double kD = 0;
         }
 
+        // ==================== Dual Launcher Constants ====================
+        public static final class DualLauncher {
+            // Velocity tolerance for considering the launcher "at speed" (rps)
+            public static final double kVelocityToleranceRPS = 1.0;
+
+            // Default target velocity (rps) — typically overridden by commands/state handler
+            public static final double kDefaultTargetRPS = 40.0;
+
+            // Current limits (amps) — protects motors and prevents brownout
+            public static final Current kSupplyCurrentLimit = Amps.of(40);
+            public static final Current kStatorCurrentLimit = Amps.of(80);
+
+            // Bottom roller (large flywheel) — Clockwise Positive
+            public static final class BottomRoller {
+                public static final double kS = 0.25;  // Static friction (volts)
+                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
+                public static final double kP = 0.4;   // Proportional gain
+                public static final double kI = 0.0;   // Integral gain
+                public static final double kD = 0.0;   // Derivative gain
+            }
+
+            // Top roller (smaller contact wheels) — CounterClockwise Positive
+            public static final class TopRoller {
+                public static final double kS = 0.25;  // Static friction (volts)
+                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
+                public static final double kP = 0.4;   // Proportional gain
+                public static final double kI = 0.0;   // Integral gain
+                public static final double kD = 0.0;   // Derivative gain
+            }
+        }
+
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(

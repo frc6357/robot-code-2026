@@ -15,6 +15,7 @@ public class SubsystemControls
     private final boolean turret;
     private final boolean launcher;
     private final boolean bangbanglauncher;
+    private final boolean duallauncher;
     private final boolean lights;
     private final boolean pickup;
     private final boolean indexer;
@@ -39,6 +40,7 @@ public class SubsystemControls
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
         @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
+        @JsonProperty(required = true, value = "duallauncher") boolean duallauncher,
         @JsonProperty(required = true, value = "lights")      boolean lights,
         @JsonProperty(required = true, value = "indexer")     boolean indexer,
         @JsonProperty(required = true, value = "feeder")      boolean feeder,
@@ -52,6 +54,7 @@ public class SubsystemControls
         this.turret = turret;
         this.launcher = launcher;
         this.bangbanglauncher = bangbanglauncher;
+        this.duallauncher = duallauncher;
         this.lights = lights;
         this.pickup = pickup;
         this.indexer = indexer;
@@ -84,6 +87,9 @@ public class SubsystemControls
     }
     public boolean isBangBangLauncherPresent() {
         return bangbanglauncher;
+    }
+    public boolean isDualLauncherPresent() {
+        return duallauncher;
     }
     public boolean isLightsPresent() {
         return lights;
