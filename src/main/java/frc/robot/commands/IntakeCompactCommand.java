@@ -16,7 +16,7 @@ public class IntakeCompactCommand extends Command {
     private final SK26Intake intake;
     
     // Oscillation positions (in rotations)
-    private final double stowPosition;
+    private final double compactPosition;
     private final double groundPosition;
     
     // Time between position switches (in seconds)
@@ -32,23 +32,23 @@ public class IntakeCompactCommand extends Command {
      * Creates a new IntakeCompactCommand with custom oscillation range and default 1 second interval.
      * @param intake The intake subsystem
      * @param groundPosition The low position in rotations
-     * @param stowPosition The high position in rotations
+     * @param compactPosition The high position in rotations
      */
-    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double stowPosition) {
-        this(intake, groundPosition, stowPosition, kIntakeCompactSwitchIntervalSeconds);
+    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double compactPosition) {
+        this(intake, groundPosition, compactPosition, kIntakeCompactSwitchIntervalSeconds);
     }
 
     /**
      * Creates a new IntakeCompactCommand with custom oscillation range and interval.
      * @param intake The intake subsystem
      * @param groundPosition The low position in rotations
-     * @param stowPosition The high position in rotations
+     * @param compactPosition The compacting position in rotations
      * @param switchIntervalSeconds Time between position switches in seconds
      */
-    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double stowPosition, double switchIntervalSeconds) {
+    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double compactPosition, double switchIntervalSeconds) {
         this.intake = intake;
         this.groundPosition = groundPosition;
-        this.stowPosition = stowPosition;
+        this.compactPosition = compactPosition;
         this.switchIntervalSeconds = switchIntervalSeconds;
 
         addRequirements(intake);
@@ -60,7 +60,7 @@ public class IntakeCompactCommand extends Command {
         // Start by moving to high position and record the start time
         movingToHigh = true;
         lastSwitchTimestamp = Timer.getFPGATimestamp();
-        intake.setTargetPosition(stowPosition);
+        intake.setTargetPosition(compactPosition);
     }
 
     @Override
@@ -81,7 +81,7 @@ public class IntakeCompactCommand extends Command {
             {
                 // Switch to high position
                 movingToHigh = true;
-                intake.setTargetPosition(stowPosition);
+                intake.setTargetPosition(compactPosition);
             }
         }
     }

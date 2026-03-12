@@ -3,14 +3,15 @@ package frc.robot.bindings;
 import frc.lib.bindings.CommandBinder;
 // Imports from robot
 import frc.robot.StateHandler;
+import frc.robot.Konstants.IntakeConstants.IntakePosition;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.commands.*;
 import frc.robot.subsystems.intake.SK26Intake;
 
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
-import static frc.robot.Konstants.IntakeConstants.kIntakeIdleVoltage;
-import static frc.robot.Konstants.IntakeConstants.IntakePosition.kIntakeZeroPosition;
-import static frc.robot.Konstants.IntakeConstants.IntakePosition.kIntakeGroundPosition;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.kZeroPosition;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.kGroundPosition;
+import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBackbutton;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Ports.OperatorPorts.kStartbutton;
@@ -54,7 +55,8 @@ public class SK26IntakeBinder implements CommandBinder
         // intakeRollersFullSpeed.whileTrue(new IntakeCommand(intake, kIntakeFullVoltage));
         kLTrigger.button.whileTrue(new IntakeCommand(intake, kIntakeFullVoltage));
         // intakeIdleSpeed.whileTrue(new IntakeCommand(intake, kIntakeIdleVoltage));
-        kBackbutton.button.onTrue(new IntakePivotCommand(intake, kIntakeZeroPosition));
-        kStartbutton.button.onTrue(new IntakePivotCommand(intake, kIntakeGroundPosition));
+        kBackbutton.button.onTrue(new IntakePivotCommand(intake, kZeroPosition));
+        kStartbutton.button.onTrue(new IntakePivotCommand(intake, kGroundPosition));
+        kAbutton.button.whileTrue(new IntakeCompactCommand(intake, IntakePosition.kGroundPosition.rotations, IntakePosition.kCompactingPosition.rotations));
     }
 }

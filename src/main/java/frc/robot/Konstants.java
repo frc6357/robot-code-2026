@@ -584,10 +584,13 @@ public final class Konstants
     {
         public static enum IntakePosition
         {
-            /** Set the intake angle to X degrees **/
-            kIntakeGroundPosition(-0.271),
-            /** Set the intake angle to 0 degrees (zero position) **/
-            kIntakeZeroPosition(0.0);
+            /** Set the intake angle to -0.271 intake rotations */
+            kGroundPosition(-0.271),
+            /** Set the intake angle -0.113 intake rotations */
+            kCompactingPosition(-0.113),
+            /** Set the intake angle to 0 rotations (zero position) */
+            kZeroPosition(0.0);
+            
 
             /**
              * The target position for the intake in mechanism rotations (not motor rotations). Positive is up, negative is down.

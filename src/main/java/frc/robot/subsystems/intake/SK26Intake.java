@@ -179,7 +179,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 			.withSensorToMechanismRatio(kPositionerSensorToMechanismRatio);
 
 		positionerMotor.getConfigurator().apply(positionerConfig);
-		positionerMotor.setPosition(IntakePosition.kIntakeZeroPosition.rotations);
+		positionerMotor.setPosition(IntakePosition.kZeroPosition.rotations);
 
 		// ========== Positioner Follower Motor Configuration ==========
 		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);		
@@ -207,7 +207,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		positionerAngularVelocityStatusSignal = positionerMotor.getVelocity();
 
 		// Initialize position tracking
-		motorTargetPosition = IntakePosition.kIntakeZeroPosition.rotations;
+		motorTargetPosition = IntakePosition.kZeroPosition.rotations;
 
 		addPathPlannerCommands();
 	}
@@ -306,7 +306,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		PathPlannerCommands.addCommand("Intake Deploy", this.runOnce(() -> setTargetPosition(IntakePosition.kIntakeGroundPosition.rotations)));
-		PathPlannerCommands.addCommand("Intake Stow", this.runOnce(() -> setTargetPosition(IntakePosition.kIntakeZeroPosition.rotations)));
+		PathPlannerCommands.addCommand("Intake Deploy", this.runOnce(() -> setTargetPosition(IntakePosition.kGroundPosition.rotations)));
+		PathPlannerCommands.addCommand("Intake Stow", this.runOnce(() -> setTargetPosition(IntakePosition.kZeroPosition.rotations)));
 	}
 }
