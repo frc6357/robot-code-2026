@@ -13,7 +13,6 @@ import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
-import frc.robot.commands.FeederFeedCommand;
 
 public class SK26FeederBinder implements CommandBinder {
 
@@ -55,9 +54,9 @@ public class SK26FeederBinder implements CommandBinder {
         {
             SK26Feeder feeder = feederSubsystem.get();
             //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
-            kDownDpad.button.and(StateHandler.whenCurrentState(MacroState.IDLE)).whileTrue(new FeederFeedCommand(feeder, kFeederRunningVoltage));
-            //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVoltage));
-            //runLowVoltage.whileTrue(new FeederFeedCommand(feeder, kFeederWaitingVoltage));
+            kDownDpad.button.and(StateHandler.whenCurrentState(MacroState.IDLE)).whileTrue(feeder.feedCommand(kFeederRunningVoltage));
+            //runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
+            //runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
         }
     }
     

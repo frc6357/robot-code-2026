@@ -259,15 +259,15 @@ public class RobotContainer {
                 }
             }
 
-            if(subsystems.isBangBangLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
+            if(subsystems.isDualLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
             {
                 // If both launcher and turret are present, create the shooting coordinator
-                m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_BBLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
+                m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_DualLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
                 m_shootingCoordinatorInstance = m_shootingCoordinator.get();
             }
 
             // Give StateHandler a reference to the launcher for state readiness checking
-            m_stateHandlerContainer.ifPresent(sh -> sh.setLauncherSubsystem(m_BBLauncherContainer));
+            m_stateHandlerContainer.ifPresent(sh -> sh.setLauncherSubsystem(m_DualLauncherContainer));
             // Give StateHandler a reference to the turret for state readiness checking
             m_stateHandlerContainer.ifPresent(sh -> sh.setTurretSubsystem(m_turretContainer));
             // Give StateHandler a reference to the intake for state readiness checking

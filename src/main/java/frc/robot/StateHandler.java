@@ -20,7 +20,7 @@ import frc.robot.Konstants.LauncherConstants;
 import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.intake.SK26Intake;
 import frc.robot.subsystems.turret.SK26Turret;
 import lombok.Getter;
@@ -153,16 +153,16 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     /**
      * Sets the launcher subsystem reference for checking launcher readiness.
      * If the Optional is present, remaps the {@link #launcherReady} trigger to the
-     * launcher's {@code isAtGoal()} method. If empty, leaves the trigger unchanged
+     * launcher's {@code atTargetVelocity()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
-     * @param launcher Optional containing the BangBangLauncher, or empty if not present
+     * @param launcher Optional containing the SK26DualLauncher, or empty if not present
      */
-    public void setLauncherSubsystem(Optional<BangBangLauncher> launcher) {
+    public void setLauncherSubsystem(Optional<SK26DualLauncher> launcher) {
         if (launcher.isEmpty()) {
             return;
         }
-        launcherReady = new Trigger(launcher.get()::isAtGoal);
+        launcherReady = new Trigger(launcher.get()::atTargetVelocity);
     }
 
     /**

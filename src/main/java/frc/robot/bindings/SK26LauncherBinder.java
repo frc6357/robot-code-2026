@@ -6,9 +6,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
-import frc.robot.commands.RunLauncherWithRPSCommand;
-import frc.robot.commands.RunLauncherWithVelCommand;
-import frc.robot.commands.commandGroups.LauncherUnJamCommandGroup;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
 
 import static frc.robot.Konstants.LauncherConstants.kTargetMotorRPS;
@@ -42,9 +39,9 @@ public class SK26LauncherBinder implements CommandBinder {
             // SK26Launcher launcher = launcherSubsystem.get();
             SK26Launcher launcher = launcherSubsystem.get();
 
-            ShootExitVel.whileTrue(new RunLauncherWithVelCommand(launcher, kTargetlaunchVelocity));
-            ShootRPS.whileTrue(new RunLauncherWithRPSCommand(launcher, kTargetMotorRPS));
-            UnJam.whileTrue(new LauncherUnJamCommandGroup(launcher));
+            ShootExitVel.whileTrue(launcher.runAtExitVelCommand(kTargetlaunchVelocity));
+            ShootRPS.whileTrue(launcher.runAtRPSCommand(kTargetMotorRPS));
+            UnJam.whileTrue(launcher.unjamCommand());
         }
     }
     

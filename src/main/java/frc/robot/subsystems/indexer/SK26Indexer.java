@@ -145,6 +145,24 @@ public class SK26Indexer extends SubsystemBase
         numBallsInIndexer = Math.max(0, numBallsInIndexer - 1);
     }
 
+    /**
+     * Returns a command that feeds the indexer at the given voltage.
+     * The command sets status to FEEDING on start and resets to IDLE on end.
+     * Replaces the standalone IndexerFeedCommand.
+     *
+     * @param voltage The voltage to feed at.
+     * @return A command requiring this subsystem.
+     */
+    public Command feedCommand(double voltage) {
+        return this.startEnd(
+            () -> {
+                setStatus(IndexerStatus.FEEDING);
+                feedFuel(voltage);
+            },
+            () -> setStatus(IndexerStatus.IDLE)
+        );
+    }
+
     // private void checkIfBallIntaked() {
     //     boolean currentState = intakeSensor.get();
 

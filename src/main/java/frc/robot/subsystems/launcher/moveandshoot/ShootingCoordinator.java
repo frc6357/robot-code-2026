@@ -33,7 +33,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Konstants.LauncherConstants;
 import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.launcher.moveandshoot.ShotCalculationStrategy.Range;
 import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.utils.Field;
@@ -41,7 +41,7 @@ import frc.lib.utils.FieldConstants.LinesHorizontal;
 
 public class ShootingCoordinator {
     SKSwerve drive;
-    BangBangLauncher launcher;
+    SK26DualLauncher launcher;
     SK26Turret turret;
 
     private final ShotCalculator shotCalculator = createShotCalculator();
@@ -70,7 +70,7 @@ public class ShootingCoordinator {
     private static final double SHUTTLE_UNMIRROR_THRESHOLD = 0.3; // meters back from center to un-mirror
 
     public ShootingCoordinator(
-        BangBangLauncher launcher,
+        SK26DualLauncher launcher,
         SK26Turret turret,
         SKSwerve drive
     ) {
@@ -188,7 +188,7 @@ public class ShootingCoordinator {
         return drive;
     }
 
-    public BangBangLauncher getLauncher() {
+    public SK26DualLauncher getLauncher() {
         return launcher;
     }
 
@@ -226,7 +226,7 @@ public class ShootingCoordinator {
      * @return true if the flywheel is at the required RPM
      */
     public boolean isLauncherReady() {
-        return launcher.isAtGoal();
+        return launcher.atTargetVelocity();
     }
 
     /**

@@ -17,6 +17,8 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+// Inline command factory methods replace standalone FeederFeedCommand
+
 import org.littletonrobotics.junction.Logger;
 
 public class SK26Feeder extends SubsystemBase
@@ -73,6 +75,17 @@ public class SK26Feeder extends SubsystemBase
 
     public double getVelocity() {
         return encoder.getVelocity()/60;
+    }
+
+    /**
+     * Returns a command that sets the feeder to the given voltage once.
+     * Replaces the standalone FeederFeedCommand.
+     *
+     * @param voltage The voltage to feed at.
+     * @return A command requiring this subsystem.
+     */
+    public Command feedCommand(double voltage) {
+        return this.runOnce(() -> feedFuel(voltage));
     }
 
     @Override
