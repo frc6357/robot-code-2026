@@ -34,5 +34,7 @@ public class IntakeCommand extends Command {
 
     // When the command ends or is interrupted, set the intake to idle
     @Override
-    public void end(boolean interrupted) {}
+    public void end(boolean interrupted) {
+        intake.setIntakeVoltage(0.0);
+    }
 }

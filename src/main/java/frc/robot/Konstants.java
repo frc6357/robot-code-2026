@@ -585,25 +585,55 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to X degrees **/
-            kIntakeGroundPosition(0), //TODO This angle needs to be set to a safe angle above the ground
+            kIntakeGroundPosition(-0.271),
             /** Set the intake angle to 0 degrees (zero position) **/
-            kIntakeZeroPosition(4.747); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
+            kIntakeZeroPosition(0.0);
 
-            public final double angle;
-            IntakePosition(double angle)
+            /**
+             * The target position for the intake in mechanism rotations (not motor rotations). Positive is up, negative is down.
+             */
+            public final double rotations;
+            IntakePosition(double rotations)
             {
-                this.angle = angle;
+                this.rotations = rotations;
             }
         }
 
         // PID Constants
-        public static final double kPositionerKp = 0.0;
-        public static final double kPositionerKi = 0.0;
-        public static final double kPositionerKd = 0.0;
+        public static final double kPositionerKp = 22.0; //20
+        public static final double kPositionerKi = 6.0;
+        public static final double kPositionerKd = 1.0;
         public static final double kPositionerKs = 0.0;
         public static final double kPositionerKv = 0.0;
         public static final double kPositionerKa = 0.0;
         public static final double kPositionerKG = 0.0;
+
+        // Positioner voltage limits
+        public static final double kPositionerPeakForwardVoltage = 4.0;
+        public static final double kPositionerPeakReverseVoltage = -4.0;
+
+        // Positioner Motion Magic configuration
+        public static final double kPositionerMMCruiseVelocity = 2.0;      // Rotations per second
+        public static final double kPositionerMMAcceleration = 25.0;       // Rotations per second squared
+        public static final double kPositionerMMJerk = 50.0;               // Rotations per second cubed
+        public static final double kPositionerMMExpoKV = 0.12;
+        public static final double kPositionerMMExpoKA = 0.1;
+
+        // Positioner current limits
+        public static final double kPositionerSupplyCurrentLimit = 60;
+        public static final double kPositionerStatorCurrentLimit = 80;
+
+        // Positioner feedback configuration
+        public static final double kPositionerSensorToMechanismRatio = 16.4;
+        public static final double kPositionerGainSchedulerErrorThreshold = 0.04;
+        public static final double kPositionerPositionTolerance = 0.02;    // Rotations
+
+        // Intake roller current limits
+        public static final double kIntakeSupplyCurrentLimit = 40;
+        public static final double kIntakeStatorCurrentLimit = 60;
+
+        // Intake compact command oscillation
+        public static final double kIntakeCompactSwitchIntervalSeconds = 0.67;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;

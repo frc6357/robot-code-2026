@@ -6,9 +6,9 @@
     "launcher": false,
     "bangbanglauncher": false,
     "lights": false,
-    "indexer": true,
+    "indexer": false,
     "climb": false,
-    "pickup": false,
-    "feeder": true,
+    "pickup": true,
+    "feeder": false,
     "fueldetection": false
 }

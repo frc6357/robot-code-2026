@@ -1,7 +1,6 @@
 package frc.robot.subsystems.intake;
 
 // Imports from robot
-import static frc.robot.Konstants.IntakeConstants.kPositionerMotorMinPosition;
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKG;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKp;
@@ -10,18 +9,33 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerKd;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKa;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKs;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKv;
+import static frc.robot.Konstants.IntakeConstants.kPositionerPeakForwardVoltage;
+import static frc.robot.Konstants.IntakeConstants.kPositionerPeakReverseVoltage;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMMCruiseVelocity;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMMAcceleration;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMMJerk;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKV;
+import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKA;
+import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kPositionerSensorToMechanismRatio;
+import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
+import static frc.robot.Konstants.IntakeConstants.kPositionerPositionTolerance;
+import static frc.robot.Konstants.IntakeConstants.kIntakeSupplyCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kIntakeStatorCurrentLimit;
 import static frc.robot.Ports.pickupOBPorts.kIntakeMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
+
+import frc.lib.commands.PathPlannerCommands;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.Konstants.IntakeConstants.IntakePosition;
-import frc.lib.preferences.Pref;
-import frc.lib.preferences.SKPreferences;
-//import static frc.robot.Konstants.IntakeConstants.IntakePosition;
 
 // Imports from Phoenix 6
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -75,43 +89,43 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	private final StatusSignal<Angle> positionerAngleStatusSignal;
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
 
-	// Preferences for tuning
-	final Pref<Double> positionerKp = SKPreferences.attach("Intake/positionerKp", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKi = SKPreferences.attach("Intake/positionerKi", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKd = SKPreferences.attach("Intake/positionerKd", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKs = SKPreferences.attach("Intake/positionerKs", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKv = SKPreferences.attach("Intake/positionerKv", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionerKa = SKPreferences.attach("Intake/positionerKa", 0.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> maxVelocity = SKPreferences.attach("Intake/maxVelocity", 2.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> maxAcceleration = SKPreferences.attach("Intake/maxAcceleration", 4.0)
-		.onChange((newValue) -> reconfigurePositioner());
-	final Pref<Double> positionTolerance = SKPreferences.attach("Intake/positionTolerance", 0.1);
+	// // Preferences for tuning
+	// final Pref<Double> positionerKp = SKPreferences.attach("Intake/positionerKp", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionerKi = SKPreferences.attach("Intake/positionerKi", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionerKd = SKPreferences.attach("Intake/positionerKd", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionerKs = SKPreferences.attach("Intake/positionerKs", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionerKv = SKPreferences.attach("Intake/positionerKv", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionerKa = SKPreferences.attach("Intake/positionerKa", 0.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> maxVelocity = SKPreferences.attach("Intake/maxVelocity", 2.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> maxAcceleration = SKPreferences.attach("Intake/maxAcceleration", 4.0)
+	// 	.onChange((newValue) -> reconfigurePositioner());
+	// final Pref<Double> positionTolerance = SKPreferences.attach("Intake/positionTolerance", 0.1);
 
-	private void reconfigurePositioner() 
-	{
-		Slot0Configs slot0 = new Slot0Configs();
-		slot0.kP = positionerKp.get();
-		slot0.kI = positionerKi.get();
-		slot0.kD = positionerKd.get();
-		slot0.kS = positionerKs.get();
-		slot0.kV = positionerKv.get();
-		slot0.kA = positionerKa.get();
-		slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
-		slot0.GainSchedBehavior = GainSchedBehaviorValue.ZeroOutput;
-		positionerMotor.getConfigurator().apply(slot0);
+	// private void reconfigurePositioner() 
+	// {
+	// 	Slot0Configs slot0 = new Slot0Configs();
+	// 	slot0.kP = positionerKp.get();
+	// 	slot0.kI = positionerKi.get();
+	// 	slot0.kD = positionerKd.get();
+	// 	slot0.kS = positionerKs.get();
+	// 	slot0.kV = positionerKv.get();
+	// 	slot0.kA = positionerKa.get();
+	// 	slot0.StaticFeedforwardSign = StaticFeedforwardSignValue.UseClosedLoopSign;
+	// 	slot0.GainSchedBehavior = GainSchedBehaviorValue.ZeroOutput;
+	// 	positionerMotor.getConfigurator().apply(slot0);
 
-		MotionMagicConfigs mmConfigs = new MotionMagicConfigs();
-		mmConfigs.withMotionMagicCruiseVelocity(maxVelocity.get());
-		mmConfigs.withMotionMagicAcceleration(maxAcceleration.get());
-		positionerMotor.getConfigurator().apply(mmConfigs);
-	}
+	// 	MotionMagicConfigs mmConfigs = new MotionMagicConfigs();
+	// 	mmConfigs.withMotionMagicCruiseVelocity(maxVelocity.get());
+	// 	mmConfigs.withMotionMagicAcceleration(maxAcceleration.get());
+	// 	positionerMotor.getConfigurator().apply(mmConfigs);
+	// }
 
 	public SK26Intake() 
 	{
@@ -139,48 +153,52 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 		// Voltage limits
 		positionerConfig.Voltage = new VoltageConfigs()
-			.withPeakForwardVoltage(12.0)
-			.withPeakReverseVoltage(-12.0);
+			.withPeakForwardVoltage(kPositionerPeakForwardVoltage)
+			.withPeakReverseVoltage(kPositionerPeakReverseVoltage);
 
 		// Motion Magic configuration
 		positionerConfig.MotionMagic = new MotionMagicConfigs()
-			.withMotionMagicCruiseVelocity(maxVelocity.get())
-			.withMotionMagicAcceleration(maxAcceleration.get());
+			.withMotionMagicCruiseVelocity(kPositionerMMCruiseVelocity)
+			.withMotionMagicAcceleration(kPositionerMMAcceleration)
+			.withMotionMagicJerk(kPositionerMMJerk)
+			.withMotionMagicExpo_kV(kPositionerMMExpoKV)
+			.withMotionMagicExpo_kA(kPositionerMMExpoKA);
 
 		// Current limits
 		positionerConfig.CurrentLimits = new CurrentLimitsConfigs()
-			.withSupplyCurrentLimit(60)
+			.withSupplyCurrentLimit(kPositionerSupplyCurrentLimit)
 			.withSupplyCurrentLimitEnable(true)
-			.withStatorCurrentLimit(80)
-			.withStatorCurrentLimitEnable(true);
-
-		positionerMotor.getConfigurator().apply(positionerConfig);
-		positionerMotor.setPosition(0);
-
-		// ========== Positioner Follower Motor Configuration ==========
-		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);
-		TalonFXConfiguration followerConfig = new TalonFXConfiguration();
-
-		followerConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-		followerConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive; // Opposite direction
-		followerConfig.CurrentLimits = new CurrentLimitsConfigs()	
-			.withSupplyCurrentLimit(60)
-			.withSupplyCurrentLimitEnable(true)
-			.withStatorCurrentLimit(80)
+			.withStatorCurrentLimit(kPositionerStatorCurrentLimit)
 			.withStatorCurrentLimitEnable(true);
 		
-		positionerFollowerMotor.getConfigurator().apply(followerConfig);
+		// Feedback/closed-loop
+		positionerConfig.ClosedLoopGeneral = new ClosedLoopGeneralConfigs()
+			.withGainSchedErrorThreshold(kPositionerGainSchedulerErrorThreshold);
+		
+		positionerConfig.Feedback = new FeedbackConfigs()
+			.withSensorToMechanismRatio(kPositionerSensorToMechanismRatio);
+
+		positionerMotor.getConfigurator().apply(positionerConfig);
+		positionerMotor.setPosition(IntakePosition.kIntakeZeroPosition.rotations);
+
+		// ========== Positioner Follower Motor Configuration ==========
+		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);		
+		positionerFollowerMotor.getConfigurator().apply(
+			positionerConfig
+			.withMotorOutput(
+				outputConfigs.withInverted(InvertedValue.Clockwise_Positive))
+		);
 		followerControl = new Follower(positionerMotor.getDeviceID(), MotorAlignmentValue.Opposed);
 		positionerFollowerMotor.setControl(followerControl);
 
-		// ========== Intake Motor Configuration ==========
+		// ========== Intake Roller Motor Configuration ==========
 		intakeMotor = new TalonFX(kIntakeMotor.ID);
 		TalonFXConfiguration intakeConfig = new TalonFXConfiguration();
 		intakeConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
 		intakeConfig.CurrentLimits = new CurrentLimitsConfigs()
-			.withSupplyCurrentLimit(40)
+			.withSupplyCurrentLimit(kIntakeSupplyCurrentLimit)
 			.withSupplyCurrentLimitEnable(true)
-			.withStatorCurrentLimit(60)
+			.withStatorCurrentLimit(kIntakeStatorCurrentLimit)
 			.withStatorCurrentLimitEnable(true);
 		intakeMotor.getConfigurator().apply(intakeConfig);
 
@@ -189,7 +207,9 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		positionerAngularVelocityStatusSignal = positionerMotor.getVelocity();
 
 		// Initialize position tracking
-		motorTargetPosition = kPositionerMotorMinPosition;
+		motorTargetPosition = IntakePosition.kIntakeZeroPosition.rotations;
+
+		addPathPlannerCommands();
 	}
 
 	/**
@@ -225,7 +245,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public boolean isPositionerAtTarget() 
 	{
-		return Math.abs(getTargetPosition() - getCurrentPosition()) < positionTolerance.get();
+		return Math.abs(getTargetPosition() - getCurrentPosition()) < kPositionerPositionTolerance;
 	}
 
 	/**
@@ -233,7 +253,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void setPositionerPosition(IntakePosition angle) 
 	{
-		setTargetPosition(angle.angle);
+		setTargetPosition(angle.rotations);
 	}
 
 	/**
@@ -286,7 +306,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		// TODO: Implement PathPlanner commands for intake
-		throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
+		PathPlannerCommands.addCommand("Intake Deploy", this.runOnce(() -> setTargetPosition(IntakePosition.kIntakeGroundPosition.rotations)));
+		PathPlannerCommands.addCommand("Intake Stow", this.runOnce(() -> setTargetPosition(IntakePosition.kIntakeZeroPosition.rotations)));
 	}
 }

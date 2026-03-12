@@ -1,10 +1,30 @@
-Intake Pivot:
--3.95 (half-way point, motor rotations)
-0.0 (stow position, motor rotations)
--4.45 (ground position, motor rotations)
+1.28.2Intake Pivot:
+-3.95 (half-way point, motor rotations) // -.112
+0.0 (stow position, motor rotations) // 
+-4.45 (ground position, motor rotations) // -.273
 
 kG: (To tune, find the voltage where it barely moves up from deployed position) 1.65V works fine for the entire motion
 KG: 1.2V
+kV = 0.0548
+
+Sensor:Mechanism ratio = 16.4
+
+kG offset = .271
+
+kP = 20.0
+kI = 6.0
+kD = 1.0
+
+Output type: MotionMagicVoltage
+MotionMagic:
+Max velocity: 2.0
+max accel: 25.0
+max jerk: 50.0
+expo kV = 0.12
+expo kA = 0.1
+
+GainSchedulerErrorThreshold = 0.04
+GainSchedulerBehavior = ZeroOutput
 
 
 Intake Rollers:

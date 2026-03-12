@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import static frc.robot.Konstants.IntakeConstants.kIntakeCompactSwitchIntervalSeconds;
+
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.intake.SK26Intake;
@@ -33,7 +35,7 @@ public class IntakeCompactCommand extends Command {
      * @param stowPosition The high position in rotations
      */
     public IntakeCompactCommand(SK26Intake intake, double groundPosition, double stowPosition) {
-        this(intake, groundPosition, stowPosition, 0.67);
+        this(intake, groundPosition, stowPosition, kIntakeCompactSwitchIntervalSeconds);
     }
 
     /**
