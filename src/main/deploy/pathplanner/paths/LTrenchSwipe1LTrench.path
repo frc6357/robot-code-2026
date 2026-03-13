@@ -127,12 +127,12 @@
     },
     {
       "name": "Request Scoring State",
-      "waypointRelativePos": 3.4024390243902465,
+      "waypointRelativePos": 4.0,
       "endWaypointRelativePos": null,
       "command": {
         "type": "named",
         "data": {
-          "name": "Request SS Scoring State"
+          "name": "Request Scoring State"
         }
       }
     }

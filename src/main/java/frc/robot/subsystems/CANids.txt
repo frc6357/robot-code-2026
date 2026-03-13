@@ -27,7 +27,8 @@ Roller2 : 41
 CountingSensor : 42
 
 Feeder:
-Roller : 43
+BackRoller : 43
+FrontRoller : 44
 
 Turret:
 DrivingMotor : 50

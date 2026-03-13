@@ -2,6 +2,7 @@ package frc.robot.subsystems.feeder;
 
 import static frc.robot.Konstants.FeederConstants.kMaxFeederVoltage;
 import static frc.robot.Konstants.FeederConstants.kFeederIdleVoltage;
+import static frc.robot.Ports.LauncherPorts.kFeederFollowerMotor;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
@@ -27,6 +28,7 @@ public class SK26Feeder extends SubsystemBase
 {
     private final SparkFlex feederMotor;
     private final RelativeEncoder encoder;
+    private final SparkFlex feederFollower;
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
@@ -36,12 +38,14 @@ public class SK26Feeder extends SubsystemBase
     {
         // ========== Motor Configuration ==========
         feederMotor = new SparkFlex(kFeederMotor.ID, MotorType.kBrushless);
+        feederFollower = new SparkFlex(kFeederFollowerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
         config
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         feederMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        feederFollower.configure(config.follow(feederMotor).inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         encoder = feederMotor.getEncoder();
     }

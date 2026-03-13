@@ -9,7 +9,7 @@
       "prevControl": null,
       "nextControl": {
         "x": 3.1514233358375394,
-        "y": 1.732759297552497
+        "y": 1.7327592975524972
       },
       "isLocked": false,
       "linkedName": "RScore"
@@ -21,7 +21,7 @@
       },
       "prevControl": {
         "x": 2.704591363219934,
-        "y": 0.6272218246869414
+        "y": 0.6272218246869413
       },
       "nextControl": null,
       "isLocked": false,
@@ -36,7 +36,12 @@
       "name": "Request Intaking State",
       "waypointRelativePos": 0.9634146341463421,
       "endWaypointRelativePos": null,
-      "command": null
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Request Intaking State"
+        }
+      }
     }
   ],
   "globalConstraints": {

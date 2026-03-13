@@ -574,11 +574,15 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            map.put(1.0, 2500.0);
-            map.put(2.0, 3000.0);
-            map.put(3.0, 3500.0);
-            map.put(4.0, 4000.0);
-            map.put(5.0, 4500.0);
+            // map.put(5.334, 34.0 * 60.0);
+            // map.put(3.581, 27.5 * 60.0);
+            // map.put(4.470, 29.5 * 60.0);
+            // map.put(2.515, 23.5 * 60.0);
+            // map.put(2.690, 24.9 * 60.0);
+            // map.put(2.97, 24.9 * 60.0);
+            // map.put(3.251, 26.0 * 60.0);
+            map.put(3.4798, 26.6 * 60.0);
+            map.put(4.572, 29.4 * 60.0);
 
             return map;
         }

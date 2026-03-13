@@ -6,8 +6,8 @@ import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
-import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kBbutton;
+import static frc.robot.Ports.OperatorPorts.kRTrigger;
 
 // Imports from Java/WPILib
 import java.util.Optional;
@@ -32,10 +32,10 @@ public class SK26IndexerBinder implements CommandBinder
         this.indexerSubsystem = indexerSubsystem;
 
         // Feed when any shooting state is READY (launcher up to speed)
-        IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
-            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
-            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
+        IndexFeed = StateHandler.whenCurrentState(MacroState.SCORING)
+            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
@@ -50,10 +50,11 @@ public class SK26IndexerBinder implements CommandBinder
 
         SK26Indexer indexer = indexerSubsystem.get();
 
-        IndexFeed.whileTrue(indexer.feedCommand(kIndexerFullVoltage));
+        // IndexFeed.whileTrue(indexer.feedCommand(kIndexerFullVoltage));
 
-        kAbutton.button.and(IsIdle).whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
-        kBbutton.button.and(IsIdle).whileTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
+        kRTrigger.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
+        IndexFeed.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
+        kBbutton.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
         
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead

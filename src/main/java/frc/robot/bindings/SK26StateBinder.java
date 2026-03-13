@@ -8,7 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
-import frc.robot.Ports.OperatorPorts;
+// import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
 
 public class SK26StateBinder implements CommandBinder {

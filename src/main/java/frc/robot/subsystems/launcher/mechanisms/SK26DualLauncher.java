@@ -64,6 +64,8 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
     @Getter
     private LauncherTuning launcherTuning = new LauncherTuning("DualLauncher");
 
+    private Pref<Double> flywheelTargetSpeed = SKPreferences.attach("DualLauncher/ManualTargetSpeed (rps)", 35.0);
+
     // ==================== Live PID/FF Tuning (Phoenix Tuner X style) ====================
     // Change any value on SmartDashboard/Shuffleboard and the gain is hot-applied
     // to the TalonFX immediately — no redeploy required.
@@ -228,7 +230,7 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
 
         if (running) {
             bottomMotor.setControl(bottomVelocityControl.withVelocity(targetVelocityRPS));
-            topMotor.setControl(topVelocityControl.withVelocity(targetVelocityRPS));
+            topMotor.setControl(topVelocityControl.withVelocity(targetVelocityRPS * 1.1));
         } else {
             bottomMotor.setControl(coastControl);
             topMotor.setControl(coastControl);
@@ -303,6 +305,12 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
             this::stop);
     }
 
+    public Command runVelocityFromPrefCommand() {
+        return runEnd(
+            () -> runVelocity(flywheelTargetSpeed.get()), 
+            this::stop);
+    }
+
     /** Returns a command that immediately stops both rollers. */
     public Command stopCommand() {
         return runOnce(this::stop);
@@ -331,6 +339,8 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         Logger.recordOutput("DualLauncher/Target Velocity (rps)", targetVelocityRPS);
         Logger.recordOutput("DualLauncher/Bottom Velocity (rps)", cachedBottomVelocityRPS);
         Logger.recordOutput("DualLauncher/Top Velocity (rps)", cachedTopVelocityRPS);
+        Logger.recordOutput("DualLauncher/Top Velocity (RPM)", cachedTopVelocityRPS * 60.0);
+        Logger.recordOutput("DualLauncher/Bottom Velocity (RPM)", cachedBottomVelocityRPS * 60.0);
         Logger.recordOutput("DualLauncher/Bottom Error (rps)", targetVelocityRPS - cachedBottomVelocityRPS);
         Logger.recordOutput("DualLauncher/Top Error (rps)", targetVelocityRPS - cachedTopVelocityRPS);
         Logger.recordOutput("DualLauncher/At Target", atTargetVelocity());
