@@ -159,7 +159,10 @@ public class SK26Indexer extends SubsystemBase
                 setStatus(IndexerStatus.FEEDING);
                 feedFuel(voltage);
             },
-            () -> setStatus(IndexerStatus.IDLE)
+            () -> {
+                setStatus(IndexerStatus.IDLE);
+                idleIndexer();
+            }
         );
     }
 

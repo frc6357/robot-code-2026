@@ -1,16 +1,20 @@
 package frc.robot.bindings;
 
-import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kDownDpad;
+import static frc.robot.Ports.OperatorPorts.kXbutton;
 import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
 import static frc.robot.Konstants.FeederConstants.kFeederWaitingVoltage;
 
 import java.util.Optional;
+import java.util.Set;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.lib.bindings.CommandBinder;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 
@@ -19,11 +23,15 @@ public class SK26FeederBinder implements CommandBinder {
     Optional<SK26Feeder> feederSubsystem;
     BangBangLauncher launcher;
 
+    Pref<Double> manualFeederVoltage = SKPreferences.attach("Feeder/ManualVoltage", kFeederRunningVoltage);
+
     Trigger launcherRunningState;
     Trigger launcherAtSpeed;
 
     Trigger runFeederFromState;
     Trigger runLowVoltage;
+
+    Trigger idle;
 
     /**
      * Binds the feeder subsystem to state-driven triggers.
@@ -46,6 +54,8 @@ public class SK26FeederBinder implements CommandBinder {
             .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SCORING))
             .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentStateWaiting(MacroState.CLIMB_AND_SCORE));
+        
+        idle = StateHandler.whenCurrentState(MacroState.IDLE);
     }
 
     @Override
@@ -54,9 +64,12 @@ public class SK26FeederBinder implements CommandBinder {
         {
             SK26Feeder feeder = feederSubsystem.get();
             //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
-            kDownDpad.button.and(StateHandler.whenCurrentState(MacroState.IDLE)).whileTrue(feeder.feedCommand(kFeederRunningVoltage));
+            kXbutton.button.and(idle).whileTrue(Commands.defer(() -> feeder.feedCommand(/*manualFeederVoltage.get()*/ -5.0), Set.of(feeder)));
             //runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             //runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
+            runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
+            runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
+            idle.whileTrue(feeder.idleFeederCommand());
         }
     }
     

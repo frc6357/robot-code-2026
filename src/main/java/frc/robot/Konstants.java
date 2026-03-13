@@ -258,9 +258,9 @@ public final class Konstants
             public static final double kUp = Inches.of(8.75).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 15; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 205; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kRoll = -0.1; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 33.5; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = -153; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
             public static final boolean kAttached = true;
         }
@@ -276,8 +276,8 @@ public final class Konstants
             public static final double kUp = Units.inchesToMeters(17.833); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 9; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kRoll = -0.5; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 17.6; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 90; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
             public static final boolean kAttached = true;
@@ -603,8 +603,8 @@ public final class Konstants
         public static final double kMaxFeederVoltage = 8.0;
 
         public static final double kFeederIdleVoltage = 0.0;
-        public static final double kFeederRunningVoltage = 0.0;
-        public static final double kFeederWaitingVoltage = 2.0;
+        public static final double kFeederRunningVoltage = -5.0;
+        public static final double kFeederWaitingVoltage = -2.0;
     }
 
 
@@ -617,10 +617,10 @@ public final class Konstants
     {
         public static enum IntakePosition
         {
-            /** Set the intake angle to -0.271 intake rotations */
-            GROUND(-0.271),
-            /** Set the intake angle -0.113 intake rotations */
-            COMPACTING(-0.113),
+            /** Set the intake angle to 0.271 intake rotations */
+            GROUND(0.271),
+            /** Set the intake angle to 0.113 intake rotations */
+            COMPACTING(0.113),
             /** Set the intake angle to 0 rotations (zero position) */
             ZERO(0.0);
             
@@ -679,7 +679,7 @@ public final class Konstants
 
         public static final double kMaxIntakeVoltage = 10.0;
 
-        public static final double kIntakeFullVoltage = 8.0;
+        public static final double kIntakeFullVoltage = -7.5;
         public static final double kIntakeIdleVoltage = 0.0;
     }
 

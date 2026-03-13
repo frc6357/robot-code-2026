@@ -60,6 +60,10 @@ public class SK26Feeder extends SubsystemBase
         setFeederVoltage(kFeederIdleVoltage);
     }
 
+    public Command idleFeederCommand() {
+        return this.runOnce(() -> idleFeeder());
+    }
+
     /**
      * Feeds fuel by setting the feeder to the feed speed.
      * @param feederVoltage The feed speed in RPS.
@@ -85,7 +89,7 @@ public class SK26Feeder extends SubsystemBase
      * @return A command requiring this subsystem.
      */
     public Command feedCommand(double voltage) {
-        return this.runOnce(() -> feedFuel(voltage));
+        return this.runEnd(() -> feedFuel(voltage), () -> idleFeeder());
     }
 
     @Override

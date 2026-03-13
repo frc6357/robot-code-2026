@@ -6,16 +6,23 @@ import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
-import static frc.robot.Konstants.IndexerConstants.kIndexerIdleVoltage;
+import static frc.robot.Ports.OperatorPorts.kAbutton;
 import static frc.robot.Ports.OperatorPorts.kUpDpad;
 
 // Imports from Java/WPILib
 import java.util.Optional;
+import java.util.Set;
+
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 
 public class SK26IndexerBinder implements CommandBinder
 {
     Optional<SK26Indexer> indexerSubsystem;
+
+    Pref<Double> manualIndexerVoltage = SKPreferences.attach("Indexer/ManualVoltage", kIndexerFullVoltage);
 
     Trigger IndexFeed;
     Trigger IsIdle;
@@ -45,8 +52,7 @@ public class SK26IndexerBinder implements CommandBinder
 
         IndexFeed.whileTrue(indexer.feedCommand(kIndexerFullVoltage));
 
-        kUpDpad.button.and(IsIdle).onTrue(indexer.feedCommand(kIndexerFullVoltage));
-        kUpDpad.button.and(IsIdle).onFalse(indexer.feedCommand(kIndexerIdleVoltage));
+        kAbutton.button.and(IsIdle).whileTrue(Commands.defer(() -> indexer.feedCommand(manualIndexerVoltage.get()), Set.of(indexer)));
         
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead

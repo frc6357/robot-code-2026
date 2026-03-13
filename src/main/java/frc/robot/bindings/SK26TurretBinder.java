@@ -1,30 +1,23 @@
 package frc.robot.bindings;
 
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
+import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
+import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
+import static frc.robot.Ports.OperatorPorts.kRightStickX;
+
 import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.turret.SK26Turret;
 import frc.lib.bindings.CommandBinder;
 import frc.lib.utils.filters.LinearDeadbandFilter;
-
-import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
-import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
-import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
-import static frc.robot.Konstants.TurretConstants.TurretPosition.kTurretZeroPosition;
-import static frc.robot.Konstants.TurretConstants.TurretPosition.kTurretLeftPosition;
-import static frc.robot.Ports.OperatorPorts.kRightStickX;
-import static frc.robot.Ports.OperatorPorts.kAbutton;
-import static frc.robot.Ports.OperatorPorts.kBbutton;
-import static frc.robot.Ports.OperatorPorts.kYbutton;
-
 import frc.robot.RobotContainer;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
-import frc.robot.commands.turret.TurretButtonCommand;
 import frc.robot.commands.turret.TurretJoystickCommand;
 import frc.robot.commands.turret.TurretTrackPointCommand;
+import frc.robot.subsystems.drive.SKSwerve;
+import frc.robot.subsystems.turret.SK26Turret;
 
 public class SK26TurretBinder implements CommandBinder
 {
@@ -67,14 +60,14 @@ public class SK26TurretBinder implements CommandBinder
 
         kRightStickX.setFilter(new LinearDeadbandFilter(kTurretJoystickDeadband, 1.0));
 
-        kBbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretLeftPosition, turret));
-        kYbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretZeroPosition, turret));
-        kAbutton.button.and(IsIdle).toggleOnTrue(new TurretTrackPointCommand(
-            turret, 
-            swerve,
-            kOperatorControlled.point
-            // Field.isBlue() ? kBlueHub.point : kRedHub.point
-        ).withName("TurretManualTrackHubCommand"));
+        // kBbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretLeftPosition, turret));
+        // kYbutton.button.and(IsIdle).whileTrue(new TurretButtonCommand(kTurretZeroPosition, turret));
+        // kAbutton.button.and(IsIdle).toggleOnTrue(new TurretTrackPointCommand(
+        //     turret, 
+        //     swerve,
+        //     kOperatorControlled.point
+        //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
+        // ).withName("TurretManualTrackHubCommand"));
 
         PointAtHub.or(PointAtShuttlePoint).whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));

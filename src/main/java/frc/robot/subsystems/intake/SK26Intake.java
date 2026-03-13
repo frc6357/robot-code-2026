@@ -140,7 +140,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		// Motor output
 		MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
 		outputConfigs.NeutralMode = NeutralModeValue.Brake;
-		outputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
+		outputConfigs.Inverted = InvertedValue.Clockwise_Positive;
 		positionerConfig.MotorOutput = outputConfigs;
 
 		// PID configuration for position control (Motion Magic)
