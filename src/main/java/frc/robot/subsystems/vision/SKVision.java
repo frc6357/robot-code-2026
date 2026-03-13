@@ -49,9 +49,9 @@ public class SKVision extends SubsystemBase {
     public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {turretLL, backLL}; 
+    public final Limelight[] allLimelights = {/*turretLL,*/ backLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {turretLL, backLL}; 
+    public final Limelight[] poseLimelights = {/*turretLL,*/ backLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];

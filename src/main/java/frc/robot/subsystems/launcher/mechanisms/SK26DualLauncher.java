@@ -25,6 +25,8 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
@@ -62,6 +64,46 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
     @Getter
     private LauncherTuning launcherTuning = new LauncherTuning("DualLauncher");
 
+    // ==================== Live PID/FF Tuning (Phoenix Tuner X style) ====================
+    // Change any value on SmartDashboard/Shuffleboard and the gain is hot-applied
+    // to the TalonFX immediately — no redeploy required.
+    //
+    // Bottom Roller gains
+    private final Pref<Double> bottomKS = SKPreferences.attach("DualLauncher/Bottom/kS", DualLauncher.BottomRoller.kS)
+        .onChange(v -> applyBottomSlot0());
+    private final Pref<Double> bottomKV = SKPreferences.attach("DualLauncher/Bottom/kV", DualLauncher.BottomRoller.kV)
+        .onChange(v -> applyBottomSlot0());
+    private final Pref<Double> bottomKA = SKPreferences.attach("DualLauncher/Bottom/kA", DualLauncher.BottomRoller.kA)
+        .onChange(v -> applyBottomSlot0());
+    private final Pref<Double> bottomKP = SKPreferences.attach("DualLauncher/Bottom/kP", DualLauncher.BottomRoller.kP)
+        .onChange(v -> applyBottomSlot0());
+    private final Pref<Double> bottomKI = SKPreferences.attach("DualLauncher/Bottom/kI", DualLauncher.BottomRoller.kI)
+        .onChange(v -> applyBottomSlot0());
+    private final Pref<Double> bottomKD = SKPreferences.attach("DualLauncher/Bottom/kD", DualLauncher.BottomRoller.kD)
+        .onChange(v -> applyBottomSlot0());
+
+    // Top Roller gains
+    private final Pref<Double> topKS = SKPreferences.attach("DualLauncher/Top/kS", DualLauncher.TopRoller.kS)
+        .onChange(v -> applyTopSlot0());
+    private final Pref<Double> topKV = SKPreferences.attach("DualLauncher/Top/kV", DualLauncher.TopRoller.kV)
+        .onChange(v -> applyTopSlot0());
+    private final Pref<Double> topKA = SKPreferences.attach("DualLauncher/Top/kA", DualLauncher.TopRoller.kA)
+        .onChange(v -> applyTopSlot0());
+    private final Pref<Double> topKP = SKPreferences.attach("DualLauncher/Top/kP", DualLauncher.TopRoller.kP)
+        .onChange(v -> applyTopSlot0());
+    private final Pref<Double> topKI = SKPreferences.attach("DualLauncher/Top/kI", DualLauncher.TopRoller.kI)
+        .onChange(v -> applyTopSlot0());
+    private final Pref<Double> topKD = SKPreferences.attach("DualLauncher/Top/kD", DualLauncher.TopRoller.kD)
+        .onChange(v -> applyTopSlot0());
+
+    // Test setpoint — change on the dashboard, then hold the tuning command button
+    private final Pref<Double> tuningSetpointRPS = SKPreferences.attach(
+        "DualLauncher/Tuning/Setpoint (rps)", DualLauncher.kDefaultTargetRPS);
+
+    // Velocity tolerance (live-tunable)
+    private final Pref<Double> velocityToleranceRPS = SKPreferences.attach(
+        "DualLauncher/Tuning/Tolerance (rps)", DualLauncher.kVelocityToleranceRPS);
+
     public SK26DualLauncher() {
         bottomMotor = new TalonFX(kLauncherFrontRollers.ID, CANBus.roboRIO());
         topMotor    = new TalonFX(kLauncherBackRollers.ID, CANBus.roboRIO());
@@ -74,7 +116,7 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         TalonFXConfiguration bottomConfig = new TalonFXConfiguration()
             .withMotorOutput(
                 new MotorOutputConfigs()
-                    .withInverted(InvertedValue.Clockwise_Positive)
+                    .withInverted(InvertedValue.CounterClockwise_Positive)
                     .withNeutralMode(NeutralModeValue.Coast))
             .withFeedback(
                 new FeedbackConfigs()
@@ -132,6 +174,52 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         }
     }
 
+    // ==================== Live Tuning: Hot-Apply Methods ====================
+
+    /**
+     * Builds a Slot0Configs from the current bottom roller Pref values
+     * and hot-applies it to the bottom motor. Called automatically whenever
+     * any bottom roller gain is changed on the dashboard.
+     */
+    private void applyBottomSlot0() {
+        Slot0Configs slot0 = new Slot0Configs()
+            .withKS(bottomKS.get())
+            .withKV(bottomKV.get())
+            .withKA(bottomKA.get())
+            .withKP(bottomKP.get())
+            .withKI(bottomKI.get())
+            .withKD(bottomKD.get());
+
+        var status = bottomMotor.getConfigurator().apply(slot0);
+        if (!status.isOK()) {
+            DriverStation.reportError(
+                "[DualLauncher] Bottom Slot0 hot-apply failed: " + status, false);
+        }
+        Logger.recordOutput("DualLauncher/Tuning/BottomSlot0Applied", true);
+    }
+
+    /**
+     * Builds a Slot0Configs from the current top roller Pref values
+     * and hot-applies it to the top motor. Called automatically whenever
+     * any top roller gain is changed on the dashboard.
+     */
+    private void applyTopSlot0() {
+        Slot0Configs slot0 = new Slot0Configs()
+            .withKS(topKS.get())
+            .withKV(topKV.get())
+            .withKA(topKA.get())
+            .withKP(topKP.get())
+            .withKI(topKI.get())
+            .withKD(topKD.get());
+
+        var status = topMotor.getConfigurator().apply(slot0);
+        if (!status.isOK()) {
+            DriverStation.reportError(
+                "[DualLauncher] Top Slot0 hot-apply failed: " + status, false);
+        }
+        Logger.recordOutput("DualLauncher/Tuning/TopSlot0Applied", true);
+    }
+
     @Override
     public void periodic() {
         // Cache velocity reads (one CAN read per motor per cycle)
@@ -171,8 +259,9 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
      */
     public boolean atTargetVelocity() {
         if (!running) return false;
-        return Math.abs(cachedBottomVelocityRPS - targetVelocityRPS) <= DualLauncher.kVelocityToleranceRPS
-            && Math.abs(cachedTopVelocityRPS - targetVelocityRPS)    <= DualLauncher.kVelocityToleranceRPS;
+        double tolerance = velocityToleranceRPS.get();
+        return Math.abs(cachedBottomVelocityRPS - targetVelocityRPS) <= tolerance
+            && Math.abs(cachedTopVelocityRPS - targetVelocityRPS)    <= tolerance;
     }
 
     /** @return Current bottom roller velocity in RPS. */
@@ -219,6 +308,22 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         return runOnce(this::stop);
     }
 
+    /**
+     * Returns a command that runs both rollers at the dashboard tuning setpoint
+     * while held, and stops when released. Reads the setpoint each cycle so you
+     * can change it live without re-scheduling.
+     * 
+     * <p>Bind this to a button for pit/practice tuning — adjust gains and
+     * setpoint on the dashboard, hold the button, watch the response in
+     * AdvantageScope, iterate.
+     */
+    public Command tuningCommand() {
+        return runEnd(
+            () -> runVelocity(tuningSetpointRPS.get()),
+            this::stop
+        ).withName("DualLauncherTuning");
+    }
+
     // ==================== Telemetry ====================
 
     private void telemeterize() {
@@ -229,6 +334,22 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         Logger.recordOutput("DualLauncher/Bottom Error (rps)", targetVelocityRPS - cachedBottomVelocityRPS);
         Logger.recordOutput("DualLauncher/Top Error (rps)", targetVelocityRPS - cachedTopVelocityRPS);
         Logger.recordOutput("DualLauncher/At Target", atTargetVelocity());
+
+        // Log active gains so they appear alongside the response in AdvantageScope
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kS", bottomKS.get());
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kV", bottomKV.get());
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kA", bottomKA.get());
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kP", bottomKP.get());
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kI", bottomKI.get());
+        Logger.recordOutput("DualLauncher/Tuning/Bottom/kD", bottomKD.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kS", topKS.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kV", topKV.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kA", topKA.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kP", topKP.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kI", topKI.get());
+        Logger.recordOutput("DualLauncher/Tuning/Top/kD", topKD.get());
+        Logger.recordOutput("DualLauncher/Tuning/Setpoint (rps)", tuningSetpointRPS.get());
+        Logger.recordOutput("DualLauncher/Tuning/Tolerance (rps)", velocityToleranceRPS.get());
     }
 
     // ==================== PathPlanner ====================

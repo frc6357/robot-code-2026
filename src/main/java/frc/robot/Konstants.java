@@ -296,7 +296,7 @@ public final class Konstants
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 180; // (yaw) faces backward (same direction as intake)
 
-            public static final boolean kAttached = true;
+            public static final boolean kAttached = false;
         }
 
         public static final class AlignmentConstants {
@@ -318,7 +318,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -4.5;
+        public static final double kIndexerFullVoltage = -6.75;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -424,13 +424,13 @@ public final class Konstants
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 60.0; //50.0  // was 0.07 V/deg (20)
+        public static final double kTurretP = 50.0; //50.0  // was 0.07 V/deg (20)
         public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
         public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
         public static final double kTurretS = 0.375; //(0.3)   // Static friction feedforward (volts)
         public static final double kTurretV = 1.9; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
         public static final double kTurretA = 0.35; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
-        public static final double kMaxTurretOutputVolts = 3.5; // Max voltage output to turret motor (for brownout protection)
+        public static final double kMaxTurretOutputVolts = 3.75; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
         public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(6.0);
@@ -603,7 +603,7 @@ public final class Konstants
         public static final double kMaxFeederVoltage = 8.0;
 
         public static final double kFeederIdleVoltage = 0.0;
-        public static final double kFeederRunningVoltage = -5.0;
+        public static final double kFeederRunningVoltage = -5.75;
         public static final double kFeederWaitingVoltage = -2.0;
     }
 
@@ -620,7 +620,7 @@ public final class Konstants
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(0.271),
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.213),
+            COMPACTING(0.1),
             /** Set the intake angle to 0 rotations (zero position) */
             ZERO(0.0);
             

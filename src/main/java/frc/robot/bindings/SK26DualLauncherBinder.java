@@ -2,6 +2,7 @@ package frc.robot.bindings;
 
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static frc.robot.Ports.OperatorPorts.kRTrigger;
+import static frc.robot.Ports.OperatorPorts.kLBbutton;
 
 import java.util.Optional;
 
@@ -19,6 +20,7 @@ public class SK26DualLauncherBinder implements CommandBinder {
 
     Trigger ManualShoot;
     Trigger Shoot;
+    Trigger TuningRun;
 
     Pref<Double> kManualShootVelocity = SKPreferences.attach("DualLauncher/ManualShootVelocity (rps)", 40.0);
 
@@ -26,6 +28,8 @@ public class SK26DualLauncherBinder implements CommandBinder {
         this.launcherSubsystem = launcherSubsystem;
 
         ManualShoot = kRTrigger.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
+
+        TuningRun = kLBbutton.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
 
         Shoot = StateHandler.whenCurrentState(MacroState.SCORING)
                 .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
@@ -40,6 +44,10 @@ public class SK26DualLauncherBinder implements CommandBinder {
 
             ManualShoot.whileTrue(
                 launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())));
+
+            // PID tuning: hold operator LB (in IDLE) to spin at dashboard setpoint.
+            // Adjust gains and setpoint live on SmartDashboard, watch response in AdvantageScope.
+            TuningRun.toggleOnTrue(launcher.tuningCommand());
 
             // Shoot trigger is available for ShootingCoordinator integration
             // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())));
