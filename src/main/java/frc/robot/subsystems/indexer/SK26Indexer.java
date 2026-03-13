@@ -3,6 +3,9 @@ package frc.robot.subsystems.indexer;
 // Imports from robot
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleVoltage;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
+
+import java.util.function.Supplier;
+
 import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
 // Imports from REV
@@ -39,9 +42,6 @@ public class SK26Indexer extends SubsystemBase
         targetVoltage = indexerVoltage.get();
         indexerMotor.setVoltage(targetVoltage);
     }
-
-    // Neo Vortex free speed: ~113 RPS (6784 RPM) at 12V
-    private static final double kNeoVortexFreeSpeedRPS = 113.0;
 
     // Motor
     private final SparkFlex indexerMotor;
@@ -158,6 +158,19 @@ public class SK26Indexer extends SubsystemBase
             () -> {
                 setStatus(IndexerStatus.FEEDING);
                 feedFuel(voltage);
+            },
+            () -> {
+                setStatus(IndexerStatus.IDLE);
+                idleIndexer();
+            }
+        );
+    }
+
+    public Command feedCommand(Supplier<Double> voltageSupplier) {
+        return this.startEnd(
+            () -> {
+                setStatus(IndexerStatus.FEEDING);
+                feedFuel(voltageSupplier.get());
             },
             () -> {
                 setStatus(IndexerStatus.IDLE);

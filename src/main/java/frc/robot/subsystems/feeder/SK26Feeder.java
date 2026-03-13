@@ -5,6 +5,8 @@ import static frc.robot.Konstants.FeederConstants.kFeederIdleVoltage;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -90,6 +92,10 @@ public class SK26Feeder extends SubsystemBase
      */
     public Command feedCommand(double voltage) {
         return this.runEnd(() -> feedFuel(voltage), () -> idleFeeder());
+    }
+
+    public Command feedCommand(Supplier<Double> voltageSupplier) {
+        return this.runEnd(() -> feedFuel(voltageSupplier.get()), () -> idleFeeder());
     }
 
     @Override

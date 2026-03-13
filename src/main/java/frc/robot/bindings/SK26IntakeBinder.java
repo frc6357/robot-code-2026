@@ -1,7 +1,6 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
-import static frc.robot.Konstants.IntakeConstants.kIntakeIdleVoltage;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.COMPACTING;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.ZERO;
@@ -57,12 +56,11 @@ public class SK26IntakeBinder implements CommandBinder
 
         /* Manual */
         // Rollers
-        OperatorPorts.kLTrigger.button.onTrue(intake.runAtVoltageCommand(kIntakeFullVoltage));
-        OperatorPorts.kLTrigger.button.onFalse(intake.runAtVoltageCommand(kIntakeIdleVoltage));
+        OperatorPorts.kLTrigger.button.whileTrue(intake.runAtVoltageCommand(kIntakeFullVoltage));
         // Pivoting
         OperatorPorts.kBackbutton.button.onTrue(intake.setIntakePivotTargetCommand(ZERO));
         OperatorPorts.kStartbutton.button.onTrue(intake.setIntakePivotTargetCommand(GROUND));
         // Trash compactor
-        OperatorPorts.kAbutton.button.whileTrue(new IntakeCompactCommand(intake, GROUND.rotations, COMPACTING.rotations));
+        OperatorPorts.kYbutton.button.whileTrue(new IntakeCompactCommand(intake, GROUND.rotations, COMPACTING.rotations));
     }
 }

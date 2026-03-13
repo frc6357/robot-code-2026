@@ -89,7 +89,7 @@ public class IntakeCompactCommand extends Command {
     @Override
     public void end(boolean interrupted) 
     {
-        intake.setTargetPosition(intake.getCurrentPosition());
+        intake.setTargetPosition(groundPosition); // Ensure intake is down when command ends
     }
 
     @Override

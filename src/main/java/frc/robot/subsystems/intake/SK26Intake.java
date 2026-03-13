@@ -280,7 +280,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 	public Command runAtVoltageCommand(double voltage) 
 	{
-		return this.runOnce(() -> setIntakeVoltage(voltage));
+		return this.runEnd(() -> setIntakeVoltage(voltage), () -> stopIntake());
 	}
 
 	/**
@@ -288,7 +288,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void stopIntake()
 	{
-		setIntakeVoltage(0);
+		setIntakeVoltage(0.0);
 	}
 
 	/**

@@ -318,7 +318,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -3.0;
+        public static final double kIndexerFullVoltage = -4.5;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -619,8 +619,8 @@ public final class Konstants
         {
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(0.271),
-            /** Set the intake angle to 0.113 intake rotations */
-            COMPACTING(0.113),
+            /** Set the intake angle to 0.213 intake rotations */
+            COMPACTING(0.213),
             /** Set the intake angle to 0 rotations (zero position) */
             ZERO(0.0);
             

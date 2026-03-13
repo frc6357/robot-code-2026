@@ -97,8 +97,8 @@ public class SK26StateBinder implements CommandBinder {
     }
 
     private void bindOperatorButtons() {
-        OperatorPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
-        OperatorPorts.kLTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SHUTTLING));
-        OperatorPorts.kStartbutton.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
+        // OperatorPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
+        // OperatorPorts.kLTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SHUTTLING));
+        // OperatorPorts.kStartbutton.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
     }
 }

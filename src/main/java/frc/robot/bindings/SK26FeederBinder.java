@@ -1,6 +1,5 @@
 package frc.robot.bindings;
 
-import static frc.robot.Ports.OperatorPorts.kDownDpad;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
 import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
 import static frc.robot.Konstants.FeederConstants.kFeederWaitingVoltage;
@@ -64,9 +63,8 @@ public class SK26FeederBinder implements CommandBinder {
         {
             SK26Feeder feeder = feederSubsystem.get();
             //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
-            kXbutton.button.and(idle).whileTrue(Commands.defer(() -> feeder.feedCommand(/*manualFeederVoltage.get()*/ -5.0), Set.of(feeder)));
-            //runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
-            //runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
+            kXbutton.button.and(idle).whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
+
             runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
             idle.whileTrue(feeder.idleFeederCommand());
