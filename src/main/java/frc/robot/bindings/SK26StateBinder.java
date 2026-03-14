@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
+import frc.robot.Ports.OperatorPorts;
 // import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
 
@@ -97,8 +98,7 @@ public class SK26StateBinder implements CommandBinder {
     }
 
     private void bindOperatorButtons() {
-        // OperatorPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
-        // OperatorPorts.kLTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SHUTTLING));
-        // OperatorPorts.kStartbutton.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
+        OperatorPorts.kRTrigger.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
+        OperatorPorts.kLTrigger.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
     }
 }

@@ -91,7 +91,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	private final StatusSignal<Angle> positionerAngleStatusSignal;
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
 
-	private String targetPositionEnum = "Off";
+	private IntakePosition targetPositionEnum = IntakePosition.ZERO;
 
 	// // Preferences for tuning
 	// final Pref<Double> positionerKp = SKPreferences.attach("Intake/positionerKp", 0.0)
@@ -212,7 +212,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 
 		// Initialize position tracking
 		motorTargetPosition = IntakePosition.ZERO.rotations;
-		targetPositionEnum = IntakePosition.ZERO.name();
+		targetPositionEnum = IntakePosition.ZERO;
 
 		addPathPlannerCommands();
 	}
@@ -258,7 +258,7 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	 */
 	public void setPositionerPosition(IntakePosition angle) 
 	{
-		targetPositionEnum = angle.name();
+		targetPositionEnum = angle;
 		setTargetPosition(angle.rotations);
 	}
 
@@ -281,6 +281,10 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 	public Command runAtVoltageCommand(double voltage) 
 	{
 		return this.runEnd(() -> setIntakeVoltage(voltage), () -> stopIntake());
+	}
+
+	public IntakePosition getPositionerTargetEnum() {
+		return targetPositionEnum;
 	}
 
 	/**
@@ -317,14 +321,14 @@ public class SK26Intake extends SubsystemBase implements PathplannerSubsystem
 		Logger.recordOutput("Intake/Positioner Error (rot)", getTargetPosition() - getCurrentPosition());
 		Logger.recordOutput("Intake/Intake Voltage", targetVoltage);
 		Logger.recordOutput("Intake/Intake Velocity (RPS)", intakeMotor.getVelocity().getValueAsDouble());
-		Logger.recordOutput("Intake/Intake Target (enum)", targetPositionEnum);
+		Logger.recordOutput("Intake/Intake Target (enum)", getPositionerTargetEnum());
 	}
 
 	@Override
 	public void addPathPlannerCommands() 
 	{
-		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(GROUND));
-		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.ZERO));
+		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(GROUND).withName("IntakeDeployAuton"));
+		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.ZERO).withName("IntakeStowAuton"));
 		System.out.println("[SK26Intake] PathPlanner commands added");
 	}
 }

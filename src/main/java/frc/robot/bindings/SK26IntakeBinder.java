@@ -51,8 +51,12 @@ public class SK26IntakeBinder implements CommandBinder
         /* State-based */
         // Rollers
         intakeRollersFullSpeed.whileTrue(intake.runAtVoltageCommand(kIntakeFullVoltage));
+
+        intakeRollersFullSpeed.and(() -> (intake.getPositionerTargetEnum() == ZERO)).onTrue(intake.setIntakePivotTargetCommand(GROUND));
         // Pivoting
         intakeZeroPosition.onTrue(intake.setIntakePivotTargetCommand(ZERO));
+
+
 
         /* Manual */
         // Rollers

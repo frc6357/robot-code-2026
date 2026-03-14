@@ -66,16 +66,16 @@ public class SK26DualLauncherBinder implements CommandBinder {
                     )
                 );
 
-                Shoot.whileTrue(
-                    launcher.runVelocityCommand(
-                        () -> RPM.of(flywheelMap.get(
-                            drive.get().getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())))
-                    )
-                );
-
                 // Shoot.whileTrue(
-                //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                //     launcher.runVelocityCommand(
+                //         () -> RPM.of(flywheelMap.get(
+                //             drive.get().getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())))
+                //     )
                 // );
+
+                Shoot.whileTrue(
+                    Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                );
             }
 
             // PID tuning: hold operator LB (in IDLE) to spin at dashboard setpoint.

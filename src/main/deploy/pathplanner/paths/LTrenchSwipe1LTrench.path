@@ -115,17 +115,6 @@
       }
     },
     {
-      "name": "Intake Deploy",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Intake Deploy"
-        }
-      }
-    },
-    {
       "name": "Request Scoring State",
       "waypointRelativePos": 4.0,
       "endWaypointRelativePos": null,
