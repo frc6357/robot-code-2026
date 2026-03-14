@@ -123,9 +123,9 @@ public class SKVision extends SubsystemBase {
                     .rotateAround(kTurretPivotInRobotSpace, turretRotation);
                 ll.setCameraPoseInRobotSpace(dynamicCameraPose);
             }
-            if(ll != turretLL) {
+            // if(ll != turretLL) {
                 ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-            }
+            // }
             scanForTags(ll);
         }
 

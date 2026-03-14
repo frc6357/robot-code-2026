@@ -21,7 +21,7 @@ public class TurretTrackPointCommand extends Command
 {
     private final SK26Turret turret;
     private final SKSwerve drive;
-    private final SKTargetPoint targetPoint;
+    private final Translation2d targetTranslation;
 
     /**
      * Creates a new TurretTrackPointCommand.
@@ -33,8 +33,16 @@ public class TurretTrackPointCommand extends Command
     {
         this.turret = turret;
         this.drive = drive;
-        this.targetPoint = targetPoint;
+        this.targetTranslation = targetPoint.getTargetPoint();
     
+        addRequirements(turret);
+    }
+
+    public TurretTrackPointCommand(SK26Turret turret, SKSwerve drive, Translation2d targetTranslation) {
+        this.turret = turret;
+        this.drive = drive;
+        this.targetTranslation = targetTranslation;
+
         addRequirements(turret);
     }
 
@@ -52,13 +60,10 @@ public class TurretTrackPointCommand extends Command
         Translation2d shooterPosition = drive.getRobotPose().getTranslation().plus(kRobotToShooter.getTranslation().toTranslation2d());
         double robotHeadingDeg = drive.getRobotRotation().getDegrees();
 
-        // Get the target point position
-        Translation2d target = targetPoint.getTargetPoint();
-
         // Calculate the field-relative angle FROM the shooter TO the target (in degrees)
         // atan2(dy, dx) gives the angle from positive X-axis, counterclockwise positive
-        double dx = target.getX() - shooterPosition.getX();
-        double dy = target.getY() - shooterPosition.getY();
+        double dx = targetTranslation.getX() - shooterPosition.getX();
+        double dy = targetTranslation.getY() - shooterPosition.getY();
         double fieldAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
         
         if(Double.isNaN(fieldAngleToTarget)) {
@@ -80,7 +85,7 @@ public class TurretTrackPointCommand extends Command
         Logger.recordOutput("TurretTrack/WrappedDesiredAngle", wrappedAngle);
         Logger.recordOutput("TurretTrack/RobotHeading", robotHeadingDeg);
         Logger.recordOutput("TurretTrack/DesiredTurretAngle", turretAngleDeg);
-        Logger.recordOutput("TurretTrack/DistanceToTarget", shooterPosition.getDistance(target));
+        Logger.recordOutput("TurretTrack/DistanceToTarget", shooterPosition.getDistance(targetTranslation));
     }
 
     @Override

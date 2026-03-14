@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.commands.PathPlannerCommands;
@@ -64,10 +65,10 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
     }
     public Command setMacroStateStatusCommand(MacroState state, MacroState.Status status) {
-        return runOnce(() -> setStatusOf(state, status)).withName("Set" + state.name() + "StatusTo" + status.name());
+        return Commands.runOnce(() -> setStatusOf(state, status)).withName("Set" + state.name() + "StatusTo" + status.name());
     }
     public Command setMacroStatesStatusCommand(MacroState[] states, MacroState.Status status) {
-        return runOnce(() -> {
+        return Commands.runOnce(() -> {
             for (MacroState state : states) {
                 setStatusOf(state, status);
             }
@@ -291,7 +292,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command setCurrentStateCommand(MacroState state) {
-        return runOnce(() -> setCurrentState(state)).withName("Force" + state.name());
+        return Commands.runOnce(() -> setCurrentState(state)).withName("Force" + state.name());
     }
 
     /**
@@ -311,7 +312,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command requestStateCommand(MacroState state) {
-        return runOnce(() -> requestState(state)).withName("Request" + state.name());
+        return Commands.runOnce(() -> requestState(state)).withName("Request" + state.name());
     }
 
     /**
@@ -322,7 +323,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command clearRequestedStateCommand() {
-        return runOnce(this::clearRequestedState).withName("ClearRequestedState");
+        return Commands.runOnce(this::clearRequestedState).withName("ClearRequestedState");
     }
 
     public MacroState.Status getStatusOf(MacroState state) {
@@ -346,7 +347,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command removeIntakeFromRequestedStateCommand() {
-        return runOnce(this::removeIntakeFromRequestedState).withName("RemoveIntakeFromRequestedState");
+        return Commands.runOnce(this::removeIntakeFromRequestedState).withName("RemoveIntakeFromRequestedState");
     }
 
     public void addIntakeToRequestedState() {
@@ -362,7 +363,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command addIntakeToRequestedStateCommand() {
-        return runOnce(this::addIntakeToRequestedState).withName("AddIntakeToRequestedState");
+        return Commands.runOnce(this::addIntakeToRequestedState).withName("AddIntakeToRequestedState");
     }
 
     public void toggleIntakeInRequestedState() {
@@ -374,7 +375,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command toggleIntakeInRequestedStateCommand() {
-        return runOnce(this::toggleIntakeInRequestedState).withName("ToggleIntakeInRequestedState");
+        return Commands.runOnce(this::toggleIntakeInRequestedState).withName("ToggleIntakeInRequestedState");
     }
 
     public void removeScoringFromRequestedState() {
@@ -387,7 +388,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command removeScoringFromRequestedStateCommand() {
-        return runOnce(this::removeScoringFromRequestedState).withName("RemoveScoringFromRequestedState");
+        return Commands.runOnce(this::removeScoringFromRequestedState).withName("RemoveScoringFromRequestedState");
     }
 
     public void addScoringToRequestedState() {
@@ -405,12 +406,17 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
     }
 
+    public Command addScoringToRequestedStateCommand() {
+        return Commands.runOnce(() -> addScoringToRequestedState());
+    }
+    
+
     public void requestScoring() {
         addScoringToRequestedState();
     }
 
     public Command requestScoringCommand() {
-        return runOnce(this::requestScoring).withName("RequestScoring");
+        return Commands.runOnce(this::requestScoring).withName("RequestScoring");
     }
 
     public void removeShuttlingFromRequestedState() {
@@ -420,6 +426,10 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
             requestedState = MacroState.INTAKING;
         }
+    }
+
+    public Command removeShuttlingFromRequestedStateCommand() {
+        return Commands.runOnce(() -> removeShuttlingFromRequestedState());
     }
 
     public void addShuttlingToRequestedState() {
@@ -442,7 +452,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command requestShuttlingCommand() {
-        return runOnce(this::requestShuttling).withName("RequestShuttling");
+        return Commands.runOnce(this::requestShuttling).withName("RequestShuttling");
     }
 
     public void turnOffLaunchingStates() {
@@ -451,7 +461,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     public Command turnOffLaunchingStatesCommand() {
-        return runOnce(this::turnOffLaunchingStates).withName("TurnOffLaunchingStates");
+        return Commands.runOnce(this::turnOffLaunchingStates).withName("TurnOffLaunchingStates");
     }
 
     // ==================== Trigger Factory Methods ====================

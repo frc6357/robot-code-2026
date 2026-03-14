@@ -108,30 +108,7 @@
   ],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Request SS Scoring State",
-      "waypointRelativePos": 3.36890243902439,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Request SS Scoring State"
-        }
-      }
-    },
-    {
-      "name": "Request Scoring State",
-      "waypointRelativePos": 4.557926829268293,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Request Scoring State"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 3.75,
     "maxAcceleration": 3.0,

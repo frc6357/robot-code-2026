@@ -36,7 +36,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
         SK26IntakeRollers rollers = rollersSubsystem.get();
 
         /* State-based */
-        intakeRollersFullSpeed.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
+        intakeRollersFullSpeed.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage).withName("IntakeRollersRun"));
 
         /* Manual */
         // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));

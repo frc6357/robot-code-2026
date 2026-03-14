@@ -78,12 +78,12 @@
   ],
   "rotationTargets": [
     {
-      "waypointRelativePos": 1.0,
-      "rotationDegrees": -135.0
+      "waypointRelativePos": 0.8955223880597036,
+      "rotationDegrees": -115.0
     },
     {
       "waypointRelativePos": 2.0,
-      "rotationDegrees": -135.0
+      "rotationDegrees": -115.0
     }
   ],
   "constraintZones": [
@@ -111,17 +111,6 @@
         "type": "named",
         "data": {
           "name": "Request Intaking State"
-        }
-      }
-    },
-    {
-      "name": "Request Scoring State",
-      "waypointRelativePos": 4.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Request Scoring State"
         }
       }
     }

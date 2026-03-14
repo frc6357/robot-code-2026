@@ -91,8 +91,11 @@ public class SK26StateBinder implements CommandBinder {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
 
-        turnOnScoring.onTrue(stateHandler.requestScoringCommand());
-        turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+        turnOnScoring.and(inAllianceZone).onTrue(stateHandler.addScoringToRequestedStateCommand());
+        turnOnScoring.and(inAllianceZone).onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+
+        turnOnScoring.and(outOfAllianceZone).onTrue(stateHandler.requestShuttlingCommand());
+        turnOnScoring.and(outOfAllianceZone).onTrue(stateHandler.removeShuttlingFromRequestedStateCommand());
     }
 
     private void bindOperatorButtons() {

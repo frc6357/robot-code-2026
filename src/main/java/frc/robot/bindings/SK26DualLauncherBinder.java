@@ -12,6 +12,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants;
 import frc.robot.Konstants.LauncherConstants;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
@@ -24,8 +26,9 @@ public class SK26DualLauncherBinder implements CommandBinder {
     Optional<SKSwerve> drive;
 
     Trigger ManualShoot;
-    Trigger Shoot;
+    Trigger Score;
     Trigger TuningRun;
+    Trigger Shuttle;
 
     InterpolatingDoubleTreeMap flywheelMap = LauncherConstants.createFlywheelSpeedMap();
 
@@ -37,9 +40,10 @@ public class SK26DualLauncherBinder implements CommandBinder {
 
         TuningRun = kLBbutton.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
 
-        Shoot = StateHandler.whenCurrentState(MacroState.SCORING)
-                .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-                .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
+        Score = StateHandler.whenCurrentState(MacroState.SCORING)
+                .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+        
+        Shuttle = StateHandler.whenCurrentState(MacroState.SHUTTLING)
                 .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
     }
 
@@ -49,20 +53,35 @@ public class SK26DualLauncherBinder implements CommandBinder {
             SK26DualLauncher launcher = launcherSubsystem.get();
 
             if(drive.isEmpty()) {
-                Shoot.whileTrue(
+                Score.whileTrue(
                     // Commands.defer(() -> launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())), Set.of(launcher)))
                     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
                 );
             }
             else {                
-                Shoot.whileTrue(
+                Score.whileTrue(
                     launcher.runVelocityCommand(
                         () -> RPM.of(flywheelMap.get(
-                            drive.get().getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())))
-                    )
+                            drive.get().getRobotPose().getTranslation().getDistance(
+                                Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
+                                                FieldConstants.Hub.redTopCenterPoint.toTranslation2d()
+                            )))
+                    ).withName("LauncherScoreInterp")
                 );
 
-                // Shoot.whileTrue(
+                Shuttle.whileTrue(
+                    launcher.runVelocityCommand(
+                        () -> RPM.of(flywheelMap.get(
+                            drive.get().getRobotPose().getTranslation().getDistance(
+                                kOperatorControlled.point.getTargetPoint()
+                            )))
+                    ).withName("LauncherShuttleInterp")
+                );
+
+                // Score.whileTrue(
+                //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                // );
+                // Shuttle.whileTrue(
                 //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
                 // );
             }

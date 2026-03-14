@@ -65,7 +65,7 @@ public class SK26FeederBinder implements CommandBinder {
             // kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
             // kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
-            runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
+            runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)).withName("FeederRollersRun"));
             kLTrigger.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
             kLTrigger.button.onFalse(Commands.defer(
                     () -> runFeederFromState.getAsBoolean()

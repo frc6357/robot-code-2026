@@ -20,6 +20,7 @@ public class SK26IntakePivotBinder implements CommandBinder
 
     Trigger intakingStates;
     Trigger intakeZeroPosition;
+    Trigger trashCompact;
 
     public SK26IntakePivotBinder(Optional<SK26IntakePivot> pivotSubsystem)
     {
@@ -33,6 +34,8 @@ public class SK26IntakePivotBinder implements CommandBinder
         // States that want the intake stowed
         intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
+
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING);
     }
 
     public void bindButtons()
@@ -47,10 +50,12 @@ public class SK26IntakePivotBinder implements CommandBinder
         /* State-based */
         // Auto-deploy to GROUND when entering an intaking state and pivot is currently at ZERO
         intakingStates.and(() -> (pivot.getPositionerTargetEnum() == ZERO))
-            .onTrue(pivot.setIntakePivotTargetCommand(GROUND));
+            .onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("IntakeDeploy"));
 
         // Stow when climbing
         intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+
+        trashCompact.or(OperatorPorts.kRTrigger.button).whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
 
         /* Manual */
         // Pivoting
@@ -58,6 +63,6 @@ public class SK26IntakePivotBinder implements CommandBinder
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor
-        OperatorPorts.kRTrigger.button.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations));
+        // OperatorPorts.kRTrigger.button.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations));
     }
 }

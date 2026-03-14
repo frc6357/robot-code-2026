@@ -8,9 +8,14 @@ import static frc.robot.Ports.OperatorPorts.kRightStickX;
 import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants;
+import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.filters.LinearDeadbandFilter;
+import frc.robot.Konstants.SwerveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
@@ -28,6 +33,9 @@ public class SK26TurretBinder implements CommandBinder
     Trigger PointAtHub;
     Trigger IsIdle;
 
+    Trigger inAllianceZone;
+    Trigger outOfAllianceZone;
+
     SlewRateLimiter slewLimiter;
 
     public SK26TurretBinder(Optional<SK26Turret> turretSubsystem, Optional<SKSwerve> swerveSubsystem)
@@ -43,6 +51,18 @@ public class SK26TurretBinder implements CommandBinder
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
+
+        if(swerveSubsystem.isEmpty()) {
+            return;
+        }
+        inAllianceZone = new Trigger(() -> {
+            double robotX = swerveSubsystem.get().getRobotPose().getX();
+            if (Field.isBlue()) {
+                return robotX < LinesVertical.allianceZone + Units.inchesToMeters(SwerveConstants.kChassisLength / 2.0);
+            } else {
+                return robotX > LinesVertical.redAllianceZone - Units.inchesToMeters(SwerveConstants.kChassisLength / 2.0);
+            }
+        });
     }
 
     @Override
@@ -69,8 +89,13 @@ public class SK26TurretBinder implements CommandBinder
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
 
-        PointAtHub.or(PointAtShuttlePoint).whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
+        PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));
+        
+        PointAtHub.whileTrue(
+            new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
+                                                                        FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
+            .withName("TurretTrackHub"));
 
 
         // Default command: Use the right joystick to manually move the turret when idle
