@@ -15,6 +15,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
     private final Optional<SK26IntakeRollers> rollersSubsystem;
 
     Trigger intakeRollersFullSpeed;
+    Trigger trashCompact;
 
     public SK26IntakeRollersBinder(Optional<SK26IntakeRollers> rollersSubsystem)
     {
@@ -24,6 +25,8 @@ public class SK26IntakeRollersBinder implements CommandBinder
         intakeRollersFullSpeed = StateHandler.whenCurrentState(MacroState.INTAKING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
     }
 
     public void bindButtons()
@@ -37,6 +40,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
 
         /* State-based */
         intakeRollersFullSpeed.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage).withName("IntakeRollersRun"));
+        trashCompact.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage * 0.66).withName("IntakeRollersCompact"));
 
         /* Manual */
         // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));

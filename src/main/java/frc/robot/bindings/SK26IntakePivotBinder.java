@@ -35,7 +35,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING);
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
     }
 
     public void bindButtons()
@@ -55,7 +55,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         // Stow when climbing
         intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
 
-        trashCompact.or(OperatorPorts.kRTrigger.button).whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
+        trashCompact.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
 
         /* Manual */
         // Pivoting

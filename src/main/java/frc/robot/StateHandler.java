@@ -447,6 +447,10 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
     }
 
+    public Command addShuttlingToRequestedStateCommand() {
+        return Commands.runOnce(() -> addShuttlingToRequestedState());
+    }
+
     public void requestShuttling() {
         addShuttlingToRequestedState();
     }

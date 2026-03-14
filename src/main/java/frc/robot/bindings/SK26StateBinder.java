@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
+import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
 
 public class SK26StateBinder implements CommandBinder {
@@ -41,7 +42,7 @@ public class SK26StateBinder implements CommandBinder {
             intakeReady = stateHandler.getIntakeReady();
             turretReady = stateHandler.getTurretReady();
             inAllianceZone = stateHandler.getInAllianceZone();
-            outOfAllianceZone = stateHandler.getOutOfAllianceZone();
+            outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
         }
 
@@ -91,14 +92,12 @@ public class SK26StateBinder implements CommandBinder {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
 
-        turnOnScoring.and(inAllianceZone).onTrue(stateHandler.addScoringToRequestedStateCommand());
-        turnOnScoring.and(inAllianceZone).onFalse(stateHandler.removeScoringFromRequestedStateCommand());
-
-        turnOnScoring.and(outOfAllianceZone).onTrue(stateHandler.requestShuttlingCommand());
-        turnOnScoring.and(outOfAllianceZone).onTrue(stateHandler.removeShuttlingFromRequestedStateCommand());
+        turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
+        turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
     }
 
     private void bindOperatorButtons() {
-
+        OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
     }
 }
