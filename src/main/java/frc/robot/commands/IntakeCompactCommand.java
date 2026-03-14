@@ -4,7 +4,7 @@ import static frc.robot.Konstants.IntakeConstants.kIntakeCompactSwitchIntervalSe
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.intake.SK26Intake;
+import frc.robot.subsystems.intake.SK26IntakePivot;
 
 /**
  * Command that oscillates the intake up and down to gently spill balls 
@@ -13,7 +13,7 @@ import frc.robot.subsystems.intake.SK26Intake;
  */
 public class IntakeCompactCommand extends Command {
 
-    private final SK26Intake intake;
+    private final SK26IntakePivot intake;
     
     // Oscillation positions (in rotations)
     private final double compactPosition;
@@ -34,18 +34,18 @@ public class IntakeCompactCommand extends Command {
      * @param groundPosition The low position in rotations
      * @param compactPosition The high position in rotations
      */
-    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double compactPosition) {
+    public IntakeCompactCommand(SK26IntakePivot intake, double groundPosition, double compactPosition) {
         this(intake, groundPosition, compactPosition, kIntakeCompactSwitchIntervalSeconds);
     }
 
     /**
      * Creates a new IntakeCompactCommand with custom oscillation range and interval.
-     * @param intake The intake subsystem
+     * @param intake The intake pivot subsystem
      * @param groundPosition The low position in rotations
      * @param compactPosition The compacting position in rotations
      * @param switchIntervalSeconds Time between position switches in seconds
      */
-    public IntakeCompactCommand(SK26Intake intake, double groundPosition, double compactPosition, double switchIntervalSeconds) {
+    public IntakeCompactCommand(SK26IntakePivot intake, double groundPosition, double compactPosition, double switchIntervalSeconds) {
         this.intake = intake;
         this.groundPosition = groundPosition;
         this.compactPosition = compactPosition;

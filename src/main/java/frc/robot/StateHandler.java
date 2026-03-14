@@ -21,7 +21,7 @@ import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
-import frc.robot.subsystems.intake.SK26Intake;
+import frc.robot.subsystems.intake.SK26IntakePivot;
 import frc.robot.subsystems.turret.SK26Turret;
 import lombok.Getter;
 
@@ -186,9 +186,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      * intake's {@code isPositionerAtTarget()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
-     * @param intake Optional containing the SK26Intake, or empty if not present
+     * @param intake Optional containing the SK26IntakePivot, or empty if not present
      */
-    public void setIntakeSubsystem(Optional<SK26Intake> intake) {
+    public void setIntakeSubsystem(Optional<SK26IntakePivot> intake) {
         if (intake.isEmpty()) {
             return;
         }

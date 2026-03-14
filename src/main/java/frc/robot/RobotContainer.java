@@ -34,7 +34,8 @@ import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26DualLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26IndexerBinder;
-import frc.robot.bindings.SK26IntakeBinder;
+import frc.robot.bindings.SK26IntakePivotBinder;
+import frc.robot.bindings.SK26IntakeRollersBinder;
 import frc.robot.bindings.SK26LauncherBinder;
 import frc.robot.bindings.SK26LightsBinder;
 import frc.robot.bindings.SK26ShootingCoordinatorBinder;
@@ -47,7 +48,8 @@ import frc.robot.subsystems.climb.SK26Climb;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.feeder.SK26Feeder;
 import frc.robot.subsystems.indexer.SK26Indexer;
-import frc.robot.subsystems.intake.SK26Intake;
+import frc.robot.subsystems.intake.SK26IntakePivot;
+import frc.robot.subsystems.intake.SK26IntakeRollers;
 import frc.robot.subsystems.launcher.mechanisms.BangBangLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.launcher.mechanisms.SK26Launcher;
@@ -88,7 +90,8 @@ public class RobotContainer {
   public Optional<SK26DualLauncher> m_DualLauncherContainer = Optional.empty();
   public Optional<StateHandler> m_stateHandlerContainer = Optional.empty();
   public Optional<SK26Lights> m_lightsContainer = Optional.empty();
-  public Optional<SK26Intake> m_pickupContainer = Optional.empty();
+  public Optional<SK26IntakePivot> m_intakePivotContainer = Optional.empty();
+  public Optional<SK26IntakeRollers> m_intakeRollersContainer = Optional.empty();
   public Optional<SK26Indexer> m_indexerContainer = Optional.empty();
   public Optional<FuelDetection> m_fuelDetectionContainer = Optional.empty();
 
@@ -103,7 +106,8 @@ public class RobotContainer {
   public static SKSwerve m_swerveInstance;
   public static SKVision m_visionInstance;
   public static SK26Climb m_climbInstance;
-  public static SK26Intake m_pickupInstance;
+  public static SK26IntakePivot m_intakePivotInstance;
+  public static SK26IntakeRollers m_intakeRollersInstance;
   public static SK26Indexer m_indexerInstance;
   public static SK26Feeder m_feederInstance;
   public static FuelDetection m_fuelDetectionInstance;
@@ -172,8 +176,10 @@ public class RobotContainer {
                     m_visionInstance = m_visionContainer.get();
                 }
                 if(subsystems.isPickupPresent()) {
-                    m_pickupContainer = Optional.of(new SK26Intake());
-                    m_pickupInstance = m_pickupContainer.get();
+                    m_intakePivotContainer = Optional.of(new SK26IntakePivot());
+                    m_intakePivotInstance = m_intakePivotContainer.get();
+                    m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
+                    m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
                 if(subsystems.isBangBangLauncherPresent()) {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
@@ -242,8 +248,10 @@ public class RobotContainer {
                     m_lightsInstance = m_lightsContainer.get();
                 }
                 if(subsystems.isPickupPresent()) {
-                    m_pickupContainer = Optional.of(new SK26Intake());
-                    m_pickupInstance = m_pickupContainer.get();
+                    m_intakePivotContainer = Optional.of(new SK26IntakePivot());
+                    m_intakePivotInstance = m_intakePivotContainer.get();
+                    m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
+                    m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
                 if(subsystems.isIndexerPresent()) {
                     m_indexerContainer = Optional.of(new SK26Indexer());
@@ -271,7 +279,7 @@ public class RobotContainer {
             // Give StateHandler a reference to the turret for state readiness checking
             m_stateHandlerContainer.ifPresent(sh -> sh.setTurretSubsystem(m_turretContainer));
             // Give StateHandler a reference to the intake for state readiness checking
-            m_stateHandlerContainer.ifPresent(sh -> sh.setIntakeSubsystem(m_pickupContainer));
+            m_stateHandlerContainer.ifPresent(sh -> sh.setIntakeSubsystem(m_intakePivotContainer));
             // Give StateHandler a reference to the drive for zone-based triggers
             m_stateHandlerContainer.ifPresent(sh -> sh.setDriveSubsystem(m_swerveContainer));
         }
@@ -299,7 +307,8 @@ public class RobotContainer {
         buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
-        buttonBinders.add(new SK26IntakeBinder(m_pickupContainer));
+        buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer));
+        buttonBinders.add(new SK26IntakeRollersBinder(m_intakeRollersContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
