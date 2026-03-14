@@ -386,6 +386,10 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
     }
 
+    public Command removeScoringFromRequestedStateCommand() {
+        return runOnce(this::removeScoringFromRequestedState).withName("RemoveScoringFromRequestedState");
+    }
+
     public void addScoringToRequestedState() {
         if(requestedState == MacroState.IDLE) {
             requestedState = MacroState.SCORING;

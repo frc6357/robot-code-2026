@@ -170,7 +170,7 @@
   {
     "name": "/Preferences/DualLauncher/ManualShootVelocity (rps)",
     "type": "double",
-    "value": 40.0,
+    "value": 35.0,
     "properties": {
       "persistent": true
     }

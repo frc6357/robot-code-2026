@@ -685,7 +685,7 @@ public final class Konstants
 
         public static final double kMaxIntakeVoltage = 10.0;
 
-        public static final double kIntakeFullVoltage = -7.5;
+        public static final double kIntakeFullVoltage = -5.5;
         public static final double kIntakeIdleVoltage = 0.0;
     }
 

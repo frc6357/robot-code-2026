@@ -92,8 +92,7 @@ public class SK26StateBinder implements CommandBinder {
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
 
         turnOnScoring.onTrue(stateHandler.requestScoringCommand());
-        turnOnShuttling.onTrue(stateHandler.requestShuttlingCommand());
-        turnOffLaunch.onTrue(stateHandler.turnOffLaunchingStatesCommand());
+        turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
     }
 
     private void bindOperatorButtons() {
