@@ -54,7 +54,12 @@ public class SK26IndexerBinder implements CommandBinder
 
         kRTrigger.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
         IndexFeed.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
-        kBbutton.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
+        kBbutton.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)))
+            .onFalse(Commands.defer(
+                    () -> IndexFeed.getAsBoolean()
+                        ? indexer.feedCommand(() -> manualIndexerVoltage.get())
+                        : indexer.idleIndexerCommand(),
+                    Set.of(indexer)));
         
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead

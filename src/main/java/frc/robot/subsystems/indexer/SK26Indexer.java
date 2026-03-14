@@ -104,6 +104,13 @@ public class SK26Indexer extends SubsystemBase
         setIndexerVoltage(kIndexerIdleVoltage);
     }
 
+    public Command idleIndexerCommand() {
+        return this.runOnce(() -> {
+            setStatus(IndexerStatus.IDLE);
+            idleIndexer();
+        });
+    }
+
     /**
      * Feeds fuel by setting the indexer to the feed speed.
      * @param indexerFeedRPS The feed speed in RPS.

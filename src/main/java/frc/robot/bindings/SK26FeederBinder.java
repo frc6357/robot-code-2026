@@ -67,6 +67,12 @@ public class SK26FeederBinder implements CommandBinder {
             kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
             runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
+            kBbutton.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)))
+                .onFalse(Commands.defer(
+                    () -> runFeederFromState.getAsBoolean()
+                        ? feeder.feedCommand(() -> manualFeederVoltage.get())
+                        : feeder.idleFeederCommand(),
+                    Set.of(feeder)));
 
             // runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             // runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));

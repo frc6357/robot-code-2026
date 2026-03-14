@@ -420,7 +420,7 @@ public final class Konstants
         public static final boolean kTurretMotorInverted = true;
 
         // Gain scheduler constants for turret PID control
-        public static final double kTurretGainSchedulerDeadbandDegrees = 1.2; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+        public static final double kTurretGainSchedulerDeadbandDegrees = 0.85; // 0.85 // Degrees of error until the turret's gain scheduler turns on
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
@@ -501,7 +501,7 @@ public final class Konstants
         // ==================== Dual Launcher Constants ====================
         public static final class DualLauncher {
             // Velocity tolerance for considering the launcher "at speed" (rps)
-            public static final double kVelocityToleranceRPS = 1.0;
+            public static final double kVelocityToleranceRPS = 5.0;
 
             // Default target velocity (rps) — typically overridden by commands/state handler
             public static final double kDefaultTargetRPS = 40.0;

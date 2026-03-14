@@ -17,8 +17,11 @@ import org.littletonrobotics.junction.Logger;
 
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Ports.DriverPorts;
 
 /**
  * Subsystem for the intake roller motor. Controls the roller that intakes game pieces
@@ -58,6 +61,9 @@ public class SK26IntakeRollers extends SubsystemBase
 		voltage = MathUtil.clamp(voltage, -kMaxIntakeVoltage, kMaxIntakeVoltage);
 		targetVoltage = voltage;
 		intakeMotor.setControl(intakeVoltageControl.withOutput(voltage));
+		if(!DriverStation.isAutonomousEnabled()){
+			DriverPorts.kDriver.setRumble(RumbleType.kBothRumble, 0.6);
+		}
 	}
 
 	/**
@@ -74,6 +80,9 @@ public class SK26IntakeRollers extends SubsystemBase
 	public void stopIntake()
 	{
 		setIntakeVoltage(0.0);
+		if(!DriverStation.isAutonomousEnabled()){
+			DriverPorts.kDriver.setRumble(RumbleType.kBothRumble, 0.0);
+		}
 	}
 
 	@Override
