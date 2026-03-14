@@ -1,7 +1,6 @@
 package frc.robot.bindings;
 
-import static frc.robot.Ports.OperatorPorts.kBbutton;
-import static frc.robot.Ports.OperatorPorts.kRTrigger;
+import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
 
 import java.util.Optional;
@@ -63,12 +62,12 @@ public class SK26FeederBinder implements CommandBinder {
         {
             SK26Feeder feeder = feederSubsystem.get();
             //runFeederFromState.whileTrue(new FeederFeedCommand(feeder, kFeederRunningVelocity));
-            kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
-            kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
+            // kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
+            // kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
             runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
-            kBbutton.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)))
-                .onFalse(Commands.defer(
+            kLTrigger.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
+            kLTrigger.button.onFalse(Commands.defer(
                     () -> runFeederFromState.getAsBoolean()
                         ? feeder.feedCommand(() -> manualFeederVoltage.get())
                         : feeder.idleFeederCommand(),

@@ -6,8 +6,7 @@ import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
-import static frc.robot.Ports.OperatorPorts.kBbutton;
-import static frc.robot.Ports.OperatorPorts.kRTrigger;
+import static frc.robot.Ports.OperatorPorts.kLTrigger;
 
 // Imports from Java/WPILib
 import java.util.Optional;
@@ -52,10 +51,10 @@ public class SK26IndexerBinder implements CommandBinder
 
         // IndexFeed.whileTrue(indexer.feedCommand(kIndexerFullVoltage));
 
-        kRTrigger.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
+        // kRTrigger.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
         IndexFeed.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
-        kBbutton.button.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)))
-            .onFalse(Commands.defer(
+        kLTrigger.button.onTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
+        kLTrigger.button.onFalse(Commands.defer(
                     () -> IndexFeed.getAsBoolean()
                         ? indexer.feedCommand(() -> manualIndexerVoltage.get())
                         : indexer.idleIndexerCommand(),

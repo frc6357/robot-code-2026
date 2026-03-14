@@ -1,9 +1,9 @@
 package frc.robot.bindings;
 
 import static edu.wpi.first.units.Units.RPM;
-import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Ports.OperatorPorts.kLBbutton;
+import static frc.robot.Ports.OperatorPorts.kRTrigger;
 
 import java.util.Optional;
 import java.util.Set;
@@ -12,10 +12,8 @@ import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
-import frc.lib.preferences.Pref;
-import frc.lib.preferences.SKPreferences;
-import frc.robot.StateHandler;
 import frc.robot.Konstants.LauncherConstants;
+import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
@@ -30,8 +28,6 @@ public class SK26DualLauncherBinder implements CommandBinder {
     Trigger TuningRun;
 
     InterpolatingDoubleTreeMap flywheelMap = LauncherConstants.createFlywheelSpeedMap();
-
-    Pref<Double> kManualShootVelocity = SKPreferences.attach("DualLauncher/ManualShootVelocity (rps)", 35.0);
 
     public SK26DualLauncherBinder(Optional<SK26DualLauncher> launcherSubsystem, Optional<SKSwerve> drive) {
         this.launcherSubsystem = launcherSubsystem;
@@ -53,13 +49,13 @@ public class SK26DualLauncherBinder implements CommandBinder {
             SK26DualLauncher launcher = launcherSubsystem.get();
 
             if(drive.isEmpty()) {
-                ManualShoot.whileTrue(
+                Shoot.whileTrue(
                     // Commands.defer(() -> launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())), Set.of(launcher)))
                     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
                 );
             }
             else {                
-                ManualShoot.whileTrue(
+                Shoot.whileTrue(
                     launcher.runVelocityCommand(
                         () -> RPM.of(flywheelMap.get(
                             drive.get().getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())))
@@ -67,20 +63,13 @@ public class SK26DualLauncherBinder implements CommandBinder {
                 );
 
                 // Shoot.whileTrue(
-                //     launcher.runVelocityCommand(
-                //         () -> RPM.of(flywheelMap.get(
-                //             drive.get().getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())))
-                //     )
+                //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
                 // );
-
-                Shoot.whileTrue(
-                    Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
-                );
             }
 
             // PID tuning: hold operator LB (in IDLE) to spin at dashboard setpoint.
             // Adjust gains and setpoint live on SmartDashboard, watch response in AdvantageScope.
-            TuningRun.toggleOnTrue(launcher.tuningCommand());
+            // TuningRun.toggleOnTrue(launcher.tuningCommand());
 
             // Shoot trigger is available for ShootingCoordinator integration
             // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())));

@@ -583,6 +583,8 @@ public final class Konstants
             // map.put(3.251, 26.0 * 60.0);
             map.put(3.4798, 26.6 * 60.0);
             map.put(4.572, 29.4 * 60.0);
+            map.put(2.94, 25.25 * 60.0);
+            map.put(2.5, 24.2 * 60.0);
 
             return map;
         }
@@ -624,7 +626,7 @@ public final class Konstants
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(0.271),
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.1),
+            COMPACTING(0.0),
             /** Set the intake angle to 0 rotations (zero position) */
             ZERO(0.0);
             
@@ -673,7 +675,7 @@ public final class Konstants
         public static final double kIntakeStatorCurrentLimit = 60;
 
         // Intake compact command oscillation
-        public static final double kIntakeCompactSwitchIntervalSeconds = 0.67;
+        public static final double kIntakeCompactSwitchIntervalSeconds = 1.2;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;

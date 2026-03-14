@@ -58,6 +58,6 @@ public class SK26IntakePivotBinder implements CommandBinder
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor
-        OperatorPorts.kYbutton.button.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations));
+        OperatorPorts.kRTrigger.button.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations));
     }
 }

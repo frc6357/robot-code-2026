@@ -1,7 +1,6 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
-import static frc.robot.Ports.OperatorPorts;
 
 import java.util.Optional;
 
@@ -40,6 +39,6 @@ public class SK26IntakeRollersBinder implements CommandBinder
         intakeRollersFullSpeed.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
 
         /* Manual */
-        OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
+        // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
     }
 }
