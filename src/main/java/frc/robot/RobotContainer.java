@@ -25,8 +25,10 @@ import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
@@ -66,6 +68,8 @@ import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.fueldetection.FuelDetection;
 import frc.robot.subsystems.vision.VisionConfig;
+
+import static frc.robot.Ports.DriverPorts.kDriver;
 import static frc.robot.StateHandler.MacroState;
 
 
@@ -396,6 +400,9 @@ public class RobotContainer {
         // Show neutral values while the robot is still disabled
         shiftLabelPublisher.set(COLOR_WHITE);
         shiftTimeRemainingPublisher.set(0.0);
+
+        shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85)));
+        shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0)));
     }
 
     private void updatePhaseTimer(Alliance allianceToWinAuto) {
