@@ -25,7 +25,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
 
@@ -34,7 +33,7 @@ import static frc.robot.Ports.LauncherPorts.kLauncherBackRollers;
 
 import org.littletonrobotics.junction.Logger;
 
-public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
+public class SK26Launcher extends SubsystemBase {
 
     @Getter
     private LauncherTuning tuning = new LauncherTuning("SK26Launcher");
@@ -201,11 +200,5 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         Logger.recordOutput("Launcher/Tangential Velocity", launchermotor.getVelocity().getValueAsDouble()*(2*Math.PI*kWheelRadius));
         Logger.recordOutput("Launcher/RPS", launchermotor.getVelocity().getValueAsDouble());
         Logger.recordOutput("Launcher/Target RPS", targetMotorRPS);
-    }
-
-    @Override
-    public void addPathPlannerCommands() {
-        // TODO: Implement PathPlanner commands for launcher
-        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

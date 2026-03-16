@@ -27,7 +27,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
 import frc.lib.preferences.SKPreferences;
-import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
 
@@ -42,7 +41,7 @@ import lombok.Getter;
  * <p>Each motor runs its own VelocityVoltage closed-loop for tighter tracking and
  * independent health monitoring.
  */
-public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsystem {
+public class SK26DualLauncher extends SubsystemBase {
 
     // Motors
     private final TalonFX bottomMotor;
@@ -360,12 +359,5 @@ public class SK26DualLauncher extends SubsystemBase implements PathplannerSubsys
         Logger.recordOutput("DualLauncher/Tuning/Top/kD", topKD.get());
         Logger.recordOutput("DualLauncher/Tuning/Setpoint (rps)", tuningSetpointRPS.get());
         Logger.recordOutput("DualLauncher/Tuning/Tolerance (rps)", velocityToleranceRPS.get());
-    }
-
-    // ==================== PathPlanner ====================
-
-    @Override
-    public void addPathPlannerCommands() {
-        // TODO: Register named commands for autonomous launcher control
     }
 }
