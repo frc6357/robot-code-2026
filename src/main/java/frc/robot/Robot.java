@@ -108,6 +108,7 @@ public class Robot extends LoggedRobot {
         // commands, running already-scheduled commands, removing finished or interrupted commands,
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
+        m_robotContainer.pollPhaseTimer();
         m_commandScheduler.run();
         SKPreferences.refreshIfNeeded();
     }
@@ -148,6 +149,8 @@ public class Robot extends LoggedRobot {
             m_autonomousCommand.cancel();
         }
         m_robotContainer.teleopInit();
+
+
     }
 
     /** This function is called periodically during operator control. */

@@ -18,8 +18,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -121,6 +127,39 @@ public class RobotContainer {
   public List<CommandBinder> buttonBinders = new ArrayList<CommandBinder>();
   LoggedDashboardChooser<Command> autoCommandSelector;
 
+  // Creates a chooser for the operator to update on which alliance won the autonomous
+  // period, thus determining which alliance will have the active shift first and every shift afterward.
+  public LoggedDashboardChooser<Alliance> phaseTimerChooser;
+  public Timer phaseTimer = new Timer();
+  public Alliance winningAutoAlliance;
+
+  // ── Phase Timer: 2026 REBUILT Alliance Shift Tracking ──────────────────────
+  // Teleop is 2:20 (140s). Elapsed time measured from teleopInit().
+  // TRANSITION SHIFT: elapsed  0s – 10s  (both HUBs active)
+  // SHIFT 1:          elapsed 10s – 35s  (25s, auto-LOSER active first)
+  // SHIFT 2:          elapsed 35s – 60s  (25s)
+  // SHIFT 3:          elapsed 60s – 85s  (25s)
+  // SHIFT 4:          elapsed 85s – 110s (25s)
+  // END GAME:         elapsed 110s – 140s (both HUBs active)
+  private static final double TRANSITION_SHIFT_END = 10.0;
+  private static final double SHIFT_1_END          = 35.0;
+  private static final double SHIFT_2_END          = 60.0;
+  private static final double SHIFT_3_END          = 85.0;
+  private static final double SHIFT_4_END          = 110.0;
+  private static final double TELEOP_DURATION      = 140.0;
+
+  // Hex color strings published as the shift label so dashboards can drive text/background color
+  private static final String COLOR_RED    = "#FF1111"; // vibrant red  — RED alliance active
+  private static final String COLOR_BLUE   = "#1166FF"; // vibrant blue — BLUE alliance active
+  private static final String COLOR_WHITE  = "#FFFFFF"; // both HUBs active (TRANSITION / END GAME)
+
+  // NetworkTables publishers for the "Shift Timer" dashboard table
+  private StringPublisher shiftLabelPublisher;
+  private DoublePublisher shiftTimeRemainingPublisher;
+
+  // Captures the FPGA timestamp at the moment teleop starts; -1.0 = not yet set
+  private double teleopStartTime = -1.0;
+
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer()
@@ -139,6 +178,8 @@ public class RobotContainer {
     }
     //set delete old files = true in build.gradle to prevent sotrage of unused orphans
   
+    /* 2026 REBUILT Phase Timing Utility */
+    configurePhaseTimer();
 }
 
   /**
@@ -320,12 +361,118 @@ public class RobotContainer {
         }
     }
 
-    public void configurePathPlannerCommands()
+    private void configurePathPlannerCommands()
     {
         NamedCommands.registerCommands(PathPlannerCommands.getAvailableCommands());
     }
 
+    private void configurePhaseTimer() {
+        phaseTimerChooser = new LoggedDashboardChooser<Alliance>("PhaseTimerChooser");
+        phaseTimerChooser.addDefaultOption("Blue", Alliance.Blue);
+        phaseTimerChooser.addOption("Red", Alliance.Red);
+        phaseTimerChooser.onChange((allianceToWinAuto) -> updatePhaseTimer(allianceToWinAuto));
+
+        // Initialise to the default so winningAutoAlliance is never null at runtime
+        winningAutoAlliance = Alliance.Blue;
+
+        // Publish to the "Shift Timer" NetworkTable — visible in Shuffleboard / AdvantageScope
+        NetworkTable shiftTable = NetworkTableInstance.getDefault().getTable("Shift Timer");
+        shiftLabelPublisher        = shiftTable.getStringTopic("Active Shift").publish();
+        shiftTimeRemainingPublisher = shiftTable.getDoubleTopic("Seconds Remaining").publish();
+
+        // Show neutral values while the robot is still disabled
+        shiftLabelPublisher.set(COLOR_WHITE);
+        shiftTimeRemainingPublisher.set(0.0);
+    }
+
+    private void updatePhaseTimer(Alliance allianceToWinAuto) {
+        winningAutoAlliance = allianceToWinAuto;
+    }
+
     /**
+     * Returns the Alliance whose HUB is ACTIVE during SHIFT 1.
+     * Per the game manual: the auto-winning alliance has their HUB set to INACTIVE
+     * for SHIFT 1, so the AUTO LOSER scores first.
+     */
+    private Alliance getShift1ActiveAlliance() {
+        return (winningAutoAlliance == Alliance.Red) ? Alliance.Blue : Alliance.Red;
+    }
+
+    /**
+     * Returns the Alliance with the ACTIVE HUB for a given shift number (1-4).
+     * Odd-numbered shifts go to the auto-losing alliance; even-numbered shifts
+     * go to the auto-winning alliance (they alternate each shift).
+     *
+     * @param shiftNumber 1 through 4
+     * @return the Alliance whose HUB is active during that shift
+     */
+    private Alliance getActiveAllianceForShift(int shiftNumber) {
+        Alliance shift1Active = getShift1ActiveAlliance();
+        // Odd shifts → auto-loser active, Even shifts → auto-winner active
+        return (shiftNumber % 2 != 0) ? shift1Active
+                                       : (shift1Active == Alliance.Red ? Alliance.Blue : Alliance.Red);
+    }
+
+    /**
+     * Called from {@link Robot#robotPeriodic()} BEFORE the command scheduler runs.
+     * Computes the current REBUILT shift period based on elapsed teleop time and
+     * publishes the active shift label and countdown to the "Shift Timer" NetworkTable.
+     */
+    public void pollPhaseTimer() {
+        if (!DriverStation.isTeleop()) {
+            shiftLabelPublisher.set(COLOR_WHITE);
+            shiftTimeRemainingPublisher.set(0.0);
+            return;
+        }
+
+        // Latch the FPGA timestamp once on the first poll after teleopInit()
+        if (teleopStartTime < 0.0) {
+            teleopStartTime = Timer.getFPGATimestamp();
+        }
+
+        double elapsed = Timer.getFPGATimestamp() - teleopStartTime;
+
+        String label;
+        double remaining;
+
+        if (elapsed < TRANSITION_SHIFT_END) {
+            // TRANSITION SHIFT — both HUBs active, no alliance advantage yet
+            label     = COLOR_WHITE;
+            remaining = TRANSITION_SHIFT_END - elapsed;
+
+        } else if (elapsed < SHIFT_1_END) {
+            Alliance active = getActiveAllianceForShift(1);
+            label     = (active == Alliance.Red) ? COLOR_RED : COLOR_BLUE;
+            remaining = SHIFT_1_END - elapsed;
+
+        } else if (elapsed < SHIFT_2_END) {
+            Alliance active = getActiveAllianceForShift(2);
+            label     = (active == Alliance.Red) ? COLOR_RED : COLOR_BLUE;
+            remaining = SHIFT_2_END - elapsed;
+
+        } else if (elapsed < SHIFT_3_END) {
+            Alliance active = getActiveAllianceForShift(3);
+            label     = (active == Alliance.Red) ? COLOR_RED : COLOR_BLUE;
+            remaining = SHIFT_3_END - elapsed;
+
+        } else if (elapsed < SHIFT_4_END) {
+            Alliance active = getActiveAllianceForShift(4);
+            label     = (active == Alliance.Red) ? COLOR_RED : COLOR_BLUE;
+            remaining = SHIFT_4_END - elapsed;
+
+        } else if (elapsed < TELEOP_DURATION) {
+            // END GAME — both HUBs active again
+            label     = COLOR_WHITE;
+            remaining = TELEOP_DURATION - elapsed;
+
+        } else {
+            label     = COLOR_WHITE;
+            remaining = 0.0;
+        }
+
+        shiftLabelPublisher.set(label);
+        shiftTimeRemainingPublisher.set(Math.max(0.0, remaining));
+    }    /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      * <p>
      * This method loads the auto when it is called, however, it is recommended
@@ -349,6 +496,9 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
+        // Reset the latch so pollPhaseTimer captures a fresh start timestamp
+        teleopStartTime = -1.0;
+
         if(m_stateHandlerContainer.isPresent()) {
             m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
         }
