@@ -166,6 +166,7 @@ public class RobotContainer {
   private static double shiftSecondsRemaining = Double.MAX_VALUE;
 
   private static final double SHIFT_WARNING_THRESHOLD = 5.0;
+  private static final double SHIFT_NOTICE_THRESHOLD = 10.0;
 
   /**
    * Active (true) during the last 5 seconds of every shift period — TRANSITION,
@@ -176,6 +177,11 @@ public class RobotContainer {
       new Trigger(() -> DriverStation.isTeleop()
                      && shiftSecondsRemaining <= SHIFT_WARNING_THRESHOLD
                      && shiftSecondsRemaining > 0.0);
+
+  public static final Trigger shiftNotice = 
+      new Trigger(() -> DriverStation.isTeleop()
+                     && shiftSecondsRemaining <= SHIFT_NOTICE_THRESHOLD
+                     && shiftSecondsRemaining > SHIFT_NOTICE_THRESHOLD - 1.5);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */

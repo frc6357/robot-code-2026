@@ -239,6 +239,7 @@ public class SK26Lights extends SubsystemBase {
             case STROBE_BLUE: patterns.blueStrobe.applyTo(m_baseBuffer); break;
             case STROBE_YELLOW: patterns.yellowStrobe.applyTo(m_baseBuffer); break;
             case STROBE_ORANGE: patterns.orangeStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_PURPLE: patterns.purpleStrobe.applyTo(m_baseBuffer); break;
             case STROBE_SKBLUE: patterns.skBlueStrobe.applyTo(m_baseBuffer); break;
 
             // Dual color modes

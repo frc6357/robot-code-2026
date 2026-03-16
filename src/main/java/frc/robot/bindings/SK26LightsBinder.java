@@ -135,6 +135,11 @@ public class SK26LightsBinder implements CommandBinder {
             lights.setMode(LightMode.STROBE_ORANGE, "Shift Ending Soon")
         )
         .onFalse(handleEffectFallbackCommand);
+
+        RobotContainer.shiftNotice.onTrue(
+            lights.setMode(LightMode.STROBE_PURPLE, "Shift Ending Notice")
+        )
+        .onFalse(handleEffectFallbackCommand);
     }
 
     private Command handleEffectFallbackCommand = Commands.runOnce(this::handleEffectFallback).ignoringDisable(true);

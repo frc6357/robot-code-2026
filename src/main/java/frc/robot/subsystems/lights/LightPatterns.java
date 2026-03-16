@@ -30,6 +30,7 @@ public class LightPatterns {
     public final LEDPattern blue = LEDPattern.solid(Color.kBlue);
     public final LEDPattern yellow = LEDPattern.solid(Color.kYellow);
     public final LEDPattern orange = LEDPattern.solid(Color.kOrange);
+    public final LEDPattern purple = LEDPattern.solid(Color.kPurple);
     public final LEDPattern skBlue = LEDPattern.solid(kSKBlue);
     
     // Rainbow patterns
@@ -44,6 +45,7 @@ public class LightPatterns {
     public final LEDPattern blueStrobe = blue.blink(kDefaultStrobeSeconds);
     public final LEDPattern yellowStrobe = yellow.blink(kDefaultStrobeSeconds);
     public final LEDPattern orangeStrobe = orange.blink(kDefaultStrobeSeconds);
+    public final LEDPattern purpleStrobe = purple.blink(kDefaultStrobeSeconds);
     public final LEDPattern skBlueStrobe = skBlue.blink(kDefaultStrobeSeconds);
 
     // Dual color patterns

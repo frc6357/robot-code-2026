@@ -20,6 +20,7 @@ public enum LightMode {
     STROBE_BLUE,
     STROBE_YELLOW,
     STROBE_ORANGE,
+    STROBE_PURPLE,
     STROBE_SKBLUE,
 
     // Dual Color
