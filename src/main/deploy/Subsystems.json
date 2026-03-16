@@ -6,7 +6,7 @@
     "launcher": false,
     "bangbanglauncher": false,
     "duallauncher": true,
-    "lights": false,
+    "lights": true,
     "indexer": true,
     "climb": false,
     "pickup": true,

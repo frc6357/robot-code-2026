@@ -92,7 +92,6 @@ public class Robot extends LoggedRobot {
             .andThen(PathfindingCommand.warmupCommand().withName("PathfindingWarmup")));
         
         SmartDashboard.putData(m_commandScheduler);
-        SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
     }
 
     /**
@@ -149,8 +148,6 @@ public class Robot extends LoggedRobot {
             m_autonomousCommand.cancel();
         }
         m_robotContainer.teleopInit();
-
-
     }
 
     /** This function is called periodically during operator control. */

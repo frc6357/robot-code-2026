@@ -24,11 +24,11 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.lib.commands.PathPlannerCommands;
 import frc.lib.utils.SubsystemControls;
@@ -130,11 +130,11 @@ public class RobotContainer {
   // Creates a chooser for the operator to update on which alliance won the autonomous
   // period, thus determining which alliance will have the active shift first and every shift afterward.
   public LoggedDashboardChooser<Alliance> phaseTimerChooser;
-  public Timer phaseTimer = new Timer();
   public Alliance winningAutoAlliance;
 
   // ── Phase Timer: 2026 REBUILT Alliance Shift Tracking ──────────────────────
-  // Teleop is 2:20 (140s). Elapsed time measured from teleopInit().
+  // Teleop is 2:20 (140s). DriverStation.getMatchTime() counts DOWN from 140.0.
+  // elapsed = TELEOP_DURATION - getMatchTime() maps it back to an elapsed value.
   // TRANSITION SHIFT: elapsed  0s – 10s  (both HUBs active)
   // SHIFT 1:          elapsed 10s – 35s  (25s, auto-LOSER active first)
   // SHIFT 2:          elapsed 35s – 60s  (25s)
@@ -157,8 +157,21 @@ public class RobotContainer {
   private StringPublisher shiftLabelPublisher;
   private DoublePublisher shiftTimeRemainingPublisher;
 
-  // Captures the FPGA timestamp at the moment teleop starts; -1.0 = not yet set
-  private double teleopStartTime = -1.0;
+  // Tracks the seconds remaining in the current shift period; written by pollPhaseTimer()
+  // and read by the shiftEndingSoon trigger every 20 ms loop cycle.
+  private static double shiftSecondsRemaining = Double.MAX_VALUE;
+
+  private static final double SHIFT_WARNING_THRESHOLD = 5.0;
+
+  /**
+   * Active (true) during the last 5 seconds of every shift period — TRANSITION,
+   * SHIFT 1-4, and END GAME. Backed by {@link #shiftSecondsRemaining} which is
+   * updated by {@link #pollPhaseTimer()} before the command scheduler runs.
+   */
+  public static final Trigger shiftEndingSoon =
+      new Trigger(() -> DriverStation.isTeleop()
+                     && shiftSecondsRemaining <= SHIFT_WARNING_THRESHOLD
+                     && shiftSecondsRemaining > 0.0);
 
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
@@ -420,17 +433,17 @@ public class RobotContainer {
      */
     public void pollPhaseTimer() {
         if (!DriverStation.isTeleop()) {
+            shiftSecondsRemaining = Double.MAX_VALUE;
             shiftLabelPublisher.set(COLOR_WHITE);
             shiftTimeRemainingPublisher.set(0.0);
             return;
         }
 
-        // Latch the FPGA timestamp once on the first poll after teleopInit()
-        if (teleopStartTime < 0.0) {
-            teleopStartTime = Timer.getFPGATimestamp();
-        }
-
-        double elapsed = Timer.getFPGATimestamp() - teleopStartTime;
+        // getMatchTime() counts DOWN from 140.0 during teleop.
+        // Converting to elapsed time makes the shift boundaries easy to reason about.
+        // Returns -1.0 if the FMS hasn't provided a time yet; treat that as the very start.
+        double matchTime = DriverStation.getMatchTime();
+        double elapsed   = (matchTime < 0.0) ? 0.0 : TELEOP_DURATION - matchTime;
 
         String label;
         double remaining;
@@ -471,7 +484,8 @@ public class RobotContainer {
         }
 
         shiftLabelPublisher.set(label);
-        shiftTimeRemainingPublisher.set(Math.max(0.0, remaining));
+        shiftSecondsRemaining = Math.max(0.0, remaining);
+        shiftTimeRemainingPublisher.set(shiftSecondsRemaining);
     }    
     /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
@@ -497,9 +511,6 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
-        // Reset the latch so pollPhaseTimer captures a fresh start timestamp
-        teleopStartTime = -1.0;
-
         if(m_stateHandlerContainer.isPresent()) {
             m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
         }

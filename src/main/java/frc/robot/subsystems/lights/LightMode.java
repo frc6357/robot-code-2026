@@ -21,6 +21,12 @@ public enum LightMode {
     STROBE_YELLOW,
     STROBE_ORANGE,
     STROBE_SKBLUE,
+
+    // Dual Color
+    DUAL_SOLID_WHITE_GREEN,
+    DUAL_SOLID_WHITE_YELLOW,
+    DUAL_STROBE_WHITE_GREEN,
+    DUAL_STROBE_WHITE_YELLOW,
     
     // Team/Match modes
     RAINBOW,
