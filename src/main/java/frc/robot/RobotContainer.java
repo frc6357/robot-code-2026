@@ -472,7 +472,8 @@ public class RobotContainer {
 
         shiftLabelPublisher.set(label);
         shiftTimeRemainingPublisher.set(Math.max(0.0, remaining));
-    }    /**
+    }    
+    /**
      * Use this to pass the autonomous command to the main {@link Robot} class.
      * <p>
      * This method loads the auto when it is called, however, it is recommended
