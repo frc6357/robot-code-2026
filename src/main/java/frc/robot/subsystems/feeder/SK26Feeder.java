@@ -1,11 +1,15 @@
 package frc.robot.subsystems.feeder;
 
 import static frc.robot.Konstants.FeederConstants.kMaxFeederVoltage;
-import static frc.robot.Konstants.FeederConstants.kFeederIdleVelocity;
+import static frc.robot.Konstants.FeederConstants.kFeederIdleVoltage;
+import static frc.robot.Ports.LauncherPorts.kFeederFollowerMotor;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
+import java.util.function.Supplier;
+
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -16,11 +20,15 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
+// Inline command factory methods replace standalone FeederFeedCommand
+
 import org.littletonrobotics.junction.Logger;
 
 public class SK26Feeder extends SubsystemBase
 {
     private final SparkFlex feederMotor;
+    private final RelativeEncoder encoder;
+    private final SparkFlex feederFollower;
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
@@ -30,12 +38,16 @@ public class SK26Feeder extends SubsystemBase
     {
         // ========== Motor Configuration ==========
         feederMotor = new SparkFlex(kFeederMotor.ID, MotorType.kBrushless);
+        feederFollower = new SparkFlex(kFeederFollowerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
         config
             .idleMode(IdleMode.kBrake)
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         feederMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+        feederFollower.configure(config.follow(feederMotor).inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        encoder = feederMotor.getEncoder();
     }
 
     /**
@@ -49,38 +61,45 @@ public class SK26Feeder extends SubsystemBase
         feederMotor.setVoltage(voltage);
     }
 
-    /**
-     * Sets the velocity of the feeder motor in RPS (Rotations Per Second).
-     * Internally converts to voltage control.
-     * @param velocity The desired velocity in RPS.
-     */
-    public void setFeederVelocity(double velocity) {
-        // Neo Vortex free speed is ~113 RPS (6784 RPM) at 12V
-        // Convert RPS to voltage (approximate open-loop)
-        double voltage = (velocity / 113.0) * 12.0;
-        setFeederVoltage(voltage);
-    }
-
-    public Command setFeederVelCommand(double velocityRPS) {
-        return run(() -> setFeederVelocity(velocityRPS));
-    }
-
-    public Command setFeederVoltageCommand(double voltage) {
-        return run(() -> setFeederVoltage(voltage));
-    }
-
     public void idleFeeder() 
     {
-        setFeederVelocity(kFeederIdleVelocity);
+        setFeederVoltage(kFeederIdleVoltage);
+    }
+
+    public Command idleFeederCommand() {
+        return this.runOnce(() -> idleFeeder());
     }
 
     /**
      * Feeds fuel by setting the feeder to the feed speed.
-     * @param feederFeedRPS The feed speed in RPS.
+     * @param feederVoltage The feed speed in RPS.
      */
-    public void feedFuel(double feederFeedRPS) 
+    public void feedFuel(double feederVoltage) 
     {
-        setFeederVelocity(feederFeedRPS);
+        setFeederVoltage(feederVoltage);
+    }
+
+    public double getVoltage() {
+        return feederMotor.getAppliedOutput();
+    }
+
+    public double getVelocity() {
+        return encoder.getVelocity()/60;
+    }
+
+    /**
+     * Returns a command that sets the feeder to the given voltage once.
+     * Replaces the standalone FeederFeedCommand.
+     *
+     * @param voltage The voltage to feed at.
+     * @return A command requiring this subsystem.
+     */
+    public Command feedCommand(double voltage) {
+        return this.runEnd(() -> feedFuel(voltage), () -> idleFeeder());
+    }
+
+    public Command feedCommand(Supplier<Double> voltageSupplier) {
+        return this.runEnd(() -> feedFuel(voltageSupplier.get()), () -> idleFeeder());
     }
 
     @Override
@@ -104,5 +123,7 @@ public class SK26Feeder extends SubsystemBase
 
     private void logOutputs() {
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
+        Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
+        Logger.recordOutput("Feeder/Current Voltage", getVoltage());
     }
 }

@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.RobotContainer.m_field;
 
 import java.util.function.UnaryOperator;
@@ -115,6 +116,7 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void outputTelemetry() {
+        Logger.runEveryN(4, () -> Logger.recordOutput("HubDistance", getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())));
         Logger.runEveryN(2, () -> telemetry.telemeterize(lastReadState));
         Logger.runEveryN(2, () -> {
             io.updateInputs(inputs); 

@@ -7,6 +7,7 @@ import static frc.robot.Konstants.ClimbConstants.kClimbD;
 import static frc.robot.Konstants.ClimbConstants.kClimbI;
 import static frc.robot.Konstants.ClimbConstants.kClimbP;
 import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
+import static frc.robot.Konstants.ClimbConstants.kClimbMotorSpeed;
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
 import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
 
@@ -28,6 +29,7 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class SK26Climb extends SubsystemBase
@@ -198,6 +200,48 @@ public class SK26Climb extends SubsystemBase
 
     public void setIsRunning(boolean running) {
         isRunning = running;
+    }
+
+    // ==================== Inline Command Factories ====================
+
+    /**
+     * Returns a command that runs the climb motors upward and stops when ended.
+     * Replaces the standalone ClimbUpCommand.
+     *
+     * @return A command requiring this subsystem.
+     */
+    public Command climbUpCommand() {
+        return this.runEnd(
+            () -> { runMotors(kClimbMotorSpeed); setIsRunning(true); },
+            this::stopMotors
+        );
+    }
+
+    /**
+     * Returns a command that runs the climb motors downward and stops when ended.
+     * Replaces the standalone ClimbDownCommand.
+     *
+     * @return A command requiring this subsystem.
+     */
+    public Command climbDownCommand() {
+        return this.runEnd(
+            () -> { runMotors(-kClimbMotorSpeed); setIsRunning(true); },
+            this::stopMotors
+        );
+    }
+
+    /**
+     * Returns a command that sets the climb to a target height using PID
+     * and finishes when the height is reached.
+     * Replaces the standalone ClimbButtonCommand.
+     *
+     * @param height The target climb height.
+     * @return A command requiring this subsystem.
+     */
+    public Command climbToHeightCommand(double height) {
+        return this.runOnce(() -> { setClimbHeight(height); setIsRunning(true); })
+                   .andThen(this.run(() -> {}))
+                   .until(this::climbIsAtHeight);
     }
 
     @Override

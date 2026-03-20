@@ -4,10 +4,6 @@ import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
-import frc.robot.commands.ClimbButtonCommand;
-import frc.robot.commands.ClimbDownCommand;
-
-import frc.robot.commands.ClimbUpCommand;
 import frc.robot.subsystems.climb.SK26Climb;
 
 import static frc.robot.Ports.OperatorPorts.climbGoButton;
@@ -42,11 +38,11 @@ public class SK26ClimbBinder implements CommandBinder {
         {
             SK26Climb climb = climbSubsystem.get();
 
-            t1Button.onTrue(new ClimbButtonCommand(kTOne, climb).withName("L1ButtomClimb"));
-            returnButton.onTrue(new ClimbButtonCommand(kClimbReturn, climb).withName("Returm to Home"));
+            t1Button.onTrue(climb.climbToHeightCommand(kTOne).withName("L1ButtomClimb"));
+            returnButton.onTrue(climb.climbToHeightCommand(kClimbReturn).withName("Returm to Home"));
             //t1Button.onTrue(Commands.sequence(new ClimbButtonCommand(kTOne, climb), new WaitCommand(0.5), new ClimbButtonCommand(kClimbReturn, climb)).withName("L1Command"));
-            upButton.whileTrue(new ClimbUpCommand(climb).until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
-            downButton.whileTrue(new ClimbDownCommand(climb).until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
+            upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
+            downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
         }
     }
 }

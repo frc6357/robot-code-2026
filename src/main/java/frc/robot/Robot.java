@@ -14,6 +14,8 @@ import org.littletonrobotics.junction.networktables.NT4Publisher;
 import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
+import frc.lib.preferences.SKPreferences;
+
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
@@ -90,7 +92,6 @@ public class Robot extends LoggedRobot {
             .andThen(PathfindingCommand.warmupCommand().withName("PathfindingWarmup")));
         
         SmartDashboard.putData(m_commandScheduler);
-        SmartDashboard.putNumber("DS Match Time", DriverStation.getMatchTime());
     }
 
     /**
@@ -106,7 +107,9 @@ public class Robot extends LoggedRobot {
         // commands, running already-scheduled commands, removing finished or interrupted commands,
         // and running subsystem periodic() methods.  This must be called from the robot's periodic
         // block in order for anything in the Command-based framework to work.
+        m_robotContainer.pollPhaseTimer();
         m_commandScheduler.run();
+        SKPreferences.refreshIfNeeded();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
@@ -121,6 +124,7 @@ public class Robot extends LoggedRobot {
     /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
     @Override
     public void autonomousInit() {
+        m_robotContainer.autonomousInit();
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
 
         // schedule the autonomous command (example)
@@ -131,7 +135,8 @@ public class Robot extends LoggedRobot {
 
     /** This function is called periodically during autonomous. */
     @Override
-    public void autonomousPeriodic() {}
+    public void autonomousPeriodic() {
+    }
 
     @Override
     public void teleopInit() {
@@ -140,8 +145,9 @@ public class Robot extends LoggedRobot {
         // continue until interrupted by another command, remove
         // this line or comment it out.
         if (m_autonomousCommand != null) {
-        m_autonomousCommand.cancel();
+            m_autonomousCommand.cancel();
         }
+        m_robotContainer.teleopInit();
     }
 
     /** This function is called periodically during operator control. */

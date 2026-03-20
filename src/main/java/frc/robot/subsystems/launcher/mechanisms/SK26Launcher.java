@@ -9,6 +9,9 @@ import static frc.robot.Konstants.LauncherConstants.kWheelRadius;
 import static frc.robot.Konstants.LauncherConstants.kShooterTolerance;
 import static frc.robot.Konstants.LauncherConstants.kCoastLauncherRPS;
 import static frc.robot.Konstants.LauncherConstants.kStopLauncher;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherPauseTime;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
+import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRunTime;
 
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.Slot1Configs;
@@ -19,17 +22,18 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.subsystems.launcher.moveandshoot.LauncherTuning;
 import lombok.Getter;
 
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotor;
-import static frc.robot.Ports.LauncherPorts.kFixedLauncherMotorFollower;
+import static frc.robot.Ports.LauncherPorts.kLauncherFrontRollers;
+import static frc.robot.Ports.LauncherPorts.kLauncherBackRollers;
 
 import org.littletonrobotics.junction.Logger;
 
-public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem {
+public class SK26Launcher extends SubsystemBase {
 
     @Getter
     private LauncherTuning tuning = new LauncherTuning("SK26Launcher");
@@ -45,8 +49,8 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
     public SK26Launcher() {
 
         //defines motor objects
-        launchermotor = new TalonFX(kFixedLauncherMotor.ID);
-        launchermotorFollower = new TalonFX(kFixedLauncherMotorFollower.ID);
+        launchermotor = new TalonFX(kLauncherFrontRollers.ID);
+        launchermotorFollower = new TalonFX(kLauncherBackRollers.ID);
         launchermotorFollower.setControl(new Follower(launchermotor.getDeviceID(), MotorAlignmentValue.Opposed));
 
         //configures motors
@@ -132,6 +136,58 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         launcherMotorStatus = "Waiting to Shoot";
     }
 
+    // ==================== Inline Command Factories ====================
+
+    /**
+     * Returns a command that runs the launcher at the given motor RPS
+     * and coasts when ended. Replaces RunLauncherWithRPSCommand.
+     *
+     * @param targetMotorRPS The target motor speed in rotations per second.
+     * @return A command requiring this subsystem.
+     */
+    public Command runAtRPSCommand(double targetMotorRPS) {
+        return this.runEnd(
+            () -> runLauncherRPS(targetMotorRPS, "Launching"),
+            this::coastLauncher
+        );
+    }
+
+    /**
+     * Returns a command that runs the launcher at the given exit velocity (m/s)
+     * and coasts when ended. Replaces RunLauncherWithVelCommand.
+     *
+     * @param targetLaunchVelocity The target ball exit velocity in m/s.
+     * @return A command requiring this subsystem.
+     */
+    public Command runAtExitVelCommand(double targetLaunchVelocity) {
+        return this.runEnd(
+            () -> runLauncherExitVel(targetLaunchVelocity, "Launching"),
+            this::coastLauncher
+        );
+    }
+
+    /**
+     * Returns a command that oscillates the launcher in reverse and forward
+     * to unjam stuck game pieces. Repeats until interrupted, then stops.
+     * Replaces the standalone LauncherUnJamCommandGroup.
+     *
+     * @return A command requiring this subsystem.
+     */
+    public Command unjamCommand() {
+        return Commands.sequence(
+            Commands.runOnce(() -> unJamLauncher(-kUnJamLauncherRPS), this),
+            Commands.waitSeconds(kUnJamLauncherRunTime),
+            Commands.runOnce(() -> unJamLauncher(kStopLauncher), this),
+            Commands.waitSeconds(kUnJamLauncherPauseTime),
+            Commands.runOnce(() -> unJamLauncher(kUnJamLauncherRPS), this),
+            Commands.waitSeconds(kUnJamLauncherRunTime),
+            Commands.runOnce(() -> unJamLauncher(kStopLauncher), this),
+            Commands.waitSeconds(kUnJamLauncherPauseTime)
+        ).repeatedly()
+         .finallyDo(() -> stopLauncher())
+         .withName("LauncherUnjam");
+    }
+
    
     @Override
     public void periodic() {
@@ -144,11 +200,5 @@ public class SK26Launcher extends SubsystemBase implements PathplannerSubsystem 
         Logger.recordOutput("Launcher/Tangential Velocity", launchermotor.getVelocity().getValueAsDouble()*(2*Math.PI*kWheelRadius));
         Logger.recordOutput("Launcher/RPS", launchermotor.getVelocity().getValueAsDouble());
         Logger.recordOutput("Launcher/Target RPS", targetMotorRPS);
-    }
-
-    @Override
-    public void addPathPlannerCommands() {
-        // TODO: Implement PathPlanner commands for launcher
-        throw new UnsupportedOperationException("Unimplemented method 'addPathPlannerCommands'");
     }
 }

@@ -4,9 +4,9 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.Konstants.TurretConstants.kTurretCenter;
 import static frc.robot.Konstants.VisionConstants.kAprilTagFieldLayout;
 import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
+import static frc.robot.Konstants.VisionConstants.kTurretPivotInRobotSpace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,15 +44,14 @@ public class SKVision extends SubsystemBase {
     /* Example:
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
-    public final Limelight frontLL = new Limelight(VisionConfig.FRONT_CONFIG); // limelight-front
+    public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
-    public final Limelight threeLL = new Limelight(VisionConfig.THREE_CONFIG); // limelight-three
-    public final Limelight fourLL = new Limelight(VisionConfig.FOUR_CONFIG); // limelight-four
+    public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {threeLL, fourLL}; 
+    public final Limelight[] allLimelights = {turretLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {fourLL}; 
+    public final Limelight[] poseLimelights = {turretLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
@@ -111,16 +110,22 @@ public class SKVision extends SubsystemBase {
         tagLOSTransforms.clear();
 
         for(Limelight ll : poseLimelights) {
-            ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
             if(ll == turretLL) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
                     continue;
                 }
-                ll.setCameraPoseInRobotSpace(
-                    ll.getConfig().getCameraPose3d()
-                    .rotateAround(kTurretCenter, new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()))));
+                // Rotate the turret LL's 0° pose around the turret pivot by the current turret angle.
+                // cameraPose3d uses WPILib convention (X=forward, Y=left, Z=up).
+                // WPILib +Z rotation = CCW from above, which matches the turret's CCW-positive convention.
+                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()));
+                Pose3d dynamicCameraPose = ll.getConfig().getCameraPose3d()
+                    .rotateAround(kTurretPivotInRobotSpace, turretRotation);
+                ll.setCameraPoseInRobotSpace(dynamicCameraPose);
             }
+            // if(ll != turretLL) {
+                ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
+            // }
             scanForTags(ll);
         }
 

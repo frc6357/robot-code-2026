@@ -47,7 +47,7 @@ public class TurretJoystickCommand extends Command
         double newAngle = turret.getTargetAngleDegrees() + angularVelocity * dt;
 
         // Ignore new angle requests until it's done wrapping
-        if(turret.isWrapping()) {
+        if(turret.isJoystickWrapping()) {
             return;
         }
         turret.setAngleDegreesWrapped(newAngle);

@@ -42,7 +42,7 @@ public class SK26StateBinder implements CommandBinder {
             intakeReady = stateHandler.getIntakeReady();
             turretReady = stateHandler.getTurretReady();
             inAllianceZone = stateHandler.getInAllianceZone();
-            outOfAllianceZone = stateHandler.getOutOfAllianceZone();
+            outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
         }
 
@@ -89,16 +89,15 @@ public class SK26StateBinder implements CommandBinder {
 
     private void bindDriverButtons() 
     {
-        DriverPorts.kLTrigger.button.onTrue(stateHandler.toggleIntakeInRequestedStateCommand());
+        DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
+            .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
 
-        turnOnScoring.onTrue(stateHandler.requestScoringCommand());
-        turnOnShuttling.onTrue(stateHandler.requestShuttlingCommand());
-        turnOffLaunch.onTrue(stateHandler.turnOffLaunchingStatesCommand());
+        turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
+        turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
     }
 
     private void bindOperatorButtons() {
-        OperatorPorts.kRTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
-        OperatorPorts.kLTrigger.button.onTrue(stateHandler.requestStateCommand(MacroState.SHUTTLING));
-        OperatorPorts.kStartbutton.button.onTrue(stateHandler.setCurrentStateCommand(MacroState.IDLE));
+        OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
     }
 }

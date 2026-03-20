@@ -11,12 +11,15 @@ import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.MetersPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Radians;
+import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
 import static frc.robot.Konstants.DriveConstants.kMaxAngularRate;
 import static frc.robot.Konstants.LauncherConstants.kUnJamLauncherRPS;
 import static frc.robot.Konstants.OIConstants.kJoystickDeadband;
 import static frc.robot.Konstants.OIConstants.kSlowModePercent;
+import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
 
 import java.util.HashMap;
 import java.util.List;
@@ -69,7 +72,7 @@ public final class Konstants
         
         public static final AngularVelocity kMaxAngularRate = RotationsPerSecond.of(1.25); // 3/4 of a rotation per second max angular velocity
         public static final AngularVelocity kMaxAngularRateFAST = kMaxAngularRate.times(2); // 1.5 rotations per second max angular velocity
-        public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.5); // 1/4 of a rotation per second max angular velocity
+        public static final AngularVelocity kMaxAngularRateSLOW = kMaxAngularRate.times(0.333); // 1/4 of a rotation per second max angular velocity
         
         public static final LinearAcceleration kMaxTeleopLinAcceleration = kMaxSpeed.div(Seconds.of(0.33));
         public static final AngularAcceleration kMaxTeleopRotAcceleration = kMaxAngularRate.div(Seconds.of(0.33));
@@ -245,21 +248,21 @@ public final class Konstants
         }
         */
 
-        public static final class FrontLimelight {
+        public static final class BackLimelight {
             // Network/pipeline values
-            public static final String kName = "limelight-front"; // NetworkTable name and hostname
+            public static final String kName = "limelight-back"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = 0.3; // (z) meters forward of center; negative is backwards
-            public static final double kRight = 0.0; // (x) meters right of center; negative is left
-            public static final double kUp = 0.25; // (y) meters up of center; negative is down (how did you get a limelight down there???)
+            public static final double kForward = Inches.of(-11.5).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(11.25).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(8.75).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kRoll = -0.1; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 33.5; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = -153; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = false;
+            public static final boolean kAttached = true;
         }
 
         /* NOTE: this config should be representative of the Limelight's position when the turret is at 0 degrees */
@@ -268,16 +271,16 @@ public final class Konstants
             public static final String kName = "limelight-turret"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = Units.inchesToMeters(-8.0); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Units.inchesToMeters(-9.5); // (x) meters right of center; negative is left
-            public static final double kUp = Units.inchesToMeters(19.625); // (y) meters up of center; negative is down (how did you get a limelight down there???)
+            public static final double kForward = Units.inchesToMeters(-5.729); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Units.inchesToMeters(-12.018); // (x) meters right of center; negative is left
+            public static final double kUp = Units.inchesToMeters(17.833); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 180; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 1; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 0; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+            public static final double kRoll = -0.5; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 17.6; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 90; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = false;
+            public static final boolean kAttached = true;
         }
         public static final class LimelightThree {
             // Network/pipeline values
@@ -293,38 +296,32 @@ public final class Konstants
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 180; // (yaw) faces backward (same direction as intake)
 
-            public static final boolean kAttached = true;
-        }
-
-        public static final class LimelightFour {
-            // Network/pipeline values
-            public static final String kName = "limelight-four"; // NetworkTable name and hostname
-
-            // Translation (in meters) from center of robot
-            public static final double kForward = Inches.of(-9).in(Meters); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Inches.of(6).in(Meters); // (x) meters right of center; negative is left
-            public static final double kUp = Inches.of(13.5).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
-
-            // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
-
-            public static final boolean kAttached = true;
+            public static final boolean kAttached = false;
         }
 
         public static final class AlignmentConstants {
             public static double kRejectDistance = 1.4; // 1.4m
         }
+
+        // The turret pivot point in WPILib robot-space (X=forward, Y=left, Z=up) in meters.
+        // Derived from the turret LL position at turret 0° and the known 6.718" offset
+        // from the LL to the turret center (behind the LL when it faces left/west).
+        //   forward: same as LL (-5.729")
+        //   left:    LL is at +12.018" left, pivot is 6.718" behind (toward right = less left) → 12.018 - 6.718 = 5.318" left
+        //   up:      same as LL (17.833")
+        public static final Translation3d kTurretPivotInRobotSpace = new Translation3d(
+            Units.inchesToMeters(-5.729),   // forward  (same as turret LL)
+            Units.inchesToMeters(5.318),  // left     (WPILib Y=left; LL right was -6.532, so left = +5.318 from center)
+            Units.inchesToMeters(17.833)); // up       (same as turret LL)
     }
 
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullSpeed = 8.0;
+        public static final double kIndexerFullVoltage = -6.75;
 
         // Indexer idle speed in Rotations Per Second (RPS)
-        public static final double kIndexerIdleSpeed = 0.0;
+        public static final double kIndexerIdleVoltage = 0.0;
 
         // Indexer unjam parameters
         public static final double kIndexerUnjamReverseRPS = -4.0;
@@ -338,7 +335,7 @@ public final class Konstants
         public static final Distance kIndexerHeight = Inches.of(18);
 
         // Max voltage output for indexer motor (for brownout protection)
-        public static final double kMaxIndexerVoltage = 10.0;
+        public static final double kMaxIndexerVoltage = 7.0;
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -410,36 +407,44 @@ public final class Konstants
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;
-        public static final double kTurretAngleTolerance = 0.5;
+        public static final double kTurretAngleTolerance = 6.7; // Degrees of tolerance for considering the turret "at position"
 
         // CANcoder / Absolute Encoder constants
-        public static final double kTurretEncoderOffset = -0.3828125; // Rotations (-0.5 to +0.5) //-0.111
-        public static final boolean kTurretEncoderInverted = false; // Set true if encoder reads backwards
+        public static final double kTurretEncoderOffset = 0.200928 ; // Rotations (-0.5 to +0.5) - negated due to encoder inversion
+        public static final boolean kTurretEncoderInverted = true; // Set true if encoder reads backwards
         public static final double kEncoderGearRatio = 2.0; // 2 encoder rotations = 1 turret rotation
 
-        // TODO: Find the actual gearing ratio from the motor to the turret (motor rotations per turret rotation)
         public static final double kTurretMotorGearRatio = 9.444; // 9.444:1 gearing from motor to turret
 
         // Motor direction - set true if motor spins opposite to encoder direction
         public static final boolean kTurretMotorInverted = true;
 
+        // Gain scheduler constants for turret PID control
+        public static final double kTurretGainSchedulerDeadbandDegrees = 0.85; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 25.2;  // was 0.07 V/deg
-        public static final double kTurretI = 7.2;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 1.8;   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.0;   // Static friction feedforward (volts)
-        public static final double kMaxTurretOutput = 2.25; // Max duty cycle (0-1) for safety
+        public static final double kTurretP = 50.0; //50.0  // was 0.07 V/deg (20)
+        public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
+        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
+        public static final double kTurretS = 0.375; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 1.9; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.35; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kMaxTurretOutputVolts = 3.75; // Max voltage output to turret motor (for brownout protection)
 
-        public static final AngularVelocity kMaxTurretMMVelocity = DegreesPerSecond.of(440);
-        public static final AngularAcceleration kMaxTurretMMAcceleration = DegreesPerSecondPerSecond.of(1320);
+        public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(6.0);
+        public static final double kMaxTurretMMJerk = kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond) * 10; // Jerk is typically 10x acceleration
 
         // Turret extra constants
         public static final double kManualTurretSpeed = 360.0; // Degrees per second at full joystick deflection
         public static final double kTurretJoystickDeadband = 0.15;
 
-        // Translation from center of robot to center of turret bearing
-        public static final Translation3d kTurretCenter = new Translation3d(Inches.of(0.125), Inches.of(8.625), Inches.of(17.5));
+        // Turret coordinate system offset
+        // Standard robot-relative: 0° = front, +90° = left (CCW positive)
+        // Turret coordinates: 0° = left, +90° = front
+        // To convert: turretAngle = standardAngle - kTurretCoordinateOffset
+        public static final double kTurretCoordinateOffset = 90.0;
 
         // Turret lead angle compensation (Option 3 framework with Option 2 defaults)
         // Lead formula: leadAngle = yawVelocity × baseLeadTime × scaleFactor
@@ -493,11 +498,44 @@ public final class Konstants
             public static final double kD = 0;
         }
 
+        // ==================== Dual Launcher Constants ====================
+        public static final class DualLauncher {
+            // Velocity tolerance for considering the launcher "at speed" (rps)
+            public static final double kVelocityToleranceRPS = 5.0;
+
+            // Default target velocity (rps) — typically overridden by commands/state handler
+            public static final double kDefaultTargetRPS = 40.0;
+
+            // Current limits (amps) — protects motors and prevents brownout
+            public static final Current kSupplyCurrentLimit = Amps.of(40);
+            public static final Current kStatorCurrentLimit = Amps.of(80);
+
+            // Bottom roller (large flywheel) — Clockwise Positive
+            public static final class BottomRoller {
+                public static final double kS = 0.25;  // Static friction (volts)
+                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
+                public static final double kP = 0.4;   // Proportional gain
+                public static final double kI = 0.0;   // Integral gain
+                public static final double kD = 0.0;   // Derivative gain
+            }
+
+            // Top roller (smaller contact wheels) — CounterClockwise Positive
+            public static final class TopRoller {
+                public static final double kS = 0.25;  // Static friction (volts)
+                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
+                public static final double kP = 0.4;   // Proportional gain
+                public static final double kI = 0.0;   // Integral gain
+                public static final double kD = 0.0;   // Derivative gain
+            }
+        }
+
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(Inches.of(-5.534), Inches.of(9.427), Inches.of(19.874)),  // Placeholder: 0.5m height
-                new Rotation3d()                    // No rotation offset
+                new Translation3d(Inches.of(-5.75), Inches.of(5.534), Inches.of(19.874)),  // Placeholder: 0.5m height Was: 9.427
+                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.of(-kTurretEncoderOffset))                    // No rotation offset
             );
 
         // Phase delay compensation
@@ -536,11 +574,18 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            map.put(1.0, 2500.0);
-            map.put(2.0, 3000.0);
-            map.put(3.0, 3500.0);
-            map.put(4.0, 4000.0);
-            map.put(5.0, 4500.0);
+            // map.put(5.334, 34.0 * 60.0);
+            // map.put(3.581, 27.5 * 60.0);
+            // map.put(4.470, 29.5 * 60.0);
+            // map.put(2.515, 23.5 * 60.0);
+            // map.put(2.690, 24.9 * 60.0);
+            // map.put(2.97, 24.9 * 60.0);
+            // map.put(3.251, 26.0 * 60.0);
+            map.put(3.4798, 26.6 * 60.0);
+            map.put(4.572, 29.4 * 60.0);
+            map.put(2.94, 25.25 * 60.0);
+            map.put(2.5, 24.2 * 60.0);
+            map.put(4.01, 27.55 * 60.0);
 
             return map;
         }
@@ -562,10 +607,11 @@ public final class Konstants
     public static final class FeederConstants
     {
         // Max voltage output for feeder motor (for brownout protection)
-        public static final double kMaxFeederVoltage = 10.0;
+        public static final double kMaxFeederVoltage = 8.0;
 
-        public static final double kFeederIdleVelocity = 0.0;
-        public static final double kFeederRunningVelocity = 8.0;
+        public static final double kFeederIdleVoltage = 0.0;
+        public static final double kFeederRunningVoltage = -5.75;
+        public static final double kFeederWaitingVoltage = -2.0;
     }
 
 
@@ -578,17 +624,59 @@ public final class Konstants
     {
         public static enum IntakePosition
         {
-            /** Set the intake angle to X degrees **/
-            kIntakeGroundPosition(90.0), //TODO This angle needs to be set to a safe angle above the ground
-            /** Set the intake angle to 0 degrees (zero position) **/
-            kIntakeZeroPosition(0.0); //TODO Make sure to set the ofset in Phoenix Tuner for this :)
+            /** Set the intake angle to 0.271 intake rotations */
+            GROUND(0.271),
+            /** Set the intake angle to 0.213 intake rotations */
+            COMPACTING(0.067),
+            /** Set the intake angle to 0 rotations (zero position) */
+            ZERO(0.0);
+            
 
-            public final double angle;
-            IntakePosition(double angle)
+            /**
+             * The target position for the intake in mechanism rotations (not motor rotations). Positive is up, negative is down.
+             */
+            public final double rotations;
+            IntakePosition(double rotations)
             {
-                this.angle = angle;
+                this.rotations = rotations;
             }
         }
+
+        // PID Constants
+        public static final double kPositionerKp = 28.67; //20
+        public static final double kPositionerKi = 6.0;
+        public static final double kPositionerKd = 1.0;
+        public static final double kPositionerKs = 0.0;
+        public static final double kPositionerKv = 0.0;
+        public static final double kPositionerKa = 0.0;
+        public static final double kPositionerKG = 0.0;
+
+        // Positioner voltage limits
+        public static final double kPositionerPeakForwardVoltage = 4.0;
+        public static final double kPositionerPeakReverseVoltage = -4.0;
+
+        // Positioner Motion Magic configuration
+        public static final double kPositionerMMCruiseVelocity = 2.0;      // Rotations per second
+        public static final double kPositionerMMAcceleration = 25.0;       // Rotations per second squared
+        public static final double kPositionerMMJerk = 50.0;               // Rotations per second cubed
+        public static final double kPositionerMMExpoKV = 0.12;
+        public static final double kPositionerMMExpoKA = 0.1;
+
+        // Positioner current limits
+        public static final double kPositionerSupplyCurrentLimit = 60;
+        public static final double kPositionerStatorCurrentLimit = 80;
+
+        // Positioner feedback configuration
+        public static final double kPositionerSensorToMechanismRatio = 16.4;
+        public static final double kPositionerGainSchedulerErrorThreshold = 0.04;
+        public static final double kPositionerPositionTolerance = 0.02;    // Rotations
+
+        // Intake roller current limits
+        public static final double kIntakeSupplyCurrentLimit = 40;
+        public static final double kIntakeStatorCurrentLimit = 60;
+
+        // Intake compact command oscillation
+        public static final double kIntakeCompactSwitchIntervalSeconds = 1.2;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
@@ -598,8 +686,8 @@ public final class Konstants
 
         public static final double kMaxIntakeVoltage = 10.0;
 
-        public static final double kIntakeFullSpeed = 8.0;
-        public static final double kIntakeIdleSpeed = 2.0;
+        public static final double kIntakeFullVoltage = -5.5;
+        public static final double kIntakeIdleVoltage = 0.0;
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

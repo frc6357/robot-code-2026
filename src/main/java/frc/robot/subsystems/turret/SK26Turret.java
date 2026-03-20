@@ -1,8 +1,8 @@
 package frc.robot.subsystems.turret;
 
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.DegreesPerSecond;
 import static edu.wpi.first.units.Units.Inches;
-import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecondPerSecond;
 import static edu.wpi.first.units.Units.Seconds;
@@ -10,17 +10,22 @@ import static edu.wpi.first.units.Units.Volts;
 // Imports from the robot
 import static frc.robot.Konstants.TurretConstants.kEncoderGearRatio;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretMMAcceleration;
+import static frc.robot.Konstants.TurretConstants.kMaxTurretMMJerk;
 import static frc.robot.Konstants.TurretConstants.kMaxTurretMMVelocity;
+import static frc.robot.Konstants.TurretConstants.kMaxTurretOutputVolts;
+import static frc.robot.Konstants.TurretConstants.kTurretA;
 import static frc.robot.Konstants.TurretConstants.kTurretAngleTolerance;
 import static frc.robot.Konstants.TurretConstants.kTurretD;
 import static frc.robot.Konstants.TurretConstants.kTurretEncoderInverted;
 import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
+import static frc.robot.Konstants.TurretConstants.kTurretGainSchedulerDeadbandDegrees;
 import static frc.robot.Konstants.TurretConstants.kTurretI;
 import static frc.robot.Konstants.TurretConstants.kTurretMaxPosition;
 import static frc.robot.Konstants.TurretConstants.kTurretMinPosition;
 import static frc.robot.Konstants.TurretConstants.kTurretMotorInverted;
 import static frc.robot.Konstants.TurretConstants.kTurretP;
 import static frc.robot.Konstants.TurretConstants.kTurretS;
+import static frc.robot.Konstants.TurretConstants.kTurretV;
 import static frc.robot.Ports.TurretPorts.kTurretEncoder;
 import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
@@ -29,17 +34,20 @@ import org.littletonrobotics.junction.Logger;
 import com.ctre.phoenix6.StatusSignal;
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
+import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
@@ -51,6 +59,7 @@ import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -73,7 +82,7 @@ public class SK26Turret extends SubsystemBase
     protected final CANcoder turretEncoder = new CANcoder(kTurretEncoder.ID);
 
     @Getter
-    boolean wrapping = false;
+    boolean joystickWrapping = false;
     
     // MotionMagic position control request (Phoenix6 firmware-side closed loop)
     private final MotionMagicVoltage motionMagicControl = new MotionMagicVoltage(0.0);
@@ -88,6 +97,7 @@ public class SK26Turret extends SubsystemBase
     private double cachedAngleDeg = 0.0;
 
     private final StatusSignal<Angle> turretAngleStatusSignal;
+    private final StatusSignal<AngularVelocity> turretAngularVelocityStatusSignal;
 
     // Create the SysId routine
     SysIdRoutine sysIdRoutine = new SysIdRoutine(
@@ -135,37 +145,64 @@ public class SK26Turret extends SubsystemBase
             : InvertedValue.CounterClockwise_Positive;
         motorConfig.MotorOutput = outputConfigs;
 
+        motorConfig.ClosedLoopGeneral = new ClosedLoopGeneralConfigs()
+            .withGainSchedErrorThreshold(Degrees.of(kTurretGainSchedulerDeadbandDegrees));
+
         // Closed-loop PID (Slot 0) — runs on the motor controller firmware
         motorConfig.Slot0 = new Slot0Configs()
-            .withKP(kTurretP)
-            .withKI(kTurretI)
-            .withKD(kTurretD)
-            .withKS(kTurretS)
-            .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
+        .withKP(kTurretP)
+        .withKI(kTurretI)
+        .withKD(kTurretD)
+        .withKS(kTurretS)
+        .withKV(kTurretV)
+        .withKA(kTurretA)
+        .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+        .withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput);
+        
+        motorConfig.Voltage = new VoltageConfigs()
+        .withPeakForwardVoltage(kMaxTurretOutputVolts)
+        .withPeakReverseVoltage(-kMaxTurretOutputVolts);
 
         // FusedCANcoder feedback — motor firmware fuses rotor + CANcoder position
         motorConfig.Feedback = new FeedbackConfigs()
-            .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
-            .withFeedbackRemoteSensorID(kTurretEncoder.ID)
-            .withSensorToMechanismRatio(kEncoderGearRatio);     // 2 encoder rotations = 1 turret rotation
-            // .withRotorToSensorRatio(kTurretMotorGearRatio / kEncoderGearRatio); // motor → encoder ratio
-
+        .withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+        .withFeedbackRemoteSensorID(kTurretEncoder.ID)
+        .withSensorToMechanismRatio(kEncoderGearRatio)
+        .withVelocityFilterTimeConstant(0.1);     // 2 encoder rotations = 1 turret rotation
+        // .withRotorToSensorRatio(kTurretMotorGearRatio / kEncoderGearRatio); // motor → encoder ratio
+        
         // Motion Magic velocity / acceleration (converted from deg/s → turret rot/s)
         motorConfig.MotionMagic = new MotionMagicConfigs()
-            .withMotionMagicCruiseVelocity(
-                kMaxTurretMMVelocity.in(RotationsPerSecond))
-            .withMotionMagicAcceleration(
-                kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond));
-
+        .withMotionMagicCruiseVelocity(
+            kMaxTurretMMVelocity.in(RotationsPerSecond))
+        .withMotionMagicAcceleration(
+            kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond))
+        .withMotionMagicJerk(kMaxTurretMMJerk);
+        
         turretMotor.getConfigurator().apply(motorConfig);
-
-        turretAngleStatusSignal = turretEncoder.getPosition();
-
+        
+        turretAngleStatusSignal = turretMotor.getPosition();
+        turretAngularVelocityStatusSignal = turretMotor.getVelocity();
+        
         // ========== Initialize ==========
         // Set initial target to current position (don't move on boot)
         targetAngleDeg = getAngleDegrees();
-    }
+        }
+            
+    @Override
+    public void periodic()
+    {
+        // ========== Cache sensor read ==========
+        cachedAngleDeg = getAngleDegrees();
 
+        // ========== Send MotionMagic target to motor firmware ==========
+        // Convert target from degrees to turret rotations (mechanism units)
+        double targetRotations = targetAngleDeg / 360.0;
+        turretMotor.setControl(motionMagicControl.withPosition(targetRotations));
+
+        telemeterize();
+    }
+    
     /**
      * Returns the current turret angle from the CANcoder (degrees).
      * Accounts for 2:1 gear ratio (2 encoder rotations = 1 turret rotation).
@@ -174,19 +211,24 @@ public class SK26Turret extends SubsystemBase
     public double getAngleDegrees()
     {
         // Use continuous position to track across full range
-        double encoderRotations = turretAngleStatusSignal.refresh().getValue().in(Rotations);
+        double encoderDegrees = turretAngleStatusSignal.refresh().getValue().in(Degrees);
         
-        // 2:1 ratio: turret degrees = encoder rotations * (360 / 2) = encoder rotations * 180
-        double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
+        // // 2:1 ratio: turret degrees = encoder rotations * (360 / 2) = encoder rotations * 180
+        // double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
         
-        return turretDegrees;
+        return encoderDegrees;
     }
 
+    public double getAngularVelocityDegreesPerSecond() {
+        double encoderVelocityDegpersec = turretAngularVelocityStatusSignal.refresh().getValue().in(DegreesPerSecond);
+        return encoderVelocityDegpersec;
+    }
+    
     public void setAngleDegrees(TurretPosition angle) 
     {
         setAngleDegrees(angle.angle);
     }
-
+    
     /**
      * Command the turret to move to a specific angle.
      * @param angleDeg Target angle in degrees (-180 to +180)
@@ -210,17 +252,18 @@ public class SK26Turret extends SubsystemBase
         // Wrap the angle if it exceeds limits
         while (angleDeg > kTurretMaxPosition)
         {
-            wrapping = true;
+            joystickWrapping = true;
             angleDeg -= range;
         }
         while (angleDeg < kTurretMinPosition)
         {
-            wrapping = true;
+            joystickWrapping = true;
             angleDeg += range;
         }
         
         targetAngleDeg = angleDeg;
     }
+    
 
     /**
      * Returns the current target angle in degrees.
@@ -267,25 +310,6 @@ public class SK26Turret extends SubsystemBase
         turretMotor.stopMotor();
     }
 
-    @Override
-    public void periodic()
-    {
-        // ========== Cache sensor read ==========
-        cachedAngleDeg = getAngleDegrees();
-
-        // ========== Send MotionMagic target to motor firmware ==========
-        // Convert target from degrees to turret rotations (mechanism units)
-        double targetRotations = targetAngleDeg / 360.0;
-        turretMotor.setControl(motionMagicControl.withPosition(targetRotations));
-
-        if(targetAngleDeg < kTurretMaxPosition && 
-            targetAngleDeg > kTurretMinPosition) 
-        {
-            wrapping = false;
-        }
-
-        telemeterize();
-    }
 
     public void telemeterize() {
         // Sends the needed Pose3d for the turret CAD model to correctly rotate the turret in the 3D visualization on the dashboard
@@ -299,12 +323,13 @@ public class SK26Turret extends SubsystemBase
                 turretRotation));
         }
         
-        Logger.recordOutput("Turret/Angle (deg)", angle);
-        Logger.recordOutput("Turret/Velocity (deg/s)", turretEncoder.getVelocity().getValue().in(DegreesPerSecond) * (360.0 / kEncoderGearRatio));
+        Logger.recordOutput("Turret/Angle (deg)", cachedAngleDeg);
+        Logger.recordOutput("Turret/Velocity (degpersec)", getAngularVelocityDegreesPerSecond());
         Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
         Logger.recordOutput("Turret/At Target", atTarget());
         Logger.recordOutput("Turret/Error (deg)", getTurretError());
+        Logger.recordOutput("Turret/ErrorAbs (deg)", Math.abs(getTurretError()));
         Logger.recordOutput("Turret/Motor Voltage Output", getMotorVoltage());
-        Logger.recordOutput("Turret/Wrapping", isWrapping());
+        Logger.recordOutput("Turret/Wrapping", isJoystickWrapping());
     }
 }

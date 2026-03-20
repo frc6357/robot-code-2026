@@ -1,8 +1,10 @@
 package frc.robot.subsystems.indexer;
 
 // Imports from robot
-import static frc.robot.Konstants.IndexerConstants.kIndexerIdleSpeed;
+import static frc.robot.Konstants.IndexerConstants.kIndexerIdleVoltage;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
+
+import java.util.function.Supplier;
 
 import static frc.robot.Konstants.IndexerConstants.kMaxIndexerVoltage;
 
@@ -21,6 +23,8 @@ import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 
 /**
  * Indexer subsystem using CANrange sensor for gamepiece recognition
@@ -29,8 +33,15 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
  */
 public class SK26Indexer extends SubsystemBase
 {
-    // Neo Vortex free speed: ~113 RPS (6784 RPM) at 12V
-    private static final double kNeoVortexFreeSpeedRPS = 113.0;
+
+    Pref<Double> indexerVoltage = SKPreferences.attach("Indexer Voltage", 0.0)
+		.onChange((newValue) -> updateVoltage());
+
+    private void updateVoltage() 
+    {
+        targetVoltage = indexerVoltage.get();
+        indexerMotor.setVoltage(targetVoltage);
+    }
 
     // Motor
     private final SparkFlex indexerMotor;
@@ -57,11 +68,12 @@ public class SK26Indexer extends SubsystemBase
 
     public SK26Indexer() 
     {
+        System.out.println("Indexer initialized");
         // ========== Motor Configuration ==========
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();
         config
-            .idleMode(IdleMode.kBrake)
+            .idleMode(IdleMode.kCoast)
             .smartCurrentLimit(40)
             .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
         indexerMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
@@ -87,62 +99,91 @@ public class SK26Indexer extends SubsystemBase
         indexerMotor.setVoltage(voltage);
     }
 
-    /**
-     * Sets the velocity of the indexer motor in RPS (Rotations Per Second).
-     * Internally converts to voltage control.
-     * @param velocity The desired velocity in RPS.
-     */
-    public void setIndexerVelocity(double velocity) {
-        double voltage = (velocity / kNeoVortexFreeSpeedRPS) * 12.0;
-        setIndexerVoltage(voltage);
+    public void idleIndexer() 
+    {
+        setIndexerVoltage(kIndexerIdleVoltage);
     }
 
-    public Command setIndexerVelCommand(double velocityRPS) {
-        return run(() -> setIndexerVelocity(velocityRPS));
-    }
-
-    public Command setIndexerVoltageCommand(double voltage) {
-        return run(() -> setIndexerVoltage(voltage));
-    }
-
-    public void idleIndexer() {
-        setIndexerVelocity(kIndexerIdleSpeed);
+    public Command idleIndexerCommand() {
+        return this.runOnce(() -> {
+            setStatus(IndexerStatus.IDLE);
+            idleIndexer();
+        });
     }
 
     /**
      * Feeds fuel by setting the indexer to the feed speed.
      * @param indexerFeedRPS The feed speed in RPS.
      */
-    public void feedFuel(double indexerFeedRPS) {
-        setIndexerVelocity(indexerFeedRPS);
+    public void feedFuel(double voltage) 
+    {
+        setIndexerVoltage(voltage);
     }
 
     /**
      * Runs the indexer at the speed, specifically for unjamming purposes.
      * @param speed The speed to target in RPS.
      */
-    public void unjamIndexer(double speed) {
-        setIndexerVelocity(speed);
+    public void unjamIndexer(double voltage) 
+    {
+        setIndexerVoltage(voltage);
     }
 
     /** Returns the current tracked ball count in the indexer. */
-    public int getNumBalls() {
+    public int getNumBalls() 
+    {
         return numBallsInIndexer;
     }
 
     /** Sets the tracked ball count (e.g. after a reset or manual correction). */
-    public void setNumBalls(int count) {
+    public void setNumBalls(int count) 
+    {
         numBallsInIndexer = count;
     }
 
     /** Call when a ball enters the indexer (e.g. from the intake sensor). */
-    public void incrementBallCount() {
+    public void incrementBallCount() 
+    {
         numBallsInIndexer++;
     }
 
     /** Call when a ball leaves the indexer (e.g. notified by the feeder after launch). */
     public void decrementBallCount() {
         numBallsInIndexer = Math.max(0, numBallsInIndexer - 1);
+    }
+
+    /**
+     * Returns a command that feeds the indexer at the given voltage.
+     * The command sets status to FEEDING on start and resets to IDLE on end.
+     * Replaces the standalone IndexerFeedCommand.
+     *
+     * @param voltage The voltage to feed at.
+     * @return A command requiring this subsystem.
+     */
+    public Command feedCommand(double voltage) {
+        return this.startEnd(
+            () -> {
+                setStatus(IndexerStatus.FEEDING);
+                feedFuel(voltage);
+            },
+            () -> {
+                setStatus(IndexerStatus.IDLE);
+                idleIndexer();
+            }
+        );
+    }
+
+    public Command feedCommand(Supplier<Double> voltageSupplier) {
+        return this.startEnd(
+            () -> {
+                setStatus(IndexerStatus.FEEDING);
+                feedFuel(voltageSupplier.get());
+            },
+            () -> {
+                setStatus(IndexerStatus.IDLE);
+                idleIndexer();
+            }
+        );
     }
 
     // private void checkIfBallIntaked() {

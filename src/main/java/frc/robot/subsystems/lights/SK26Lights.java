@@ -7,7 +7,6 @@ import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -46,21 +45,13 @@ public class SK26Lights extends SubsystemBase {
     // State
     private String ledStatus = "Breathing SKBlue";
     private LightMode currentMode = LightMode.BREATHING_SKBLUE;
-    private GameState currentGameState = GameState.PRE_MATCH_NO_FMS;
-    private GameState previousGameState = GameState.PRE_MATCH_NO_FMS;
     private boolean autoLightsEnabled = true;
-    private boolean partyModeActive = false;
-    private boolean wasInAuto = false;
 
     // Calibration
     private boolean runCalibrationTest = false;
     private int calibrationStep = 0;
     private int calibrationTimer = 0;
     private static final int CALIBRATION_STEP_DURATION = 150;
-
-    // Game timing
-    private static final double ENDGAME_START_TIME = 10.0;
-    private static final double ENDGAME_FLASH_DURATION = 3.0;
 
     // Fun mode
     private final SendableChooser<LightMode> funEffectChooser = new SendableChooser<>();
@@ -202,15 +193,15 @@ public class SK26Lights extends SubsystemBase {
                 currentMode = selectedEffect;
                 ledStatus = "Fun Mode: " + selectedEffect.toString();
             }
-        } else if (autoLightsEnabled) {
-            updateAutoLights();
-        } else {
-            // Light effect chooser is the base layer when nothing else is active
-            LightMode selectedEffect = lightEffectChooser.getSelected();
-            if (selectedEffect != null) {
-                currentMode = selectedEffect;
-                ledStatus = "Light Effect: " + selectedEffect.toString();
-            }
+        } else if (!autoLightsEnabled) {
+            /* TODO: Reincorporate light effect chooser for non-fun modes. 
+                Had to disable to get actual Trigger-based lighting working without conflicts. */
+            // // Light effect chooser is the base layer when nothing else is active
+            // LightMode selectedEffect = lightEffectChooser.getSelected();
+            // if (selectedEffect != null) {
+            //     currentMode = selectedEffect;
+            //     ledStatus = "Light Effect: " + selectedEffect.toString();
+            // }
         }
 
         if (runCalibrationTest) {
@@ -248,7 +239,14 @@ public class SK26Lights extends SubsystemBase {
             case STROBE_BLUE: patterns.blueStrobe.applyTo(m_baseBuffer); break;
             case STROBE_YELLOW: patterns.yellowStrobe.applyTo(m_baseBuffer); break;
             case STROBE_ORANGE: patterns.orangeStrobe.applyTo(m_baseBuffer); break;
+            case STROBE_PURPLE: patterns.purpleStrobe.applyTo(m_baseBuffer); break;
             case STROBE_SKBLUE: patterns.skBlueStrobe.applyTo(m_baseBuffer); break;
+
+            // Dual color modes
+            case DUAL_SOLID_WHITE_GREEN: patterns.dualSolidWhiteGreen.applyTo(m_baseBuffer); break;
+            case DUAL_SOLID_WHITE_YELLOW: patterns.dualSolidWhiteYellow.applyTo(m_baseBuffer); break;
+            case DUAL_STROBE_WHITE_GREEN: patterns.dualStrobeWhiteGreen.applyTo(m_baseBuffer); break;
+            case DUAL_STROBE_WHITE_YELLOW: patterns.dualStrobeWhiteYellow.applyTo(m_baseBuffer); break;
             
             // Team/Alliance modes
             case BREATHING_SKBLUE: effects.applyBreathingSKBlue(m_baseBuffer); break;
@@ -308,114 +306,6 @@ public class SK26Lights extends SubsystemBase {
             case RHYTHM_GAME: effects.applyRhythmGame(m_baseBuffer); break;
             case SIMON_SAYS: effects.applySimonSays(m_baseBuffer); break;
             case COLOR_KNOCKOUT: effects.applyColorKnockout(m_baseBuffer); break;
-        }
-    }
-
-    // ==================== AUTO LIGHTS ====================
-
-    private GameState determineGameState() {
-        boolean fmsAttached = DriverStation.isFMSAttached();
-        boolean dsAttached = DriverStation.isDSAttached();
-        boolean auto = DriverStation.isAutonomousEnabled();
-        boolean teleop = DriverStation.isTeleopEnabled();
-        double matchTime = DriverStation.getMatchTime();
-
-        if (auto) {
-            return GameState.AUTO;
-        }
-
-        if (teleop) {
-            if (matchTime > 0 && matchTime <= ENDGAME_START_TIME) {
-                if (matchTime > ENDGAME_START_TIME - ENDGAME_FLASH_DURATION) {
-                    return GameState.ENDGAME_FLASH;
-                }
-                return GameState.ENDGAME_SOLID;
-            }
-            return GameState.TELEOP;
-        }
-
-        if (previousGameState == GameState.ENDGAME_SOLID || 
-            previousGameState == GameState.ENDGAME_FLASH ||
-            previousGameState == GameState.POST_MATCH) {
-            return GameState.POST_MATCH;
-        }
-
-        if (fmsAttached || dsAttached) {
-            return GameState.PRE_MATCH_FMS;
-        }
-        
-        return GameState.PRE_MATCH_NO_FMS;
-    }
-
-    private void updateAutoLights() {
-        if (!autoLightsEnabled) {
-            return;
-        }
-
-        previousGameState = currentGameState;
-        GameState rawState = determineGameState();
-
-        if (rawState == GameState.AUTO) {
-            wasInAuto = true;
-            currentGameState = GameState.AUTO;
-        }
-        else if (wasInAuto && rawState != GameState.TELEOP) {
-            currentGameState = GameState.AUTO_TO_TELEOP;
-        }
-        else if (rawState == GameState.TELEOP) {
-            wasInAuto = false;
-            currentGameState = GameState.TELEOP;
-        }
-        else {
-            if (rawState == GameState.PRE_MATCH_NO_FMS || rawState == GameState.PRE_MATCH_FMS) {
-                wasInAuto = false;
-            }
-            currentGameState = rawState;
-        }
-
-        if (partyModeActive && currentGameState == GameState.AUTO) {
-            currentMode = LightMode.RAINBOW;
-            ledStatus = "Party Mode";
-            return;
-        }
-
-        switch (currentGameState) {
-            case PRE_MATCH_NO_FMS:
-                currentMode = LightMode.BREATHING_SKBLUE;
-                ledStatus = "Pre-Match (No DS)";
-                break;
-            case PRE_MATCH_FMS:
-                currentMode = LightMode.SKBLUE_GRADIENT;
-                ledStatus = "Pre-Match (DS Connected)";
-                break;
-            case AUTO:
-                if (!partyModeActive) {
-                    partyModeActive = true;
-                }
-                currentMode = LightMode.RAINBOW;
-                ledStatus = "Auto (Party)";
-                break;
-            case AUTO_TO_TELEOP:
-                currentMode = LightMode.ALLIANCE_SOLID;
-                ledStatus = "Auto→Teleop (Alliance Solid)";
-                break;
-            case TELEOP:
-                currentMode = LightMode.ALLIANCE_GRADIENT;
-                ledStatus = "Teleop (Alliance)";
-                partyModeActive = false;
-                break;
-            case ENDGAME_FLASH:
-                currentMode = LightMode.ALLIANCE_FLASH_WHITE;
-                ledStatus = "Endgame (Flash)";
-                break;
-            case ENDGAME_SOLID:
-                currentMode = LightMode.ALLIANCE_SOLID;
-                ledStatus = "Endgame (Solid)";
-                break;
-            case POST_MATCH:
-                currentMode = LightMode.ALLIANCE_SOLID;
-                ledStatus = "Post-Match (Alliance)";
-                break;
         }
     }
 
@@ -532,7 +422,6 @@ public class SK26Lights extends SubsystemBase {
     public Command enableAutoLights() {
         return runOnce(() -> {
             autoLightsEnabled = true;
-            partyModeActive = false;
         }).ignoringDisable(true).withName("Enable Auto Lights");
     }
 
@@ -544,16 +433,11 @@ public class SK26Lights extends SubsystemBase {
 
     public Command activatePartyMode() {
         return runOnce(() -> {
-            partyModeActive = true;
             autoLightsEnabled = true;
         }).ignoringDisable(true).withName("Activate Party Mode");
     }
 
     public void resetMatchState() {
-        wasInAuto = false;
-        partyModeActive = false;
-        currentGameState = GameState.PRE_MATCH_NO_FMS;
-        previousGameState = GameState.PRE_MATCH_NO_FMS;
     }
 
     // ==================== GAME BUTTON ====================
@@ -808,18 +692,19 @@ public class SK26Lights extends SubsystemBase {
         }).ignoringDisable(true).withName("Stop Calibration Test");
     }
 
-    // ==================== GETTERS ====================
+    // ==================== GETTERS / SETTERS ====================
 
     public boolean isAutoLightsEnabled() { return autoLightsEnabled; }
-    public GameState getCurrentGameState() { return currentGameState; }
     public LightMode getCurrentMode() { return currentMode; }
     public boolean isGameModeEnabled() { return gameModeEnabled; }
+
+    /** Allows external callers (e.g. SK26LightsBinder) to stamp the status string. */
+    public void setLedStatus(String status) { ledStatus = status; }
 
     // ==================== LOGGING ====================
 
     private void logOutputs() {
         Logger.recordOutput("Lights/Status", ledStatus);
-        Logger.recordOutput("Lights/Game State", currentGameState.toString());
         Logger.recordOutput("Lights/Gamma", gamma);
         Logger.recordOutput("Lights/Red Correction", redCorrection);
         Logger.recordOutput("Lights/Green Correction", greenCorrection);

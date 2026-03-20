@@ -9,13 +9,13 @@ public class FeederFeedCommand extends Command
 
     private final SK26Feeder Subsystem;
 
-    double velocity;
+    double voltage;
 
     // Constructor
-    public FeederFeedCommand(SK26Feeder Subsystem, double velocity)
+    public FeederFeedCommand(SK26Feeder Subsystem, double voltage)
     {
         this.Subsystem = Subsystem;
-        this.velocity = velocity;
+        this.voltage =voltage;
         addRequirements(Subsystem);
     }
 
@@ -23,14 +23,14 @@ public class FeederFeedCommand extends Command
     @Override
     public void initialize()
     {
-        Subsystem.feedFuel(velocity);
+        Subsystem.feedFuel(voltage);
     }
 
     // This command never finishes on its own
     @Override
     public boolean isFinished()
     {
-        return false;
+        return true;
     }
 
     @Override

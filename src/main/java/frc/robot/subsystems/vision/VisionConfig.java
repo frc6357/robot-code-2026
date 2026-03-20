@@ -12,7 +12,7 @@ import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
-import frc.robot.Konstants.VisionConstants.FrontLimelight;
+import frc.robot.Konstants.VisionConstants.BackLimelight;
 import frc.robot.Konstants.VisionConstants.TurretLimelight;
 
 import static edu.wpi.first.units.Units.Degrees;
@@ -32,13 +32,14 @@ public final class VisionConfig {
                                         .withRotation(RightLimelight.kRoll, RightLimelight.kPitch, RightLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(RightLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
     */
-    public static final String FRONT_LL = FrontLimelight.kName;
-    public static final int FRONT_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig FRONT_CONFIG = 
-                                        new LimelightConfig(FrontLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
-                                        .withTranslation(FrontLimelight.kForward, FrontLimelight.kRight, FrontLimelight.kUp) // Feeds in the position of the limelight on the bot
-                                        .withRotation(FrontLimelight.kRoll, FrontLimelight.kPitch, FrontLimelight.kYaw) // Feeds in rotation of limelight
-                                        .withAttached(FrontLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+    public static final String BACK_LL = BackLimelight.kName;
+    public static final int BACK_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig BACK_CONFIG = 
+                                        new LimelightConfig(BackLimelight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
+                                        .withTranslation(BackLimelight.kForward, BackLimelight.kRight, BackLimelight.kUp) // Feeds in the position of the limelight on the bot
+                                        .withRotation(BackLimelight.kRoll, BackLimelight.kPitch, BackLimelight.kYaw) // Feeds in rotation of limelight
+                                        .withAttached(BackLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+    
     
     public static final String TURRET_LL = TurretLimelight.kName;
     public static final int TURRET_TAG_PIPELINE = kAprilTagPipeline;
@@ -48,21 +49,13 @@ public final class VisionConfig {
                                         .withRotation(TurretLimelight.kRoll, TurretLimelight.kPitch, TurretLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(TurretLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
 
-    public static final String LL_THREE = LimelightThree.kName;
-    public static final int THREE_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig THREE_CONFIG = 
+    public static final String LL_INTAKE = LimelightThree.kName;
+    public static final int INTAKE_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig INTAKE_CONFIG = 
                                         new LimelightConfig(LimelightThree.kName)
                                         .withTranslation(LimelightThree.kForward, LimelightThree.kRight, LimelightThree.kUp)
                                         .withRotation(LimelightThree.kRoll, LimelightThree.kPitch, LimelightThree.kYaw)
                                         .withAttached(LimelightThree.kAttached);
-
-    public static final String LL_FOUR = LimelightFour.kName;
-    public static final int FOUR_TAG_PIPELINE = kAprilTagPipeline;
-    public static final LimelightConfig FOUR_CONFIG = 
-                                        new LimelightConfig(LimelightFour.kName)
-                                        .withTranslation(LimelightFour.kForward, LimelightFour.kRight, LimelightFour.kUp)
-                                        .withRotation(LimelightFour.kRoll, LimelightFour.kPitch, LimelightFour.kYaw)
-                                        .withAttached(LimelightFour.kAttached);
 
 
     // Standard deviations for vision measurements (in meters and degrees)

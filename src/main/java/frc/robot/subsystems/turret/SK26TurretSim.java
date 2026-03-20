@@ -24,7 +24,7 @@ public class SK26TurretSim extends SK26Turret {
     // Moment of inertia for the turret (kg⋅m²)
     // Higher values = more resistance to acceleration, slower response, less oscillation
     // Typical turret MOI: 0.05 to 0.5 kg⋅m² depending on mass and radius
-    private static final double kTurretMOI = 0.0375; // Adjust to match real turret behavior
+    private static final double kTurretMOI = 0.0518; // Adjust to match real turret behavior
     
     private final DCMotorSim turretMotorSim = new DCMotorSim(
         LinearSystemId.createDCMotorSystem(
@@ -43,7 +43,7 @@ public class SK26TurretSim extends SK26Turret {
         turretSimState = turretMotor.getSimState();
         // Use Clockwise_Positive because kTurretMotorInverted=true means 
         // negative voltage produces positive angle change
-        turretSimState.Orientation = ChassisReference.Clockwise_Positive;
+        turretSimState.Orientation = ChassisReference.CounterClockwise_Positive;
         turretSimState.setMotorType(MotorType.KrakenX44);
         turretSimState.setSupplyVoltage(RobotController.getBatteryVoltage());
 

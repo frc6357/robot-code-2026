@@ -1,28 +1,61 @@
 package frc.robot.bindings;
 
-import static frc.robot.Ports.OperatorPorts.kAbutton;
-import static frc.robot.Ports.OperatorPorts.kBbutton;
-import static frc.robot.Ports.OperatorPorts.kYbutton;
-import static frc.robot.Ports.OperatorPorts.kXbutton;
-import static frc.robot.Ports.OperatorPorts.kLeftDpad;
-import static frc.robot.Ports.OperatorPorts.kRightDpad;
-import static frc.robot.Ports.OperatorPorts.kBackbutton;
-
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.robot.RobotContainer;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.lights.LightMode;
 import frc.robot.subsystems.lights.SK26Lights;
 
 public class SK26LightsBinder implements CommandBinder {
-
     private final Optional<SK26Lights> lightsSubsystem;
+    private SK26Lights lights; // Only valid if lightsSubsystem is present
+
+    private Trigger auto;
+    private Trigger teleop;
+    private Trigger disabledFMS;
+    private Trigger disabledNoFMS;
+    private Trigger shuttlingWaiting;
+    private Trigger shuttlingReady;
+    private Trigger scoringWaiting;
+    private Trigger scoringReady;
+    private Trigger steadyStreamShuttlingWaiting;
+    private Trigger steadyStreamShuttlingReady;
+    private Trigger steadyStreamScoringWaiting;
+    private Trigger steadyStreamScoringReady;
+    private Trigger intakeWaiting;
+    private Trigger intakeReady;
+
+    boolean lightsPresent = false;
 
     public SK26LightsBinder(Optional<SK26Lights> lightsSubsystem) {
         this.lightsSubsystem = lightsSubsystem;
+        shuttlingWaiting = StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING);
+        steadyStreamShuttlingWaiting = StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SHUTTLING);
+        shuttlingReady = StateHandler.whenCurrentStateReady(MacroState.SHUTTLING);
+        steadyStreamShuttlingReady = StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING);
+        scoringWaiting = StateHandler.whenCurrentStateWaiting(MacroState.SCORING);
+        steadyStreamScoringWaiting = StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SCORING);
+        scoringReady = StateHandler.whenCurrentStateReady(MacroState.SCORING);
+        steadyStreamScoringReady = StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING);
+        intakeWaiting = StateHandler.whenCurrentStateWaiting(MacroState.INTAKING);
+        intakeReady = StateHandler.whenCurrentStateReady(MacroState.INTAKING);
+        auto = new Trigger(DriverStation::isAutonomousEnabled);
+        teleop = new Trigger(DriverStation::isTeleopEnabled);
+        disabledFMS = new Trigger(
+            () -> DriverStation.isDisabled()
+               && (DriverStation.isFMSAttached() || DriverStation.isDSAttached()));
+        disabledNoFMS = new Trigger(
+            () -> DriverStation.isDisabled()
+               && !DriverStation.isFMSAttached()
+               && !DriverStation.isDSAttached());
     }
 
     @Override
@@ -30,110 +63,142 @@ public class SK26LightsBinder implements CommandBinder {
         if (lightsSubsystem.isEmpty()) {
             return;
         }
-        SK26Lights lights = lightsSubsystem.get();
+        lights = lightsSubsystem.get();
+        lightsPresent = true;
 
-        StateHandler.whenCurrentStateReady(MacroState.SHUTTLING)
-            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING))
-        .onTrue(
-            lights.setMode(LightMode.STROBE_WHITE)
-        );
-        
-        StateHandler.whenCurrentStateReady(MacroState.SCORING)
-            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
-        .onTrue(
-            lights.setMode(LightMode.STROBE_SKBLUE)
-        );
+        // ── Game-state triggers ───────────────────────────────────────────────────
 
-        // ==================== BASIC LIGHT CONTROLS (Operator D-pad) ====================
-        // These two buttons always work regardless of game mode.
-        kLeftDpad.button.onTrue(lights.setMode(LightMode.OFF));           // D-pad Left = Lights Off
-        kRightDpad.button.onTrue(lights.setMode(LightMode.SKBLUE_GRADIENT)); // D-pad Right = SK Gradient
+        // Autonomous — rainbow party mode
+        auto.onTrue(lights.setMode(LightMode.RAINBOW, "Auto (Party)"))
+            .onFalse(handleEffectFallbackCommand);
 
-        // Serious light effects (Alliance Gradient, Solid colors, etc.) are controlled
-        // via the "Lights/Light Effect" dropdown on SmartDashboard.
+        // Main teleop (not in endgame window)
+        teleop.onTrue(lights.setMode(LightMode.ALLIANCE_GRADIENT, "Teleop (Alliance)"))
+            .onFalse(handleEffectFallbackCommand);
 
-        // ==================== GAME MODE TOGGLE (Operator Back) ====================
-        // Back button toggles game controller mode on/off.
-        // When game mode is ON, Operator ABXY become game interaction buttons.
-        // When game mode is OFF, Operator ABXY are free for other subsystems (turret, etc).
-        kBackbutton.button.onTrue(lights.toggleGameModeCommand());
+        // Disabled with DS/FMS connected
+        disabledFMS.onTrue(lights.setMode(LightMode.SKBLUE_GRADIENT, "Disabled (DS Connected)"))
+            .onFalse(handleEffectFallbackCommand);
 
-        // ==================== GAME MODE BUTTONS (Operator ABXY) ====================
-        // These buttons ONLY do something when Game Controller Mode is ON.
-        // When Game Controller Mode is OFF, they do nothing for lights,
-        // leaving them free for turret/launcher bindings.
-        //
-        // When ON:
-        //   - Simon Says: A=Green, B=Red, X=Blue, Y=Yellow
-        //   - Color Knockout: A=Green, B=Red, X=Blue, Y=Yellow (P2)
-        //   - Other games: A = game action
+        // Disabled with no DS
+        disabledNoFMS.onTrue(lights.setMode(LightMode.BREATHING_SKBLUE, "Disabled (No DS)"))
+            .onFalse(handleEffectFallbackCommand);
 
-        // Operator A button (Green / game action)
-        kAbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonGreenButton(),              // Simon Says: Green
-                    Commands.either(
-                        lights.knockoutP2GreenButton(),     // Color Knockout: P2 Green
-                        lights.gameButtonPressedAlt(),      // Other games: game action
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                            // Game mode OFF: do nothing
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
+        // ── Macro-state-based lights ──────────────────────────────────────────────
 
-        // Operator B button (Red)
-        kBbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonRedButton(),                // Simon Says: Red
-                    Commands.either(
-                        lights.knockoutP2RedButton(),       // Color Knockout: P2 Red
-                        Commands.none(),                    // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                            // Game mode OFF: do nothing
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
+        /* Shuttling = Yellow */
+        shuttlingWaiting.onTrue(
+            lights.setMode(LightMode.SOLID_YELLOW, "Shuttling (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
+        shuttlingReady.onTrue(
+            lights.setMode(LightMode.STROBE_YELLOW, "Shuttling (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
 
-        // Operator X button (Blue)
-        kXbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonBlueButton(),               // Simon Says: Blue
-                    Commands.either(
-                        lights.knockoutP2BlueButton(),      // Color Knockout: P2 Blue
-                        Commands.none(),                    // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                            // Game mode OFF: do nothing
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
+        /* Scoring = SK Blue */
+        scoringWaiting.onTrue(
+            lights.setMode(LightMode.SOLID_GREEN, "Scoring (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
 
-        // Operator Y button (Yellow)
-        kYbutton.button.onTrue(
-            Commands.either(
-                Commands.either(
-                    lights.simonYellowButton(),             // Simon Says: Yellow
-                    Commands.either(
-                        lights.knockoutP2YellowButton(),    // Color Knockout: P2 Yellow
-                        Commands.none(),                    // Other games: nothing
-                        () -> lights.getCurrentMode() == LightMode.COLOR_KNOCKOUT
-                    ),
-                    () -> lights.getCurrentMode() == LightMode.SIMON_SAYS
-                ),
-                Commands.none(),                            // Game mode OFF: do nothing
-                lights::isGameModeEnabled
-            ).ignoringDisable(true)
-        );
+        scoringReady.onTrue(
+            lights.setMode(LightMode.STROBE_GREEN, "Scoring (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        /* Intaking = White */
+        intakeWaiting.onTrue(
+            lights.setMode(LightMode.SOLID_WHITE, "Intaking (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        intakeReady.onTrue(
+            lights.setMode(LightMode.STROBE_WHITE, "Intaking (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        /* Steady Stream Scoring = Dual White/Green */
+        steadyStreamScoringWaiting.onTrue(
+            lights.setMode(LightMode.DUAL_SOLID_WHITE_GREEN, "Steady Stream Scoring (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        steadyStreamScoringReady.onTrue(
+            lights.setMode(LightMode.DUAL_STROBE_WHITE_GREEN, "Steady Stream Scoring (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        /* Steady Stream Shuttling = Dual White/Yellow */
+        steadyStreamShuttlingWaiting.onTrue(
+            lights.setMode(LightMode.DUAL_SOLID_WHITE_YELLOW, "Steady Stream Shuttling (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        steadyStreamShuttlingReady.onTrue(
+            lights.setMode(LightMode.DUAL_STROBE_WHITE_YELLOW, "Steady Stream Shuttling (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        /* Shift ending soon = Orange */
+        RobotContainer.shiftEndingSoon.onTrue(
+            lights.setMode(LightMode.STROBE_ORANGE, "Shift Ending Soon")
+        )
+        .onFalse(handleEffectFallbackCommand);
+
+        RobotContainer.shiftNotice.onTrue(
+            lights.setMode(LightMode.STROBE_PURPLE, "Shift Ending Notice")
+        )
+        .onFalse(handleEffectFallbackCommand);
+    }
+
+    private Command handleEffectFallbackCommand = Commands.runOnce(this::handleEffectFallback).ignoringDisable(true);
+
+    /**
+     * Used whenever a high-priority effect (like state-based or shift ending soon)
+     * needs to temporarily override the current lights mode, but we want to return
+     * to the correct mode after the effect ends instead of just going back to the
+     * default for the current game state. 
+     */
+    private void handleEffectFallback() {
+        if(!lightsPresent) {
+            return;
+        }
+
+        // Really disguting chain of if-elses, but it works and it's only called when an 
+        // effect ends so it won't cause any performance issues. 
+
+        if(scoringReady.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.STROBE_GREEN));
+        }
+        else if(scoringWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.SOLID_GREEN));
+        }
+        else if(shuttlingReady.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.STROBE_YELLOW));
+        }
+        else if(shuttlingWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.SOLID_YELLOW));
+        }
+        else if(intakeReady.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.STROBE_WHITE));
+        }
+        else if(intakeWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.SOLID_WHITE));
+        }
+        else if(steadyStreamScoringReady.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DUAL_STROBE_WHITE_GREEN));
+        }
+        else if(steadyStreamScoringWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DUAL_SOLID_WHITE_GREEN));
+        }
+        else if(steadyStreamShuttlingReady.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DUAL_STROBE_WHITE_YELLOW));
+        }
+        else if(steadyStreamShuttlingWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DUAL_SOLID_WHITE_YELLOW));
+        }
+        else if(teleop.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.ALLIANCE_GRADIENT));
+        }
+        else if(auto.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.RAINBOW));
+        }
+        else if(disabledFMS.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.SKBLUE_GRADIENT));
+        }
+        else if(disabledNoFMS.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.BREATHING_SKBLUE));
+        }
     }
 }
