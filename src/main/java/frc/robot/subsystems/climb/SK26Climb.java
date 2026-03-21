@@ -85,13 +85,13 @@ public class SK26Climb extends SubsystemBase
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
-            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotorAndSetPosition);
 
         climbConfigLeft.limitSwitch
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
-            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotorAndSetPosition);
 
         climbMotorRight.configure(climbConfigRight, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         climbMotorLeft.configure(climbConfigLeft, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
