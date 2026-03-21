@@ -1,7 +1,7 @@
 {
     
     "swerve": true,
-    "vision": true,
+    "vision": false,
     "turret": true,
     "launcher": false,
     "bangbanglauncher": false,
@@ -9,7 +9,7 @@
     "lights": true,
     "indexer": true,
     "climb": false,
-    "pickup": true,
+    "pickup": false,
     "feeder": true,
     "fueldetection": false
 }
