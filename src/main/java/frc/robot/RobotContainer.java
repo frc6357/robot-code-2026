@@ -195,6 +195,9 @@ public class RobotContainer {
 
     // Configure the trigger bindings
     configureButtonBindings();
+
+    // Register SmartDashboard test suite for individual subsystem testing
+    TestSuite.init();
   
     if(m_swerveContainer.isPresent()) {
         autoCommandSelector = new LoggedDashboardChooser<>("Select an Auto", AutoBuilder.buildAutoChooser());
