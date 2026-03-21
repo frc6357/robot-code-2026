@@ -210,13 +210,13 @@ public class TestSuite {
     private static Command buildTurretSweep(SK26Turret turret) {
         return Commands.repeatingSequence(
             // Sweep to positive limit
-            Commands.runOnce(() -> turret.setAngleDegrees(170.0)),
+            Commands.runOnce(() -> turret.setAngleDegrees(150.0)),
             Commands.waitUntil(turret::atTarget).withTimeout(4.0),
             // Return to center
             Commands.runOnce(() -> turret.setAngleDegrees(0.0)),
             Commands.waitUntil(turret::atTarget).withTimeout(4.0),
             // Sweep to negative limit
-            Commands.runOnce(() -> turret.setAngleDegrees(-170.0)),
+            Commands.runOnce(() -> turret.setAngleDegrees(-150.0)),
             Commands.waitUntil(turret::atTarget).withTimeout(4.0),
             // Return to center
             Commands.runOnce(() -> turret.setAngleDegrees(0.0)),
