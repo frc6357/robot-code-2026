@@ -51,29 +51,26 @@ public class TurretTrackPointCommand extends Command
         // Get the target point position
         Translation2d target = targetPoint.getTargetPoint();
 
+        // Calculate the vector from robot to target
+        double dx = target.getX() - robotPosition.getX();
+        double dy = target.getY() - robotPosition.getY();
+
         // Calculate the field-relative angle to the target (in degrees)
         // atan2 gives angle from positive X-axis, counterclockwise positive
-        double desiredAngle = Math.toDegrees(
-            Math.signum(drive.getRobotPose().getTranslation().getY() - targetPoint.getTargetPoint().getY()) *
-            Math.acos(
-                (drive.getRobotPose().getTranslation().getX() - targetPoint.getTargetPoint().getX()) / 
-                drive.getRobotPose().getTranslation().getDistance(targetPoint.getTargetPoint())))
-                 + 180; // Instead of matching the angle directly, face opposite of it (towards the point)
-        if(Double.isNaN(desiredAngle)) {
-            desiredAngle = turret.getAngleDegrees();
-        }
+        double fieldAngleToTargetDeg = Math.toDegrees(Math.atan2(dy, dx));
 
         // Convert field-relative angle to robot-relative angle for the turret
         // If robot is facing 0° and target is at 45° field-relative, turret should be at 45°
         // If robot is facing 30° and target is at 45° field-relative, turret should be at 15°
-        double turretAngleDeg = desiredAngle - robotHeadingDeg;
+        double turretAngleDeg = fieldAngleToTargetDeg - robotHeadingDeg;
 
+        // Normalize to -180 to +180 range
         double wrappedAngle = MathUtil.inputModulus(turretAngleDeg, -180, 180);
 
         turret.setAngleDegrees(wrappedAngle);
 
         // Debug output
-        SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", desiredAngle);
+        SmartDashboard.putNumber("TurretTrack/FieldAngleToTarget", fieldAngleToTargetDeg);
         SmartDashboard.putNumber("TurretTrack/WrappedDesiredAngle", wrappedAngle);
         SmartDashboard.putNumber("TurretTrack/RobotHeading", robotHeadingDeg);
         SmartDashboard.putNumber("TurretTrack/DesiredTurretAngle", turretAngleDeg);

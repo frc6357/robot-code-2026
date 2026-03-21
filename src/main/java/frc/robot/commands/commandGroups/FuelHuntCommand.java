@@ -225,11 +225,16 @@ public class FuelHuntCommand {
                     // Race the pathfind against a proximity check so the robot
                     // moves on to the next leg the instant it's close enough —
                     // no pause while PathPlanner plans the next path.
+                    // The minimum-leg-time wait prevents the proximity check
+                    // from firing during the initial planning phase.
                     AutoBuilder.pathfindToPose(fuelTarget, kFuelHuntConstraints, kFuelGoalEndVel)
                         .raceWith(
-                            // End this leg as soon as robot is within kFuelProximityM
-                            Commands.waitUntil(() ->
-                                getRobotPose().getTranslation().getDistance(fuelPos) < kFuelProximityM)
+                            Commands.sequence(
+                                Commands.waitSeconds(kMinLegTimeSec),
+                                // End this leg as soon as robot is within kFuelProximityM
+                                Commands.waitUntil(() ->
+                                    getRobotPose().getTranslation().getDistance(fuelPos) < kFuelProximityM)
+                            )
                         )
                         .withTimeout(kLegTimeoutSec)
                         .withName("FH_GoToFuel_" + legCount[0]),
@@ -238,7 +243,28 @@ public class FuelHuntCommand {
                 );
             }
 
-            // No affordable fuel — return
+            // No affordable fuel — check if we're still in the scan grace period
+            if (elapsed < kScanGraceSec) {
+                // Drive deeper into the neutral zone to give the camera time
+                // to detect and build up confidence on fuel.  Head toward
+                // a scan point along the entry trench line.
+                double scanX = Math.min(robotPos.getX() + 2.0, kNzMaxX);
+                Translation2d scanPos = new Translation2d(scanX, entryTrenchY);
+                Rotation2d heading = backFirst(robotPos, scanPos);
+                Pose2d scanTarget = new Pose2d(scanPos, heading);
+
+                log("Grace period — scanning toward (%.1f,%.1f), %.1fs left",
+                    scanX, entryTrenchY, kScanGraceSec - elapsed);
+
+                return Commands.sequence(
+                    AutoBuilder.pathfindToPose(scanTarget, kFuelHuntConstraints, kFuelGoalEndVel)
+                        .withTimeout(kLegTimeoutSec)
+                        .withName("FH_ScanDrive"),
+                    buildHuntStep(retFar, retTrenchY, entryTrenchY, retPath, huntStart, legCount, startBalls)
+                );
+            }
+
+            // No affordable fuel and grace period expired — return
             log("No affordable fuel — returning");
             Logger.recordOutput("FuelHunt/Target", new Pose2d[0]);
             return buildReturnSequence(retPath);

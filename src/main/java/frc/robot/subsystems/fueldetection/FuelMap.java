@@ -62,6 +62,11 @@ public class FuelMap {
     /**
      * Feed this cycle's detections into the map.  Call once per periodic().
      *
+     * <p>This overload has <b>no camera frustum</b> — all unmatched fuels
+     * decay every frame.  Prefer the frustum-aware overload
+     * {@link #update(Translation2d[], Translation2d, double, double, double)}
+     * so fuels outside the camera's view persist correctly.
+     *
      * Algorithm (per frame):
      * 
      *   For each new detection, find the closest existing fuel
@@ -76,6 +81,33 @@ public class FuelMap {
      *                       detected this frame.
      */
     public void update(Translation2d[] fieldPositions) {
+        update(fieldPositions, null, 0, 0, 0);
+    }
+
+    /**
+     * Feed this cycle's detections into the map with camera frustum
+     * information for visibility-aware decay.
+     *
+     * <p>Only fuels that fall <b>inside</b> the camera's field of view
+     * (defined by {@code cameraOrigin}, {@code cameraHeadingRad}, and
+     * {@code halfFovRad}) are decayed when not matched.  Fuels outside the
+     * FOV are left at their current confidence — they persist until the
+     * camera looks at them again.
+     *
+     * @param fieldPositions    Array of field-space positions for every ball
+     *                          detected this frame.
+     * @param cameraOrigin      Field-space position of the camera (robot pose
+     *                          + camera offset).  {@code null} to fall back to
+     *                          decay-all behaviour.
+     * @param cameraHeadingRad  Camera heading in field space (radians).
+     * @param halfFovRad        Half the horizontal FOV of the camera (radians).
+     * @param maxRange          Maximum detection range of the camera (meters).
+     */
+    public void update(Translation2d[] fieldPositions,
+                       Translation2d cameraOrigin,
+                       double cameraHeadingRad,
+                       double halfFovRad,
+                       double maxRange) {
         double now = Timer.getFPGATimestamp();
 
         int existingCount = trackedFuels.size();
@@ -118,15 +150,64 @@ public class FuelMap {
         // ---- Decay unmatched existing fuels & remove expired ----
         for (int i = existingCount - 1; i >= 0; i--) {
             if (!matched[i]) {
-                trackedFuels.get(i).decay();
-                if (trackedFuels.get(i).isExpired()) {
-                    trackedFuels.remove(i);
+                // Only decay fuels that are inside the camera's FOV.
+                // Fuels outside the FOV are simply not visible — we have
+                // no new evidence about them, so leave their confidence
+                // unchanged until the camera looks at them again.
+                if (isInsideFov(trackedFuels.get(i).getFieldPosition(),
+                                cameraOrigin, cameraHeadingRad,
+                                halfFovRad, maxRange)) {
+                    trackedFuels.get(i).decay();
+                    if (trackedFuels.get(i).isExpired()) {
+                        trackedFuels.remove(i);
+                    }
                 }
             }
         }
     }
 
     // ==================== Internals ====================
+
+    /**
+     * Determines whether a field position falls inside the camera's
+     * cone-shaped field of view.
+     *
+     * <p>If {@code cameraOrigin} is {@code null}, this returns {@code true}
+     * so that all fuels decay (legacy behaviour / fallback).
+     *
+     * @param fuelPos           Field-space position to test
+     * @param cameraOrigin      Field-space origin of the camera
+     * @param cameraHeadingRad  Camera heading in field space (radians)
+     * @param halfFovRad        Half horizontal FOV (radians)
+     * @param maxRange          Maximum detection range (meters)
+     * @return true if the fuel is inside the view cone (or no frustum info)
+     */
+    private boolean isInsideFov(Translation2d fuelPos,
+                                Translation2d cameraOrigin,
+                                double cameraHeadingRad,
+                                double halfFovRad,
+                                double maxRange) {
+        if (cameraOrigin == null) {
+            return true; // no frustum data — fall back to decay-all
+        }
+
+        double dx = fuelPos.getX() - cameraOrigin.getX();
+        double dy = fuelPos.getY() - cameraOrigin.getY();
+        double dist = Math.hypot(dx, dy);
+
+        // Beyond camera range — not visible
+        if (dist > maxRange || dist < 0.15) {
+            return false;
+        }
+
+        // Angle from camera heading to the fuel
+        double angleToBall = Math.atan2(dy, dx);
+        double relativeAngle = angleToBall - cameraHeadingRad;
+        // Normalize to [-π, π]
+        relativeAngle = Math.atan2(Math.sin(relativeAngle), Math.cos(relativeAngle));
+
+        return Math.abs(relativeAngle) <= halfFovRad;
+    }
 
     /**
      * Removes the tracked fuel with the lowest confidence to make room for a

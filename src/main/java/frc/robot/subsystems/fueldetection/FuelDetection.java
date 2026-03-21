@@ -112,6 +112,17 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
         FuelHuntFileLogger.init();
     }
 
+    // ---- Camera FOV constants for visibility-aware decay ----
+    /**
+     * Half of the horizontal field-of-view of the Limelight 3 (degrees).
+     * The LL3 has ~62° HFOV, so half is ~31°.  We use a slightly generous
+     * value to account for edge-of-frame detection loss.
+     */
+    private static final double HALF_FOV_DEG = 31.0;
+
+    /** Maximum range (m) at which the NN detector reliably spots balls. */
+    private static final double MAX_DETECT_RANGE_M = 5.0;
+
     // ==================== Periodic ====================
 
     @Override
@@ -122,7 +133,13 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
             Translation2d[] simPositions = simFuelField.getVisibleFuelPositions(robotPose, cameraYawDeg);
             numDetections = simPositions.length;
             targetValid = numDetections > 0;
-            fuelMap.update(simPositions);
+
+            // Compute camera frustum for visibility-aware decay
+            double cameraHeadingRad = robotPose.getRotation().getRadians()
+                                    + Math.toRadians(cameraYawDeg);
+            Translation2d cameraOrigin = robotPose.getTranslation();
+            fuelMap.update(simPositions, cameraOrigin, cameraHeadingRad,
+                           Math.toRadians(HALF_FOV_DEG), MAX_DETECT_RANGE_M);
 
             Logger.recordOutput("FuelDetection/SimBallsRemaining", simFuelField.getRemainingCount());
         } else {
@@ -137,17 +154,27 @@ public class FuelDetection extends SubsystemBase implements PathplannerSubsystem
             jsonDump     = LimelightHelpers.getJSONDump(limelightName);
 
             // ---- Project detections to field & update map ----
-            if (swerve != null && numDetections > 0) {
-                Translation2d[] fieldPositions = new Translation2d[numDetections];
+            if (swerve != null) {
                 Pose2d robotPose = swerve.getRobotPose();
 
-                for (int i = 0; i < numDetections; i++) {
-                    fieldPositions[i] = projectToField(detections[i], robotPose);
+                // Compute camera frustum for visibility-aware decay
+                double cameraHeadingRad = robotPose.getRotation().getRadians()
+                                        + Math.toRadians(cameraYawDeg);
+                Translation2d cameraOrigin = robotPose.getTranslation();
+
+                if (numDetections > 0) {
+                    Translation2d[] fieldPositions = new Translation2d[numDetections];
+                    for (int i = 0; i < numDetections; i++) {
+                        fieldPositions[i] = projectToField(detections[i], robotPose);
+                    }
+                    fuelMap.update(fieldPositions, cameraOrigin, cameraHeadingRad,
+                                   Math.toRadians(HALF_FOV_DEG), MAX_DETECT_RANGE_M);
+                } else {
+                    // No detections — still update with frustum so fuels
+                    // in view are decayed but fuels outside view persist
+                    fuelMap.update(new Translation2d[0], cameraOrigin, cameraHeadingRad,
+                                   Math.toRadians(HALF_FOV_DEG), MAX_DETECT_RANGE_M);
                 }
-                fuelMap.update(fieldPositions);
-            } else if (numDetections == 0) {
-                // Still need to decay even when nothing is detected
-                fuelMap.update(new Translation2d[0]);
             }
         }
 

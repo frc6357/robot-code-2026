@@ -9,5 +9,5 @@
     "indexer": false,
     "pickup": true,
     "climb": false,
-    "fueldetection": true
+    "fueldetection": false
 }
