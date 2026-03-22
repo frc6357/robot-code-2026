@@ -60,6 +60,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         /* Manual */
         // Pivoting
         OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        OperatorPorts.kLBbutton.button.onTrue(pivot.resetEncoderCommand());
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor

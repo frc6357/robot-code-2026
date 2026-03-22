@@ -223,6 +223,23 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		positionerMotor.stopMotor();
 	}
 
+	/**
+	 * Resets the leader motor's encoder position to zero without moving the motor.
+	 * Use this to re-zero the sensor when the robot boots with the intake in an unknown position.
+	 */
+	public void resetEncoder()
+	{
+		positionerMotor.setPosition(0.0);
+	}
+
+	/**
+	 * Command factory that resets the encoder position to zero (one-shot).
+	 */
+	public Command resetEncoderCommand()
+	{
+		return this.runOnce(this::resetEncoder).withName("IntakePivotResetEncoder");
+	}
+
 	@Override
 	public void periodic()
 	{

@@ -42,10 +42,10 @@ public class SK26FeederBinder implements CommandBinder {
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
         //         .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
-        this.runFeederFromState = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+        this.runFeederFromState = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
 
         this.runLowVoltage = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
             .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))

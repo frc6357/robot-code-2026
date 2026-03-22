@@ -2,33 +2,26 @@ package frc.robot.subsystems.feeder;
 
 import static frc.robot.Konstants.FeederConstants.kMaxFeederVoltage;
 import static frc.robot.Konstants.FeederConstants.kFeederIdleVoltage;
-import static frc.robot.Ports.LauncherPorts.kFeederFollowerMotor;
 import static frc.robot.Ports.LauncherPorts.kFeederMotor;
 import static frc.robot.Ports.Sensors.launcherSensor;
 
 import java.util.function.Supplier;
 
-import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
-import com.revrobotics.ResetMode;
-import com.revrobotics.spark.SparkFlex;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
-import com.revrobotics.spark.config.SparkFlexConfig;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-// Inline command factory methods replace standalone FeederFeedCommand
-
 import org.littletonrobotics.junction.Logger;
 
 public class SK26Feeder extends SubsystemBase
 {
-    private final SparkFlex feederMotor;
-    private final RelativeEncoder encoder;
-    private final SparkFlex feederFollower;
+    private final TalonFX feederMotor;
+    private final VoltageOut m_voltageRequest = new VoltageOut(0).withEnableFOC(false);
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
@@ -37,17 +30,14 @@ public class SK26Feeder extends SubsystemBase
     public SK26Feeder() 
     {
         // ========== Motor Configuration ==========
-        feederMotor = new SparkFlex(kFeederMotor.ID, MotorType.kBrushless);
-        feederFollower = new SparkFlex(kFeederFollowerMotor.ID, MotorType.kBrushless);
-        SparkFlexConfig config = new SparkFlexConfig();
-        config
-            .idleMode(IdleMode.kBrake)
-            .smartCurrentLimit(40)
-            .voltageCompensation(12.0); // Enable voltage compensation for consistent behavior
-        feederMotor.configure(config, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        feederFollower.configure(config.follow(feederMotor).inverted(false), ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-
-        encoder = feederMotor.getEncoder();
+        feederMotor = new TalonFX(kFeederMotor.ID);
+        TalonFXConfiguration config = new TalonFXConfiguration();
+        config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        config.CurrentLimits.SupplyCurrentLimit = 40;
+        config.CurrentLimits.SupplyCurrentLimitEnable = true;
+        config.Voltage.PeakForwardVoltage = 12.0;
+        config.Voltage.PeakReverseVoltage = -12.0;
+        feederMotor.getConfigurator().apply(config);
     }
 
     /**
@@ -58,7 +48,7 @@ public class SK26Feeder extends SubsystemBase
     public void setFeederVoltage(double voltage) {
         // Clamp output for safety
         voltage = MathUtil.clamp(voltage, -kMaxFeederVoltage, kMaxFeederVoltage);
-        feederMotor.setVoltage(voltage);
+        feederMotor.setControl(m_voltageRequest.withOutput(voltage));
     }
 
     public void idleFeeder() 
@@ -80,11 +70,11 @@ public class SK26Feeder extends SubsystemBase
     }
 
     public double getVoltage() {
-        return feederMotor.getAppliedOutput();
+        return feederMotor.getMotorVoltage().getValueAsDouble();
     }
 
     public double getVelocity() {
-        return encoder.getVelocity()/60;
+        return feederMotor.getVelocity().getValueAsDouble(); // TalonFX reports velocity in RPS
     }
 
     /**
