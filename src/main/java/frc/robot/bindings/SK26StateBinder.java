@@ -48,7 +48,7 @@ public class SK26StateBinder implements CommandBinder {
 
         /* Buttons */
         turnOnScoring = DriverPorts.kRTrigger.button;
-        turnOnShuttling = DriverPorts.kRTrigger.button.debounce(0.55);
+        turnOnShuttling = DriverPorts.kLeftDpad.button;
 
         if (stateHandler != null) {
             // Create trigger for when launcher is in any active launching state
@@ -60,7 +60,7 @@ public class SK26StateBinder implements CommandBinder {
                     || state == MacroState.STEADY_STREAM_SHUTTLING;
             });
 
-            // Turn off trigger requires: double-press AND launcher has been active for 0.8s
+            // Turn off trigger requires: double-press RT AND launcher has been active for 0.8s
             Trigger launcherActiveFor800ms = new Trigger(() -> launcherActiveDebouncer.calculate(launcherActive.getAsBoolean()));
             turnOffLaunch = DriverPorts.kRTrigger.button.multiPress(2, 0.33).and(launcherActiveFor800ms);
         } else {

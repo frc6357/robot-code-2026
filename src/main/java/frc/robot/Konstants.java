@@ -152,8 +152,8 @@ public final class Konstants
 
         /** Slower, smoother constraints for FuelHunt pathfinding — gentle curves, no snapping. */
         public static final PathConstraints kFuelHuntConstraints = new PathConstraints(
-            4.0, 1.2,
-            120, 180,
+            3.5, 2.5,
+            180, 360,
             12, false);
     }
 
@@ -178,10 +178,10 @@ public final class Konstants
         /** End-velocity (m/s) when arriving at a fuel cluster.
          *  Higher = plows through faster (less accurate aim).
          *  Lower  = more precise but slower cycle time. */
-        public static final double kFuelGoalEndVel      = 4.0;
+        public static final double kFuelGoalEndVel      = 2.0;
 
         /** End-velocity (m/s) when arriving at the trench entry. */
-        public static final double kEntryGoalEndVel     = 2.5;
+        public static final double kEntryGoalEndVel     = 2.0;
 
         /** Safety-timeout seconds — generous; primary exit is the target. */
         public static final double kMaxHuntTimeSec      = 30.0;
@@ -189,9 +189,19 @@ public final class Konstants
         /** Per-leg timeout seconds — prevents a single pathfind from stalling. */
         public static final double kLegTimeoutSec       = 4.0;
 
+        /** Minimum seconds a leg must run before the proximity check can
+         *  end it early.  Prevents rapid replanning during the initial
+         *  path-generation phase of each leg. */
+        public static final double kMinLegTimeSec       = 0.5;
+
         /** Proximity (m) at which a fuel-leg is considered "arrived" and
          *  the robot immediately starts the next leg, no pause. */
-        public static final double kFuelProximityM      = 1.0;
+        public static final double kFuelProximityM      = 1.5;
+
+        /** Grace period (seconds) after entering the hunt loop before
+         *  "no fuel found" is allowed to trigger a return.  Gives the
+         *  camera time to detect and confirm fuel in the neutral zone. */
+        public static final double kScanGraceSec        = 3.0;
 
         /** Max lateral distance (m) the robot may stray from the entry
          *  trench Y coordinate. Clusters farther away are skipped.
