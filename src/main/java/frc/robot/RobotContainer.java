@@ -239,9 +239,11 @@ public class RobotContainer {
                     m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
                     m_visionInstance = m_visionContainer.get();
                 }
-                if(subsystems.isPickupPresent()) {
+                if(subsystems.isIntakePivotPresent()) {
                     m_intakePivotContainer = Optional.of(new SK26IntakePivot());
                     m_intakePivotInstance = m_intakePivotContainer.get();
+                }
+                if(subsystems.isIntakeRollersPresent()) {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
@@ -311,9 +313,11 @@ public class RobotContainer {
                     m_lightsContainer = Optional.of(new SK26Lights());
                     m_lightsInstance = m_lightsContainer.get();
                 }
-                if(subsystems.isPickupPresent()) {
+                if(subsystems.isIntakePivotPresent()) {
                     m_intakePivotContainer = Optional.of(new SK26IntakePivot());
                     m_intakePivotInstance = m_intakePivotContainer.get();
+                }
+                if(subsystems.isIntakeRollersPresent()) {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }

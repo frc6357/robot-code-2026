@@ -17,7 +17,8 @@ public class SubsystemControls
     private final boolean bangbanglauncher;
     private final boolean duallauncher;
     private final boolean lights;
-    private final boolean pickup;
+    private final boolean intakepivot;
+    private final boolean intakerollers;
     private final boolean indexer;
     private final boolean feeder;
     private final boolean fueldetection;
@@ -27,8 +28,10 @@ public class SubsystemControls
      *            indicates if the swerve subsystem is present and should be enabled
      * @param lights
      *            indicates if the lights subsystem is present and should be enabled
-     * @param pickup
-     *            indicates if the pickup subsystem is present and should be enabled
+     * @param intakepivot
+     *            indicates if the intake pivot subsystem is present and should be enabled
+     * @param intakerollers
+     *            indicates if the intake rollers subsystem is present and should be enabled
      */
 
     public SubsystemControls(
@@ -36,7 +39,8 @@ public class SubsystemControls
         @JsonProperty(required = true, value = "vision")      boolean vision,
         @JsonProperty(required = true, value = "climb")       boolean climb,
 
-        @JsonProperty(required = true, value = "pickup")      boolean pickup,
+        @JsonProperty(required = true, value = "intakepivot")    boolean intakepivot,
+        @JsonProperty(required = true, value = "intakerollers")  boolean intakerollers,
         @JsonProperty(required = true, value = "turret")      boolean turret,
         @JsonProperty(required = true, value = "launcher")     boolean launcher,
         @JsonProperty(required = true, value = "bangbanglauncher") boolean bangbanglauncher,
@@ -56,7 +60,8 @@ public class SubsystemControls
         this.bangbanglauncher = bangbanglauncher;
         this.duallauncher = duallauncher;
         this.lights = lights;
-        this.pickup = pickup;
+        this.intakepivot = intakepivot;
+        this.intakerollers = intakerollers;
         this.indexer = indexer;
         this.feeder = feeder;
         this.fueldetection = fueldetection;
@@ -94,8 +99,11 @@ public class SubsystemControls
     public boolean isLightsPresent() {
         return lights;
     }
-    public boolean isPickupPresent() {
-        return pickup;
+    public boolean isIntakePivotPresent() {
+        return intakepivot;
+    }
+    public boolean isIntakeRollersPresent() {
+        return intakerollers;
     }
     public boolean isIndexerPresent() {
         return indexer;
