@@ -64,6 +64,8 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 @SuppressWarnings("unused")
 public final class Konstants
 {
+    //TODO: This is a HUGE todo- make as many constants as practical as possible into TunableNumbers.
+
     public static final class DriveConstants {
         
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
