@@ -684,10 +684,13 @@ public final class Konstants
         public static final double kPositionerMotorMinPosition = 0.5;
         public static final double kPositionMotorMaxPosition = 0.5;
 
-        public static final double kMaxIntakeVoltage = 10.0;
+        public static final double kMaxIntakeVoltage = 8.0;
 
         public static final double kIntakeFullVoltage = -5.5;
+        public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
+
+        public static final double kChassisSpeedRollerFF = 0.66; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";
