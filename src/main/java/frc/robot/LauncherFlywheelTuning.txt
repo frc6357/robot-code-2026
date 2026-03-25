@@ -1,0 +1,15 @@
+Launcher Flywheel Tuning:
+
+Ordered Pairs look like: [Distance from Hub in meters, ideal target flywheel velocity determined via Elastic]
+
+Values:
+[2.82, 23]
+[3, 24]
+[3.12, 24.5]
+[3.27, 25]
+[3.32, 26.5]
+[3.52, 26.75]
+[3.71, 27]
+[4.13 31]
+[4.33, 30.75]
+[4.47, 32]

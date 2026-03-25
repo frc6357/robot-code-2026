@@ -50,7 +50,7 @@ public class TurretTrackPointCommand extends Command
     public void initialize()
     {
         // Sync to current turret angle to prevent any initial jump
-        turret.setAngleDegrees(turret.getAngleDegrees());
+        turret.setAngleDegrees(turret.getCachedAngleDegrees());
     }
 
     @Override
@@ -67,7 +67,7 @@ public class TurretTrackPointCommand extends Command
         double fieldAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
         
         if(Double.isNaN(fieldAngleToTarget)) {
-            fieldAngleToTarget = robotHeadingDeg + turret.getAngleDegrees();
+            fieldAngleToTarget = robotHeadingDeg + turret.getCachedAngleDegrees();
         }
 
         // Convert field-relative angle to robot-relative angle for the turret
@@ -92,7 +92,7 @@ public class TurretTrackPointCommand extends Command
     public void end(boolean interrupted)
     {
         // Keep turret at its current position when command ends
-        turret.setAngleDegrees(turret.getAngleDegrees());
+        turret.setAngleDegrees(turret.getCachedAngleDegrees());
     }
 
     @Override

@@ -24,6 +24,8 @@ import static frc.robot.Konstants.TurretConstants.kTurretEncoderOffset;
 import java.util.HashMap;
 import java.util.List;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
@@ -34,6 +36,7 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 // import edu.wpi.first.math.util.Units;
 // import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,6 +46,9 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.Publisher;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularAcceleration;
 import edu.wpi.first.units.measure.AngularVelocity;
@@ -56,6 +62,7 @@ import frc.lib.preferences.SKPreferences;
 import frc.lib.preferences.Pref;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.drive.GeneratedConstants;
@@ -315,6 +322,12 @@ public final class Konstants
             Units.inchesToMeters(-5.729),   // forward  (same as turret LL)
             Units.inchesToMeters(5.318),  // left     (WPILib Y=left; LL right was -6.532, so left = +5.318 from center)
             Units.inchesToMeters(17.833)); // up       (same as turret LL)
+
+        // Use this to check the center of the turret bearing with the 3d render of the robot on AdvantageScope
+        // static {
+        //     StructPublisher<Translation3d> turretCenterPublisher = NetworkTableInstance.getDefault().getStructTopic("TurretCenterRobotSpace", Translation3d.struct).publish();
+        //     turretCenterPublisher.accept(kTurretPivotInRobotSpace);
+        // }
     }
 
     public static final class IndexerConstants 
@@ -686,10 +699,13 @@ public final class Konstants
         public static final double kPositionerMotorMinPosition = 0.5;
         public static final double kPositionMotorMaxPosition = 0.5;
 
-        public static final double kMaxIntakeVoltage = 10.0;
+        public static final double kMaxIntakeVoltage = 8.0;
 
         public static final double kIntakeFullVoltage = -5.5;
+        public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
+
+        public static final double kChassisSpeedRollerFF = 0.66; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

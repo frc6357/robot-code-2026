@@ -208,7 +208,7 @@ public class SK26Turret extends SubsystemBase
      * Accounts for 2:1 gear ratio (2 encoder rotations = 1 turret rotation).
      * Range: -180 to +180 degrees.
      */
-    public double getAngleDegrees()
+    private double getAngleDegrees()
     {
         // Use continuous position to track across full range
         double encoderDegrees = turretAngleStatusSignal.refresh().getValue().in(Degrees);
@@ -217,6 +217,14 @@ public class SK26Turret extends SubsystemBase
         // double turretDegrees = encoderRotations * (360.0 / kEncoderGearRatio);
         
         return encoderDegrees;
+    }
+
+    /**
+     * Returns the cached turret angle in degrees instead of reading from the CANcoder again.
+     * @return Cached turret angle in degrees
+     */
+    public double getCachedAngleDegrees() {
+        return cachedAngleDeg;
     }
 
     public double getAngularVelocityDegreesPerSecond() {
