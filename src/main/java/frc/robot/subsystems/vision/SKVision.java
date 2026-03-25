@@ -21,6 +21,7 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
@@ -110,6 +111,8 @@ public class SKVision extends SubsystemBase {
         tagIDsInView.clear();
         tagLOSTransforms.clear();
 
+        Rotation2d cachedSwerveRotation = m_swerve.getRobotRotation();
+
         for(Limelight ll : poseLimelights) {
             if(ll == turretLL) {
                 if(m_turret == null) {
@@ -119,14 +122,18 @@ public class SKVision extends SubsystemBase {
                 // Rotate the turret LL's 0° pose around the turret pivot by the current turret angle.
                 // cameraPose3d uses WPILib convention (X=forward, Y=left, Z=up).
                 // WPILib +Z rotation = CCW from above, which matches the turret's CCW-positive convention.
-                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(-m_turret.getAngleDegrees()));
+                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(-m_turret.getCachedAngleDegrees()));
                 Pose3d dynamicCameraPose = ll.getConfig().getCameraPose3d()
                     .rotateAround(kTurretPivotInRobotSpace, turretRotation);
                 ll.setCameraPoseInRobotSpace(dynamicCameraPose);
+                // Also need to adjust the robot orientation by subtracting the turret angle, since the MegaTag2 pose estimation needs 
+                // to know the field-relative robot orientation of **the camera**, not just the robot in this case.
+                // In most cases for non-servoing cameras, passing in the robot's heading is sufficient since the camera is fixed to the robot.
+                ll.setRobotOrientation(cachedSwerveRotation.getDegrees() - m_turret.getCachedAngleDegrees());
             }
-            // if(ll != turretLL) {
-                ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-            // }
+            else {
+                ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
+            }
             scanForTags(ll);
         }
 
