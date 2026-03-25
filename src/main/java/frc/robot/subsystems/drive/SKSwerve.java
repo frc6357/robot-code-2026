@@ -266,6 +266,10 @@ public class SKSwerve extends SubsystemBase {
         return getRobotPose().getRotation();
     }
 
+    public Rotation2d getRawDrivetrainRotation() {
+        return drivetrain.getState().Pose.getRotation();
+    }
+
     public Rotation2d getGyroRotation() {
         return drivetrain.getPigeon2().getRotation2d();
     }
@@ -300,7 +304,7 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void resetPose(Pose2d pose) {
-        // drivetrain.resetPose(pose);
+        drivetrain.resetPose(pose);
         // drivetrain.getPigeon2().set
         poseEstimator.resetPose(pose);
     }
