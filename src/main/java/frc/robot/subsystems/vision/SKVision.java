@@ -98,6 +98,7 @@ public class SKVision extends SubsystemBase {
             this.m_turret = null;
         }
         startupLimelights();
+        turretLL.setIMUMode(IMUMode.EXTERNAL_ONLY);
     }
 
     public SKVision(Optional<SKSwerve> m_swerve) {
@@ -118,7 +119,7 @@ public class SKVision extends SubsystemBase {
                 // Rotate the turret LL's 0° pose around the turret pivot by the current turret angle.
                 // cameraPose3d uses WPILib convention (X=forward, Y=left, Z=up).
                 // WPILib +Z rotation = CCW from above, which matches the turret's CCW-positive convention.
-                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()));
+                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(-m_turret.getAngleDegrees()));
                 Pose3d dynamicCameraPose = ll.getConfig().getCameraPose3d()
                     .rotateAround(kTurretPivotInRobotSpace, turretRotation);
                 ll.setCameraPoseInRobotSpace(dynamicCameraPose);
@@ -324,7 +325,6 @@ public class SKVision extends SubsystemBase {
         }
 
         m_swerve.resetPose(ll.getRawPose3d().toPose2d());
-        ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
     }
 
     public void autonResetPoseToVision() {
