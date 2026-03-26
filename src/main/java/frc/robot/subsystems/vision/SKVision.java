@@ -23,6 +23,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -37,6 +38,7 @@ import frc.lib.vision.Limelight.IMUMode;
 import frc.lib.vision.LimelightHelpers.RawFiducial;
 import frc.robot.Robot;
 import frc.robot.subsystems.turret.SK26Turret;
+import frc.robot.subsystems.vision.VisionConfig.Thresholds;
 import frc.robot.subsystems.drive.SKSwerve;
 
 public class SKVision extends SubsystemBase {
@@ -394,6 +396,28 @@ public class SKVision extends SubsystemBase {
         // ll.setRobotOrientation(botPose3d.toPose2d().getRotation().getDegrees());
         resetPoseToVision(
                 ll.targetInView(), botPose3d, ll.getMegaPose2d(), ll.getRawPoseTimestamp());
+    }
+
+    public void stationaryDrivetrainUpdate() {
+        if(Robot.isSimulation()) {
+            return;
+        }
+        Limelight ll = getBestLimelight();
+        if(!ll.targetInView()) {
+            return;
+        }
+
+        Transform2d diff = m_swerve.getRobotPose().minus(ll.getRawPose3d().toPose2d());
+
+        if(diff.getX() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF && 
+           diff.getY() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF &&
+           diff.getRotation().getRotations() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF) 
+        {
+            resetPoseToVisionLog = "Success: Raw Drivetrain update on " + ll.getName();
+            m_swerve.resetPose(ll.getRawPose3d().toPose2d());
+            return;
+        }
+        resetPoseToVisionLog = "Fail: Raw Drivetrain update";
     }
 
     @AutoLogOutput(key = "Vision/ResetPoseToVisionLog")
