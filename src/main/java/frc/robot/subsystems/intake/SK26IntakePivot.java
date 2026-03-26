@@ -17,9 +17,12 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKV;
 import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKA;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
 import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
-import static frc.robot.Konstants.IntakeConstants.kPositionerSensorToMechanismRatio;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
 import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPositionTolerance;
+import static frc.robot.Ports.pickupOBPorts.kPositionerEncoder;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
 
@@ -29,9 +32,11 @@ import frc.robot.Konstants.IntakeConstants.IntakePosition;
 
 // Imports from Phoenix 6
 import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -39,11 +44,14 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 import org.littletonrobotics.junction.Logger;
@@ -66,6 +74,9 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final TalonFX positionerMotor;
 	private final TalonFX positionerFollowerMotor;
 
+	// Absolute encoder (CANcoder) — the sole position feedback source
+	private final CANcoder positionerEncoder;
+
 	// Control requests
 	private final MotionMagicVoltage motionMagicControl = new MotionMagicVoltage(0.0);
 	private final Follower followerControl;
@@ -81,6 +92,17 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 
 	public SK26IntakePivot()
 	{
+		// ========== CANcoder Configuration ==========
+		positionerEncoder = new CANcoder(kPositionerEncoder.ID);
+		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
+		MagnetSensorConfigs magnetConfig = new MagnetSensorConfigs();
+		magnetConfig.MagnetOffset = kPositionerEncoderOffset;
+		magnetConfig.SensorDirection = kPositionerEncoderInverted
+			? SensorDirectionValue.Clockwise_Positive
+			: SensorDirectionValue.CounterClockwise_Positive;
+		encoderConfig.MagnetSensor = magnetConfig;
+		positionerEncoder.getConfigurator().apply(encoderConfig);
+
 		// ========== Positioner Motor Configuration ==========
 		positionerMotor = new TalonFX(kPositionerMotor.ID);
 		TalonFXConfiguration positionerConfig = new TalonFXConfiguration();
@@ -128,10 +150,11 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 			.withGainSchedErrorThreshold(kPositionerGainSchedulerErrorThreshold);
 
 		positionerConfig.Feedback = new FeedbackConfigs()
-			.withSensorToMechanismRatio(kPositionerSensorToMechanismRatio);
+			.withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
+			.withFeedbackRemoteSensorID(kPositionerEncoder.ID)
+			.withSensorToMechanismRatio(kPositionerEncoderGearRatio);
 
 		positionerMotor.getConfigurator().apply(positionerConfig);
-		positionerMotor.setPosition(IntakePosition.ZERO.rotations);
 
 		// ========== Positioner Follower Motor Configuration ==========
 		positionerFollowerMotor = new TalonFX(kPositionerFollowerMotor.ID);
@@ -143,12 +166,12 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		followerControl = new Follower(positionerMotor.getDeviceID(), MotorAlignmentValue.Opposed);
 		positionerFollowerMotor.setControl(followerControl);
 
-		// Initialize status signals for efficient polling
+		// Initialize status signals from the motor
 		positionerAngleStatusSignal = positionerMotor.getPosition();
 		positionerAngularVelocityStatusSignal = positionerMotor.getVelocity();
 
 		// Initialize position tracking
-		motorTargetPosition = IntakePosition.ZERO.rotations;
+		motorTargetPosition = positionerAngleStatusSignal.refresh().getValue().in(edu.wpi.first.units.Units.Rotations);
 		targetPositionEnum = IntakePosition.ZERO;
 
 		addPathPlannerCommands();

@@ -684,6 +684,11 @@ public final class Konstants
         public static final double kPositionerGainSchedulerErrorThreshold = 0.04;
         public static final double kPositionerPositionTolerance = 0.02;    // Rotations
 
+        // Absolute encoder (CANcoder) configuration
+        public static final double kPositionerEncoderOffset = 0.0;         // Rotations (-0.5 to +0.5) — set after measuring zero
+        public static final boolean kPositionerEncoderInverted = false;    // Set true if encoder reads backwards
+        public static final double kPositionerEncoderGearRatio = 1.0;      // 1:1 — encoder sits directly on the pivot shaft
+
         // Intake roller current limits
         public static final double kIntakeSupplyCurrentLimit = 40;
         public static final double kIntakeStatorCurrentLimit = 60;
