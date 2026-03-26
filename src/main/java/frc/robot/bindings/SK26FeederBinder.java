@@ -3,6 +3,8 @@ package frc.robot.bindings;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
 
+import static frc.robot.Ports.TesterPorts.kFeederButton;
+
 import java.util.Optional;
 import java.util.Set;
 
@@ -73,6 +75,12 @@ public class SK26FeederBinder implements CommandBinder {
                         : feeder.idleFeederCommand(),
                     Set.of(feeder)));
 
+            kFeederButton.button.onTrue(Commands.defer (() -> feeder.feedCommand(() ->  -manualFeederVoltage.get()), Set.of(feeder)));
+            kFeederButton.button.onFalse(Commands.defer(
+                    () -> runFeederFromState.getAsBoolean()
+                        ? feeder.feedCommand(() -> manualFeederVoltage.get())
+                        : feeder.idleFeederCommand(),
+                    Set.of(feeder)));
             // runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             // runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));
             // idle.whileTrue(feeder.idleFeederCommand());

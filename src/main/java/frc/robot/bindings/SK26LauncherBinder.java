@@ -14,6 +14,8 @@ import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 import static frc.robot.Ports.OperatorPorts.kXbutton;
 
+import static frc.robot.Ports.TesterPorts.kLauncherButton;
+
 public class SK26LauncherBinder implements CommandBinder {
 
     Optional<SK26Launcher> launcherSubsystem;
@@ -42,6 +44,8 @@ public class SK26LauncherBinder implements CommandBinder {
             ShootExitVel.whileTrue(launcher.runAtExitVelCommand(kTargetlaunchVelocity));
             ShootRPS.whileTrue(launcher.runAtRPSCommand(kTargetMotorRPS));
             UnJam.whileTrue(launcher.unjamCommand());
+
+            kLauncherButton.button.whileTrue(launcher.runAtExitVelCommand(kTargetlaunchVelocity));
         }
     }
     

@@ -2,6 +2,8 @@ package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
 
+import static frc.robot.Ports.TesterPorts.kIntakeRollersButton;
+
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -42,6 +44,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
         intakeRollersFullSpeed.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage).withName("IntakeRollersRun"));
         trashCompact.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage * 0.66).withName("IntakeRollersCompact"));
 
+        kIntakeRollersButton.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage).withName("IntakeRollersRun"));
         /* Manual */
         // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
     }

@@ -135,8 +135,26 @@ public class Ports
         
         public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
         public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
-        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
+        public static final SKTrigger climbTOneButton = new SKTrigger(kOperator, kA.value, BUTTON);
         public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
+    }
+
+    public static class TesterPorts 
+    {
+        public static final GenericHID kTester = new FilteredXboxController(4).getHID();
+
+        public static final SKTrigger kFeederButton = new SKTrigger(kTester, kLeftBumper.value, BUTTON);
+        public static final SKTrigger kIndexerButton = new SKTrigger(kTester, kB.value, BUTTON);
+        public static final FilteredAxis kTurretStick = new FilteredAxis(() -> kTester.getRawAxis(kRightX.value));
+        public static final SKTrigger kTurretButton = new SKTrigger(kTester, kLeftTrigger.value, BUTTON);
+        public static final SKTrigger kLauncherButton = new SKTrigger(kTester, kRightBumper.value, BUTTON);
+        public static final SKTrigger kIntakePivotZeroButton = new SKTrigger(kTester, kBack.value, BUTTON);
+        public static final SKTrigger kIntakePivotGroundButton = new SKTrigger(kTester, kStart.value, BUTTON);
+        public static final SKTrigger kIntakeRollersButton = new SKTrigger(kTester, kY.value, BUTTON);
+        public static final SKTrigger kClimbTOneButton = new SKTrigger(kTester, kA.value, BUTTON);
+        public static final SKTrigger kClimbReturnButton = new SKTrigger(kTester, kX.value, BUTTON);
+
+       
     }
 
     public static class LauncherPorts {

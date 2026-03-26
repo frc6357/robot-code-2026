@@ -8,6 +8,8 @@ import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
 
+import static frc.robot.Ports.TesterPorts.kIndexerButton;
+
 // Imports from Java/WPILib
 import java.util.Optional;
 import java.util.Set;
@@ -70,6 +72,12 @@ public class SK26IndexerBinder implements CommandBinder
                         : indexer.idleIndexerCommand(),
                     Set.of(indexer)));
         
+        kIndexerButton.button.onTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
+        kIndexerButton.button.onFalse(Commands.defer(
+                    () -> IndexFeed.getAsBoolean()
+                        ? indexer.feedCommand(() -> manualIndexerVoltage.get())
+                        : indexer.idleIndexerCommand(),
+                    Set.of(indexer)));
         // Removed IndexIdle binding - it was using an uninitialized trigger
         // If you need idle behavior, set it as the default command instead
     }

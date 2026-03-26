@@ -5,6 +5,9 @@ import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.ZERO;
 import static frc.robot.Ports.OperatorPorts;
 
+import static frc.robot.Ports.TesterPorts.kIntakePivotGroundButton;
+import static frc.robot.Ports.TesterPorts.kIntakePivotZeroButton;
+
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -61,6 +64,9 @@ public class SK26IntakePivotBinder implements CommandBinder
         // Pivoting
         OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
+
+        kIntakePivotZeroButton.button.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        kIntakePivotGroundButton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor
         // OperatorPorts.kRTrigger.button.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations));

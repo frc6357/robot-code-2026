@@ -5,6 +5,9 @@ import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
 import static frc.robot.Ports.OperatorPorts.kRightStickX;
 
+import static frc.robot.Ports.TesterPorts.kTurretStick;
+import static frc.robot.Ports.TesterPorts.kTurretButton;
+
 import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
@@ -105,5 +108,13 @@ public class SK26TurretBinder implements CommandBinder
                 () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()))
             .unless(IsIdle.negate()).withName("TurretManualJoystick")
         );
+
+        kTurretButton.button.whileTrue(
+            new TurretJoystickCommand(
+                turret, 
+                () -> slewLimiter.calculate(-kTurretStick.getFilteredAxis()))
+                .unless(IsIdle.negate()).withName("TurretManualJoystick")
+        );
+
     }
 }
