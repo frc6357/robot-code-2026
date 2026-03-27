@@ -17,6 +17,7 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKV;
 import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKA;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
 import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderDiscontinuityPoint;
 import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
 import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
 import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
@@ -101,6 +102,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 			? SensorDirectionValue.Clockwise_Positive
 			: SensorDirectionValue.CounterClockwise_Positive;
 		encoderConfig.MagnetSensor = magnetConfig;
+		encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = kPositionerEncoderDiscontinuityPoint;
 		positionerEncoder.getConfigurator().apply(encoderConfig);
 
 		// ========== Positioner Motor Configuration ==========

@@ -638,9 +638,9 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to 0.271 intake rotations */
-            GROUND(0.271),
+            GROUND(0.25),
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.067),
+            COMPACTING(0.0825),
             /** Set the intake angle to 0 rotations (zero position) */
             ZERO(0.0);
             
@@ -685,9 +685,10 @@ public final class Konstants
         public static final double kPositionerPositionTolerance = 0.02;    // Rotations
 
         // Absolute encoder (CANcoder) configuration
-        public static final double kPositionerEncoderOffset = 0.0;         // Rotations (-0.5 to +0.5) — set after measuring zero
+        public static final double kPositionerEncoderOffset = -0.28173828125;         // Rotations (-0.5 to +0.5) — set after measuring zero
         public static final boolean kPositionerEncoderInverted = false;    // Set true if encoder reads backwards
-        public static final double kPositionerEncoderGearRatio = 1.0;      // 1:1 — encoder sits directly on the pivot shaft
+        public static final double kPositionerEncoderGearRatio = 3.08;      // 1:1 — encoder sits directly on the pivot shaft
+        public static final double kPositionerEncoderDiscontinuityPoint = 1;
 
         // Intake roller current limits
         public static final double kIntakeSupplyCurrentLimit = 40;
