@@ -17,14 +17,14 @@
     {
       "anchor": {
         "x": 3.1265474060822895,
-        "y": 1.484
+        "y": 0.65
       },
       "prevControl": {
-        "x": 3.1265474060822895,
-        "y": 1.233999999999999
+        "x": 3.3794438595460727,
+        "y": 0.65
       },
       "nextControl": null,
-      "isLocked": true,
+      "isLocked": false,
       "linkedName": null
     }
   ],
@@ -74,7 +74,7 @@
   "folder": "Right Trench",
   "idealStartingState": {
     "velocity": 1.25,
-    "rotation": -90.0
+    "rotation": 0.0
   },
   "useDefaultConstraints": true
 }

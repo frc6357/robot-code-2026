@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 3.1265474060822895,
-        "y": 1.484
+        "y": 0.65
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1514233358375394,
-        "y": 1.7327592975524972
+        "x": 3.3765474060822895,
+        "y": 0.65
       },
       "isLocked": false,
       "linkedName": "RScore"

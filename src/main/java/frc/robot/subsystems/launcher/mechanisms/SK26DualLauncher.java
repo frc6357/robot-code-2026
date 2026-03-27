@@ -53,7 +53,8 @@ public class SK26DualLauncher extends SubsystemBase {
     private final CoastOut coastControl = new CoastOut();
 
     // State
-    private double targetVelocityRPS = 0.0;
+    private double topTargetVelocity = 0.0;
+    private double bottomTargetVelocity = 0.0;
     private double cachedBottomVelocityRPS = 0.0;
     private double cachedTopVelocityRPS = 0.0;
 
@@ -228,8 +229,8 @@ public class SK26DualLauncher extends SubsystemBase {
         cachedTopVelocityRPS    = topMotor.getVelocity().getValueAsDouble();
 
         if (running) {
-            bottomMotor.setControl(bottomVelocityControl.withVelocity(targetVelocityRPS));
-            topMotor.setControl(topVelocityControl.withVelocity(targetVelocityRPS * 1.1));
+            bottomMotor.setControl(bottomVelocityControl.withVelocity(bottomTargetVelocity));
+            topMotor.setControl(topVelocityControl.withVelocity(topTargetVelocity));
         } else {
             bottomMotor.setControl(coastControl);
             topMotor.setControl(coastControl);
@@ -245,13 +246,14 @@ public class SK26DualLauncher extends SubsystemBase {
      * @param rps Target velocity in rotations per second.
      */
     public void runVelocity(double rps) {
-        targetVelocityRPS = rps;
+        bottomTargetVelocity = rps;
+        topTargetVelocity = bottomTargetVelocity * 1.1;
         running = true;
     }
 
     /** Stop both rollers and coast to a halt. */
     public void stop() {
-        targetVelocityRPS = 0.0;
+        topTargetVelocity = 0.0;
         running = false;
     }
 
@@ -261,8 +263,8 @@ public class SK26DualLauncher extends SubsystemBase {
     public boolean atTargetVelocity() {
         if (!running) return false;
         double tolerance = velocityToleranceRPS.get();
-        return Math.abs(cachedBottomVelocityRPS - targetVelocityRPS) <= tolerance
-            && Math.abs(cachedTopVelocityRPS - targetVelocityRPS)    <= tolerance;
+        return Math.abs(cachedBottomVelocityRPS - bottomTargetVelocity) <= tolerance
+            && Math.abs(cachedTopVelocityRPS - topTargetVelocity)    <= tolerance;
     }
 
     /** @return Current bottom roller velocity in RPS. */
@@ -276,8 +278,8 @@ public class SK26DualLauncher extends SubsystemBase {
     }
 
     /** @return The current target velocity in RPS. */
-    public double getTargetVelocityRPS() {
-        return targetVelocityRPS;
+    public double getTopTargetVelocity() {
+        return topTargetVelocity;
     }
 
     // ==================== Commands ====================
@@ -335,13 +337,13 @@ public class SK26DualLauncher extends SubsystemBase {
 
     private void telemeterize() {
         Logger.recordOutput("DualLauncher/Running", running);
-        Logger.recordOutput("DualLauncher/Target Velocity (rps)", targetVelocityRPS);
+        Logger.recordOutput("DualLauncher/Target Velocity (rps)", topTargetVelocity);
         Logger.recordOutput("DualLauncher/Bottom Velocity (rps)", cachedBottomVelocityRPS);
         Logger.recordOutput("DualLauncher/Top Velocity (rps)", cachedTopVelocityRPS);
         Logger.recordOutput("DualLauncher/Top Velocity (RPM)", cachedTopVelocityRPS * 60.0);
         Logger.recordOutput("DualLauncher/Bottom Velocity (RPM)", cachedBottomVelocityRPS * 60.0);
-        Logger.recordOutput("DualLauncher/Bottom Error (rps)", targetVelocityRPS - cachedBottomVelocityRPS);
-        Logger.recordOutput("DualLauncher/Top Error (rps)", targetVelocityRPS - cachedTopVelocityRPS);
+        Logger.recordOutput("DualLauncher/Bottom Error (rps)", bottomTargetVelocity - cachedBottomVelocityRPS);
+        Logger.recordOutput("DualLauncher/Top Error (rps)", topTargetVelocity - cachedTopVelocityRPS);
         Logger.recordOutput("DualLauncher/At Target", atTargetVelocity());
 
         // Log active gains so they appear alongside the response in AdvantageScope
