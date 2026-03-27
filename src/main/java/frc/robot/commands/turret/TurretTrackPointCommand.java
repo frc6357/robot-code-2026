@@ -3,6 +3,8 @@ package frc.robot.commands.turret;
 import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
 import static frc.robot.Konstants.TurretConstants.kTurretCoordinateOffset;
 
+import java.util.Optional;
+
 import org.littletonrobotics.junction.Logger;
 
 import edu.wpi.first.math.MathUtil;
@@ -21,7 +23,8 @@ public class TurretTrackPointCommand extends Command
 {
     private final SK26Turret turret;
     private final SKSwerve drive;
-    private final Translation2d targetTranslation;
+    private Optional<Translation2d> targetTranslation = Optional.empty();
+    private Optional<SKTargetPoint> targetPoint = Optional.empty();
 
     /**
      * Creates a new TurretTrackPointCommand.
@@ -33,7 +36,7 @@ public class TurretTrackPointCommand extends Command
     {
         this.turret = turret;
         this.drive = drive;
-        this.targetTranslation = targetPoint.getTargetPoint();
+        this.targetPoint = Optional.of(targetPoint);
     
         addRequirements(turret);
     }
@@ -41,7 +44,7 @@ public class TurretTrackPointCommand extends Command
     public TurretTrackPointCommand(SK26Turret turret, SKSwerve drive, Translation2d targetTranslation) {
         this.turret = turret;
         this.drive = drive;
-        this.targetTranslation = targetTranslation;
+        this.targetTranslation = Optional.of(targetTranslation);
 
         addRequirements(turret);
     }
@@ -56,14 +59,22 @@ public class TurretTrackPointCommand extends Command
     @Override
     public void execute()
     {
+        Translation2d target;
+        if(targetPoint.isPresent()) {
+            target = targetPoint.get().getTargetPoint();
+        }
+        else {
+            target = targetTranslation.get();
+        }
+
         // Get the robot's current position and rotation
         Translation2d shooterPosition = drive.getRobotPose().getTranslation().plus(kRobotToShooter.getTranslation().toTranslation2d());
         double robotHeadingDeg = drive.getRobotRotation().getDegrees();
 
         // Calculate the field-relative angle FROM the shooter TO the target (in degrees)
         // atan2(dy, dx) gives the angle from positive X-axis, counterclockwise positive
-        double dx = targetTranslation.getX() - shooterPosition.getX();
-        double dy = targetTranslation.getY() - shooterPosition.getY();
+        double dx = target.getX() - shooterPosition.getX();
+        double dy = target.getY() - shooterPosition.getY();
         double fieldAngleToTarget = Math.toDegrees(Math.atan2(dy, dx));
         
         if(Double.isNaN(fieldAngleToTarget)) {
@@ -85,7 +96,7 @@ public class TurretTrackPointCommand extends Command
         Logger.recordOutput("TurretTrack/WrappedDesiredAngle", wrappedAngle);
         Logger.recordOutput("TurretTrack/RobotHeading", robotHeadingDeg);
         Logger.recordOutput("TurretTrack/DesiredTurretAngle", turretAngleDeg);
-        Logger.recordOutput("TurretTrack/DistanceToTarget", shooterPosition.getDistance(targetTranslation));
+        Logger.recordOutput("TurretTrack/DistanceToTarget", shooterPosition.getDistance(target));
     }
 
     @Override

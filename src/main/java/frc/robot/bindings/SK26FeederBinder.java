@@ -42,10 +42,10 @@ public class SK26FeederBinder implements CommandBinder {
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
         //         .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
-        this.runFeederFromState = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+        this.runFeederFromState = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
 
         this.runLowVoltage = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
             .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))
@@ -65,7 +65,17 @@ public class SK26FeederBinder implements CommandBinder {
             // kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
             // kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
-            runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)).withName("FeederRollersRun"));
+            runFeederFromState.whileTrue(Commands.repeatingSequence(
+                Commands.race(
+                    Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)),
+                    Commands.waitSeconds(1.5)
+                ),
+                Commands.race(
+                    Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)),
+                    Commands.waitSeconds(0.2)
+                )
+            ).withName("FeederFeedAndUnjam"));
+            runLowVoltage.whileTrue(feeder.feedCommand(() -> -manualFeederVoltage.get()));
             kLTrigger.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
             kLTrigger.button.onFalse(Commands.defer(
                     () -> runFeederFromState.getAsBoolean()

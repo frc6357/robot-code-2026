@@ -25,17 +25,24 @@ public class SK26IndexerBinder implements CommandBinder
 
     Trigger IndexFeed;
     Trigger IsIdle;
+    Trigger IndexBackwards;
 
     public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem)
     {
         this.indexerSubsystem = indexerSubsystem;
 
         // Feed when any shooting state is READY (launcher up to speed)
-        IndexFeed = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+        IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
 
+        IndexBackwards = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SHUTTLING));
+
+        
         // For simple trigger bindings (if necessary)
         IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
     }
@@ -59,9 +66,10 @@ public class SK26IndexerBinder implements CommandBinder
             ),
             Commands.race(
                 Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)),
-                Commands.waitSeconds(0.5)
+                Commands.waitSeconds(0.2)
             )
         ).withName("IndexerFeedAndUnjam"));
+        IndexBackwards.whileTrue(indexer.feedCommand(() -> -manualIndexerVoltage.get()));
         //IndexFeed.negate().whileTrue(Commands.defer(() -> indexer.feedCommand(() -> {return -manualIndexerVoltage.get() / 8.0;}), Set.of(indexer)));
         kLTrigger.button.onTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
         kLTrigger.button.onFalse(Commands.defer(

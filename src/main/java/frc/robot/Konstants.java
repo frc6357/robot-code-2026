@@ -71,6 +71,8 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 @SuppressWarnings("unused")
 public final class Konstants
 {
+    //TODO: This is a HUGE todo- make as many constants as practical as possible into TunableNumbers.
+
     public static final class DriveConstants {
         
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
@@ -420,7 +422,7 @@ public final class Konstants
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;
-        public static final double kTurretAngleTolerance = 6.7; // Degrees of tolerance for considering the turret "at position"
+        public static final double kTurretAngleTolerance = 3.5; // Degrees of tolerance for considering the turret "at position"
 
         // CANcoder / Absolute Encoder constants
         public static final double kTurretEncoderOffset = 0.200928 ; // Rotations (-0.5 to +0.5) - negated due to encoder inversion
@@ -433,20 +435,20 @@ public final class Konstants
         public static final boolean kTurretMotorInverted = true;
 
         // Gain scheduler constants for turret PID control
-        public static final double kTurretGainSchedulerDeadbandDegrees = 0.85; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+        public static final double kTurretGainSchedulerDeadbandDegrees = 0.2; // 0.85 // Degrees of error until the turret's gain scheduler turns on
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 50.0; //50.0  // was 0.07 V/deg (20)
+        public static final double kTurretP = 8.0; //50.0  // was 0.07 V/deg (20)
         public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
         public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.375; //(0.3)   // Static friction feedforward (volts)
-        public static final double kTurretV = 1.9; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
-        public static final double kTurretA = 0.35; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
-        public static final double kMaxTurretOutputVolts = 3.75; // Max voltage output to turret motor (for brownout protection)
+        public static final double kTurretS = 0.2; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 4.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.15; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kMaxTurretOutputVolts = 5.5; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
-        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(6.0);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(8.0);
         public static final double kMaxTurretMMJerk = kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond) * 10; // Jerk is typically 10x acceleration
 
         // Turret extra constants
@@ -514,7 +516,7 @@ public final class Konstants
         // ==================== Dual Launcher Constants ====================
         public static final class DualLauncher {
             // Velocity tolerance for considering the launcher "at speed" (rps)
-            public static final double kVelocityToleranceRPS = 5.0;
+            public static final double kVelocityToleranceRPS = 3.0;
 
             // Default target velocity (rps) — typically overridden by commands/state handler
             public static final double kDefaultTargetRPS = 40.0;
@@ -587,18 +589,16 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            // map.put(5.334, 34.0 * 60.0);
-            // map.put(3.581, 27.5 * 60.0);
-            // map.put(4.470, 29.5 * 60.0);
-            // map.put(2.515, 23.5 * 60.0);
-            // map.put(2.690, 24.9 * 60.0);
-            // map.put(2.97, 24.9 * 60.0);
-            // map.put(3.251, 26.0 * 60.0);
-            map.put(3.4798, 26.6 * 60.0);
-            map.put(4.572, 29.4 * 60.0);
-            map.put(2.94, 25.25 * 60.0);
-            map.put(2.5, 24.2 * 60.0);
-            map.put(4.01, 27.55 * 60.0);
+            map.put(2.82, 23 * 60.0);
+            map.put(3.0, 24.0 * 60.0);
+            map.put(3.12, 24.5 * 60.0);
+            map.put(3.27, 25.0 * 60.0);
+            map.put(3.32, 26.5 * 60.0);
+            map.put(3.52, 26.75 * 60.0);
+            map.put(3.71, 27.0 * 60.0);
+            map.put(4.13, 30.75 * 60.0);
+            map.put(4.33, 31.0 * 60.0);
+            map.put(4.47, 32.0 * 60.0);
 
             return map;
         }

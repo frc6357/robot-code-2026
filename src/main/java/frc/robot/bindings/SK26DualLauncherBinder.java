@@ -60,31 +60,31 @@ public class SK26DualLauncherBinder implements CommandBinder {
             }
             else {     
                 // TODO: LAUNCHER - Switch which blocks are commented when done tuning launcher flywheel           
-                // Score.whileTrue(
-                //     launcher.runVelocityCommand(
-                //         () -> RPM.of(flywheelMap.get(
-                //             drive.get().getRobotPose().getTranslation().getDistance(
-                //                 Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
-                //                                 FieldConstants.Hub.redTopCenterPoint.toTranslation2d()
-                //             )))
-                //     ).withName("LauncherScoreInterp")
-                // );
-
-                // Shuttle.whileTrue(
-                //     launcher.runVelocityCommand(
-                //         () -> RPM.of(flywheelMap.get(
-                //             drive.get().getRobotPose().getTranslation().getDistance(
-                //                 kOperatorControlled.point.getTargetPoint()
-                //             )))
-                //     ).withName("LauncherShuttleInterp")
-                // );
-
                 Score.whileTrue(
-                    Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                    launcher.runVelocityCommand(
+                        () -> RPM.of(flywheelMap.get(
+                            drive.get().getRobotPose().getTranslation().getDistance(
+                                Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
+                                                FieldConstants.Hub.redTopCenterPoint.toTranslation2d()
+                            )))
+                    ).withName("LauncherScoreInterp")
                 );
+
                 Shuttle.whileTrue(
-                    Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                    launcher.runVelocityCommand(
+                        () -> RPM.of(flywheelMap.get(
+                            drive.get().getRobotPose().getTranslation().getDistance(
+                                kOperatorControlled.point.getTargetPoint()
+                            )))
+                    ).withName("LauncherShuttleInterp")
                 );
+
+                // Score.whileTrue(
+                //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                // );
+                // Shuttle.whileTrue(
+                //     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
+                // );
             }
 
             // PID tuning: hold operator LB (in IDLE) to spin at dashboard setpoint.

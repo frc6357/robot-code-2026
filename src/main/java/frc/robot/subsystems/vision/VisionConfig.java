@@ -110,6 +110,7 @@ public final class VisionConfig {
         public static final double CLOSE_POSE_DIFF = 0.5;
         public static final double PROXIMITY_POSE_DIFF = 0.3;
         public static final double MULTI_POSE_DIFF = 0.67;
+        public static final double DRIVETRAIN_STATIONARY_POSE_DIFF = 0.85;
 
         // Scoring
         public static final double TAG_COUNT_WEIGHT = 25.0;

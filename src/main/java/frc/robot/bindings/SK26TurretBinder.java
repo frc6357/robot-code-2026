@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.lib.utils.Field;
@@ -89,10 +90,11 @@ public class SK26TurretBinder implements CommandBinder
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
 
-        inAllianceZone.negate().whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
+        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).whileTrue(
+            new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));
         
-        inAllianceZone.whileTrue(
+        inAllianceZone.and(() -> DriverStation.isEnabled()).whileTrue(
             new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
                                                                         FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
             .withName("TurretTrackHub"));
