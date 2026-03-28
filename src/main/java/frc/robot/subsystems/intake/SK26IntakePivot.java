@@ -45,10 +45,12 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -79,7 +81,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final CANcoder positionerEncoder;
 
 	// Control requests
-	private final MotionMagicVoltage motionMagicControl = new MotionMagicVoltage(0.0);
+	private final PositionTorqueCurrentFOC torqueFOCControl = new PositionTorqueCurrentFOC(0.0);
 	private final Follower followerControl;
 
 	// Position tracking
@@ -112,7 +114,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		// Motor output
 		MotorOutputConfigs outputConfigs = new MotorOutputConfigs();
 		outputConfigs.NeutralMode = NeutralModeValue.Brake;
-		outputConfigs.Inverted = InvertedValue.Clockwise_Positive;
+		outputConfigs.Inverted = InvertedValue.CounterClockwise_Positive;
 		positionerConfig.MotorOutput = outputConfigs;
 
 		// PID configuration for position control (Motion Magic)
@@ -125,6 +127,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 			.withKA(kPositionerKa)
 			.withKG(kPositionerKG)
 			.withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+			.withGravityType(GravityTypeValue.Arm_Cosine)
 			.withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput);
 
 		// Voltage limits
@@ -186,7 +189,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	public void setTargetPosition(double targetPosition)
 	{
 		motorTargetPosition = targetPosition;
-		positionerMotor.setControl(motionMagicControl.withPosition(targetPosition));
+		positionerMotor.setControl(torqueFOCControl.withPosition(targetPosition));
 	}
 
 	/**

@@ -8,7 +8,6 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
-import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
 
 public class SK26StateBinder implements CommandBinder {
@@ -18,6 +17,7 @@ public class SK26StateBinder implements CommandBinder {
     Trigger turnOffLaunch;
     Trigger turnOnScoring;
     Trigger turnOnShuttling;
+    Trigger turnOnSpitting;
 
     Trigger launcherReady;
     Trigger intakeReady;
@@ -49,6 +49,7 @@ public class SK26StateBinder implements CommandBinder {
         /* Buttons */
         turnOnScoring = DriverPorts.kRTrigger.button;
         turnOnShuttling = DriverPorts.kRTrigger.button.debounce(0.55);
+        turnOnSpitting = DriverPorts.kXbutton.button;
 
         if (stateHandler != null) {
             // Create trigger for when launcher is in any active launching state
@@ -94,10 +95,13 @@ public class SK26StateBinder implements CommandBinder {
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+
+        turnOnSpitting.onTrue(stateHandler.requestStateCommand(MacroState.SPITTING));
+        turnOnSpitting.onFalse(stateHandler.requestStateCommand(MacroState.IDLE));
     }
 
     private void bindOperatorButtons() {
-        OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
-        OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
+        // OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        // OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
     }
 }

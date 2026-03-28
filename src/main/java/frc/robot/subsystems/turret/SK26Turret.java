@@ -156,7 +156,7 @@ public class SK26Turret extends SubsystemBase
         .withKS(kTurretS)
         .withKV(kTurretV)
         .withKA(kTurretA)
-        .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign)
+        .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseVelocitySign)
         .withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput);
         
         motorConfig.Voltage = new VoltageConfigs()

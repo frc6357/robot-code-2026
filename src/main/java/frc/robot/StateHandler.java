@@ -43,7 +43,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         CLIMBING(Status.WAITING),
         STEADY_STREAM_SCORING(Status.WAITING),
         STEADY_STREAM_SHUTTLING(Status.WAITING),
-        CLIMB_AND_SCORE(Status.WAITING);
+        CLIMB_AND_SCORE(Status.WAITING),
+        SPITTING(Status.WAITING);
         
         private MacroState(Status status) {
             this.status = status;
@@ -145,6 +146,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
         stateChooser.addOption("CLIMB_AND_SCORE", MacroState.CLIMB_AND_SCORE);
+        stateChooser.addOption("SPITTING", MacroState.SPITTING);
 
         stateChooser.onChange((state) -> this.requestState(state));
 
@@ -542,6 +544,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Request ClimbAndScore State", this.requestStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Request SS Scoring State", this.requestStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Request SS Shuttling State", this.requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        PathPlannerCommands.addCommand("Request Spitting State", this.requestStateCommand(MacroState.SPITTING));
         
         PathPlannerCommands.addCommand("Force Idle State", this.setCurrentStateCommand(MacroState.IDLE));
         PathPlannerCommands.addCommand("Force Scoring State", this.setCurrentStateCommand(MacroState.SCORING));
@@ -551,6 +554,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Force ClimbAndScore State", this.setCurrentStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Force SS Scoring State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Force SS Shuttling State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        PathPlannerCommands.addCommand("Force Spitting State", this.setCurrentStateCommand(MacroState.SPITTING));
 
         System.out.println("[StateHandler] Added commands to PathPlanner");
     }

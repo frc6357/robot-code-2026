@@ -404,6 +404,11 @@ public class SKVision extends SubsystemBase {
         }
         Limelight ll = getBestLimelight();
         if(!ll.targetInView()) {
+            resetPoseToVisionLog = "Fail: Raw Drivetrain update";
+            return;
+        }
+        if(ll.getDistanceToTagFromCamera() > 2.2) {
+            resetPoseToVisionLog = "Fail: Raw Drivetrain update";
             return;
         }
 

@@ -439,9 +439,9 @@ public final class Konstants
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 8.0; //50.0  // was 0.07 V/deg (20)
-        public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
+        public static final double kTurretP = 9.2; //50.0  // was 0.07 V/rotation (20)
+        public static final double kTurretI = 0.0;   // was 0.02 V/(rotation·s)
+        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(rotation/s)
         public static final double kTurretS = 0.2; //(0.3)   // Static friction feedforward (volts)
         public static final double kTurretV = 4.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
         public static final double kTurretA = 0.15; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
@@ -589,16 +589,19 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            map.put(2.82, 23 * 60.0);
-            map.put(3.0, 24.0 * 60.0);
+            map.put(2.82, 23.3 * 60.0);
+            map.put(3.0, 24.2 * 60.0);
             map.put(3.12, 24.5 * 60.0);
-            map.put(3.27, 25.0 * 60.0);
-            map.put(3.32, 26.5 * 60.0);
+            map.put(3.27, 25.3 * 60.0);
+            map.put(3.32, 26.0 * 60.0);
+            map.put(3.45, 26.2 * 60.0);
             map.put(3.52, 26.75 * 60.0);
             map.put(3.71, 27.0 * 60.0);
             map.put(4.13, 30.75 * 60.0);
             map.put(4.33, 31.0 * 60.0);
             map.put(4.47, 32.0 * 60.0);
+            map.put(4.67, 32.8 * 60.0);
+            map.put(5.11, 33.5 * 60.0);
 
             return map;
         }
@@ -612,6 +615,14 @@ public final class Konstants
             map.put(3.0, 0.6);
             map.put(4.0, 0.8);
             map.put(5.0, 1.0);
+
+            return map;
+        }
+
+        public static InterpolatingDoubleTreeMap createTopRollerRatioMap() {
+            InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
+
+            map.put(3.5, 1.1);
 
             return map;
         }
@@ -638,11 +649,11 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to 0.271 intake rotations */
-            GROUND(0.25),
+            GROUND(0.0),
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.0825),
+            COMPACTING(0.18),
             /** Set the intake angle to 0 rotations (zero position) */
-            ZERO(0.0);
+            ZERO(0.245);
             
 
             /**
