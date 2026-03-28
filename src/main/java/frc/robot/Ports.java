@@ -133,10 +133,6 @@ public class Ports
         public static final SKTrigger kLSbutton = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
         
-        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
-        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
-        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
-        public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
     }
 
     public static class LauncherPorts {

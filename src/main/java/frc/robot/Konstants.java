@@ -473,8 +473,8 @@ public final class Konstants
 
     public static final class ClimbConstants
     {
-        public static final double kClimbMotorSpeed = .05;
-        public static final Double kClimbP = 0.5; // TODO: Test for proper value. Needs to be lowered, currently running to fast. Thinking around .3-.4 is a good value.
+        public static final double kClimbMotorSpeed = .15;
+        public static final Double kClimbP = 0.4; // TODO: Test for proper value. Needs to be lowered, currently running to fast. Thinking around .3-.4 is a good value.
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbV = 0;
