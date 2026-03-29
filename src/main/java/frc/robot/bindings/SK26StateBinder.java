@@ -47,8 +47,8 @@ public class SK26StateBinder implements CommandBinder {
         }
 
         /* Buttons */
-        turnOnScoring = DriverPorts.kRTrigger.button;
-        turnOnShuttling = DriverPorts.kRTrigger.button.debounce(0.55);
+        turnOnScoring = DriverPorts.kRTrigger.button.and(inAllianceZone);
+        turnOnShuttling = DriverPorts.kRTrigger.button.and(outOfAllianceZone);
         turnOnSpitting = DriverPorts.kXbutton.button;
 
         if (stateHandler != null) {
@@ -95,6 +95,9 @@ public class SK26StateBinder implements CommandBinder {
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+
+        turnOnShuttling.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        turnOnShuttling.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
 
         turnOnSpitting.onTrue(stateHandler.requestStateCommand(MacroState.SPITTING));
         turnOnSpitting.onFalse(stateHandler.requestStateCommand(MacroState.IDLE));
