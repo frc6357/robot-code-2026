@@ -1,35 +1,30 @@
 package frc.robot.subsystems.intake;
 
+import static edu.wpi.first.units.Units.Rotations;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderDiscontinuityPoint;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
+import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
+import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerKG;
-import static frc.robot.Konstants.IntakeConstants.kPositionerKp;
-import static frc.robot.Konstants.IntakeConstants.kPositionerKi;
-import static frc.robot.Konstants.IntakeConstants.kPositionerKd;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKa;
+import static frc.robot.Konstants.IntakeConstants.kPositionerKd;
+import static frc.robot.Konstants.IntakeConstants.kPositionerKi;
+import static frc.robot.Konstants.IntakeConstants.kPositionerKp;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKs;
 import static frc.robot.Konstants.IntakeConstants.kPositionerKv;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPeakForwardVoltage;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPeakReverseVoltage;
-import static frc.robot.Konstants.IntakeConstants.kPositionerMMCruiseVelocity;
-import static frc.robot.Konstants.IntakeConstants.kPositionerMMAcceleration;
-import static frc.robot.Konstants.IntakeConstants.kPositionerMMJerk;
-import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKV;
-import static frc.robot.Konstants.IntakeConstants.kPositionerMMExpoKA;
-import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
-import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderDiscontinuityPoint;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
-import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPositionTolerance;
+import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
 import static frc.robot.Ports.pickupOBPorts.kPositionerEncoder;
-import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
+import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 
-import frc.lib.commands.PathPlannerCommands;
-import frc.lib.subsystems.PathplannerSubsystem;
-import frc.robot.Konstants.IntakeConstants.IntakePosition;
+import org.littletonrobotics.junction.Logger;
 
 // Imports from Phoenix 6
 import com.ctre.phoenix6.StatusSignal;
@@ -38,14 +33,12 @@ import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
 import com.ctre.phoenix6.configs.MagnetSensorConfigs;
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.MotionMagicVoltage;
-import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
@@ -57,14 +50,14 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
-import org.littletonrobotics.junction.Logger;
-
 // Imports from WPILib
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
+import frc.lib.commands.PathPlannerCommands;
+import frc.lib.subsystems.PathplannerSubsystem;
+import frc.robot.Konstants.IntakeConstants.IntakePosition;
 
 /**
  * Subsystem for the intake pivot mechanism. Controls the positioner motor (and follower)
@@ -78,10 +71,10 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final TalonFX positionerFollowerMotor;
 
 	// Absolute encoder (CANcoder) — the sole position feedback source
-	private final CANcoder positionerEncoder;
+	// private final CANcoder positionerEncoder;
 
 	// Control requests
-	private final PositionTorqueCurrentFOC torqueFOCControl = new PositionTorqueCurrentFOC(0.0);
+	private final PositionVoltage positionVoltageControl = new PositionVoltage(Rotations.of(0.0));
 	private final Follower followerControl;
 
 	// Position tracking
@@ -91,21 +84,21 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final StatusSignal<Angle> positionerAngleStatusSignal;
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
 
-	private IntakePosition targetPositionEnum = IntakePosition.ZERO;
+	private IntakePosition targetPositionEnum = IntakePosition.STOW;
 
 	public SK26IntakePivot()
 	{
 		// ========== CANcoder Configuration ==========
-		positionerEncoder = new CANcoder(kPositionerEncoder.ID);
-		CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
-		MagnetSensorConfigs magnetConfig = new MagnetSensorConfigs();
-		magnetConfig.MagnetOffset = kPositionerEncoderOffset;
-		magnetConfig.SensorDirection = kPositionerEncoderInverted
-			? SensorDirectionValue.Clockwise_Positive
-			: SensorDirectionValue.CounterClockwise_Positive;
-		encoderConfig.MagnetSensor = magnetConfig;
-		encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = kPositionerEncoderDiscontinuityPoint;
-		positionerEncoder.getConfigurator().apply(encoderConfig);
+		// positionerEncoder = new CANcoder(kPositionerEncoder.ID);
+		// CANcoderConfiguration encoderConfig = new CANcoderConfiguration();
+		// MagnetSensorConfigs magnetConfig = new MagnetSensorConfigs();
+		// magnetConfig.MagnetOffset = kPositionerEncoderOffset;
+		// magnetConfig.SensorDirection = kPositionerEncoderInverted
+		// 	? SensorDirectionValue.Clockwise_Positive
+		// 	: SensorDirectionValue.CounterClockwise_Positive;
+		// encoderConfig.MagnetSensor = magnetConfig;
+		// encoderConfig.MagnetSensor.AbsoluteSensorDiscontinuityPoint = kPositionerEncoderDiscontinuityPoint;
+		// positionerEncoder.getConfigurator().apply(encoderConfig);
 
 		// ========== Positioner Motor Configuration ==========
 		positionerMotor = new TalonFX(kPositionerMotor.ID);
@@ -133,15 +126,15 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		// Voltage limits
 		positionerConfig.Voltage = new VoltageConfigs()
 			.withPeakForwardVoltage(kPositionerPeakForwardVoltage)
-			.withPeakReverseVoltage(kPositionerPeakReverseVoltage);
+			.withPeakReverseVoltage(kPositionerPeakReverseVoltage); // Phoenix says 16?
 
 		// Motion Magic configuration
-		positionerConfig.MotionMagic = new MotionMagicConfigs()
-			.withMotionMagicCruiseVelocity(kPositionerMMCruiseVelocity)
-			.withMotionMagicAcceleration(kPositionerMMAcceleration)
-			.withMotionMagicJerk(kPositionerMMJerk)
-			.withMotionMagicExpo_kV(kPositionerMMExpoKV)
-			.withMotionMagicExpo_kA(kPositionerMMExpoKA);
+		// positionerConfig.MotionMagic = new MotionMagicConfigs()
+		// 	.withMotionMagicCruiseVelocity(kPositionerMMCruiseVelocity)
+		// 	.withMotionMagicAcceleration(kPositionerMMAcceleration)
+		// 	.withMotionMagicJerk(kPositionerMMJerk)
+		// 	.withMotionMagicExpo_kV(kPositionerMMExpoKV)
+		// 	.withMotionMagicExpo_kA(kPositionerMMExpoKA);
 
 		// Current limits
 		positionerConfig.CurrentLimits = new CurrentLimitsConfigs()
@@ -155,8 +148,8 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 			.withGainSchedErrorThreshold(kPositionerGainSchedulerErrorThreshold);
 
 		positionerConfig.Feedback = new FeedbackConfigs()
-			.withFeedbackSensorSource(FeedbackSensorSourceValue.RemoteCANcoder)
-			.withFeedbackRemoteSensorID(kPositionerEncoder.ID)
+			.withFeedbackSensorSource(FeedbackSensorSourceValue.RotorSensor)
+			// .withFeedbackRemoteSensorID(kPositionerEncoder.ID)
 			.withSensorToMechanismRatio(kPositionerEncoderGearRatio);
 
 		positionerMotor.getConfigurator().apply(positionerConfig);
@@ -177,7 +170,10 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 
 		// Initialize position tracking
 		motorTargetPosition = positionerAngleStatusSignal.refresh().getValue().in(edu.wpi.first.units.Units.Rotations);
-		targetPositionEnum = IntakePosition.ZERO;
+		targetPositionEnum = IntakePosition.STOW;
+
+		// 
+		positionerMotor.setPosition(0.0);
 
 		addPathPlannerCommands();
 	}
@@ -189,7 +185,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	public void setTargetPosition(double targetPosition)
 	{
 		motorTargetPosition = targetPosition;
-		positionerMotor.setControl(torqueFOCControl.withPosition(targetPosition));
+		positionerMotor.setControl(positionVoltageControl.withPosition(targetPosition));
 	}
 
 	/**
@@ -274,7 +270,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	public void addPathPlannerCommands()
 	{
 		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(IntakePosition.GROUND).withName("IntakeDeployAuton"));
-		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.ZERO).withName("IntakeStowAuton"));
+		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.STOW).withName("IntakeStowAuton"));
 		System.out.println("[SK26IntakePivot] PathPlanner commands added");
 	}
 }

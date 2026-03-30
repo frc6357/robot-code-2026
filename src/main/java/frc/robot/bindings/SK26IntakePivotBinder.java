@@ -2,7 +2,7 @@ package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.COMPACTING;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
-import static frc.robot.Konstants.IntakeConstants.IntakePosition.ZERO;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.STOW;
 import static frc.robot.Ports.OperatorPorts;
 
 import java.util.Optional;
@@ -49,17 +49,17 @@ public class SK26IntakePivotBinder implements CommandBinder
 
         /* State-based */
         // Auto-deploy to GROUND when entering an intaking state and pivot is currently at ZERO
-        intakingStates.and(() -> (pivot.getPositionerTargetEnum() == ZERO))
+        intakingStates.and(() -> (pivot.getPositionerTargetEnum() == STOW))
             .onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("IntakeDeploy"));
 
         // Stow when climbing
-        intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(STOW));
 
         trashCompact.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
 
         /* Manual */
         // Pivoting
-        OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(STOW));
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor

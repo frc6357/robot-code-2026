@@ -440,7 +440,7 @@ public final class Konstants
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
         public static final double kTurretP = 9.2; //50.0  // was 0.07 V/rotation (20)
-        public static final double kTurretI = 0.0;   // was 0.02 V/(rotation·s)
+        public static final double kTurretI = 0.3;   // was 0.02 V/(rotation·s)
         public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(rotation/s)
         public static final double kTurretS = 0.2; //(0.3)   // Static friction feedforward (volts)
         public static final double kTurretV = 4.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
@@ -649,11 +649,11 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to 0.271 intake rotations */
-            GROUND(0.0),
+            GROUND(-0.02), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.18),
+            COMPACTING(0.08), //TODO This value isn't doing much, needs to be investigated
             /** Set the intake angle to 0 rotations (zero position) */
-            ZERO(0.245);
+            STOW(0.0); //0.225 with encoder
             
 
             /**
@@ -667,10 +667,10 @@ public final class Konstants
         }
 
         // PID Constants
-        public static final double kPositionerKp = 28.67; //20
-        public static final double kPositionerKi = 6.0;
-        public static final double kPositionerKd = 1.0;
-        public static final double kPositionerKs = 0.0;
+        public static final double kPositionerKp = 12.5; //20
+        public static final double kPositionerKi = 2.0;
+        public static final double kPositionerKd = 0.5;
+        public static final double kPositionerKs = 0.5;
         public static final double kPositionerKv = 0.0;
         public static final double kPositionerKa = 0.0;
         public static final double kPositionerKG = 0.0;
@@ -687,18 +687,18 @@ public final class Konstants
         public static final double kPositionerMMExpoKA = 0.1;
 
         // Positioner current limits
-        public static final double kPositionerSupplyCurrentLimit = 60;
-        public static final double kPositionerStatorCurrentLimit = 80;
+        public static final double kPositionerSupplyCurrentLimit = 70;
+        public static final double kPositionerStatorCurrentLimit = 120;
 
         // Positioner feedback configuration
         public static final double kPositionerSensorToMechanismRatio = 16.4;
-        public static final double kPositionerGainSchedulerErrorThreshold = 0.04;
-        public static final double kPositionerPositionTolerance = 0.02;    // Rotations
+        public static final double kPositionerGainSchedulerErrorThreshold = 0.03;
+        public static final double kPositionerPositionTolerance = 0.03;    // Rotations
 
         // Absolute encoder (CANcoder) configuration
-        public static final double kPositionerEncoderOffset = -0.28173828125;         // Rotations (-0.5 to +0.5) — set after measuring zero
+        public static final double kPositionerEncoderOffset = -0.87548828125;         // Rotations (-0.5 to +0.5) — set after measuring zero
         public static final boolean kPositionerEncoderInverted = false;    // Set true if encoder reads backwards
-        public static final double kPositionerEncoderGearRatio = 3.08;      // 1:1 — encoder sits directly on the pivot shaft
+        public static final double kPositionerEncoderGearRatio = 2.909090909090909;      // was 3.636363636363
         public static final double kPositionerEncoderDiscontinuityPoint = 1;
 
         // Intake roller current limits
