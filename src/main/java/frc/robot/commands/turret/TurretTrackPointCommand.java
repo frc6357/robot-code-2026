@@ -1,6 +1,5 @@
 package frc.robot.commands.turret;
 
-import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
 import static frc.robot.Konstants.TurretConstants.kTurretCoordinateOffset;
 import static frc.robot.Konstants.VisionConstants.kTurretPivotInRobotSpace;
 

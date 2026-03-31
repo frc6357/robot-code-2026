@@ -338,8 +338,8 @@ public class RobotContainer {
             if(subsystems.isDualLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
             {
                 // If both launcher and turret are present, create the shooting coordinator
-                // m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_DualLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
-                // m_shootingCoordinatorInstance = m_shootingCoordinator.get();
+                m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_DualLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
+                m_shootingCoordinatorInstance = m_shootingCoordinator.get();
             }
 
             // Give StateHandler a reference to the launcher for state readiness checking
@@ -372,7 +372,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
-        buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
+        // buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer));

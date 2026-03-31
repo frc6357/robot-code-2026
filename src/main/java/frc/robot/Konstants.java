@@ -549,8 +549,8 @@ public final class Konstants
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(Inches.of(-5.75), Inches.of(5.534), Inches.of(19.874)),  // Placeholder: 0.5m height Was: 9.427
-                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.of(-kTurretEncoderOffset))                    // No rotation offset
+                VisionConstants.kTurretPivotInRobotSpace,  // Placeholder: 0.5m height Was: 9.427
+                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.zero())                    // No rotation offset
             );
 
         // Phase delay compensation

@@ -70,7 +70,7 @@ public class SK26IndexerBinder implements CommandBinder
                 Commands.waitSeconds(0.2)
             )
         ).withName("IndexerFeedAndUnjam"));
-        IndexBackwards.debounce(0.2, DebounceType.kRising).whileTrue(indexer.feedCommand(() -> -manualIndexerVoltage.get()));
+        IndexBackwards.debounce(0.2, DebounceType.kRising).whileTrue(indexer.feedCommand(() -> -manualIndexerVoltage.get()).withName("IndexerWaitingUnjam"));
         //IndexFeed.negate().whileTrue(Commands.defer(() -> indexer.feedCommand(() -> {return -manualIndexerVoltage.get() / 8.0;}), Set.of(indexer)));
         kLTrigger.button.onTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
         kLTrigger.button.onFalse(Commands.defer(

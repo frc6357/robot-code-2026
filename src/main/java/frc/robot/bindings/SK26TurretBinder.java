@@ -52,7 +52,7 @@ public class SK26TurretBinder implements CommandBinder
         PointAtShuttlePoint = StateHandler.whenCurrentState(MacroState.SHUTTLING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
-        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
+        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE).or(StateHandler.whenCurrentState(MacroState.INTAKING).or(StateHandler.whenCurrentState(MacroState.SPITTING)));
 
         if(swerveSubsystem.isEmpty()) {
             return;
@@ -91,11 +91,11 @@ public class SK26TurretBinder implements CommandBinder
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
 
-        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).whileTrue(
+        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(
             new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));
         
-        inAllianceZone.and(() -> DriverStation.isEnabled()).whileTrue(Commands.deferredProxy(() -> 
+        inAllianceZone.and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(Commands.deferredProxy(() -> 
             new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
                                                                         FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
         ).withName("TurretTrackHub" + DriverStation.getAlliance().get()));

@@ -1,13 +1,15 @@
 package frc.robot;
 
+import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
+
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,12 +19,11 @@ import frc.lib.subsystems.PathplannerSubsystem;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.FieldConstants.Tower;
-import frc.robot.Konstants.LauncherConstants;
 import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.intake.SK26IntakePivot;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.turret.SK26Turret;
 import lombok.Getter;
 
@@ -224,7 +225,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         notNearTower = new Trigger(() -> {
             // Compute shooter position in field space from robot pose + robot-to-shooter transform
             Translation2d shooterPos = new Pose3d(swerve.getRobotPose())
-                .plus(LauncherConstants.kRobotToShooter)
+                .plus(kRobotToShooter)
                 .toPose2d()
                 .getTranslation();
 

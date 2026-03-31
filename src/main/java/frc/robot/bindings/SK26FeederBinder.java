@@ -6,7 +6,6 @@ import static frc.robot.Konstants.FeederConstants.kFeederRunningVoltage;
 import java.util.Optional;
 import java.util.Set;
 
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.subsystems.feeder.SK26Feeder;
@@ -66,13 +65,14 @@ public class SK26FeederBinder implements CommandBinder {
             // kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
             // kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
-            runForwards.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
-                Commands.race(
-                    Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)),
-                    Commands.waitSeconds(1.5)
-                )
-            ).withName("FeederFeedAndUnjam"));
-            runBackwards.debounce(0.2, DebounceType.kRising).whileTrue(feeder.feedCommand(() -> manualFeederVoltage.get()));
+            // runForwards.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
+            //     Commands.race(
+            //         Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)),
+            //         Commands.waitSeconds(1.5)
+            //     )
+            // ).withName("FeederFeedAndUnjam"));
+            // runBackwards.debounce(0.2, DebounceType.kRising).whileTrue(feeder.feedCommand(() -> manualFeederVoltage.get()).withName("FeederWaiting"));
+            runForwards.or(runBackwards).whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)).withName("FeederRun"));
             kLTrigger.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
             kLTrigger.button.onFalse(Commands.defer(
                     () -> runForwards.getAsBoolean()
