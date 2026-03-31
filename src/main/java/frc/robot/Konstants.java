@@ -439,12 +439,12 @@ public final class Konstants
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 9.2; //50.0  // was 0.07 V/rotation (20)
-        public static final double kTurretI = 0.3;   // was 0.02 V/(rotation·s)
+        public static final double kTurretP = 4.5; //50.0  // was 0.07 V/rotation (20)
+        public static final double kTurretI = 1.5;   // was 0.02 V/(rotation·s)
         public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(rotation/s)
-        public static final double kTurretS = 0.2; //(0.3)   // Static friction feedforward (volts)
-        public static final double kTurretV = 4.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
-        public static final double kTurretA = 0.15; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kTurretS = 0.3375; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 2.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.0005; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
         public static final double kMaxTurretOutputVolts = 5.5; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);

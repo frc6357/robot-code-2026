@@ -10,7 +10,7 @@
     "lights": false,
     "indexer": true,
     "climb": true,
-    "intakepivot": true,
+    "intakepivot": false,
     "intakerollers": true,
     "feeder": true,
     "fueldetection": false

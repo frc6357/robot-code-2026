@@ -2,6 +2,7 @@ package frc.robot.commands.turret;
 
 import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
 import static frc.robot.Konstants.TurretConstants.kTurretCoordinateOffset;
+import static frc.robot.Konstants.VisionConstants.kTurretPivotInRobotSpace;
 
 import java.util.Optional;
 
@@ -68,7 +69,7 @@ public class TurretTrackPointCommand extends Command
         }
 
         // Get the robot's current position and rotation
-        Translation2d shooterPosition = drive.getRobotPose().getTranslation().plus(kRobotToShooter.getTranslation().toTranslation2d());
+        Translation2d shooterPosition = drive.getRobotPose().getTranslation().plus(kTurretPivotInRobotSpace.toTranslation2d());
         double robotHeadingDeg = drive.getRobotRotation().getDegrees();
 
         // Calculate the field-relative angle FROM the shooter TO the target (in degrees)
