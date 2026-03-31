@@ -52,9 +52,6 @@ public class SK26Indexer extends SubsystemBase
     // Target voltage for the indexer motor
     private double targetVoltage = 0.0;
 
-    // Ball count tracked by external events (intake sensor, feeder notification, etc.)
-    private int numBallsInIndexer = 0;
-
     // Display status
     private IndexerStatus status = IndexerStatus.IDLE;
     // private boolean lastIntakeSensorState = false;
@@ -129,29 +126,6 @@ public class SK26Indexer extends SubsystemBase
         setIndexerVoltage(voltage);
     }
 
-    /** Returns the current tracked ball count in the indexer. */
-    public int getNumBalls() 
-    {
-        return numBallsInIndexer;
-    }
-
-    /** Sets the tracked ball count (e.g. after a reset or manual correction). */
-    public void setNumBalls(int count) 
-    {
-        numBallsInIndexer = count;
-    }
-
-    /** Call when a ball enters the indexer (e.g. from the intake sensor). */
-    public void incrementBallCount() 
-    {
-        numBallsInIndexer++;
-    }
-
-    /** Call when a ball leaves the indexer (e.g. notified by the feeder after launch). */
-    public void decrementBallCount() {
-        numBallsInIndexer = Math.max(0, numBallsInIndexer - 1);
-    }
-
     /**
      * Returns a command that feeds the indexer at the given voltage.
      * The command sets status to FEEDING on start and resets to IDLE on end.
@@ -212,6 +186,5 @@ public class SK26Indexer extends SubsystemBase
         Logger.recordOutput("Indexer/Motor Speed (RPS)", velocityRPM / 60.0);
         Logger.recordOutput("Indexer/Status", status.toString());
         Logger.recordOutput("Indexer/Target Voltage (V)", targetVoltage);
-        Logger.recordOutput("Indexer/Balls In Indexer", numBallsInIndexer);
     }
 }

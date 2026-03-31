@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -32,7 +33,9 @@ public class SK26Feeder extends SubsystemBase
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
+    private int ballsLaunchedLastScoring = 0;
     private boolean lastLauncherSensorState = false;
+    private Timer timer = new Timer();
 
     public SK26Feeder() 
     {
@@ -102,6 +105,16 @@ public class SK26Feeder extends SubsystemBase
         return this.runEnd(() -> feedFuel(voltageSupplier.get()), () -> idleFeeder());
     }
 
+    public Command startTimer() {
+        timer.reset();
+        ballsLaunchedLastScoring = 0;
+        return this.runOnce(() -> timer.start());
+    }
+
+    public Command stopTimer() {
+        return this.runOnce(() -> timer.stop());
+    }
+
     @Override
     public void periodic() {
         checkIfBallLaunched();
@@ -125,5 +138,7 @@ public class SK26Feeder extends SubsystemBase
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
         Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
         Logger.recordOutput("Feeder/Current Voltage", getVoltage());
+        Logger.recordOutput("Last Scoring Time", timer.get());
+        Logger.recordOutput("Balls/Second Last Scoring", ballsLaunchedLastScoring/timer.get());
     }
 }
