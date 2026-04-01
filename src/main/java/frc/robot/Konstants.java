@@ -439,12 +439,12 @@ public final class Konstants
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 4.5; //50.0  // was 0.07 V/rotation (20)
-        public static final double kTurretI = 1.5;   // was 0.02 V/(rotation·s)
+        public static final double kTurretP = 20.0; //50.0  // was 0.07 V/rotation (20)
+        public static final double kTurretI = 2.0;   // was 0.02 V/(rotation·s)
         public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(rotation/s)
-        public static final double kTurretS = 0.3375; //(0.3)   // Static friction feedforward (volts)
-        public static final double kTurretV = 2.0; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
-        public static final double kTurretA = 0.0005; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kTurretS = 0.335; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 3.8; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.08; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
         public static final double kMaxTurretOutputVolts = 5.5; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
@@ -590,18 +590,20 @@ public final class Konstants
 
             // Example data (distance in meters -> flywheel speed in RPM)
             map.put(2.82, 23.3 * 60.0);
-            map.put(3.0, 24.2 * 60.0);
-            map.put(3.12, 24.5 * 60.0);
-            map.put(3.27, 25.3 * 60.0);
-            map.put(3.32, 26.0 * 60.0);
-            map.put(3.45, 26.2 * 60.0);
-            map.put(3.52, 26.75 * 60.0);
-            map.put(3.71, 27.0 * 60.0);
-            map.put(4.13, 30.75 * 60.0);
-            map.put(4.33, 31.0 * 60.0);
-            map.put(4.47, 32.0 * 60.0);
-            map.put(4.67, 32.8 * 60.0);
-            map.put(5.11, 33.5 * 60.0);
+            map.put(3.0, 24.0 * 60.0);
+            map.put(3.12, 24.3 * 60.0);
+            map.put(3.27, 24.8 * 60.0);
+            map.put(3.32, 25.5 * 60.0);
+            map.put(3.45, 25.9 * 60.0);
+            map.put(3.52, 26.0 * 60.0);
+            map.put(3.71, 26.2 * 60.0);
+            map.put(3.95, 26.8 * 60.0);
+            map.put(4.08, 27.4 * 60.0);
+            map.put(4.13, 27.55 * 60.0);
+            map.put(4.33, 27.15 * 60.0);
+            map.put(4.47, 28.2 * 60.0);
+            map.put(4.67, 29.1 * 60.0);
+            map.put(5.11, 30.5 * 60.0);
 
             return map;
         }
@@ -649,9 +651,9 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to 0.271 intake rotations */
-            GROUND(-0.02), // -0.02 with encoder
+            GROUND(-0.235), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.08), //TODO This value isn't doing much, needs to be investigated
+            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
             /** Set the intake angle to 0 rotations (zero position) */
             STOW(0.0); //0.225 with encoder
             
@@ -698,7 +700,7 @@ public final class Konstants
         // Absolute encoder (CANcoder) configuration
         public static final double kPositionerEncoderOffset = -0.87548828125;         // Rotations (-0.5 to +0.5) — set after measuring zero
         public static final boolean kPositionerEncoderInverted = false;    // Set true if encoder reads backwards
-        public static final double kPositionerEncoderGearRatio = 2.909090909090909;      // was 3.636363636363
+        public static final double kPositionerEncoderGearRatio = 17.76;      // was 3.636363636363
         public static final double kPositionerEncoderDiscontinuityPoint = 1;
 
         // Intake roller current limits

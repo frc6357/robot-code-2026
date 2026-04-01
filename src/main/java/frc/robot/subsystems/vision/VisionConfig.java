@@ -69,9 +69,9 @@ public final class VisionConfig {
 
     // Record for pose standard deviations (groups xy and theta together)
     public record PoseStdDevs(double xy, double theta) {
-        public static final PoseStdDevs STATIONARY_CLOSE = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs STATIONARY_CLOSE = new PoseStdDevs(0.2, 1.0);
         public static final PoseStdDevs MULTI_TAG = new PoseStdDevs(0.25, 8.0);
-        public static final PoseStdDevs STRONG_MULTI = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs STRONG_MULTI = new PoseStdDevs(1.0, 2.0);
         public static final PoseStdDevs CLOSE_SINGLE = new PoseStdDevs(0.5, 16.0);
         public static final PoseStdDevs PROXIMITY = new PoseStdDevs(2.0, 999999.0);
         public static final PoseStdDevs STABLE = new PoseStdDevs(0.5, 999999.0);

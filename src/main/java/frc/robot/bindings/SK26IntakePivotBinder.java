@@ -35,7 +35,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
+        trashCompact = StateHandler.whenCurrentStateReady(MacroState.SCORING);
     }
 
     public void bindButtons()

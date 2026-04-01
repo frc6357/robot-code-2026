@@ -30,7 +30,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
+        trashCompact = StateHandler.whenCurrentStateReady(MacroState.SCORING);
 
         spitting = StateHandler.whenCurrentState(MacroState.SPITTING);
     }

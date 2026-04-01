@@ -82,6 +82,12 @@ public class HubTargetingSystem {
     /** Height of the hub opening rim, used as the Z component of the 3D aim point. */
     private static final double HUB_HEIGHT = FieldConstants.Hub.height;
 
+    /**
+     * Extra inward offset toward the hub center, in meters.
+     * Shifts the aim point ~4 inches closer to the center of the hub for better scoring margin.
+     */
+    private static final double INWARD_OFFSET_METERS = 0.1016; // 4 inches
+
     // ===== Precomputed Vertices =====
 
     private static final List<Translation2d> blueVertices =
@@ -183,7 +189,20 @@ public class HubTargetingSystem {
         Translation2d farEdgePoint = hexPerimeterPoint(hubCenter, farEdgeAngle);
 
         // Interpolate between hub center (0.0) and far edge point (1.0)
-        return hubCenter.interpolate(farEdgePoint, AIM_WEIGHT);
+        Translation2d interpolated = hubCenter.interpolate(farEdgePoint, AIM_WEIGHT);
+
+        // Shift the aim point inward toward the hub center by INWARD_OFFSET_METERS
+        double dx = hubCenter.getX() - interpolated.getX();
+        double dy = hubCenter.getY() - interpolated.getY();
+        double dist = Math.hypot(dx, dy);
+        if (dist > 1e-6) {
+            interpolated = new Translation2d(
+                interpolated.getX() + (dx / dist) * INWARD_OFFSET_METERS,
+                interpolated.getY() + (dy / dist) * INWARD_OFFSET_METERS
+            );
+        }
+
+        return interpolated;
     }
 
     /**
