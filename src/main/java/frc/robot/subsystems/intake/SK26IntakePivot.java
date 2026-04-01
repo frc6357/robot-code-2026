@@ -92,7 +92,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	// we know we've hit the physical hard-stop and the rotor sensor has drifted.
 	// Reset the motor position to the known GROUND value so the PID stops pushing.
 	private static final double STALL_VELOCITY_THRESHOLD_RPS = 0.5;
-	private static final double STALL_TIME_SECONDS = 2.0;
+	private static final double STALL_TIME_SECONDS = 6.7;
 	private static final double STALL_RESET_POSITION = IntakePosition.GROUND.rotations; // -0.235
 	private final Timer stallTimer = new Timer();
 	private boolean stallTimerRunning = false;

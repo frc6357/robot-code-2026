@@ -653,7 +653,7 @@ public final class Konstants
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(-0.235), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
+            COMPACTING(-0.045), //TODO This value isn't doing much, needs to be investigated
             /** Set the intake angle to 0 rotations (zero position) */
             STOW(0.0); //0.225 with encoder
             
