@@ -53,6 +53,7 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 // Imports from WPILib
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.commands.PathPlannerCommands;
@@ -85,6 +86,17 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
 
 	private IntakePosition targetPositionEnum = IntakePosition.STOW;
+
+	// ===== Stall Detection (ground hard-stop homing) =====
+	// When targeting GROUND, if the motor stalls (velocity near zero) for STALL_TIME_SECONDS,
+	// we know we've hit the physical hard-stop and the rotor sensor has drifted.
+	// Reset the motor position to the known GROUND value so the PID stops pushing.
+	private static final double STALL_VELOCITY_THRESHOLD_RPS = 0.5;
+	private static final double STALL_TIME_SECONDS = 6.7;
+	private static final double STALL_RESET_POSITION = IntakePosition.GROUND.rotations; // -0.235
+	private final Timer stallTimer = new Timer();
+	private boolean stallTimerRunning = false;
+	private boolean stallResetApplied = false;
 
 	public SK26IntakePivot()
 	{
@@ -253,6 +265,39 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		// Cache position reading
 		currentPositionerPosition = positionerAngleStatusSignal.refresh().getValue().in(edu.wpi.first.units.Units.Rotations);
 
+		// ===== Stall detection for ground hard-stop homing =====
+		// Only active when we're targeting GROUND and haven't already reset this cycle.
+		// The motor's rotor sensor drifts, so the reported position undershoots the real
+		// GROUND position. The PID keeps pushing into the hard-stop, stalling the motor.
+		// After 2 seconds of stall we know we're physically at ground, so we tell the
+		// motor "you are at -0.235" and the error drops to zero.
+		double velocityRPS = Math.abs(positionerAngularVelocityStatusSignal.refresh().getValue().in(RotationsPerSecond));
+		boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
+		boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
+		boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
+
+		if (targetingGround && motorStalled && stillHasError && !stallResetApplied) {
+			// Start / continue the stall timer
+			if (!stallTimerRunning) {
+				stallTimer.restart();
+				stallTimerRunning = true;
+			}
+
+			if (stallTimer.hasElapsed(STALL_TIME_SECONDS)) {
+				// We've been stalled long enough — reset position to known ground value
+				positionerMotor.setPosition(STALL_RESET_POSITION);
+				motorTargetPosition = STALL_RESET_POSITION;
+				stallResetApplied = true;
+				Logger.recordOutput("Intake/StallResetTriggered", true);
+			}
+		} else if (!targetingGround || !motorStalled || !stillHasError) {
+			// Motor is moving or we're no longer targeting ground — reset stall tracking
+			stallTimer.stop();
+			stallTimerRunning = false;
+			stallResetApplied = false;
+		}
+
+		Logger.recordOutput("Intake/StallResetApplied", stallResetApplied);
 		logOutputs();
 	}
 

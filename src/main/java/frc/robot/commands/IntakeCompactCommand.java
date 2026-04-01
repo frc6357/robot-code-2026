@@ -66,7 +66,7 @@ public class IntakeCompactCommand extends Command {
     @Override
     public void execute() {
         double currentTime = Timer.getFPGATimestamp();
-        if (currentTime - lastSwitchTimestamp >= switchIntervalSeconds) 
+        if (currentTime - lastSwitchTimestamp >= (!movingToHigh ? switchIntervalSeconds * 2.0 : switchIntervalSeconds))
         {
             lastSwitchTimestamp = currentTime;
             
