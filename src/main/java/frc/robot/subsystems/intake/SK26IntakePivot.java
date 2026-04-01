@@ -53,6 +53,7 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 // Imports from WPILib
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -276,7 +277,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
 		boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
 
-		if (targetingGround && motorStalled && stillHasError && !stallResetApplied) {
+		if (DriverStation.isEnabled() && targetingGround && motorStalled && stillHasError && !stallResetApplied) {
 			// Start / continue the stall timer
 			if (!stallTimerRunning) {
 				stallTimer.restart();

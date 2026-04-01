@@ -301,6 +301,10 @@ public class SK26Turret extends SubsystemBase
         return Math.abs(getTurretError()) <= kTurretAngleTolerance;
     }
 
+    public boolean closeToTarget() {
+        return Math.abs(getTurretError()) <= kTurretAngleTolerance * 2.0;
+    }
+
     /**
      * Reset the controller and sync target to current position.
      * Useful after simulation initialization or when recovering from errors.

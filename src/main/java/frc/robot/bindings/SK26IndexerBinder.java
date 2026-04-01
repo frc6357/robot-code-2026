@@ -63,7 +63,7 @@ public class SK26IndexerBinder implements CommandBinder
         IndexFeed.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
             Commands.race(
                 Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)),
-                Commands.waitSeconds(1.5)
+                Commands.waitSeconds(3.0)
             ),
             Commands.race(
                 Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)),

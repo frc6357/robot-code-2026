@@ -7,6 +7,7 @@ import static frc.robot.Ports.OperatorPorts;
 
 import java.util.Optional;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
@@ -35,7 +36,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
-        trashCompact = StateHandler.whenCurrentStateReady(MacroState.SCORING);
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).debounce(4.5, DebounceType.kRising);
     }
 
     public void bindButtons()

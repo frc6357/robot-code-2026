@@ -268,6 +268,13 @@ public class SK26DualLauncher extends SubsystemBase {
             && Math.abs(cachedTopVelocityRPS - topTargetVelocity)    <= tolerance;
     }
 
+    public boolean closeToTargetVelocity() {
+        if(!running) return false;
+        double tolerance = velocityToleranceRPS.get() * 2.0;
+        return Math.abs(cachedBottomVelocityRPS - bottomTargetVelocity) <= tolerance
+            && Math.abs(cachedTopVelocityRPS - topTargetVelocity)    <= tolerance;
+    }
+
     /** @return Current bottom roller velocity in RPS. */
     public double getBottomVelocityRPS() {
         return cachedBottomVelocityRPS;

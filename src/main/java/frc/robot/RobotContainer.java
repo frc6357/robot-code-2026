@@ -70,6 +70,7 @@ import frc.robot.subsystems.fueldetection.FuelDetection;
 import frc.robot.subsystems.vision.VisionConfig;
 
 import static frc.robot.Ports.DriverPorts.kDriver;
+import static frc.robot.Ports.OperatorPorts.kOperator;
 import static frc.robot.StateHandler.MacroState;
 
 
@@ -411,7 +412,8 @@ public class RobotContainer {
         shiftLabelPublisher.set(COLOR_WHITE);
         shiftTimeRemainingPublisher.set(0.0);
 
-        shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85)));
+        shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85))
+        .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.85))));
         shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0)));
     }
 

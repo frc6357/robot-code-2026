@@ -9,6 +9,7 @@ import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
 import frc.robot.StateHandler.MacroState;
+import frc.robot.StateHandler.MacroState.Status;
 
 public class SK26StateBinder implements CommandBinder {
     private Optional<StateHandler> stateHandlerContainer;
@@ -19,9 +20,11 @@ public class SK26StateBinder implements CommandBinder {
     Trigger turnOnShuttling;
     Trigger turnOnSpitting;
 
-    Trigger launcherReady;
+    Trigger launcherReadyToScore;
+    Trigger launcherReadyToShuttle;
     Trigger intakeReady;
-    Trigger turretReady;
+    Trigger turretReadyToScore;
+    Trigger turretReadyToShuttle;
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
     Trigger notNearTower;
@@ -38,9 +41,11 @@ public class SK26StateBinder implements CommandBinder {
         // Trigger definitions:
         /* Subsystem States */
         if (stateHandler != null) {
-            launcherReady = stateHandler.getLauncherReady();
+            launcherReadyToScore = stateHandler.getLauncherReadyToScore();
+            launcherReadyToShuttle = stateHandler.getLauncherReadyToShuttle();
             intakeReady = stateHandler.getIntakeReady();
-            turretReady = stateHandler.getTurretReady();
+            turretReadyToScore = stateHandler.getTurretReadyToScore();
+            turretReadyToShuttle = stateHandler.getTurretReadyToShuttle();
             inAllianceZone = stateHandler.getInAllianceZone();
             outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
@@ -80,12 +85,16 @@ public class SK26StateBinder implements CommandBinder {
     }
 
     private void bindRobotStates() {
-        inAllianceZone.and(notNearTower).and(launcherReady).and(turretReady)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING));
-        outOfAllianceZone.and(launcherReady).and(turretReady)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING));
+        inAllianceZone.and(notNearTower).and(launcherReadyToScore).and(turretReadyToScore)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY)))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING)));
+        outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY)))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING)));
     }
 
     private void bindDriverButtons() 

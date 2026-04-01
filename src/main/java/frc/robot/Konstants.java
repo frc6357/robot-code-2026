@@ -333,7 +333,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -6.75;
+        public static final double kIndexerFullVoltage = -7.65;
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -653,7 +653,7 @@ public final class Konstants
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(-0.235), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(-0.045), //TODO This value isn't doing much, needs to be investigated
+            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
             /** Set the intake angle to 0 rotations (zero position) */
             STOW(0.0); //0.225 with encoder
             
@@ -722,7 +722,7 @@ public final class Konstants
         public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
 
-        public static final double kChassisSpeedRollerFF = 0.66; // Volts of output per m/s of velocity in the intake's direction
+        public static final double kChassisSpeedRollerFF = 1.0; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

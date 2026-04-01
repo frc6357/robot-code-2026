@@ -89,14 +89,18 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      * Defaults to true; remapped to the launcher's atGoal when {@link #setLauncherSubsystem} is called.
      */
     @Getter
-    private Trigger launcherReady = new Trigger(() -> true);
+    private Trigger launcherReadyToScore = new Trigger(() -> true);
+    @Getter
+    private Trigger launcherReadyToShuttle = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the turret is at its target angle (or no turret is present).
      * Defaults to true; remapped to the turret's atTarget when {@link #setTurretSubsystem} is called.
      */
     @Getter
-    private Trigger turretReady = new Trigger(() -> true);
+    private Trigger turretReadyToScore = new Trigger(() -> true);
+    @Getter
+    private Trigger turretReadyToShuttle = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the intake positioner is at its target (or no intake is present).
@@ -156,7 +160,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     /**
      * Sets the launcher subsystem reference for checking launcher readiness.
-     * If the Optional is present, remaps the {@link #launcherReady} trigger to the
+     * If the Optional is present, remaps the {@link #launcherReadyToScore} trigger to the
      * launcher's {@code atTargetVelocity()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
@@ -166,12 +170,12 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (launcher.isEmpty()) {
             return;
         }
-        launcherReady = new Trigger(launcher.get()::atTargetVelocity);
+        launcherReadyToScore = new Trigger(launcher.get()::atTargetVelocity);
     }
 
     /**
      * Sets the turret subsystem reference for checking turret readiness.
-     * If the Optional is present, remaps the {@link #turretReady} trigger to the
+     * If the Optional is present, remaps the {@link #turretReadyToScore} trigger to the
      * turret's {@code atTarget()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
@@ -181,7 +185,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (turret.isEmpty()) {
             return;
         }
-        turretReady = new Trigger(turret.get()::atTarget);
+        turretReadyToScore = new Trigger(turret.get()::atTarget);
     }
 
     /**
