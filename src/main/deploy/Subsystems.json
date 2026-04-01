@@ -3,7 +3,7 @@
     
     "swerve": true,
     "vision": true,
-    "turret": true,
+    "turret": false,
     "launcher": false,
     "bangbanglauncher": false,
     "duallauncher": true,
