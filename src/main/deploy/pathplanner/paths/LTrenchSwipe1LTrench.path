@@ -4,12 +4,12 @@
     {
       "anchor": {
         "x": 4.453,
-        "y": 7.56
+        "y": 7.46
       },
       "prevControl": null,
       "nextControl": {
         "x": 5.3027912074689905,
-        "y": 7.650145879840213
+        "y": 7.550145879840214
       },
       "isLocked": false,
       "linkedName": null
@@ -36,28 +36,28 @@
         "y": 6.535796064400716
       },
       "prevControl": {
-        "x": 8.372904554568294,
-        "y": 6.915459800166852
+        "x": 8.396265298576552,
+        "y": 6.924280521182433
       },
       "nextControl": {
-        "x": 8.739679828371024,
-        "y": 6.0268216692894
+        "x": 8.660574162679424,
+        "y": 6.154226475279107
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 8.03710413694722,
-        "y": 3.52392296718973
+        "x": 7.96622009569378,
+        "y": 3.5503987240829353
       },
       "prevControl": {
-        "x": 9.061645050071684,
-        "y": 3.8935815793519772
+        "x": 8.906491228070175,
+        "y": 3.9265071770334927
       },
       "nextControl": {
-        "x": 7.422375081360872,
-        "y": 3.30212617349131
+        "x": 7.359443969935274,
+        "y": 3.3076882737795334
       },
       "isLocked": false,
       "linkedName": null
@@ -97,11 +97,11 @@
     {
       "anchor": {
         "x": 4.453,
-        "y": 7.46
+        "y": 7.36
       },
       "prevControl": {
-        "x": 4.763524288678583,
-        "y": 7.491814262013831
+        "x": 4.765149773549212,
+        "y": 7.36
       },
       "nextControl": null,
       "isLocked": false,
@@ -134,11 +134,24 @@
     },
     {
       "name": "ReEntry",
-      "minWaypointRelativePos": 5.4449696151248945,
+      "minWaypointRelativePos": 4.91,
       "maxWaypointRelativePos": 6.0,
       "constraints": {
         "maxVelocity": 1.5,
         "maxAcceleration": 3.0,
+        "maxAngularVelocity": 540.0,
+        "maxAngularAcceleration": 720.0,
+        "nominalVoltage": 12.0,
+        "unlimited": false
+      }
+    },
+    {
+      "name": "Launch",
+      "minWaypointRelativePos": 0,
+      "maxWaypointRelativePos": 1.1550802139037444,
+      "constraints": {
+        "maxVelocity": 4.5,
+        "maxAcceleration": 5.0,
         "maxAngularVelocity": 540.0,
         "maxAngularAcceleration": 720.0,
         "nominalVoltage": 12.0,

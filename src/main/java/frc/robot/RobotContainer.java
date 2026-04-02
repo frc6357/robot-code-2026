@@ -414,7 +414,8 @@ public class RobotContainer {
 
         shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85))
         .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.85))));
-        shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0)));
+        shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0))
+        .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.0))));
     }
 
     private void updatePhaseTimer(Alliance allianceToWinAuto) {
