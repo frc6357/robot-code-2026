@@ -1,5 +1,12 @@
 package frc.robot.subsystems.vision;
 
+import static edu.wpi.first.units.Units.Degrees;
+import static edu.wpi.first.units.Units.DegreesPerSecond;
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.RadiansPerSecond;
+import static frc.robot.Konstants.VisionConstants.kAprilTagPipeline;
+
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.numbers.N1;
@@ -10,17 +17,11 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
+import frc.robot.Konstants.VisionConstants.BackLimelight;
+import frc.robot.Konstants.VisionConstants.LimelightThree;
+import frc.robot.Konstants.VisionConstants.TurretLimelight;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
-import frc.robot.Konstants.VisionConstants.BackLimelight;
-import frc.robot.Konstants.VisionConstants.TurretLimelight;
-
-import static edu.wpi.first.units.Units.Degrees;
-import static edu.wpi.first.units.Units.DegreesPerSecond;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
-import static frc.robot.Konstants.VisionConstants.*;
 
 public final class VisionConfig {
     /* Example:
@@ -68,9 +69,9 @@ public final class VisionConfig {
 
     // Record for pose standard deviations (groups xy and theta together)
     public record PoseStdDevs(double xy, double theta) {
-        public static final PoseStdDevs STATIONARY_CLOSE = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs STATIONARY_CLOSE = new PoseStdDevs(0.2, 1.0);
         public static final PoseStdDevs MULTI_TAG = new PoseStdDevs(0.25, 8.0);
-        public static final PoseStdDevs STRONG_MULTI = new PoseStdDevs(0.1, 0.1);
+        public static final PoseStdDevs STRONG_MULTI = new PoseStdDevs(1.0, 2.0);
         public static final PoseStdDevs CLOSE_SINGLE = new PoseStdDevs(0.5, 16.0);
         public static final PoseStdDevs PROXIMITY = new PoseStdDevs(2.0, 999999.0);
         public static final PoseStdDevs STABLE = new PoseStdDevs(0.5, 999999.0);
@@ -108,6 +109,8 @@ public final class VisionConfig {
         // Pose difference thresholds
         public static final double CLOSE_POSE_DIFF = 0.5;
         public static final double PROXIMITY_POSE_DIFF = 0.3;
+        public static final double MULTI_POSE_DIFF = 0.67;
+        public static final double DRIVETRAIN_STATIONARY_POSE_DIFF = 0.4;
 
         // Scoring
         public static final double TAG_COUNT_WEIGHT = 25.0;

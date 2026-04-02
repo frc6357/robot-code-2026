@@ -133,10 +133,6 @@ public class Ports
         public static final SKTrigger kLSbutton = new SKTrigger(kOperator, kLeftStick.value, BUTTON);
         public static final SKTrigger kRSbutton = new SKTrigger(kOperator, kRightStick.value, BUTTON);
         
-        public static final SKTrigger climbUpButton = new SKTrigger(kOperator, kB.value, BUTTON);
-        public static final SKTrigger climbDownButton = new SKTrigger(kOperator, kY.value, BUTTON);
-        public static final SKTrigger climbGoButton = new SKTrigger(kOperator, kA.value, BUTTON);
-        public static final SKTrigger climbzeroButton = new SKTrigger(kOperator, kX.value, BUTTON);
     }
 
     public static class LauncherPorts {
@@ -178,6 +174,7 @@ public class Ports
         public static final CANPort kPositionerMotor = new CANPort(30, busName); 
         public static final CANPort kPositionerFollowerMotor = new CANPort(31, busName);
         public static final CANPort kIntakeMotor = new CANPort(32, busName);
+        public static final CANPort kPositionerEncoder = new CANPort(33, busName);
 
         //public static final CANPort kIndexerMotor = new CANPort(59, busName);
     }

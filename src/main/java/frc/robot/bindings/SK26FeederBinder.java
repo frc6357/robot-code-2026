@@ -26,8 +26,8 @@ public class SK26FeederBinder implements CommandBinder {
     Trigger launcherRunningState;
     Trigger launcherAtSpeed;
 
-    Trigger runFeederFromState;
-    Trigger runLowVoltage;
+    Trigger runForwards;
+    Trigger runBackwards;
 
     Trigger idle;
 
@@ -42,12 +42,12 @@ public class SK26FeederBinder implements CommandBinder {
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
         //         .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
         //         .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
-        this.runFeederFromState = StateHandler.whenCurrentState(MacroState.SCORING)
-            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
+        this.runForwards = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
 
-        this.runLowVoltage = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
+        this.runBackwards = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
             .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))
             .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SCORING))
             .or(StateHandler.whenCurrentStateWaiting(MacroState.STEADY_STREAM_SHUTTLING))
@@ -65,10 +65,17 @@ public class SK26FeederBinder implements CommandBinder {
             // kRTrigger.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)));
             // kBbutton.button.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
 
-            runFeederFromState.whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)).withName("FeederRollersRun"));
+            // runForwards.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
+            //     Commands.race(
+            //         Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)),
+            //         Commands.waitSeconds(1.5)
+            //     )
+            // ).withName("FeederFeedAndUnjam"));
+            // runBackwards.debounce(0.2, DebounceType.kRising).whileTrue(feeder.feedCommand(() -> manualFeederVoltage.get()).withName("FeederWaiting"));
+            runForwards.or(runBackwards).whileTrue(Commands.defer(() -> feeder.feedCommand(() -> manualFeederVoltage.get()), Set.of(feeder)).withName("FeederRun"));
             kLTrigger.button.onTrue(Commands.defer(() -> feeder.feedCommand(() -> -manualFeederVoltage.get()), Set.of(feeder)));
             kLTrigger.button.onFalse(Commands.defer(
-                    () -> runFeederFromState.getAsBoolean()
+                    () -> runForwards.getAsBoolean()
                         ? feeder.feedCommand(() -> manualFeederVoltage.get())
                         : feeder.idleFeederCommand(),
                     Set.of(feeder)));

@@ -70,6 +70,7 @@ import frc.robot.subsystems.fueldetection.FuelDetection;
 import frc.robot.subsystems.vision.VisionConfig;
 
 import static frc.robot.Ports.DriverPorts.kDriver;
+import static frc.robot.Ports.OperatorPorts.kOperator;
 import static frc.robot.StateHandler.MacroState;
 
 
@@ -239,9 +240,11 @@ public class RobotContainer {
                     m_visionContainer = Optional.of(new SKVision(m_swerveContainer, m_turretContainer));
                     m_visionInstance = m_visionContainer.get();
                 }
-                if(subsystems.isPickupPresent()) {
+                if(subsystems.isIntakePivotPresent()) {
                     m_intakePivotContainer = Optional.of(new SK26IntakePivot());
                     m_intakePivotInstance = m_intakePivotContainer.get();
+                }
+                if(subsystems.isIntakeRollersPresent()) {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
@@ -311,9 +314,11 @@ public class RobotContainer {
                     m_lightsContainer = Optional.of(new SK26Lights());
                     m_lightsInstance = m_lightsContainer.get();
                 }
-                if(subsystems.isPickupPresent()) {
+                if(subsystems.isIntakePivotPresent()) {
                     m_intakePivotContainer = Optional.of(new SK26IntakePivot());
                     m_intakePivotInstance = m_intakePivotContainer.get();
+                }
+                if(subsystems.isIntakeRollersPresent()) {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
@@ -334,8 +339,8 @@ public class RobotContainer {
             if(subsystems.isDualLauncherPresent() && subsystems.isTurretPresent() && subsystems.isSwervePresent()) 
             {
                 // If both launcher and turret are present, create the shooting coordinator
-                // m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_DualLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
-                // m_shootingCoordinatorInstance = m_shootingCoordinator.get();
+                m_shootingCoordinator = Optional.of(new ShootingCoordinator(m_DualLauncherContainer.get(), m_turretContainer.get(), m_swerveContainer.get()));
+                m_shootingCoordinatorInstance = m_shootingCoordinator.get();
             }
 
             // Give StateHandler a reference to the launcher for state readiness checking
@@ -368,11 +373,11 @@ public class RobotContainer {
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
         buttonBinders.add(new SK26BBLauncherBinder(m_BBLauncherContainer));
-        buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
+        // buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
         buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer));
-        buttonBinders.add(new SK26IntakeRollersBinder(m_intakeRollersContainer));
+        buttonBinders.add(new SK26IntakeRollersBinder(m_intakeRollersContainer, m_swerveContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
@@ -407,7 +412,8 @@ public class RobotContainer {
         shiftLabelPublisher.set(COLOR_WHITE);
         shiftTimeRemainingPublisher.set(0.0);
 
-        shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85)));
+        shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85))
+        .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.85))));
         shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0)));
     }
 

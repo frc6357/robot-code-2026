@@ -1,3 +1,4 @@
+
 {
     
     "swerve": true,
@@ -6,10 +7,11 @@
     "launcher": false,
     "bangbanglauncher": false,
     "duallauncher": true,
-    "lights": true,
+    "lights": false,
     "indexer": true,
-    "climb": false,
-    "pickup": true,
+    "climb": true,
+    "intakepivot": true,
+    "intakerollers": true,
     "feeder": true,
     "fueldetection": false
 }

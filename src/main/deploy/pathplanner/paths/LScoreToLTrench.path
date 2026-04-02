@@ -3,35 +3,46 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1265474060822895,
-        "y": 6.622951699463328
+        "x": 3.7,
+        "y": 7.46
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1514233358375394,
-        "y": 6.871710997015825
+        "x": 3.95,
+        "y": 7.46
       },
       "isLocked": false,
-      "linkedName": "LScore"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.453095577746077,
-        "y": 7.457
+        "x": 4.453,
+        "y": 7.46
       },
       "prevControl": {
-        "x": 2.7046869409660106,
-        "y": 7.434221824686941
+        "x": 4.203,
+        "y": 7.46
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "LeftTrench"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
+    {
+      "name": "Request Idle State",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Request Idle State"
+        }
+      }
+    },
     {
       "name": "Request Intaking State",
       "waypointRelativePos": 0.9634146341463421,
@@ -54,13 +65,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "Left Trench",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

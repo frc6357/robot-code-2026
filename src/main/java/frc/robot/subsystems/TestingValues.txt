@@ -37,3 +37,12 @@ Launcher:
 
 
 
+NEW INTAKE: TorqueCurrentFOC
+kP: 180.0
+kS: 8.0
+kG: 30.0
+
+GainSchedulerBehavior: ZeroOutput
+GainSchedulerErrorThreshold: 0.02
+
+Neutral: Brake

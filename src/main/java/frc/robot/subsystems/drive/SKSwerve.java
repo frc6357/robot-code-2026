@@ -33,6 +33,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Robot;
+import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants;
 
 /**
  * The Spring Konstant's swerve subsystem. This subsystem is responsible for controlling the swerve drivetrain, including
@@ -116,7 +118,10 @@ public class SKSwerve extends SubsystemBase {
     }
 
     public void outputTelemetry() {
-        Logger.runEveryN(4, () -> Logger.recordOutput("HubDistance", getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())));
+        Logger.runEveryN(4, () -> Logger.recordOutput("HubDistance", 
+            Field.isBlue() ? getRobotPose().getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d()) : 
+            getRobotPose().getTranslation().getDistance(FieldConstants.Hub.redTopCenterPoint.toTranslation2d())));
+        Logger.runEveryN(4, () -> Logger.recordOutput("TargetPointDistance", getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())));
         Logger.runEveryN(2, () -> telemetry.telemeterize(lastReadState));
         Logger.runEveryN(2, () -> {
             io.updateInputs(inputs); 
@@ -263,6 +268,10 @@ public class SKSwerve extends SubsystemBase {
         return getRobotPose().getRotation();
     }
 
+    public Rotation2d getRawDrivetrainRotation() {
+        return drivetrain.getState().Pose.getRotation();
+    }
+
     public Rotation2d getGyroRotation() {
         return drivetrain.getPigeon2().getRotation2d();
     }
@@ -298,6 +307,7 @@ public class SKSwerve extends SubsystemBase {
 
     public void resetPose(Pose2d pose) {
         drivetrain.resetPose(pose);
+        // drivetrain.getPigeon2().set
         poseEstimator.resetPose(pose);
     }
 

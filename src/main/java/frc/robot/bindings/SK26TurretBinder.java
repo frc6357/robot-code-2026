@@ -9,6 +9,8 @@ import java.util.Optional;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.lib.utils.Field;
@@ -50,7 +52,7 @@ public class SK26TurretBinder implements CommandBinder
         PointAtShuttlePoint = StateHandler.whenCurrentState(MacroState.SHUTTLING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
-        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE);
+        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE).or(StateHandler.whenCurrentState(MacroState.INTAKING).or(StateHandler.whenCurrentState(MacroState.SPITTING)));
 
         if(swerveSubsystem.isEmpty()) {
             return;
@@ -89,13 +91,14 @@ public class SK26TurretBinder implements CommandBinder
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
 
-        PointAtShuttlePoint.whileTrue(new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
+        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(
+            new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));
         
-        PointAtHub.whileTrue(
+        inAllianceZone.and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(Commands.deferredProxy(() -> 
             new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
                                                                         FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
-            .withName("TurretTrackHub"));
+        ).withName("TurretTrackHub" + DriverStation.getAlliance().get()));
 
 
         // Default command: Use the right joystick to manually move the turret when idle

@@ -28,7 +28,7 @@ public class TurretJoystickCommand extends Command
     {
         lastTimestamp = Timer.getFPGATimestamp();
         // Sync target to actual position to prevent jumping when command starts
-        turret.setAngleDegrees(turret.getAngleDegrees());
+        turret.setAngleDegrees(turret.getCachedAngleDegrees());
     }
 
     @Override

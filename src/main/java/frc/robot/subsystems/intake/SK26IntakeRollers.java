@@ -3,8 +3,12 @@ package frc.robot.subsystems.intake;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kMaxIntakeVoltage;
 import static frc.robot.Konstants.IntakeConstants.kIntakeSupplyCurrentLimit;
+import static frc.robot.Konstants.IntakeConstants.kChassisSpeedRollerFF;
+import static frc.robot.Konstants.IntakeConstants.kIntakeStationaryVoltage;
 import static frc.robot.Konstants.IntakeConstants.kIntakeStatorCurrentLimit;
 import static frc.robot.Ports.pickupOBPorts.kIntakeMotor;
+
+import java.util.function.Supplier;
 
 // Imports from Phoenix 6
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
@@ -17,6 +21,7 @@ import org.littletonrobotics.junction.Logger;
 
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -67,6 +72,26 @@ public class SK26IntakeRollers extends SubsystemBase
 	}
 
 	/**
+	 * Runs the intake rollers based on the robot's chassis speeds. This is to compensate for
+	 * the increasing entrance speed of Fuel as it enters the intake system.
+	 * @param robotSpeeds The current speeds of the robot chassis.
+	 */
+	public static double calculateRollerVoltageFromRobotVel(ChassisSpeeds robotSpeeds) {
+		// Calculate the speed of the intake as it approaches Fuel, which fortunately is on the front of the robot
+		double forwardSpeed = robotSpeeds.vxMetersPerSecond;
+
+		// Map the forward speed to an intake voltage (this is a simple linear mapping, can be tuned)
+		// Unfortunately the signs of the math is a little funky, but I am just working with what is already here.
+		double voltage = MathUtil.clamp(kIntakeStationaryVoltage - (forwardSpeed * kChassisSpeedRollerFF), -kMaxIntakeVoltage, kIntakeStationaryVoltage);
+		
+		return voltage;
+	}
+
+	public Command runBasedOnRobotSpeedCommand(Supplier<ChassisSpeeds> robotSpeeds) {
+		return this.runEnd(() -> setIntakeVoltage(calculateRollerVoltageFromRobotVel(robotSpeeds.get())), () -> stopIntake());
+	}
+
+	/**
 	 * Command factory that runs the rollers at the given voltage and stops on end.
 	 */
 	public Command runAtVoltageCommand(double voltage)
@@ -93,7 +118,7 @@ public class SK26IntakeRollers extends SubsystemBase
 
 	private void logOutputs()
 	{
-		Logger.recordOutput("Intake/Roller Voltage", targetVoltage);
+		Logger.recordOutput("Intake/Roller Target Voltage", targetVoltage);
 		Logger.recordOutput("Intake/Roller Velocity (RPS)", intakeMotor.getVelocity().getValueAsDouble());
 	}
 }

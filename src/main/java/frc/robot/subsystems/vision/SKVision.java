@@ -21,10 +21,15 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.numbers.N3;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.utils.Field;
 import frc.lib.utils.Trio;
@@ -33,6 +38,7 @@ import frc.lib.vision.Limelight.IMUMode;
 import frc.lib.vision.LimelightHelpers.RawFiducial;
 import frc.robot.Robot;
 import frc.robot.subsystems.turret.SK26Turret;
+import frc.robot.subsystems.vision.VisionConfig.Thresholds;
 import frc.robot.subsystems.drive.SKSwerve;
 
 public class SKVision extends SubsystemBase {
@@ -68,6 +74,8 @@ public class SKVision extends SubsystemBase {
 
     // Creates an ArrayList to store estimated vision poses during autonomous
     public ArrayList<Trio<Pose3d, Pose2d, Double>> multiCamPoses = new ArrayList<Trio<Pose3d, Pose2d, Double>>();
+
+    StructPublisher<Pose3d> turretLimelightPosePublisher = NetworkTableInstance.getDefault().getStructTopic("TurretLLPose", Pose3d.struct).publish();
     
     
         // Data extraction record (groups related vision measurement data)
@@ -98,6 +106,7 @@ public class SKVision extends SubsystemBase {
             this.m_turret = null;
         }
         startupLimelights();
+        turretLL.setIMUMode(IMUMode.EXTERNAL_ONLY);
     }
 
     public SKVision(Optional<SKSwerve> m_swerve) {
@@ -109,8 +118,10 @@ public class SKVision extends SubsystemBase {
         tagIDsInView.clear();
         tagLOSTransforms.clear();
 
+        Rotation2d cachedSwerveRotation = m_swerve.getRawDrivetrainRotation();
+
         for(Limelight ll : poseLimelights) {
-            if(ll == turretLL) {
+            if(ll.getName() == turretLL.getName()) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
                     continue;
@@ -118,14 +129,20 @@ public class SKVision extends SubsystemBase {
                 // Rotate the turret LL's 0° pose around the turret pivot by the current turret angle.
                 // cameraPose3d uses WPILib convention (X=forward, Y=left, Z=up).
                 // WPILib +Z rotation = CCW from above, which matches the turret's CCW-positive convention.
-                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(m_turret.getAngleDegrees()));
+                Rotation3d turretRotation = new Rotation3d(0, 0, Math.toRadians(m_turret.getCachedAngleDegrees()));
                 Pose3d dynamicCameraPose = ll.getConfig().getCameraPose3d()
                     .rotateAround(kTurretPivotInRobotSpace, turretRotation);
                 ll.setCameraPoseInRobotSpace(dynamicCameraPose);
+                turretLimelightPosePublisher.accept(dynamicCameraPose);
+                // Also need to adjust the robot orientation by subtracting the turret angle, since the MegaTag2 pose estimation needs 
+                // to know the field-relative robot orientation of **the camera**, not just the robot in this case.
+                // In most cases for non-servoing cameras, passing in the robot's heading is sufficient since the camera is fixed to the robot.
+                SmartDashboard.putNumber("TurretLimelightRotation", cachedSwerveRotation.getDegrees() - dynamicCameraPose.getRotation().toRotation2d().getDegrees());
+                ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
             }
-            // if(ll != turretLL) {
-                ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
-            // }
+            else {
+                ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
+            }
             scanForTags(ll);
         }
 
@@ -242,8 +259,9 @@ public class SKVision extends SubsystemBase {
             // Set the integrating status to false before checking if any limelight is integrating
             isIntegrating = false;
 
-            // Feeds the limelight's robot orientation for use with the MEGATAG2 algorithm
-            ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
+            // Commented out because this should be handled in periodic
+            // // Feeds the limelight's robot orientation for use with the MEGATAG2 algorithm
+            // ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
 
             // Add the input into the pose estimator
             addFilteredLimelightInput(ll);
@@ -323,8 +341,8 @@ public class SKVision extends SubsystemBase {
             return;
         }
 
+        resetPoseToVisionLog = "ForceReset executed on " + ll.getName();
         m_swerve.resetPose(ll.getRawPose3d().toPose2d());
-        ll.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
     }
 
     public void autonResetPoseToVision() {
@@ -375,9 +393,36 @@ public class SKVision extends SubsystemBase {
         }
 
         Pose3d botPose3d = ll.getRawPose3d();
-        ll.setRobotOrientation(botPose3d.toPose2d().getRotation().getDegrees());
+        // ll.setRobotOrientation(botPose3d.toPose2d().getRotation().getDegrees());
         resetPoseToVision(
                 ll.targetInView(), botPose3d, ll.getMegaPose2d(), ll.getRawPoseTimestamp());
+    }
+
+    public void stationaryDrivetrainUpdate() {
+        if(Robot.isSimulation()) {
+            return;
+        }
+        Limelight ll = getBestLimelight();
+        if(!ll.targetInView()) {
+            resetPoseToVisionLog = "Fail: Raw Drivetrain update";
+            return;
+        }
+        if(ll.getDistanceToTagFromCamera() > 2.2) {
+            resetPoseToVisionLog = "Fail: Raw Drivetrain update";
+            return;
+        }
+
+        Transform2d diff = m_swerve.getRobotPose().minus(ll.getRawPose3d().toPose2d());
+
+        if(diff.getX() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF && 
+           diff.getY() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF &&
+           diff.getRotation().getRotations() < Thresholds.DRIVETRAIN_STATIONARY_POSE_DIFF) 
+        {
+            resetPoseToVisionLog = "Success: Raw Drivetrain update on " + ll.getName();
+            m_swerve.resetPose(ll.getRawPose3d().toPose2d());
+            return;
+        }
+        resetPoseToVisionLog = "Fail: Raw Drivetrain update";
     }
 
     @AutoLogOutput(key = "Vision/ResetPoseToVisionLog")
@@ -450,7 +495,7 @@ public class SKVision extends SubsystemBase {
             LL.sendInvalidStatus("no tag found rejection");
             return false;
         }
-        LL.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
+        // LL.setRobotOrientation(m_swerve.getRobotRotation().getDegrees());
         return true;
     }
 
@@ -553,13 +598,13 @@ public class SKVision extends SubsystemBase {
     ) {
         // Stationary and very close
         if (Math.hypot(robotSpeed.vxMetersPerSecond, robotSpeed.vyMetersPerSecond) <= VisionConfig.Thresholds.STATIONARY_SPEED.in(MetersPerSecond)
-                && targetSize > VisionConfig.Thresholds.VERY_CLOSE_SIZE) {
+                && targetSize > VisionConfig.Thresholds.VERY_CLOSE_SIZE && poseDifference < VisionConfig.Thresholds.CLOSE_POSE_DIFF) {
             ll.sendValidStatus("Stationary close integration");
             return VisionConfig.PoseStdDevs.STATIONARY_CLOSE;
         }
 
         // Multi-tag integration
-        else if (multiTags && targetSize > VisionConfig.Thresholds.SMALL_MULTI_SIZE) {
+        else if (multiTags && targetSize > VisionConfig.Thresholds.SMALL_MULTI_SIZE && poseDifference < VisionConfig.Thresholds.MULTI_POSE_DIFF) {
             if (targetSize > VisionConfig.Thresholds.LARGE_MULTI_SIZE) {
                 ll.sendValidStatus("Strong Multi integration");
                 return VisionConfig.PoseStdDevs.STRONG_MULTI;

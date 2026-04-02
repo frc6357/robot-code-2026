@@ -58,7 +58,8 @@ public class SK26DualLauncherBinder implements CommandBinder {
                     Commands.defer(() -> launcher.runVelocityFromPrefCommand(), Set.of(launcher))
                 );
             }
-            else {                
+            else {     
+                // TODO: LAUNCHER - Switch which blocks are commented when done tuning launcher flywheel           
                 Score.whileTrue(
                     launcher.runVelocityCommand(
                         () -> RPM.of(flywheelMap.get(
