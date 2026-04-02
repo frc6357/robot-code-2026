@@ -118,9 +118,12 @@ public class SKVision extends SubsystemBase {
         tagIDsInView.clear();
         tagLOSTransforms.clear();
 
+        // Cache swerve rotation once for all Limelights
         Rotation2d cachedSwerveRotation = m_swerve.getRawDrivetrainRotation();
 
+        // OPTIMIZATION: Refresh all Limelight snapshots FIRST, batching NT reads
         for(Limelight ll : poseLimelights) {
+            // Set robot orientation before refreshing snapshot (needed for MegaTag2)
             if(ll.getName() == turretLL.getName()) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
@@ -143,7 +146,12 @@ public class SKVision extends SubsystemBase {
             else {
                 ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
             }
-            scanForTags(ll);
+            
+            // Refresh snapshot AFTER setting orientation - batches all NT reads
+            ll.refreshSnapshot();
+            
+            // Use cached data for tag scanning
+            scanForTagsCached(ll);
         }
 
         telemeterizeTagLOS();
@@ -189,10 +197,62 @@ public class SKVision extends SubsystemBase {
         }
     }
 
+    // ======================= THROTTLE MANAGEMENT =======================
+    // Call these methods on robot state transitions to optimize Limelight performance
+
+    private static final int THROTTLE_DISABLED = 10; // Skip frames while disabled (lower CPU usage)
+    private static final int THROTTLE_ENABLED = 0;   // No throttling while enabled (full performance)
+
+    /**
+     * Configures Limelight throttling for disabled state.
+     * Reduces processing load when vision data isn't critical.
+     * Call this from disabledInit().
+     */
+    public void onDisabled() {
+        for (Limelight ll : allLimelights) {
+            if (ll.isAttached()) {
+                ll.setThrottle(THROTTLE_DISABLED);
+            }
+        }
+    }
+
+    /**
+     * Configures Limelight throttling for enabled states (auto/teleop).
+     * Maximizes vision update rate for best pose estimation.
+     * Call this from autonomousInit() or teleopInit().
+     */
+    public void onEnabled() {
+        for (Limelight ll : allLimelights) {
+            if (ll.isAttached()) {
+                ll.setThrottle(THROTTLE_ENABLED);
+            }
+        }
+    }
+
+    // ======================= END THROTTLE MANAGEMENT =======================
+
+    /**
+     * Scans a limelight for visible AprilTags and adds their IDs to an array for later usage.
+     * Uses cached snapshot data to avoid additional NetworkTables calls.
+     * @param ll The limelight to scan for tags
+     */
+    private void scanForTagsCached(Limelight ll) {
+        if(ll.getLimelightPipeline() == kAprilTagPipeline) {
+            if(ll.getCachedTargetInView()) {
+                for(RawFiducial tag : ll.getCachedRawFiducials()) {
+                    tagIDsInView.add(tag.id);
+                }
+            }
+        }
+    }
+
     /**
      * Scans a limelight for visible AprilTags and adds their IDs to an array for later usage.
      * @param ll The limelight to scan for tags
+     * @deprecated Use {@link #scanForTagsCached(Limelight)} after calling ll.refreshSnapshot()
      */
+    @Deprecated
+    @SuppressWarnings("unused")
     private void scanForTags(Limelight ll) {
         if(ll.getLimelightPipeline() == kAprilTagPipeline) {
                 if(ll.targetInView()) {
@@ -277,7 +337,7 @@ public class SKVision extends SubsystemBase {
     private void updatePose() {
         Limelight bestLL = getBestLimelight();
         for(Limelight ll : poseLimelights) {
-            if(!DriverStation.isDisabled()) {
+            if(DriverStation.isDisabled()) {
                 ll.setThrottle(10);
             }
             else {
@@ -317,8 +377,16 @@ public class SKVision extends SubsystemBase {
         double bestScore = 0;
         for(Limelight LL : poseLimelights) {
             double score = 0;
-            score += (LL.getTagCountInView() * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / LL.getDistanceToTagFromCamera();
-            score += LL.getTargetSize() * 1.25; // Range: 1-100
+            // Use cached values to avoid additional NT calls
+            double tagCount = LL.getCachedTagCount();
+            double distanceToTag = LL.getCachedDistanceToTag();
+            double targetSize = LL.getCachedTargetSize();
+            
+            // Avoid division by zero
+            if (distanceToTag > 0.001) {
+                score += (tagCount * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / distanceToTag;
+            }
+            score += targetSize * 1.25; // Range: 1-100
 
             if(score > bestScore) {
                 bestScore = score;
@@ -337,7 +405,7 @@ public class SKVision extends SubsystemBase {
         if(ll == null) {
             return;
         }
-        if(!ll.targetInView()) {
+        if(!ll.getCachedTargetInView()) {
             return;
         }
 
@@ -486,11 +554,12 @@ public class SKVision extends SubsystemBase {
 
     /**
      * Validates basic requirements for vision measurement integration.
+     * Uses cached snapshot data to avoid additional NetworkTables calls.
      * @param LL The limelight to validate
      * @return true if basic requirements are met, false otherwise
      */
     private boolean validateBasicRequirements(Limelight LL) {
-        if (!LL.targetInView()) {
+        if (!LL.getCachedTargetInView()) {
             LL.setTagStatus("no tags");
             LL.sendInvalidStatus("no tag found rejection");
             return false;
@@ -520,17 +589,19 @@ public class SKVision extends SubsystemBase {
 
     /**
      * Extracts vision measurement data from a limelight.
+     * Uses cached snapshot data to avoid additional NetworkTables calls.
      * @param LL The limelight to extract data from
      * @return VisionMeasurement record containing all relevant data
      */
     private VisionMeasurement extractVisionMeasurement(Limelight LL) {
-        double timeStamp = LL.getRawPoseTimestamp();
-        double targetSize = LL.getTargetSize();
-        Pose3d botpose3D = LL.getRawPose3d();
+        // Use cached values from snapshot (populated by refreshSnapshot() in periodic)
+        double timeStamp = LL.getCachedRawPoseTimestamp();
+        double targetSize = LL.getCachedTargetSize();
+        Pose3d botpose3D = LL.getCachedRawPose3d();
         Pose2d botposeMT1 = botpose3D.toPose2d();
-        Pose2d botposeMT2 = LL.getMegaPose2d();
-        RawFiducial[] tags = LL.getRawFiducial();
-        boolean multiTags = LL.multipleTagsInView();
+        Pose2d botposeMT2 = LL.getCachedMegaPose2d();
+        RawFiducial[] tags = LL.getCachedRawFiducials();
+        boolean multiTags = LL.getCachedMultipleTagsInView();
         ChassisSpeeds robotSpeed = m_swerve.getRobotRelativeSpeeds();
         double poseDifference = m_swerve.getRobotPose().getTranslation().getDistance(botposeMT2.getTranslation());
         double highestAmbiguity = findHighestAmbiguity(tags, LL);

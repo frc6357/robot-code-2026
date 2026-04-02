@@ -34,6 +34,10 @@ public class SK26Feeder extends SubsystemBase
     private int numBallsLaunched = 0;
     private boolean lastLauncherSensorState = false;
 
+    // Cached sensor values to avoid redundant CAN reads
+    private double cachedVelocityRPS = 0.0;
+    private double cachedAppliedOutput = 0.0;
+
     public SK26Feeder() 
     {
         // ========== Motor Configuration ==========
@@ -104,6 +108,10 @@ public class SK26Feeder extends SubsystemBase
 
     @Override
     public void periodic() {
+        // Cache all CAN reads at the start of the cycle
+        cachedVelocityRPS = encoder.getVelocity() / 60.0;
+        cachedAppliedOutput = feederMotor.getAppliedOutput();
+
         checkIfBallLaunched();
         logOutputs();
     }
@@ -123,7 +131,7 @@ public class SK26Feeder extends SubsystemBase
 
     private void logOutputs() {
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
-        Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
-        Logger.recordOutput("Feeder/Current Voltage", getVoltage());
+        Logger.recordOutput("Feeder/Current Velocity RPS", cachedVelocityRPS);
+        Logger.recordOutput("Feeder/Current Voltage", cachedAppliedOutput);
     }
 }
