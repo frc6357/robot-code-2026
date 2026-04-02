@@ -554,7 +554,7 @@ public final class Konstants
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = 0.03;  // MA's tested value
+        public static final double kPhaseDelaySeconds = 0.2;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
@@ -600,10 +600,13 @@ public final class Konstants
             map.put(3.95, 26.8 * 60.0);
             map.put(4.08, 27.4 * 60.0);
             map.put(4.13, 27.55 * 60.0);
-            map.put(4.33, 27.15 * 60.0);
+            map.put(4.33, 27.9 * 60.0);
             map.put(4.47, 28.2 * 60.0);
             map.put(4.67, 29.1 * 60.0);
             map.put(5.11, 30.5 * 60.0);
+            map.put(5.24, 30.95 * 60.0);
+            map.put(5.43, 31.5 * 60.0);
+            map.put(5.62, 32.0 * 60.0);
 
             return map;
         }
@@ -612,10 +615,13 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> time of flight in seconds)
-            map.put(1.0, 0.2);
-            map.put(2.0, 0.4);
-            map.put(3.0, 0.6);
-            map.put(4.0, 0.8);
+            map.put(3.02, 0.68);
+            map.put(3.26, 0.76);
+            map.put(3.55, 0.86);
+            map.put(3.61, 0.89);
+            map.put(4.07, 0.99);
+            map.put(4.47, 1.04);
+            map.put(4.7, 1.13);
             map.put(5.0, 1.0);
 
             return map;
