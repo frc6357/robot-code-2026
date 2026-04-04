@@ -15,6 +15,18 @@
           "data": {
             "pathName": "RTrenchToRScore"
           }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.67
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Request Scoring State"
+          }
         }
       ]
     }

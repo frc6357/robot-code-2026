@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 3.7,
+        "x": 3.45,
         "y": 7.36
       },
       "prevControl": {
-        "x": 3.95,
+        "x": 3.7,
         "y": 7.36
       },
       "nextControl": null,
@@ -45,19 +45,7 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Request Scoring State",
-      "waypointRelativePos": 1.0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Request Scoring State"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.5,
     "maxAcceleration": 3.0,

@@ -22,6 +22,8 @@ public class GeneratedConstants {
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
+
+    // TODO: Look into these feedforwards- use AdvantageKit sysid tuning routine
     private static final Slot0Configs steerGains = new Slot0Configs()
         .withKP(100).withKI(0).withKD(0.5)
         .withKS(0.1).withKV(2.49).withKA(0)
