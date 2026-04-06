@@ -414,7 +414,8 @@ public class RobotContainer {
 
         shiftEndingSoon.onTrue(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.85))
         .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.85))));
-        shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0)));
+        shiftEndingSoon.onFalse(Commands.runOnce(() -> kDriver.setRumble(RumbleType.kBothRumble, 0.0))
+        .alongWith(Commands.runOnce(() -> kOperator.setRumble(RumbleType.kBothRumble, 0.0))));
     }
 
     private void updatePhaseTimer(Alliance allianceToWinAuto) {
@@ -521,18 +522,24 @@ public class RobotContainer {
     }
 
     public void disabledInit() {
+        // Throttle Limelights to reduce CPU load while disabled
+        m_visionContainer.ifPresent(vision -> vision.onDisabled());
     }
 
     public void autonomousInit() {
         if(m_stateHandlerContainer.isPresent()) {
             m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
         }
+        // Remove Limelight throttling for full performance during auto
+        m_visionContainer.ifPresent(vision -> vision.onEnabled());
     }
 
     public void teleopInit() {
         if(m_stateHandlerContainer.isPresent()) {
             m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
         }
+        // Remove Limelight throttling for full performance during teleop
+        m_visionContainer.ifPresent(vision -> vision.onEnabled());
     }
 
     public void testPeriodic()

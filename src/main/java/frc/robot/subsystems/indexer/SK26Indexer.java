@@ -55,6 +55,12 @@ public class SK26Indexer extends SubsystemBase
     // Ball count tracked by external events (intake sensor, feeder notification, etc.)
     private int numBallsInIndexer = 0;
 
+    // Cached sensor values to avoid redundant CAN reads
+    private double cachedVelocityRPM = 0.0;
+    private double cachedAppliedOutput = 0.0;
+    private double cachedOutputCurrent = 0.0;
+    private double cachedBusVoltage = 0.0;
+
     // Display status
     private IndexerStatus status = IndexerStatus.IDLE;
     // private boolean lastIntakeSensorState = false;
@@ -198,18 +204,21 @@ public class SK26Indexer extends SubsystemBase
     @Override
     public void periodic() 
     {
-        // checkIfBallIntaked();
+        // Cache all CAN reads at the start of the cycle
+        cachedVelocityRPM = indexerEncoder.getVelocity();
+        cachedAppliedOutput = indexerMotor.getAppliedOutput();
+        cachedOutputCurrent = indexerMotor.getOutputCurrent();
+        cachedBusVoltage = indexerMotor.getBusVoltage();
 
         logOutputs();
     }
 
     private void logOutputs() {
-        double velocityRPM = indexerEncoder.getVelocity();
-        Logger.recordOutput("Indexer/Applied Output", indexerMotor.getAppliedOutput());
-        Logger.recordOutput("Indexer/Actual Velocity RPM", velocityRPM);
-        Logger.recordOutput("Indexer/Output Current", indexerMotor.getOutputCurrent());
-        Logger.recordOutput("Indexer/Bus Voltage", indexerMotor.getBusVoltage());
-        Logger.recordOutput("Indexer/Motor Speed (RPS)", velocityRPM / 60.0);
+        Logger.recordOutput("Indexer/Applied Output", cachedAppliedOutput);
+        Logger.recordOutput("Indexer/Actual Velocity RPM", cachedVelocityRPM);
+        Logger.recordOutput("Indexer/Output Current", cachedOutputCurrent);
+        Logger.recordOutput("Indexer/Bus Voltage", cachedBusVoltage);
+        Logger.recordOutput("Indexer/Motor Speed (RPS)", cachedVelocityRPM / 60.0);
         Logger.recordOutput("Indexer/Status", status.toString());
         Logger.recordOutput("Indexer/Target Voltage (V)", targetVoltage);
         Logger.recordOutput("Indexer/Balls In Indexer", numBallsInIndexer);

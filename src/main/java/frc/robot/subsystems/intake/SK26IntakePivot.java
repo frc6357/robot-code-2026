@@ -27,6 +27,7 @@ import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 import org.littletonrobotics.junction.Logger;
 
 // Imports from Phoenix 6
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
@@ -87,6 +88,9 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	private final StatusSignal<AngularVelocity> positionerAngularVelocityStatusSignal;
 
 	private IntakePosition targetPositionEnum = IntakePosition.STOW;
+
+	// Cached velocity value (updated each cycle via refreshAll)
+	private double cachedVelocityRPS = 0.0;
 
 	// ===== Stall Detection (ground hard-stop homing) =====
 	// When targeting GROUND, if the motor stalls (velocity near zero) for STALL_TIME_SECONDS,
@@ -263,8 +267,12 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 	@Override
 	public void periodic()
 	{
-		// Cache position reading
-		currentPositionerPosition = positionerAngleStatusSignal.refresh().getValue().in(edu.wpi.first.units.Units.Rotations);
+		// Batch refresh all status signals in a single CAN frame
+		BaseStatusSignal.refreshAll(positionerAngleStatusSignal, positionerAngularVelocityStatusSignal);
+		
+		// Cache readings from the refreshed signals
+		currentPositionerPosition = positionerAngleStatusSignal.getValue().in(edu.wpi.first.units.Units.Rotations);
+		cachedVelocityRPS = positionerAngularVelocityStatusSignal.getValue().in(RotationsPerSecond);
 
 		// ===== Stall detection for ground hard-stop homing =====
 		// Only active when we're targeting GROUND and haven't already reset this cycle.
@@ -272,7 +280,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		// GROUND position. The PID keeps pushing into the hard-stop, stalling the motor.
 		// After 2 seconds of stall we know we're physically at ground, so we tell the
 		// motor "you are at -0.235" and the error drops to zero.
-		double velocityRPS = Math.abs(positionerAngularVelocityStatusSignal.refresh().getValue().in(RotationsPerSecond));
+		double velocityRPS = Math.abs(cachedVelocityRPS);
 		boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
 		boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
 		boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
@@ -307,7 +315,7 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		Logger.recordOutput("Intake/Positioner Position (rot)", getCurrentPosition());
 		Logger.recordOutput("Intake/Positioner Target Position (rot)", getTargetPosition());
 		Logger.recordOutput("Intake/Positioner At Target", isPositionerAtTarget());
-		Logger.recordOutput("Intake/Positioner Velocity (RPS)", positionerAngularVelocityStatusSignal.refresh().getValue().in(RotationsPerSecond));
+		Logger.recordOutput("Intake/Positioner Velocity (RPS)", cachedVelocityRPS);
 		Logger.recordOutput("Intake/Positioner Error (rot)", getTargetPosition() - getCurrentPosition());
 		Logger.recordOutput("Intake/Intake Target (enum)", getPositionerTargetEnum());
 	}

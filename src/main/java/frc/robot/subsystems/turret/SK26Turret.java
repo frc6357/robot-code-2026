@@ -31,6 +31,7 @@ import static frc.robot.Ports.TurretPorts.kTurretMotor;
 
 import org.littletonrobotics.junction.Logger;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 // Imports from Phoenix
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
@@ -95,6 +96,7 @@ public class SK26Turret extends SubsystemBase
 
     // Cached per-cycle value to avoid redundant CAN reads
     private double cachedAngleDeg = 0.0;
+    private double cachedVelocityDegPerSec = 0.0;
 
     private final StatusSignal<Angle> turretAngleStatusSignal;
     private final StatusSignal<AngularVelocity> turretAngularVelocityStatusSignal;
@@ -192,8 +194,12 @@ public class SK26Turret extends SubsystemBase
     @Override
     public void periodic()
     {
-        // ========== Cache sensor read ==========
-        cachedAngleDeg = getAngleDegrees();
+        // ========== Batch refresh all status signals in a single CAN frame ==========
+        BaseStatusSignal.refreshAll(turretAngleStatusSignal, turretAngularVelocityStatusSignal);
+        
+        // ========== Cache sensor reads from refreshed signals ==========
+        cachedAngleDeg = turretAngleStatusSignal.getValue().in(Degrees);
+        cachedVelocityDegPerSec = turretAngularVelocityStatusSignal.getValue().in(DegreesPerSecond);
 
         // ========== Send MotionMagic target to motor firmware ==========
         // Convert target from degrees to turret rotations (mechanism units)
@@ -207,6 +213,7 @@ public class SK26Turret extends SubsystemBase
      * Returns the current turret angle from the CANcoder (degrees).
      * Accounts for 2:1 gear ratio (2 encoder rotations = 1 turret rotation).
      * Range: -180 to +180 degrees.
+     * Note: This forces a refresh - prefer using getCachedAngleDegrees() when possible.
      */
     private double getAngleDegrees()
     {
@@ -227,6 +234,18 @@ public class SK26Turret extends SubsystemBase
         return cachedAngleDeg;
     }
 
+    /**
+     * Returns the cached angular velocity in degrees per second.
+     * @return Cached angular velocity in degrees/second
+     */
+    public double getCachedAngularVelocityDegreesPerSecond() {
+        return cachedVelocityDegPerSec;
+    }
+
+    /**
+     * Returns the angular velocity in degrees per second.
+     * Note: This forces a refresh - prefer using getCachedAngularVelocityDegreesPerSecond() when possible.
+     */
     public double getAngularVelocityDegreesPerSecond() {
         double encoderVelocityDegpersec = turretAngularVelocityStatusSignal.refresh().getValue().in(DegreesPerSecond);
         return encoderVelocityDegpersec;
@@ -336,7 +355,7 @@ public class SK26Turret extends SubsystemBase
         }
         
         Logger.recordOutput("Turret/Angle (deg)", cachedAngleDeg);
-        Logger.recordOutput("Turret/Velocity (degpersec)", getAngularVelocityDegreesPerSecond());
+        Logger.recordOutput("Turret/Velocity (degpersec)", cachedVelocityDegPerSec);
         Logger.recordOutput("Turret/Target (deg)", getTargetAngleDegrees());
         Logger.recordOutput("Turret/At Target", atTarget());
         Logger.recordOutput("Turret/Error (deg)", getTurretError());

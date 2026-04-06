@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchSwipe1LTrench"
+            "pathName": "LTrenchSwipe1LTrenchSubtle"
           }
         },
         {
           "type": "path",
           "data": {
             "pathName": "LTrenchToLScore"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.67
           }
         },
         {

@@ -97,11 +97,35 @@ public class Limelight {
         }
     }
 
+    /**
+     * Cached snapshot of Limelight data for a single cycle.
+     * Call {@link Limelight#refreshSnapshot()} once per periodic cycle,
+     * then use getCached*() methods for zero-cost repeated access.
+     */
+    public static class LimelightSnapshot {
+        public boolean targetInView = false;
+        public double horizontalOffset = 0;
+        public double verticalOffset = 0;
+        public double targetSize = 0;
+        public int tagCount = 0;
+        public double closestTagID = 0;
+        public Pose3d rawPose3d = new Pose3d();
+        public Pose2d megaPose2d = new Pose2d();
+        public double rawPoseTimestamp = 0;
+        public double megaPoseTimestamp = 0;
+        public RawFiducial[] rawFiducials = new RawFiducial[0];
+        public double distanceToTag = 0;
+        public boolean valid = false; // True if snapshot was successfully populated
+    }
+
     /* Debug */
     private final DecimalFormat df = new DecimalFormat();
     @Getter private LimelightConfig config;
     @Getter @Setter private String logStatus = "";
     @Getter @Setter private String tagStatus = "";
+
+    // Cached snapshot - populated once per cycle by refreshSnapshot()
+    private final LimelightSnapshot snapshot = new LimelightSnapshot();
 
     /** Creates a new limelight object.
      * @param config The limeight config object to use
@@ -147,6 +171,133 @@ public class Limelight {
     public boolean isAttached() {
         return config.isAttached();
     }
+
+    // ======================= SNAPSHOT CACHING SYSTEM =======================
+    // Call refreshSnapshot() ONCE at the start of your subsystem's periodic(),
+    // then use getCached*() methods for repeated access without additional NT calls.
+
+    /**
+     * Refreshes the cached snapshot with current Limelight data.
+     * Call this ONCE per periodic cycle, then use getCached*() methods.
+     * This batches all NetworkTables reads into a single operation.
+     */
+    public void refreshSnapshot() {
+        if (!isAttached()) {
+            snapshot.valid = false;
+            return;
+        }
+        
+        try {
+            // Get the bot pose estimate once - this contains most data we need
+            var poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(config.getName());
+            var megaTagEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(config.getName());
+            
+            snapshot.targetInView = LimelightHelpers.getTV(config.getName());
+            snapshot.horizontalOffset = LimelightHelpers.getTX(config.getName());
+            snapshot.verticalOffset = LimelightHelpers.getTY(config.getName());
+            snapshot.targetSize = LimelightHelpers.getTA(config.getName());
+            snapshot.closestTagID = LimelightHelpers.getFiducialID(config.getName());
+            
+            // Extract data from the single pose estimate call
+            snapshot.tagCount = poseEstimate.tagCount;
+            snapshot.rawFiducials = poseEstimate.rawFiducials;
+            snapshot.rawPoseTimestamp = poseEstimate.timestampSeconds;
+            
+            // Get poses
+            snapshot.rawPose3d = LimelightHelpers.getBotPose3d_wpiBlue(config.getName());
+            snapshot.megaPose2d = megaTagEstimate.pose;
+            snapshot.megaPoseTimestamp = megaTagEstimate.timestampSeconds;
+            
+            // Calculate distance to tag
+            Pose3d cameraPoseTS = LimelightHelpers.getCameraPose3d_TargetSpace(config.getName());
+            double x = cameraPoseTS.getX();
+            double y = cameraPoseTS.getZ();
+            snapshot.distanceToTag = Math.sqrt(x * x + y * y);
+            
+            snapshot.valid = true;
+        } catch (Exception e) {
+            snapshot.valid = false;
+        }
+    }
+
+    /**
+     * @return The cached snapshot. Use after calling refreshSnapshot().
+     */
+    public LimelightSnapshot getSnapshot() {
+        return snapshot;
+    }
+
+    /** @return Cached: Whether there's a valid target in view */
+    public boolean getCachedTargetInView() {
+        return snapshot.valid && snapshot.targetInView;
+    }
+
+    /** @return Cached: Horizontal offset to target */
+    public double getCachedHorizontalOffset() {
+        return snapshot.horizontalOffset;
+    }
+
+    /** @return Cached: Vertical offset to target */
+    public double getCachedVerticalOffset() {
+        return snapshot.verticalOffset;
+    }
+
+    /** @return Cached: Target size (percentage of image) */
+    public double getCachedTargetSize() {
+        return snapshot.targetSize;
+    }
+
+    /** @return Cached: Number of AprilTags in view */
+    public int getCachedTagCount() {
+        return snapshot.tagCount;
+    }
+
+    /** @return Cached: Whether multiple tags are visible */
+    public boolean getCachedMultipleTagsInView() {
+        return snapshot.tagCount > 1;
+    }
+
+    /** @return Cached: Closest tag ID */
+    public double getCachedClosestTagID() {
+        return snapshot.closestTagID;
+    }
+
+    /** @return Cached: Raw 3D pose (MegaTag1) */
+    public Pose3d getCachedRawPose3d() {
+        return snapshot.rawPose3d;
+    }
+
+    /** @return Cached: MegaTag2 pose */
+    public Pose2d getCachedMegaPose2d() {
+        return snapshot.megaPose2d;
+    }
+
+    /** @return Cached: Raw pose timestamp */
+    public double getCachedRawPoseTimestamp() {
+        return snapshot.rawPoseTimestamp;
+    }
+
+    /** @return Cached: MegaTag2 pose timestamp */
+    public double getCachedMegaPoseTimestamp() {
+        return snapshot.megaPoseTimestamp;
+    }
+
+    /** @return Cached: Raw fiducial data array */
+    public RawFiducial[] getCachedRawFiducials() {
+        return snapshot.rawFiducials;
+    }
+
+    /** @return Cached: Distance to closest tag */
+    public double getCachedDistanceToTag() {
+        return snapshot.distanceToTag;
+    }
+
+    /** @return Whether the snapshot is valid (refreshSnapshot succeeded) */
+    public boolean isSnapshotValid() {
+        return snapshot.valid;
+    }
+
+    // ======================= END SNAPSHOT CACHING =======================
 
     /**
      * Using the Limelight's config, sets the Limelight's camera pose in robot space.

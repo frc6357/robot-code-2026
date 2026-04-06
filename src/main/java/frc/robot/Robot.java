@@ -7,9 +7,6 @@ package frc.robot;
 import static frc.robot.Ports.DriverPorts.kDriver;
 import static frc.robot.Ports.OperatorPorts.kOperator;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -20,9 +17,8 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 import frc.lib.preferences.SKPreferences;
 import frc.lib.tuning.TunableNumber;
 import frc.lib.tuning.Tuning;
+import frc.lib.utils.BootOptions;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
 
@@ -109,15 +105,9 @@ public class Robot extends LoggedRobot {
      * not always running is because overpopulating SmartDashboard with tunables can cause performance issues.
      */
     private void setupTuning() {
-        try {
-            File configFile = new File(Filesystem.getDeployDirectory(), "boot_options.json");
-            ObjectMapper mapper = new ObjectMapper();
-            JsonNode config = mapper.readTree(configFile);
-            tuningEnabled = config.get("TuningEnabled").asBoolean(false);
-        } catch (IOException e) {
-            System.err.println("[Tuning] Failed to read boot_options.json for TuningEnabled, defaulting to false: " + e.getMessage());
-            tuningEnabled = false;
-        }
+        // Initialize BootOptions early so all subsystems can access settings
+        BootOptions.initialize();
+        tuningEnabled = BootOptions.isTuningEnabled();
 
         if(!tuningEnabled) {
             System.out.println("[Tuning] Tuning is disabled. TunableNumbers will not be published to SmartDashboard.");
@@ -151,6 +141,7 @@ public class Robot extends LoggedRobot {
         kDriver.setRumble(RumbleType.kBothRumble, 0.0);
         kOperator.setRumble(RumbleType.kBothRumble, 0.0);
         FuelHuntFileLogger.close();
+        m_robotContainer.disabledInit();
     }
 
     @Override

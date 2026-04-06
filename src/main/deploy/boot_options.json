@@ -1,4 +1,5 @@
 {
     "RunReplay": false,
-    "TuningEnabled": false
+    "TuningEnabled": false,
+    "ReducedLogging": true
 }

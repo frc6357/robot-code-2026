@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.453,
-        "y": 0.75
+        "x": 2.5,
+        "y": 5.619985734664765
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.2030263098985925,
-        "y": 0.7463731201997569
+        "x": 1.77249756614999,
+        "y": 6.024077968862941
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "LeftBump"
     },
     {
       "anchor": {
-        "x": 3.45,
-        "y": 0.75
+        "x": 0.7912280701754386,
+        "y": 5.966172248803828
       },
       "prevControl": {
-        "x": 3.7,
-        "y": 0.75
+        "x": 2.021884481384369,
+        "y": 5.831889386040005
       },
       "nextControl": null,
       "isLocked": false,
@@ -29,23 +29,21 @@
     }
   ],
   "rotationTargets": [],
-  "constraintZones": [
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [
     {
-      "name": "Constraints Zone",
-      "minWaypointRelativePos": 0,
-      "maxWaypointRelativePos": 1.0,
-      "constraints": {
-        "maxVelocity": 1.25,
-        "maxAcceleration": 3.0,
-        "maxAngularVelocity": 270.0,
-        "maxAngularAcceleration": 540.0,
-        "nominalVoltage": 12.0,
-        "unlimited": false
+      "name": "Request Intaking State",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Request Intaking State"
+        }
       }
     }
   ],
-  "pointTowardsZones": [],
-  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.5,
     "maxAcceleration": 3.0,
@@ -59,10 +57,10 @@
     "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Right Trench",
+  "folder": "Left Bump",
   "idealStartingState": {
-    "velocity": 1.25,
-    "rotation": 180.0
+    "velocity": 0,
+    "rotation": 135.0
   },
   "useDefaultConstraints": true
 }
