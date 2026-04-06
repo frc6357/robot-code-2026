@@ -554,7 +554,7 @@ public final class Konstants
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = 0.2;
+        public static final double kPhaseDelaySeconds = -1.2;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
