@@ -78,8 +78,8 @@ public class SK26FeederBinder implements CommandBinder {
                         : feeder.idleFeederCommand(),
                     Set.of(feeder)));
 
-            scoring.onTrue(feeder.startTimer());
-            scoring.onFalse(feeder.stopTimer());
+            scoring.onTrue(feeder.startBPSTimer());
+            scoring.onFalse(feeder.stopBPSTimer());
 
             // runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             // runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));

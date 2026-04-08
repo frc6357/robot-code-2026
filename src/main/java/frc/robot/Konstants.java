@@ -349,6 +349,9 @@ public final class Konstants
 
         // Max voltage output for indexer motor (for brownout protection)
         public static final double kMaxIndexerVoltage = 7.0;
+
+        // The speed the indexer motor runs at when there aren't balls in the hopper
+        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
     }
 
     /** Constants that are used when defining filters for controllers */

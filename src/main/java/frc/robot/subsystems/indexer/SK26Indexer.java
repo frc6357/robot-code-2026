@@ -1,8 +1,10 @@
 package frc.robot.subsystems.indexer;
 
+import static frc.robot.Konstants.IndexerConstants.kIndexerFreeSpeed;
 // Imports from robot
 import static frc.robot.Konstants.IndexerConstants.kIndexerIdleVoltage;
 import static frc.robot.Ports.IndexerPorts.kIndexerMotor;
+import static frc.robot.Ports.Sensors.launcherSensor;
 
 import java.util.function.Supplier;
 
@@ -21,6 +23,7 @@ import org.littletonrobotics.junction.Logger;
 
 // Imports from WPILib
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.preferences.Pref;
@@ -62,6 +65,8 @@ public class SK26Indexer extends SubsystemBase
         FEEDING,
         UNJAMMING
     }
+
+    private Timer unjamTimer = new Timer();
 
     public SK26Indexer() 
     {
@@ -160,6 +165,26 @@ public class SK26Indexer extends SubsystemBase
         );
     }
 
+    public boolean isBallPresent() {
+        if(indexerMotor.getEncoder().getVelocity() < kIndexerFreeSpeed) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void restartTimerWhenBallLaunched() {
+        boolean lastLauncherSensorState = false;
+        boolean isBallPresent = launcherSensor.getIsDetected(true).getValue();
+        if (!lastLauncherSensorState && isBallPresent) {
+            if(isBallPresent()) unjamTimer.restart();
+        }
+        lastLauncherSensorState = isBallPresent;
+    }
+
+    public double getUnjamTimerTime() {
+        return unjamTimer.get();
+    }
     // private void checkIfBallIntaked() {
     //     boolean currentState = intakeSensor.get();
 
@@ -173,6 +198,7 @@ public class SK26Indexer extends SubsystemBase
     public void periodic() 
     {
         // checkIfBallIntaked();
+        restartTimerWhenBallLaunched();
 
         logOutputs();
     }

@@ -35,7 +35,7 @@ public class SK26Feeder extends SubsystemBase
     private int numBallsLaunched = 0;
     private int ballsLaunchedLastScoring = 0;
     private boolean lastLauncherSensorState = false;
-    private Timer timer = new Timer();
+    private static Timer bpsTimer = new Timer();
 
     public SK26Feeder() 
     {
@@ -105,14 +105,19 @@ public class SK26Feeder extends SubsystemBase
         return this.runEnd(() -> feedFuel(voltageSupplier.get()), () -> idleFeeder());
     }
 
-    public Command startTimer() {
-        timer.reset();
-        ballsLaunchedLastScoring = 0;
-        return this.runOnce(() -> timer.start());
+    public double timeSinceLastLaunched() {
+
+        return 0.0;
     }
 
-    public Command stopTimer() {
-        return this.runOnce(() -> timer.stop());
+    public Command startBPSTimer() {
+        bpsTimer.reset();
+        ballsLaunchedLastScoring = 0;
+        return this.runOnce(() -> bpsTimer.start());
+    }
+
+    public Command stopBPSTimer() {
+        return this.runOnce(() -> bpsTimer.stop());
     }
 
     @Override
@@ -138,7 +143,7 @@ public class SK26Feeder extends SubsystemBase
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
         Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
         Logger.recordOutput("Feeder/Current Voltage", getVoltage());
-        Logger.recordOutput("Last Scoring Time", timer.get());
-        Logger.recordOutput("Balls/Second Last Scoring", ballsLaunchedLastScoring/timer.get());
+        Logger.recordOutput("Last Scoring Time", bpsTimer.get());
+        Logger.recordOutput("Balls/Second Last Scoring", ballsLaunchedLastScoring/bpsTimer.get());
     }
 }
