@@ -492,7 +492,8 @@ public final class Konstants
         public static final double kLauncherV = 0.093;
         public static final double kLauncherS = 0.25;
 
-        public static final double kWheelRadius = .0508; //TEMPORARY
+        public static final double kWheelRadius = .0381; // meters (1.5 inch radius)
+        public static final double kSlipRatio = 0.85; // Ball velocity / wheel velocity (1.0 = no slip, < 1.0 = ball slower)
         public static final double kShooterTolerance = 0.5; // +/- rps
         public static final double kTargetlaunchVelocity = 5; //meters per second
         public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
@@ -554,7 +555,7 @@ public final class Konstants
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = -1.2;
+        public static final double kPhaseDelaySeconds = 0.0;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
@@ -607,6 +608,33 @@ public final class Konstants
             map.put(5.24, 30.95 * 60.0);
             map.put(5.43, 31.5 * 60.0);
             map.put(5.62, 32.0 * 60.0);
+            map.put(5.8, 32.5 * 60.0);
+            map.put(6.0, 33.0 * 60.0);
+            map.put(6.2, 33.5 * 60.0);
+            map.put(6.5, 34.2 * 60.0);
+            map.put(7.0, 35.5 * 60.0);
+            map.put(7.5, 37.0 * 60.0);
+            map.put(8.0, 38.5 * 60.0);
+            map.put(8.5, 40.0 * 60.0);
+            map.put(9.0, 41.5 * 60.0);
+            map.put(9.5, 43.0 * 60.0);
+            map.put(10.0, 45.0 * 60.0);
+            map.put(10.33, 46.0 * 60.0);
+            map.put(10.66, 47.0 * 60.0);
+            map.put(11.0, 48.0 * 60.0);
+            map.put(11.33, 49.0 * 60.0);
+            map.put(11.66, 50.0 * 60.0);
+            map.put(12.0, 51.0 * 60.0);
+            map.put(12.33, 52.0 * 60.0);
+            map.put(12.66, 53.0 * 60.0);
+            map.put(13.0, 54.0 * 60.0);
+            map.put(13.33, 55.0 * 60.0);
+            map.put(13.66, 56.0 * 60.0);
+            map.put(14.0, 57.0 * 60.0);
+            map.put(14.33, 58.0 * 60.0);
+            map.put(14.66, 59.0 * 60.0);
+            map.put(15.0, 60.0 * 60.0);
+            
 
             return map;
         }
@@ -714,7 +742,7 @@ public final class Konstants
         public static final double kIntakeStatorCurrentLimit = 60;
 
         // Intake compact command oscillation
-        public static final double kIntakeCompactSwitchIntervalSeconds = 1.2;
+        public static final double kIntakeCompactSwitchIntervalSeconds = 0.387;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
