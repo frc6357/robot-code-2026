@@ -17,9 +17,10 @@ BackRightDrive : 23
 
 
 Intake:
-Pivot : 30
-PivotFollower : 31
+LeftPivot : 30
+RightPivot : 31
 Roller : 32
+Encoder : 33
 
 Launcher:
 Roller1 : 40

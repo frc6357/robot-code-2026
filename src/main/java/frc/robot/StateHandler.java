@@ -1,13 +1,15 @@
 package frc.robot;
 
+import static frc.robot.Konstants.LauncherConstants.kRobotToShooter;
+
 import java.util.Optional;
 
+import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
-import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -17,12 +19,11 @@ import frc.lib.subsystems.PathplannerSubsystem;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.FieldConstants.Tower;
-import frc.robot.Konstants.LauncherConstants;
 import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
-import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.intake.SK26IntakePivot;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.turret.SK26Turret;
 import lombok.Getter;
 
@@ -43,7 +44,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         CLIMBING(Status.WAITING),
         STEADY_STREAM_SCORING(Status.WAITING),
         STEADY_STREAM_SHUTTLING(Status.WAITING),
-        CLIMB_AND_SCORE(Status.WAITING);
+        CLIMB_AND_SCORE(Status.WAITING),
+        SPITTING(Status.WAITING);
         
         private MacroState(Status status) {
             this.status = status;
@@ -87,14 +89,18 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      * Defaults to true; remapped to the launcher's atGoal when {@link #setLauncherSubsystem} is called.
      */
     @Getter
-    private Trigger launcherReady = new Trigger(() -> true);
+    private Trigger launcherReadyToScore = new Trigger(() -> true);
+    @Getter
+    private Trigger launcherReadyToShuttle = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the turret is at its target angle (or no turret is present).
      * Defaults to true; remapped to the turret's atTarget when {@link #setTurretSubsystem} is called.
      */
     @Getter
-    private Trigger turretReady = new Trigger(() -> true);
+    private Trigger turretReadyToScore = new Trigger(() -> true);
+    @Getter
+    private Trigger turretReadyToShuttle = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the intake positioner is at its target (or no intake is present).
@@ -145,6 +151,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("SS_SCORING", MacroState.STEADY_STREAM_SCORING);
         stateChooser.addOption("SS_SHUTTLING", MacroState.STEADY_STREAM_SHUTTLING);
         stateChooser.addOption("CLIMB_AND_SCORE", MacroState.CLIMB_AND_SCORE);
+        stateChooser.addOption("SPITTING", MacroState.SPITTING);
 
         stateChooser.onChange((state) -> this.requestState(state));
 
@@ -153,7 +160,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     /**
      * Sets the launcher subsystem reference for checking launcher readiness.
-     * If the Optional is present, remaps the {@link #launcherReady} trigger to the
+     * If the Optional is present, remaps the {@link #launcherReadyToScore} trigger to the
      * launcher's {@code atTargetVelocity()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
@@ -163,12 +170,12 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (launcher.isEmpty()) {
             return;
         }
-        launcherReady = new Trigger(launcher.get()::atTargetVelocity);
+        launcherReadyToScore = new Trigger(launcher.get()::atTargetVelocity);
     }
 
     /**
      * Sets the turret subsystem reference for checking turret readiness.
-     * If the Optional is present, remaps the {@link #turretReady} trigger to the
+     * If the Optional is present, remaps the {@link #turretReadyToScore} trigger to the
      * turret's {@code atTarget()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
@@ -178,7 +185,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (turret.isEmpty()) {
             return;
         }
-        turretReady = new Trigger(turret.get()::atTarget);
+        turretReadyToScore = new Trigger(turret.get()::atTarget);
     }
 
     /**
@@ -222,7 +229,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         notNearTower = new Trigger(() -> {
             // Compute shooter position in field space from robot pose + robot-to-shooter transform
             Translation2d shooterPos = new Pose3d(swerve.getRobotPose())
-                .plus(LauncherConstants.kRobotToShooter)
+                .plus(kRobotToShooter)
                 .toPose2d()
                 .getTranslation();
 
@@ -542,6 +549,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Request ClimbAndScore State", this.requestStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Request SS Scoring State", this.requestStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Request SS Shuttling State", this.requestStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        PathPlannerCommands.addCommand("Request Spitting State", this.requestStateCommand(MacroState.SPITTING));
         
         PathPlannerCommands.addCommand("Force Idle State", this.setCurrentStateCommand(MacroState.IDLE));
         PathPlannerCommands.addCommand("Force Scoring State", this.setCurrentStateCommand(MacroState.SCORING));
@@ -551,6 +559,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         PathPlannerCommands.addCommand("Force ClimbAndScore State", this.setCurrentStateCommand(MacroState.CLIMB_AND_SCORE));
         PathPlannerCommands.addCommand("Force SS Scoring State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SCORING));
         PathPlannerCommands.addCommand("Force SS Shuttling State", this.setCurrentStateCommand(MacroState.STEADY_STREAM_SHUTTLING));
+        PathPlannerCommands.addCommand("Force Spitting State", this.setCurrentStateCommand(MacroState.SPITTING));
 
         System.out.println("[StateHandler] Added commands to PathPlanner");
     }

@@ -5,21 +5,39 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "LTrenchSwipe1LTrench"
+            "waitTime": 5.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToLScore"
+            "pathName": "LBumpBiblicalGreed"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Request Scoring State"
           }
         },
         {
           "type": "wait",
           "data": {
-            "waitTime": 1.67
+            "waitTime": 5.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "LBumpToDepot"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.5
           }
         },
         {
@@ -32,6 +50,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Left Trench",
+  "folder": "Left Bump",
   "choreoAuto": false
 }

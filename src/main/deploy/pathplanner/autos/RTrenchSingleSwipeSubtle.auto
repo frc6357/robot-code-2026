@@ -7,19 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchSwipe1LTrench"
+            "pathName": "RTrenchSwipe1RTrenchSubtle"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToLScore"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.67
+            "pathName": "RTrenchToRScore"
           }
         },
         {
@@ -32,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Left Trench",
+  "folder": "Right Trench",
   "choreoAuto": false
 }

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.1265474060822895,
-        "y": 1.484
+        "x": 3.45,
+        "y": 0.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.1514233358375394,
-        "y": 1.7327592975524972
+        "x": 3.7,
+        "y": 0.75
       },
       "isLocked": false,
-      "linkedName": "RScore"
+      "linkedName": null
     },
     {
       "anchor": {
         "x": 4.453,
-        "y": 0.65
+        "y": 0.75
       },
       "prevControl": {
-        "x": 2.704591363219934,
-        "y": 0.6272218246869413
+        "x": 4.203,
+        "y": 0.75
       },
       "nextControl": null,
       "isLocked": false,
@@ -32,6 +32,12 @@
   "constraintZones": [],
   "pointTowardsZones": [],
   "eventMarkers": [
+    {
+      "name": "Request Idle State",
+      "waypointRelativePos": 0,
+      "endWaypointRelativePos": null,
+      "command": null
+    },
     {
       "name": "Request Intaking State",
       "waypointRelativePos": 0.9634146341463421,
@@ -54,13 +60,13 @@
   },
   "goalEndState": {
     "velocity": 2.0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "reversed": false,
   "folder": "Right Trench",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

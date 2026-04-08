@@ -18,6 +18,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
 
     Trigger runIntakeRollers;
     Trigger trashCompact;
+    Trigger spitting;
 
     public SK26IntakeRollersBinder(Optional<SK26IntakeRollers> rollersSubsystem, Optional<SKSwerve> swerveSubsystem)
     {
@@ -29,7 +30,9 @@ public class SK26IntakeRollersBinder implements CommandBinder
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
+        trashCompact = StateHandler.whenCurrentStateReady(MacroState.SCORING);
+
+        spitting = StateHandler.whenCurrentState(MacroState.SPITTING);
     }
 
     public void bindButtons()
@@ -50,6 +53,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
             .withName("IntakeRollersRunFromRobotVel"));
         }
         trashCompact.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage * 0.66).withName("IntakeRollersCompact"));
+        spitting.whileTrue(rollers.runAtVoltageCommand(-kIntakeFullVoltage).withName("IntakeRollersSpit"));
 
         /* Manual */
         // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));

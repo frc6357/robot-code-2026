@@ -9,8 +9,8 @@
     "duallauncher": true,
     "lights": false,
     "indexer": true,
-    "climb": false,
-    "intakepivot": false,
+    "climb": true,
+    "intakepivot": true,
     "intakerollers": true,
     "feeder": true,
     "fueldetection": false

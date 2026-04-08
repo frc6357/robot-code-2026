@@ -15,6 +15,9 @@ import org.littletonrobotics.junction.wpilog.WPILOGReader;
 import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import frc.lib.preferences.SKPreferences;
+import frc.lib.tuning.TunableNumber;
+import frc.lib.tuning.Tuning;
+import frc.lib.utils.BootOptions;
 
 import com.pathplanner.lib.commands.FollowPathCommand;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -42,6 +45,7 @@ public class Robot extends LoggedRobot {
     private final RobotContainer m_robotContainer;
 
     public static RobotMode Mode = RobotMode.CONTROLLED;
+    private static boolean tuningEnabled = false;
 
     private static CommandScheduler m_commandScheduler = CommandScheduler.getInstance();
 
@@ -74,24 +78,42 @@ public class Robot extends LoggedRobot {
                 break;
         }
 
+        setupTuning(); // Set up TunableNumbers, and publish them to SmartDashboard if tuning is enabled.
+
         Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may be added.
+        
+        //get the saved elastic dashboard layout
+        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
         
         DriverStation.silenceJoystickConnectionWarning(true);
         // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
         // autonomous chooser on the dashboard.
         m_robotContainer = new RobotContainer();
 
-        //get the saved elastic dashboard layout
-        WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
 
         kDriver.setRumble(RumbleType.kBothRumble, 0.0);
         kOperator.setRumble(RumbleType.kBothRumble, 0.0);
-
 
         m_commandScheduler.schedule(FollowPathCommand.warmupCommand().withName("PathPlannerWarmup")
             .andThen(PathfindingCommand.warmupCommand().withName("PathfindingWarmup")));
         
         SmartDashboard.putData(m_commandScheduler);
+    }
+
+    /**
+     * Sets up the TunableNumbers for being published to SmartDashboard. The reason for this
+     * not always running is because overpopulating SmartDashboard with tunables can cause performance issues.
+     */
+    private void setupTuning() {
+        // Initialize BootOptions early so all subsystems can access settings
+        BootOptions.initialize();
+        tuningEnabled = BootOptions.isTuningEnabled();
+
+        if(!tuningEnabled) {
+            System.out.println("[Tuning] Tuning is disabled. TunableNumbers will not be published to SmartDashboard.");
+            return;
+        }
+        Tuning.initialize();
     }
 
     /**
@@ -110,12 +132,16 @@ public class Robot extends LoggedRobot {
         m_robotContainer.pollPhaseTimer();
         m_commandScheduler.run();
         SKPreferences.refreshIfNeeded();
+        TunableNumber.refreshIfNeeded();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
     @Override
     public void disabledInit() {
+        kDriver.setRumble(RumbleType.kBothRumble, 0.0);
+        kOperator.setRumble(RumbleType.kBothRumble, 0.0);
         FuelHuntFileLogger.close();
+        m_robotContainer.disabledInit();
     }
 
     @Override

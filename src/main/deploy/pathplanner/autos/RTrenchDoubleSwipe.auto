@@ -19,7 +19,25 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 3.5
+            "waitTime": 1.67
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Request Scoring State"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 6.0
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Request Idle State"
           }
         },
         {

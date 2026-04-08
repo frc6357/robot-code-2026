@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 4.453,
-        "y": 0.75
+        "x": 4.453095577746077,
+        "y": 7.457
       },
       "prevControl": null,
       "nextControl": {
-        "x": 4.2030263098985925,
-        "y": 0.7463731201997569
+        "x": 2.8831663685152056,
+        "y": 7.434221824686941
       },
-      "isLocked": false,
+      "isLocked": true,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.45,
-        "y": 0.75
+        "x": 3.1265474060822895,
+        "y": 6.622951699463328
       },
       "prevControl": {
-        "x": 3.7,
-        "y": 0.75
+        "x": 3.1265474060822895,
+        "y": 6.872951699463329
       },
       "nextControl": null,
-      "isLocked": false,
-      "linkedName": null
+      "isLocked": true,
+      "linkedName": "LScore"
     }
   ],
   "rotationTargets": [],
@@ -45,7 +45,19 @@
     }
   ],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "Request Scoring State",
+      "waypointRelativePos": 1.0,
+      "endWaypointRelativePos": null,
+      "command": {
+        "type": "named",
+        "data": {
+          "name": "Request Scoring State"
+        }
+      }
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 4.5,
     "maxAcceleration": 3.0,
@@ -56,13 +68,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Right Trench",
+  "folder": "Left Bump",
   "idealStartingState": {
     "velocity": 1.25,
-    "rotation": 180.0
+    "rotation": 90.0
   },
   "useDefaultConstraints": true
 }

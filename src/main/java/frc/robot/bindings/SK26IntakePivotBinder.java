@@ -2,11 +2,12 @@ package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.COMPACTING;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
-import static frc.robot.Konstants.IntakeConstants.IntakePosition.ZERO;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.STOW;
 import static frc.robot.Ports.OperatorPorts;
 
 import java.util.Optional;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
@@ -35,7 +36,7 @@ public class SK26IntakePivotBinder implements CommandBinder
         intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).debounce(0.75, DebounceType.kRising);
     }
 
     public void bindButtons()
@@ -49,17 +50,17 @@ public class SK26IntakePivotBinder implements CommandBinder
 
         /* State-based */
         // Auto-deploy to GROUND when entering an intaking state and pivot is currently at ZERO
-        intakingStates.and(() -> (pivot.getPositionerTargetEnum() == ZERO))
+        intakingStates.and(() -> (pivot.getPositionerTargetEnum() == STOW))
             .onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("IntakeDeploy"));
 
         // Stow when climbing
-        intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(STOW));
 
         trashCompact.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
 
         /* Manual */
         // Pivoting
-        OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(ZERO));
+        OperatorPorts.kBackbutton.button.onTrue(pivot.setIntakePivotTargetCommand(STOW));
         OperatorPorts.kStartbutton.button.onTrue(pivot.setIntakePivotTargetCommand(GROUND));
 
         // Trash compactor
