@@ -18,7 +18,8 @@ import edu.wpi.first.units.measure.LinearVelocity;
 import frc.lib.vision.Limelight.LimelightConfig;
 import frc.robot.Konstants.DriveConstants;
 import frc.robot.Konstants.VisionConstants.BackLimelight;
-import frc.robot.Konstants.VisionConstants.LimelightThree;
+import frc.robot.Konstants.VisionConstants.ClimbLight;
+import frc.robot.Konstants.VisionConstants.IntakeLimelight;
 import frc.robot.Konstants.VisionConstants.TurretLimelight;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
@@ -40,6 +41,14 @@ public final class VisionConfig {
                                         .withTranslation(BackLimelight.kForward, BackLimelight.kRight, BackLimelight.kUp) // Feeds in the position of the limelight on the bot
                                         .withRotation(BackLimelight.kRoll, BackLimelight.kPitch, BackLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(BackLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
+
+    public static final String CLIMB_LL = ClimbLight.kName;
+    public static final int CLIMB_TAG_PIPELINE = kAprilTagPipeline;
+    public static final LimelightConfig CLIMB_CONFIG = 
+                                        new LimelightConfig(ClimbLight.kName) // Yes, it's the same value as [NAME]_LL. Just left it like this to see constructor layout
+                                        .withTranslation(ClimbLight.kForward, ClimbLight.kRight, ClimbLight.kUp) // Feeds in the position of the limelight on the bot
+                                        .withRotation(ClimbLight.kRoll, ClimbLight.kPitch, ClimbLight.kYaw) // Feeds in rotation of limelight
+                                        .withAttached(ClimbLight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
     
     
     public static final String TURRET_LL = TurretLimelight.kName;
@@ -50,13 +59,13 @@ public final class VisionConfig {
                                         .withRotation(TurretLimelight.kRoll, TurretLimelight.kPitch, TurretLimelight.kYaw) // Feeds in rotation of limelight
                                         .withAttached(TurretLimelight.kAttached); // Whether or not the limelight is attached to the robot; if false, effectively disables limelight
 
-    public static final String LL_INTAKE = LimelightThree.kName;
+    public static final String LL_INTAKE = IntakeLimelight.kName;
     public static final int INTAKE_TAG_PIPELINE = kAprilTagPipeline;
     public static final LimelightConfig INTAKE_CONFIG = 
-                                        new LimelightConfig(LimelightThree.kName)
-                                        .withTranslation(LimelightThree.kForward, LimelightThree.kRight, LimelightThree.kUp)
-                                        .withRotation(LimelightThree.kRoll, LimelightThree.kPitch, LimelightThree.kYaw)
-                                        .withAttached(LimelightThree.kAttached);
+                                        new LimelightConfig(IntakeLimelight.kName)
+                                        .withTranslation(IntakeLimelight.kForward, IntakeLimelight.kRight, IntakeLimelight.kUp)
+                                        .withRotation(IntakeLimelight.kRoll, IntakeLimelight.kPitch, IntakeLimelight.kYaw)
+                                        .withAttached(IntakeLimelight.kAttached);
 
 
     // Standard deviations for vision measurements (in meters and degrees)

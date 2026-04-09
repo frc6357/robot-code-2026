@@ -274,6 +274,23 @@ public final class Konstants
             public static final boolean kAttached = true;
         }
 
+        public static final class ClimbLight {
+            public static final String kName = "limelight-climb";
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = Inches.of(0.0).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(0.0).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(0.0).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0.0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0.0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+
+        }
+
         /* NOTE: this config should be representative of the Limelight's position when the turret is at 0 degrees */
         public static final class TurretLimelight {
             // Network/pipeline values
@@ -291,9 +308,9 @@ public final class Konstants
 
             public static final boolean kAttached = true;
         }
-        public static final class LimelightThree {
+        public static final class IntakeLimelight {
             // Network/pipeline values
-            public static final String kName = "limelight-three"; // NetworkTable name and hostname
+            public static final String kName = "limelight-intake"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
             public static final double kForward = Inches.of(-5).in(Meters); // (z) meters forward of center; negative is backwards
@@ -303,7 +320,7 @@ public final class Konstants
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) faces backward (same direction as intake)
+            public static final double kYaw = 0; // (yaw) faces backward (same direction as intake)
 
             public static final boolean kAttached = false;
         }
@@ -382,12 +399,12 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int kNumLedOnBot = 60;
+        public static final int kNumLedOnBot = 84;
         public static final double kLightsOffBrightness = 0.0;
         public static final double kLightsOnBrightness = 0.5;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
-        public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
+        public static final int kLEDBufferLength = 84; // Number of LEDs on the robot (stupid value for now - change later)
 
         public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
         public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
