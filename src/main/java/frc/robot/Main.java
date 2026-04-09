@@ -30,19 +30,19 @@ public final class Main {
         boolean runReplay = false;
 
         try {
-            File configFile = new File(Filesystem.getDeployDirectory(), "RunReplay.json");
+            File configFile = new File(Filesystem.getDeployDirectory(), "boot_options.json");
             ObjectMapper mapper = new ObjectMapper();
             JsonNode config = mapper.readTree(configFile);
             runReplay = config.get("RunReplay").asBoolean(false);
         } catch (IOException e) {
-            System.err.println("Failed to read RunReplay.json, defaulting to CONTROLLED mode: " + e.getMessage());
+            System.err.println("[RobotMode] Failed to read boot_options.json for RunReplay, defaulting to CONTROLLED mode: " + e.getMessage());
             runReplay = false;
         }
 
         if (runReplay) {
-            System.out.println("Starting in REPLAY mode.");
+            System.out.println("[RobotMode] Starting in REPLAY mode.");
         } else {
-            System.out.println("Starting in CONTROLLED mode.");
+            System.out.println("[RobotMode] Starting in CONTROLLED mode.");
         }
 
         final Robot.RobotMode mode = runReplay ? Robot.RobotMode.REPLAY : Robot.RobotMode.CONTROLLED;

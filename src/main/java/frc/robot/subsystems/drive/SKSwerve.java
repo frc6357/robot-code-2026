@@ -1,8 +1,10 @@
 package frc.robot.subsystems.drive;
 
 import static frc.robot.Konstants.AutoConstants.pathConfig;
+import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.RobotContainer.m_field;
 
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -99,11 +101,10 @@ public class SKSwerve extends SubsystemBase {
         setupPoseEstimator();
         configureAutoBuilder();
 
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> Logger.recordOutput("Drive/ActivePath", activePath.toArray(emptyPath)));
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> displayActivePath(activePath));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
         SmartDashboard.putData("Elastic Field 2D", m_field);
-        // SmartDashboard.putData("Drive", this);
     }
 
     @Override
@@ -120,13 +121,19 @@ public class SKSwerve extends SubsystemBase {
         Logger.runEveryN(4, () -> Logger.recordOutput("HubDistance", 
             Field.isBlue() ? getRobotPose().getTranslation().getDistance(FieldConstants.Hub.topCenterPoint.toTranslation2d()) : 
             getRobotPose().getTranslation().getDistance(FieldConstants.Hub.redTopCenterPoint.toTranslation2d())));
+        Logger.runEveryN(4, () -> Logger.recordOutput("TargetPointDistance", getRobotPose().getTranslation().getDistance(kOperatorControlled.point.getTargetPoint())));
         Logger.runEveryN(2, () -> telemetry.telemeterize(lastReadState));
         Logger.runEveryN(2, () -> {
             io.updateInputs(inputs); 
             Logger.processInputs("Drive/DeviceInputs", inputs);
         });
-		// m_field.setRobotPose(getRobotPose());
+		m_field.setRobotPose(getRobotPose());
 	}
+
+    private void displayActivePath(List<Pose2d> path) {
+        Logger.recordOutput("Drive/ActivePath", path.toArray(emptyPath));
+        m_field.getObject("ActivePath").setPoses(path);
+    }
 
     public GeneratedDrivetrain getDrivetrain() {
         return drivetrain;

@@ -36,7 +36,6 @@ public class SK26Climb extends SubsystemBase
 {
     private final SparkFlex climbMotorRight;
     private final SparkFlex climbMotorLeft;
-    private final DigitalInput cLimitSwitch;
     private final SparkLimitSwitch forwardLimitRight;
     private final SparkLimitSwitch reverseLimitRight;
     private final SparkLimitSwitch forwardLimitLeft;
@@ -60,7 +59,7 @@ public class SK26Climb extends SubsystemBase
         climbMotorLeft = new SparkFlex(kClimbMotorTwo.ID, MotorType.kBrushless);
         cEncoderRight = climbMotorRight.getEncoder(); 
         cEncoderLeft = climbMotorLeft.getEncoder();
-        cLimitSwitch = new DigitalInput(0);
+        
         forwardLimitRight = climbMotorRight.getForwardLimitSwitch();
         reverseLimitRight = climbMotorRight.getReverseLimitSwitch();
         forwardLimitLeft = climbMotorLeft.getForwardLimitSwitch();
@@ -85,13 +84,13 @@ public class SK26Climb extends SubsystemBase
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
-            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotorAndSetPosition);
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbConfigLeft.limitSwitch
             .forwardLimitSwitchType(Type.kNormallyOpen)
             .forwardLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor)
             .reverseLimitSwitchType(Type.kNormallyOpen)
-            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotorAndSetPosition);
+            .reverseLimitSwitchTriggerBehavior(Behavior.kStopMovingMotor);
 
         climbMotorRight.configure(climbConfigRight, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
         climbMotorLeft.configure(climbConfigLeft, ResetMode.kResetSafeParameters, PersistMode.kNoPersistParameters);
@@ -164,10 +163,7 @@ public class SK26Climb extends SubsystemBase
         
     }
 
-    public boolean isSwitchPressed()
-    {
-        return cLimitSwitch.get();
-    }
+    
 
     /** Sets the target height for the climb and commands both PID controllers. */
     public void setClimbHeight(double targetHeight)
@@ -201,7 +197,7 @@ public class SK26Climb extends SubsystemBase
     public void setIsRunning(boolean running) {
         isRunning = running;
     }
-
+    
     // ==================== Inline Command Factories ====================
 
     /**

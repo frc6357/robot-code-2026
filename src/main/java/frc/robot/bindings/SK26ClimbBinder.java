@@ -6,10 +6,11 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.subsystems.climb.SK26Climb;
 
-import static frc.robot.Ports.OperatorPorts.climbGoButton;
-import static frc.robot.Ports.OperatorPorts.climbUpButton;
-import static frc.robot.Ports.OperatorPorts.climbDownButton;
-import static frc.robot.Ports.OperatorPorts.climbzeroButton;
+import static frc.robot.Ports.OperatorPorts.kUpDpad;
+import static frc.robot.Ports.OperatorPorts.kYbutton;
+import static frc.robot.Ports.OperatorPorts.kBbutton;
+import static frc.robot.Ports.OperatorPorts.kRightDpad;
+import static frc.robot.Ports.OperatorPorts.kDownDpad;
 import static frc.robot.Konstants.ClimbConstants.kTOne;
 import static frc.robot.Konstants.ClimbConstants.kClimbReturn;
 
@@ -21,15 +22,17 @@ public class SK26ClimbBinder implements CommandBinder {
     Trigger upButton;
     Trigger downButton;
     Trigger returnButton;
+    Trigger zeroButton;
 
     public SK26ClimbBinder(Optional<SK26Climb> climbSubsystem)
     {
         this.climbSubsystem = climbSubsystem;
 
-        this.t1Button = climbGoButton.button;
-        this.upButton = climbUpButton.button;
-        this.downButton = climbDownButton.button;
-        this.returnButton = climbzeroButton.button;
+        this.t1Button = kUpDpad.button;
+        this.upButton = kYbutton.button;
+        this.downButton = kBbutton.button;
+        this.returnButton = kDownDpad.button;
+        this.zeroButton = kRightDpad.button;
     }
 
     public void bindButtons()
@@ -39,8 +42,8 @@ public class SK26ClimbBinder implements CommandBinder {
             SK26Climb climb = climbSubsystem.get();
 
             t1Button.onTrue(climb.climbToHeightCommand(kTOne).withName("L1ButtomClimb"));
-            returnButton.onTrue(climb.climbToHeightCommand(kClimbReturn).withName("Returm to Home"));
-            //t1Button.onTrue(Commands.sequence(new ClimbButtonCommand(kTOne, climb), new WaitCommand(0.5), new ClimbButtonCommand(kClimbReturn, climb)).withName("L1Command"));
+            returnButton.onTrue(climb.climbToHeightCommand(kClimbReturn).withName("ClimbToClimbPosition"));
+            zeroButton.onTrue(climb.climbToHeightCommand(0).withName("ClimbGoToZeroPosition"));
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
             downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
         }

@@ -1,5 +1,93 @@
 [
   {
+    "name": "/Preferences/driverTranslSlew",
+    "type": "double",
+    "value": 4.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/driverRotSlew",
+    "type": "double",
+    "value": 4.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrent Output (A)",
+    "type": "double",
+    "value": 54.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Tolerance (rps)",
+    "type": "double",
+    "value": 0.85,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Debounce (sec)",
+    "type": "double",
+    "value": 0.025,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DutyCycle FF (%/rps)",
+    "type": "double",
+    "value": 0.01489,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/AtGoalVelocity Debounce (sec)",
+    "type": "double",
+    "value": 0.2,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/BBLauncher/ManualShootVelocity (rps)",
+    "type": "double",
+    "value": 24.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/p",
+    "type": "double",
+    "value": 0.07,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/i",
+    "type": "double",
+    "value": 0.02,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/d",
+    "type": "double",
+    "value": 0.005,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/Intake/positionerKp",
     "type": "double",
     "value": 12.0,
@@ -72,25 +160,153 @@
     }
   },
   {
-    "name": "/Preferences/driverTranslSlew",
+    "name": "/Preferences/Indexer Voltage",
     "type": "double",
-    "value": 4.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/driverRotSlew",
+    "name": "/Preferences/DualLauncher/ManualShootVelocity (rps)",
     "type": "double",
-    "value": 4.0,
+    "value": 35.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/BBLauncher/ManualShootVelocity (rps)",
+    "name": "/Preferences/Indexer/ManualVoltage",
     "type": "double",
-    "value": 24.5,
+    "value": -6.75,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Feeder/ManualVoltage",
+    "type": "double",
+    "value": -5.75,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kS",
+    "type": "double",
+    "value": 0.25,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kV",
+    "type": "double",
+    "value": 0.12,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kA",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kP",
+    "type": "double",
+    "value": 0.4,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Bottom/kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kS",
+    "type": "double",
+    "value": 0.25,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kV",
+    "type": "double",
+    "value": 0.12,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kA",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kP",
+    "type": "double",
+    "value": 0.4,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kI",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top/kD",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Tuning/Setpoint (rps)",
+    "type": "double",
+    "value": 40.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Tuning/Tolerance (rps)",
+    "type": "double",
+    "value": 5.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/ManualTargetSpeed (rps)",
+    "type": "double",
+    "value": 35.0,
     "properties": {
       "persistent": true
     }

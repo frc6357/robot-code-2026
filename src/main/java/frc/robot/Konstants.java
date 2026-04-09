@@ -71,6 +71,8 @@ import frc.robot.subsystems.drive.SKTargetPoint;
 @SuppressWarnings("unused")
 public final class Konstants
 {
+    //TODO: This is a HUGE todo- make as many constants as practical as possible into TunableNumbers.
+
     public static final class DriveConstants {
         
         public static final LinearVelocity kMaxSpeed = GeneratedConstants.kSpeedAt12Volts; // kSpeedAt12Volts desired top speed
@@ -153,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            4.0, 3.65, 
+            3.5, 3.0, 
             360, 540, 
             12, false);
 
@@ -331,7 +333,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -6.75;
+        public static final double kIndexerFullVoltage = -9.65; //-7.65
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -349,6 +351,9 @@ public final class Konstants
 
         // Max voltage output for indexer motor (for brownout protection)
         public static final double kMaxIndexerVoltage = 7.0;
+
+        // The speed the indexer motor runs at when there aren't balls in the hopper
+        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -420,7 +425,7 @@ public final class Konstants
         // Turret position limits and tolerances
         public static final double kTurretMinPosition = -170.0;
         public static final double kTurretMaxPosition = 170.0;
-        public static final double kTurretAngleTolerance = 6.7; // Degrees of tolerance for considering the turret "at position"
+        public static final double kTurretAngleTolerance = 3.5; // Degrees of tolerance for considering the turret "at position"
 
         // CANcoder / Absolute Encoder constants
         public static final double kTurretEncoderOffset = 0.200928 ; // Rotations (-0.5 to +0.5) - negated due to encoder inversion
@@ -433,20 +438,20 @@ public final class Konstants
         public static final boolean kTurretMotorInverted = true;
 
         // Gain scheduler constants for turret PID control
-        public static final double kTurretGainSchedulerDeadbandDegrees = 0.85; // 0.85 // Degrees of error until the turret's gain scheduler turns on
+        public static final double kTurretGainSchedulerDeadbandDegrees = 0.2; // 0.85 // Degrees of error until the turret's gain scheduler turns on
 
         // Turret PID (Phoenix6 Slot0 — input is rotations, output is voltage)
         // Converted from old WPILib V/deg gains: multiply by 360 for V/rot
-        public static final double kTurretP = 50.0; //50.0  // was 0.07 V/deg (20)
-        public static final double kTurretI = 0.0;   // was 0.02 V/(deg·s)
-        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(deg/s)
-        public static final double kTurretS = 0.375; //(0.3)   // Static friction feedforward (volts)
-        public static final double kTurretV = 1.9; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
-        public static final double kTurretA = 0.35; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
-        public static final double kMaxTurretOutputVolts = 3.75; // Max voltage output to turret motor (for brownout protection)
+        public static final double kTurretP = 20.0; //50.0  // was 0.07 V/rotation (20)
+        public static final double kTurretI = 2.0;   // was 0.02 V/(rotation·s)
+        public static final double kTurretD = 0.0; // 2.0   // was 0.005 V/(rotation/s)
+        public static final double kTurretS = 0.335; //(0.3)   // Static friction feedforward (volts)
+        public static final double kTurretV = 3.8; // 1.85    // Velocity feedforward (volts per rotation per second) 1.0
+        public static final double kTurretA = 0.08; // 0.25  // Acceleration feedforward (volts per rotation per second squared) 1.542
+        public static final double kMaxTurretOutputVolts = 5.5; // Max voltage output to turret motor (for brownout protection)
 
         public static final AngularVelocity kMaxTurretMMVelocity = RotationsPerSecond.of(2.0);
-        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(6.0);
+        public static final AngularAcceleration kMaxTurretMMAcceleration = RotationsPerSecondPerSecond.of(8.0);
         public static final double kMaxTurretMMJerk = kMaxTurretMMAcceleration.in(RotationsPerSecondPerSecond) * 10; // Jerk is typically 10x acceleration
 
         // Turret extra constants
@@ -471,8 +476,8 @@ public final class Konstants
 
     public static final class ClimbConstants
     {
-        public static final double kClimbMotorSpeed = .05;
-        public static final Double kClimbP = 0.5; // TODO: Test for proper value. Needs to be lowered, currently running to fast. Thinking around .3-.4 is a good value.
+        public static final double kClimbMotorSpeed = .15;
+        public static final Double kClimbP = 0.4; // TODO: Test for proper value. Needs to be lowered, currently running to fast. Thinking around .3-.4 is a good value.
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbV = 0;
@@ -490,7 +495,8 @@ public final class Konstants
         public static final double kLauncherV = 0.093;
         public static final double kLauncherS = 0.25;
 
-        public static final double kWheelRadius = .0508; //TEMPORARY
+        public static final double kWheelRadius = .0381; // meters (1.5 inch radius)
+        public static final double kSlipRatio = 0.85; // Ball velocity / wheel velocity (1.0 = no slip, < 1.0 = ball slower)
         public static final double kShooterTolerance = 0.5; // +/- rps
         public static final double kTargetlaunchVelocity = 5; //meters per second
         public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
@@ -514,7 +520,7 @@ public final class Konstants
         // ==================== Dual Launcher Constants ====================
         public static final class DualLauncher {
             // Velocity tolerance for considering the launcher "at speed" (rps)
-            public static final double kVelocityToleranceRPS = 5.0;
+            public static final double kVelocityToleranceRPS = 3.0;
 
             // Default target velocity (rps) — typically overridden by commands/state handler
             public static final double kDefaultTargetRPS = 40.0;
@@ -547,12 +553,12 @@ public final class Konstants
         // 3D Transform (placeholder - measure from CAD)
         public static final Transform3d kRobotToShooter =
             new Transform3d(
-                new Translation3d(Inches.of(-5.75), Inches.of(5.534), Inches.of(19.874)),  // Placeholder: 0.5m height Was: 9.427
-                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.of(-kTurretEncoderOffset))                    // No rotation offset
+                VisionConstants.kTurretPivotInRobotSpace,  // Placeholder: 0.5m height Was: 9.427
+                new Rotation3d(Rotations.zero(), Rotations.zero(), Rotations.zero())                    // No rotation offset
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = 0.03;  // MA's tested value
+        public static final double kPhaseDelaySeconds = 0.0;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
@@ -587,18 +593,51 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            // map.put(5.334, 34.0 * 60.0);
-            // map.put(3.581, 27.5 * 60.0);
-            // map.put(4.470, 29.5 * 60.0);
-            // map.put(2.515, 23.5 * 60.0);
-            // map.put(2.690, 24.9 * 60.0);
-            // map.put(2.97, 24.9 * 60.0);
-            // map.put(3.251, 26.0 * 60.0);
-            map.put(3.4798, 26.6 * 60.0);
-            map.put(4.572, 29.4 * 60.0);
-            map.put(2.94, 25.25 * 60.0);
-            map.put(2.5, 24.2 * 60.0);
-            map.put(4.01, 27.55 * 60.0);
+            map.put(2.82, 23.3 * 60.0);
+            map.put(3.0, 24.0 * 60.0);
+            map.put(3.12, 24.3 * 60.0);
+            map.put(3.27, 24.8 * 60.0);
+            map.put(3.32, 25.5 * 60.0);
+            map.put(3.45, 25.9 * 60.0);
+            map.put(3.52, 26.0 * 60.0);
+            map.put(3.71, 26.2 * 60.0);
+            map.put(3.95, 26.8 * 60.0);
+            map.put(4.08, 27.4 * 60.0);
+            map.put(4.13, 27.55 * 60.0);
+            map.put(4.33, 27.9 * 60.0);
+            map.put(4.47, 28.2 * 60.0);
+            map.put(4.67, 29.1 * 60.0);
+            map.put(5.11, 30.5 * 60.0);
+            map.put(5.24, 30.95 * 60.0);
+            map.put(5.43, 31.5 * 60.0);
+            map.put(5.62, 32.0 * 60.0);
+            map.put(5.8, 32.5 * 60.0);
+            map.put(6.0, 33.0 * 60.0);
+            map.put(6.2, 33.5 * 60.0);
+            map.put(6.5, 34.2 * 60.0);
+            map.put(7.0, 35.5 * 60.0);
+            map.put(7.5, 37.0 * 60.0);
+            map.put(8.0, 38.5 * 60.0);
+            map.put(8.5, 40.0 * 60.0);
+            map.put(9.0, 41.5 * 60.0);
+            map.put(9.5, 43.0 * 60.0);
+            map.put(10.0, 45.0 * 60.0);
+            map.put(10.33, 46.0 * 60.0);
+            map.put(10.66, 47.0 * 60.0);
+            map.put(11.0, 48.0 * 60.0);
+            map.put(11.33, 49.0 * 60.0);
+            map.put(11.66, 50.0 * 60.0);
+            map.put(12.0, 51.0 * 60.0);
+            map.put(12.33, 52.0 * 60.0);
+            map.put(12.66, 53.0 * 60.0);
+            map.put(13.0, 54.0 * 60.0);
+            map.put(13.33, 55.0 * 60.0);
+            map.put(13.66, 56.0 * 60.0);
+            map.put(14.0, 57.0 * 60.0);
+            map.put(14.33, 58.0 * 60.0);
+            map.put(14.66, 59.0 * 60.0);
+            map.put(15.0, 60.0 * 60.0);
+            
 
             return map;
         }
@@ -607,11 +646,22 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> time of flight in seconds)
-            map.put(1.0, 0.2);
-            map.put(2.0, 0.4);
-            map.put(3.0, 0.6);
-            map.put(4.0, 0.8);
+            map.put(3.02, 0.68);
+            map.put(3.26, 0.76);
+            map.put(3.55, 0.86);
+            map.put(3.61, 0.89);
+            map.put(4.07, 0.99);
+            map.put(4.47, 1.04);
+            map.put(4.7, 1.13);
             map.put(5.0, 1.0);
+
+            return map;
+        }
+
+        public static InterpolatingDoubleTreeMap createTopRollerRatioMap() {
+            InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
+
+            map.put(3.5, 1.1);
 
             return map;
         }
@@ -638,11 +688,11 @@ public final class Konstants
         public static enum IntakePosition
         {
             /** Set the intake angle to 0.271 intake rotations */
-            GROUND(0.271),
+            GROUND(-0.235), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.067),
+            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
             /** Set the intake angle to 0 rotations (zero position) */
-            ZERO(0.0);
+            STOW(0.0); //0.225 with encoder
             
 
             /**
@@ -656,10 +706,10 @@ public final class Konstants
         }
 
         // PID Constants
-        public static final double kPositionerKp = 28.67; //20
-        public static final double kPositionerKi = 6.0;
-        public static final double kPositionerKd = 1.0;
-        public static final double kPositionerKs = 0.0;
+        public static final double kPositionerKp = 12.5; //20
+        public static final double kPositionerKi = 2.0;
+        public static final double kPositionerKd = 0.5;
+        public static final double kPositionerKs = 0.5;
         public static final double kPositionerKv = 0.0;
         public static final double kPositionerKa = 0.0;
         public static final double kPositionerKG = 0.0;
@@ -676,20 +726,26 @@ public final class Konstants
         public static final double kPositionerMMExpoKA = 0.1;
 
         // Positioner current limits
-        public static final double kPositionerSupplyCurrentLimit = 60;
-        public static final double kPositionerStatorCurrentLimit = 80;
+        public static final double kPositionerSupplyCurrentLimit = 70;
+        public static final double kPositionerStatorCurrentLimit = 120;
 
         // Positioner feedback configuration
         public static final double kPositionerSensorToMechanismRatio = 16.4;
-        public static final double kPositionerGainSchedulerErrorThreshold = 0.04;
-        public static final double kPositionerPositionTolerance = 0.02;    // Rotations
+        public static final double kPositionerGainSchedulerErrorThreshold = 0.03;
+        public static final double kPositionerPositionTolerance = 0.03;    // Rotations
+
+        // Absolute encoder (CANcoder) configuration
+        public static final double kPositionerEncoderOffset = -0.87548828125;         // Rotations (-0.5 to +0.5) — set after measuring zero
+        public static final boolean kPositionerEncoderInverted = false;    // Set true if encoder reads backwards
+        public static final double kPositionerEncoderGearRatio = 17.76;      // was 3.636363636363
+        public static final double kPositionerEncoderDiscontinuityPoint = 1;
 
         // Intake roller current limits
         public static final double kIntakeSupplyCurrentLimit = 40;
         public static final double kIntakeStatorCurrentLimit = 60;
 
         // Intake compact command oscillation
-        public static final double kIntakeCompactSwitchIntervalSeconds = 1.2;
+        public static final double kIntakeCompactSwitchIntervalSeconds = 0.387;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
@@ -703,7 +759,7 @@ public final class Konstants
         public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
 
-        public static final double kChassisSpeedRollerFF = 0.66; // Volts of output per m/s of velocity in the intake's direction
+        public static final double kChassisSpeedRollerFF = 1.0; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

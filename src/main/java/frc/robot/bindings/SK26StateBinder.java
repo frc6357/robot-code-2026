@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
-import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
+import frc.robot.StateHandler.MacroState.Status;
 
 public class SK26StateBinder implements CommandBinder {
     private Optional<StateHandler> stateHandlerContainer;
@@ -18,10 +18,14 @@ public class SK26StateBinder implements CommandBinder {
     Trigger turnOffLaunch;
     Trigger turnOnScoring;
     Trigger turnOnShuttling;
+    Trigger turnOnSpitting;
 
-    Trigger launcherReady;
-    Trigger intakeReady;
-    Trigger turretReady;
+    Trigger launcherReadyToScore;
+    Trigger launcherReadyToShuttle;
+    Trigger intakeDeployed;
+    Trigger intakeStowed;
+    Trigger turretReadyToScore;
+    Trigger turretReadyToShuttle;
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
     Trigger notNearTower;
@@ -38,17 +42,20 @@ public class SK26StateBinder implements CommandBinder {
         // Trigger definitions:
         /* Subsystem States */
         if (stateHandler != null) {
-            launcherReady = stateHandler.getLauncherReady();
-            intakeReady = stateHandler.getIntakeReady();
-            turretReady = stateHandler.getTurretReady();
+            launcherReadyToScore = stateHandler.getLauncherReadyToScore();
+            launcherReadyToShuttle = stateHandler.getLauncherReadyToShuttle();
+            intakeDeployed = stateHandler.getIntakeDeployed();
+            turretReadyToScore = stateHandler.getTurretReadyToScore();
+            turretReadyToShuttle = stateHandler.getTurretReadyToShuttle();
             inAllianceZone = stateHandler.getInAllianceZone();
             outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
         }
 
         /* Buttons */
-        turnOnScoring = DriverPorts.kRTrigger.button;
-        turnOnShuttling = DriverPorts.kRTrigger.button.debounce(0.55);
+        turnOnScoring = DriverPorts.kRTrigger.button.and(inAllianceZone);
+        turnOnShuttling = DriverPorts.kRTrigger.button.and(outOfAllianceZone);
+        turnOnSpitting = DriverPorts.kXbutton.button;
 
         if (stateHandler != null) {
             // Create trigger for when launcher is in any active launching state
@@ -79,12 +86,34 @@ public class SK26StateBinder implements CommandBinder {
     }
 
     private void bindRobotStates() {
-        inAllianceZone.and(notNearTower).and(launcherReady).and(turretReady)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING));
-        outOfAllianceZone.and(launcherReady).and(turretReady)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING));
+        inAllianceZone.and(notNearTower).and(launcherReadyToScore).and(turretReadyToScore)
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING))
+            );
+        outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING))
+            );
+        intakeDeployed
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.WAITING))
+            );
+
     }
 
     private void bindDriverButtons() 
@@ -94,10 +123,16 @@ public class SK26StateBinder implements CommandBinder {
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+
+        turnOnShuttling.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        turnOnShuttling.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
+
+        turnOnSpitting.onTrue(stateHandler.requestStateCommand(MacroState.SPITTING));
+        turnOnSpitting.onFalse(stateHandler.requestStateCommand(MacroState.IDLE));
     }
 
     private void bindOperatorButtons() {
-        OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
-        OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
+        // OperatorPorts.kRTrigger.button.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        // OperatorPorts.kRTrigger.button.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
     }
 }

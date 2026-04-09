@@ -382,14 +382,15 @@ public class ShootingCoordinator {
     /** 
      * Creates the InterpolatedShotStrategy with characterization data.
      * 
-     * The strategy uses lookup tables (InterpolatingDoubleTreeMap) that map:
-     *   - Distance (meters) → Flywheel RPM
-     *   - Distance (meters) → Time of Flight (seconds)
+     * The strategy uses:
+     *   - Distance (meters) → Flywheel RPM lookup table
+     *   - Kinematic calculation for time of flight: t = d / (v × cos(θ) × slipRatio)
      */
     public static InterpolatedShotStrategy createShotStrategy() {
         return new InterpolatedShotStrategy.Builder()
             .withFlywheelSpeedMap(LauncherConstants.createFlywheelSpeedMap())
-            .withTimeOfFlightMap(LauncherConstants.createTimeOfFlightMap())
+            .withWheelRadius(LauncherConstants.kWheelRadius)             // For kinematic ToF calculation
+            .withSlipRatio(LauncherConstants.kSlipRatio)                 // Ball velocity / wheel velocity compensation
             .withFixedLaunchAngle(kFixedLaunchAngle)
             .withMaxIterations(kMaxIterations)                           // Max lookahead iterations
             .withConvergenceThreshold(kConvergenceThresholdMeters)    // Stop when distance converges within kConvergenceThresholdMeters

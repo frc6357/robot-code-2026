@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
@@ -32,7 +33,13 @@ public class SK26Feeder extends SubsystemBase
 
     // Ball launch tracking
     private int numBallsLaunched = 0;
+    private int ballsLaunchedLastScoring = 0;
     private boolean lastLauncherSensorState = false;
+    private static Timer bpsTimer = new Timer();
+
+    // Cached sensor values to avoid redundant CAN reads
+    private double cachedVelocityRPS = 0.0;
+    private double cachedAppliedOutput = 0.0;
 
     public SK26Feeder() 
     {
@@ -102,8 +109,27 @@ public class SK26Feeder extends SubsystemBase
         return this.runEnd(() -> feedFuel(voltageSupplier.get()), () -> idleFeeder());
     }
 
+    public double timeSinceLastLaunched() {
+
+        return 0.0;
+    }
+
+    public Command startBPSTimer() {
+        bpsTimer.reset();
+        ballsLaunchedLastScoring = 0;
+        return this.runOnce(() -> bpsTimer.start());
+    }
+
+    public Command stopBPSTimer() {
+        return this.runOnce(() -> bpsTimer.stop());
+    }
+
     @Override
     public void periodic() {
+        // Cache all CAN reads at the start of the cycle
+        cachedVelocityRPS = encoder.getVelocity() / 60.0;
+        cachedAppliedOutput = feederMotor.getAppliedOutput();
+
         checkIfBallLaunched();
         logOutputs();
     }
@@ -123,7 +149,9 @@ public class SK26Feeder extends SubsystemBase
 
     private void logOutputs() {
         Logger.recordOutput("Feeder/Total Balls Launched", numBallsLaunched);
-        Logger.recordOutput("Feeder/Current Velocity RPS", getVelocity());
-        Logger.recordOutput("Feeder/Current Voltage", getVoltage());
+        Logger.recordOutput("Last Scoring Time", bpsTimer.get());
+        Logger.recordOutput("Balls/Second Last Scoring", ballsLaunchedLastScoring/bpsTimer.get());
+        Logger.recordOutput("Feeder/Current Velocity RPS", cachedVelocityRPS);
+        Logger.recordOutput("Feeder/Current Voltage", cachedAppliedOutput);
     }
 }
