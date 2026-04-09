@@ -155,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            4.0, 3.65, 
+            3.5, 3.0, 
             360, 540, 
             12, false);
 
@@ -351,6 +351,9 @@ public final class Konstants
 
         // Max voltage output for indexer motor (for brownout protection)
         public static final double kMaxIndexerVoltage = 7.0;
+
+        // The speed the indexer motor runs at when there aren't balls in the hopper
+        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
     }
 
     /** Constants that are used when defining filters for controllers */

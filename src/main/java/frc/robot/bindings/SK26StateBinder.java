@@ -22,7 +22,8 @@ public class SK26StateBinder implements CommandBinder {
 
     Trigger launcherReadyToScore;
     Trigger launcherReadyToShuttle;
-    Trigger intakeReady;
+    Trigger intakeDeployed;
+    Trigger intakeStowed;
     Trigger turretReadyToScore;
     Trigger turretReadyToShuttle;
     Trigger inAllianceZone;
@@ -43,7 +44,7 @@ public class SK26StateBinder implements CommandBinder {
         if (stateHandler != null) {
             launcherReadyToScore = stateHandler.getLauncherReadyToScore();
             launcherReadyToShuttle = stateHandler.getLauncherReadyToShuttle();
-            intakeReady = stateHandler.getIntakeReady();
+            intakeDeployed = stateHandler.getIntakeDeployed();
             turretReadyToScore = stateHandler.getTurretReadyToScore();
             turretReadyToShuttle = stateHandler.getTurretReadyToShuttle();
             inAllianceZone = stateHandler.getInAllianceZone();
@@ -86,15 +87,33 @@ public class SK26StateBinder implements CommandBinder {
 
     private void bindRobotStates() {
         inAllianceZone.and(notNearTower).and(launcherReadyToScore).and(turretReadyToScore)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY)))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING)));
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING))
+            );
         outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY)))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING)));
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING))
+            );
+        intakeDeployed
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.WAITING))
+            );
+
     }
 
     private void bindDriverButtons() 
