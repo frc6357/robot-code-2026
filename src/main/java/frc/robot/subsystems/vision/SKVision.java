@@ -53,11 +53,12 @@ public class SKVision extends SubsystemBase {
     public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
     public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
+    public final Limelight climbLL = new Limelight(VisionConfig.CLIMB_CONFIG); // limelight-climb
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {turretLL}; 
+    public final Limelight[] allLimelights = {turretLL, intakeLL, climbLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {turretLL}; 
+    public final Limelight[] poseLimelights = {turretLL, climbLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
@@ -191,7 +192,7 @@ public class SKVision extends SubsystemBase {
             else {
                 //ll.setLogStatus("Idle");
             }
-            ll.setIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST); // For Limelight 4s only; this fuses the internal IMU with the external IMU to provide more accurate pose estimation and better performance
+            ll.setIMUMode(IMUMode.EXTERNAL_ONLY);// was INTERNAL_EXTERNAL_ASSIST // For Limelight 4s only; this fuses the internal IMU with the external IMU to provide more accurate pose estimation and better performance
             ll.setIMUAssistAlpha(0.001); // Sets the alpha value for IMU assist mode
             ll.setLEDMode(false); // Turns off LED lights on startup
         }
