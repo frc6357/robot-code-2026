@@ -31,6 +31,9 @@ public class SK26IndexerBinder implements CommandBinder
     public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem)
     {
         this.indexerSubsystem = indexerSubsystem;
+        if(indexerSubsystem.isEmpty()) {
+            return;
+        }
 
         // Feed when any shooting state is READY (launcher up to speed)
         IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
