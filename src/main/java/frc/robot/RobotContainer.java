@@ -39,7 +39,6 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.FuelHuntBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
-import frc.robot.bindings.SK26DualLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SK26IntakePivotBinder;
