@@ -155,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            4.0, 3.65, 
+            3.5, 3.0, 
             360, 540, 
             12, false);
 

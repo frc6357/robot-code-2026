@@ -126,14 +126,14 @@ public class SKSwerveBinder implements CommandBinder{
         //     Pathfinder.PathfindThenFollowPathCommand("PassUnderRTrench", kDefaultPathfindingConstraints)
         // );
 
-        // DriverPorts.kYbutton.button.toggleOnTrue(
-        //     Commands.defer(
-        //         () -> TravelUnderNearestTrench.createCommand(
-        //             drive.getRobotPose(),
-        //             drive.getVelocity(true),
-        //             kTrenchPathfindingConstraints),
-        //         Set.of(drive))
-        // );
+        DriverPorts.kAbutton.button.whileTrue(
+            Commands.defer(
+                () -> TravelUnderNearestTrench.createCommand(
+                    drive.getRobotPose(),
+                    drive.getVelocity(true),
+                    kTrenchPathfindingConstraints),
+                Set.of(drive))
+        );
 
         // bumpAlign.whileTrue(new AlignForBumpJump(drive));
         // hubAlign.whileTrue(

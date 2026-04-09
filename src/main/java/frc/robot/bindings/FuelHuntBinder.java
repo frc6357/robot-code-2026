@@ -37,8 +37,8 @@ public class FuelHuntBinder implements CommandBinder {
         }
 
         // Hold A to run FuelHunt; releasing cancels immediately
-        fuelHuntButton.whileTrue(
-            FuelHuntCommand.create().withName("FuelCollection_DriverButton")
-        );
+        // fuelHuntButton.whileTrue(
+        //     FuelHuntCommand.create().withName("FuelCollection_DriverButton")
+        // );
     }
 }
