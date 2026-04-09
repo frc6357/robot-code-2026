@@ -368,6 +368,9 @@ public final class Konstants
 
         // Max voltage output for indexer motor (for brownout protection)
         public static final double kMaxIndexerVoltage = 7.0;
+
+        // The speed the indexer motor runs at when there aren't balls in the hopper
+        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -401,7 +404,7 @@ public final class Konstants
     {
         public static final int kNumLedOnBot = 84;
         public static final double kLightsOffBrightness = 0.0;
-        public static final double kLightsOnBrightness = 0.5;
+        public static final double kLightsOnBrightness = 1.0;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
         public static final int kLEDBufferLength = 84; // Number of LEDs on the robot (stupid value for now - change later)
