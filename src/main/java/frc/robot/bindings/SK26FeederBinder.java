@@ -31,6 +31,8 @@ public class SK26FeederBinder implements CommandBinder {
 
     Trigger idle;
 
+    Trigger scoring;
+
     /**
      * Binds the feeder subsystem to state-driven triggers.
      *
@@ -54,6 +56,9 @@ public class SK26FeederBinder implements CommandBinder {
             .or(StateHandler.whenCurrentStateWaiting(MacroState.CLIMB_AND_SCORE));
         
         idle = StateHandler.whenCurrentState(MacroState.IDLE);
+
+        scoring = StateHandler.whenCurrentState(MacroState.SCORING)
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
     }
 
     @Override
@@ -79,6 +84,9 @@ public class SK26FeederBinder implements CommandBinder {
                         ? feeder.feedCommand(() -> manualFeederVoltage.get())
                         : feeder.idleFeederCommand(),
                     Set.of(feeder)));
+
+            scoring.onTrue(feeder.startBPSTimer());
+            scoring.onFalse(feeder.stopBPSTimer());
 
             // runFeederFromState.whileTrue(feeder.feedCommand(kFeederRunningVoltage));
             // runLowVoltage.whileTrue(feeder.feedCommand(kFeederWaitingVoltage));

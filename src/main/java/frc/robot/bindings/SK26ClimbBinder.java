@@ -31,8 +31,8 @@ public class SK26ClimbBinder implements CommandBinder {
         this.t1Button = kUpDpad.button;
         this.upButton = kYbutton.button;
         this.downButton = kBbutton.button;
-        this.returnButton = kRightDpad.button;
-        this.zeroButton = kDownDpad.button;
+        this.returnButton = kDownDpad.button;
+        this.zeroButton = kRightDpad.button;
     }
 
     public void bindButtons()

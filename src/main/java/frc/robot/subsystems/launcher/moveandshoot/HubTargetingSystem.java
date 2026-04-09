@@ -86,7 +86,7 @@ public class HubTargetingSystem {
      * Extra inward offset toward the hub center, in meters.
      * Shifts the aim point ~4 inches closer to the center of the hub for better scoring margin.
      */
-    private static final double INWARD_OFFSET_METERS = 0.1016; // 4 inches
+    private static final double INWARD_OFFSET_METERS = 0.14; // 4 inches
 
     // ===== Precomputed Vertices =====
 
