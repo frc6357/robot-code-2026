@@ -8,12 +8,12 @@ FrontRightDrive : 11
 FrontRightSteer : 21
 
 BackLeftSensor : 2
-BackLeftSteer : 12
-BackLeftDrive : 22
+BackLeftDrive : 12
+BackLeftSteer : 22
 
 BackRightSensor : 3
-BackRightSteer : 13
-BackRightDrive : 23
+BackRightDrive : 13
+BackRightSteer : 23
 
 
 Intake:
