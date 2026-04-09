@@ -79,7 +79,6 @@ public class SK26Indexer extends SubsystemBase
 
     public SK26Indexer() 
     {
-        System.out.println("Indexer initialized");
         // ========== Motor Configuration ==========
         indexerMotor = new SparkFlex(kIndexerMotor.ID, MotorType.kBrushless);
         SparkFlexConfig config = new SparkFlexConfig();

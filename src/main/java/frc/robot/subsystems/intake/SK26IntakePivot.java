@@ -58,8 +58,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.commands.PathPlannerCommands;
-import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.Konstants.IntakeConstants.IntakePosition;
 
 /**
@@ -67,7 +65,7 @@ import frc.robot.Konstants.IntakeConstants.IntakePosition;
  * that raises and lowers the intake using Motion Magic position control.
  * Uses TalonFX (Kraken X44) motors.
  */
-public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsystem
+public class SK26IntakePivot extends SubsystemBase
 {
 	// Motors
 	private final TalonFX positionerMotor;
@@ -191,8 +189,6 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 
 		// 
 		positionerMotor.setPosition(0.0);
-
-		addPathPlannerCommands();
 	}
 
 	/**
@@ -318,13 +314,5 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		Logger.recordOutput("Intake/Positioner Velocity (RPS)", cachedVelocityRPS);
 		Logger.recordOutput("Intake/Positioner Error (rot)", getTargetPosition() - getCurrentPosition());
 		Logger.recordOutput("Intake/Intake Target (enum)", getPositionerTargetEnum());
-	}
-
-	@Override
-	public void addPathPlannerCommands()
-	{
-		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(IntakePosition.GROUND).withName("IntakeDeployAuton"));
-		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.STOW).withName("IntakeStowAuton"));
-		System.out.println("[SK26IntakePivot] PathPlanner commands added");
 	}
 }

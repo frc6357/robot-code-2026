@@ -20,6 +20,7 @@ import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.FieldConstants.Tower;
 import frc.robot.Konstants.SwerveConstants;
+import frc.robot.Konstants.IntakeConstants.IntakePosition;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.intake.SK26IntakePivot;
@@ -107,7 +108,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      * Defaults to true; remapped to the intake's isPositionerAtTarget when {@link #setIntakeSubsystem} is called.
      */
     @Getter
-    private Trigger intakeReady = new Trigger(() -> true);
+    private Trigger intakeDeployed = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the robot's chassis is within its own alliance zone.
@@ -190,7 +191,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     /**
      * Sets the intake subsystem reference for checking intake readiness.
-     * If the Optional is present, remaps the {@link #intakeReady} trigger to the
+     * If the Optional is present, remaps the {@link #intakeDeployed} trigger to the
      * intake's {@code isPositionerAtTarget()} method. If empty, leaves the trigger unchanged
      * (defaults to always true).
      *
@@ -200,7 +201,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (intake.isEmpty()) {
             return;
         }
-        intakeReady = new Trigger(intake.get()::isPositionerAtTarget);
+        intakeDeployed = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.GROUND);
     }
 
     /**

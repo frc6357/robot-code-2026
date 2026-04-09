@@ -155,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            4.0, 3.65, 
+            3.5, 3.0, 
             360, 540, 
             12, false);
 
@@ -333,7 +333,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -7.65;
+        public static final double kIndexerFullVoltage = -9.65; //-7.65
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
