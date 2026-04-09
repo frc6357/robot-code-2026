@@ -4,6 +4,9 @@ package frc.robot.subsystems.lights;
  * Enum defining all available LED modes/effects.
  */
 public enum LightMode {
+    // Automatic — follows FMS game state + StateHandler macro state
+    AUTO,
+
     // Basic modes
     OFF,
     SOLID_WHITE,
@@ -84,9 +87,6 @@ public enum LightMode {
     GODZILLA_CHARGING,
     
     // Interactive games
-    STOP_THE_LIGHT,
     TUG_OF_WAR,
-    RHYTHM_GAME,
-    SIMON_SAYS,
-    COLOR_KNOCKOUT
+    SIMON_SAYS
 }

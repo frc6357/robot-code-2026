@@ -380,12 +380,12 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int kNumLedOnBot = 60;
+        public static final int kNumLedOnBot = 72;
         public static final double kLightsOffBrightness = 0.0;
-        public static final double kLightsOnBrightness = 0.5;
+        public static final double kLightsOnBrightness = 1.0;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
-        public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
+        public static final int kLEDBufferLength = 72; // Number of LEDs on the robot (stupid value for now - change later)
 
         public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
         public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
