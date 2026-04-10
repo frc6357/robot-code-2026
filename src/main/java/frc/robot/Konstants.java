@@ -500,8 +500,19 @@ public final class Konstants
         public static final double kClimbV = 0;
         public static final double kClimbTolerance = 1; //figure out tolerance
         public static final double kCLimbMax = 0; //figure out value of encoder when climb is at max height.
-        public static final double kTOne = 92;
-        public static final double kClimbReturn = 25;
+
+        public static enum ClimbPosition
+        {
+            STOW(0.0),
+            HOIST(25.0),
+            T_ONE(92.0);
+
+            public final double height;
+            ClimbPosition(double height)
+            {
+                this.height = height;
+            }
+        }
     }
 
 
@@ -707,10 +718,11 @@ public final class Konstants
             /** Set the intake angle to 0.271 intake rotations */
             GROUND(-0.235), // -0.02 with encoder
             /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
+            COMPACTING(0.02),
             /** Set the intake angle to 0 rotations (zero position) */
-            STOW(0.0); //0.225 with encoder
-            
+            STOW(0.0),
+            /** Set the intake angle so far back that it guarantees a full stow even with bad PID tuning */
+            FULL_STOW(0.1);
 
             /**
              * The target position for the intake in mechanism rotations (not motor rotations). Positive is up, negative is down.

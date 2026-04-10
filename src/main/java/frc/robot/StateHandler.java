@@ -20,8 +20,10 @@ import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.FieldConstants.Tower;
 import frc.robot.Konstants.SwerveConstants;
+import frc.robot.Konstants.ClimbConstants.ClimbPosition;
 import frc.robot.Konstants.IntakeConstants.IntakePosition;
 import frc.robot.StateHandler.MacroState.Status;
+import frc.robot.subsystems.climb.SK26Climb;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.intake.SK26IntakePivot;
 import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
@@ -85,6 +87,11 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     // private MacroState previousChosenState = MacroState.IDLE;
 
+    @Getter
+    private Trigger climbStowed = new Trigger(() -> true);
+    @Getter
+    private Trigger climbReady = new Trigger(() -> true);
+
     /**
      * Trigger that is true when the launcher is at its target velocity (or no launcher is present).
      * Defaults to true; remapped to the launcher's atGoal when {@link #setLauncherSubsystem} is called.
@@ -109,6 +116,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
      */
     @Getter
     private Trigger intakeDeployed = new Trigger(() -> true);
+    @Getter
+    private Trigger intakeAvoidingMajorFouls = new Trigger(() -> true);
 
     /**
      * Trigger that is true when the robot's chassis is within its own alliance zone.
@@ -175,6 +184,18 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     }
 
     /**
+     * Sets the climb subsystem reference for checking climb position.
+     * @param climb Optional containing the SK26Climb, or empty if not present
+     */
+    public void setClimbSubsystem(Optional<SK26Climb> climb) {
+        if (climb.isEmpty()) {
+            return;
+        }
+        climbStowed = new Trigger(() -> climb.get().climbIsAtPosition(ClimbPosition.STOW));
+        climbReady = new Trigger(() -> climb.get().climbIsAtPosition(ClimbPosition.T_ONE));
+    }
+
+    /**
      * Sets the turret subsystem reference for checking turret readiness.
      * If the Optional is present, remaps the {@link #turretReadyToScore} trigger to the
      * turret's {@code atTarget()} method. If empty, leaves the trigger unchanged
@@ -202,6 +223,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             return;
         }
         intakeDeployed = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.GROUND);
+        intakeAvoidingMajorFouls = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.STOW);
     }
 
     /**
@@ -393,6 +415,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         else if(requestedState == MacroState.STEADY_STREAM_SCORING) {
             requestedState = MacroState.INTAKING;
         }
+        else if(requestedState == MacroState.CLIMB_AND_SCORE) {
+            requestedState = MacroState.CLIMBING;
+        }
     }
 
     public Command removeScoringFromRequestedStateCommand() {
@@ -411,6 +436,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         }
         else if(requestedState == MacroState.STEADY_STREAM_SHUTTLING) {
             requestedState = MacroState.STEADY_STREAM_SCORING;
+        }
+        else if(requestedState == MacroState.CLIMBING) {
+            requestedState = MacroState.CLIMB_AND_SCORE;
         }
     }
 
@@ -438,6 +466,19 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     public Command removeShuttlingFromRequestedStateCommand() {
         return Commands.runOnce(() -> removeShuttlingFromRequestedState());
+    }
+
+    public void removeClimbFromRequestedState() {
+        if(requestedState == MacroState.CLIMBING) {
+            requestedState = MacroState.IDLE;
+        }
+        else if(requestedState == MacroState.CLIMB_AND_SCORE) {
+            requestedState = MacroState.SCORING;
+        }
+    }
+
+    public Command removeClimbFromRequestedStateCommand() {
+        return Commands.runOnce(() -> removeClimbFromRequestedState()).withName("RemoveClimbFromRequestedState");
     }
 
     public void addShuttlingToRequestedState() {

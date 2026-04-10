@@ -23,12 +23,14 @@ public class SK26StateBinder implements CommandBinder {
     Trigger launcherReadyToScore;
     Trigger launcherReadyToShuttle;
     Trigger intakeDeployed;
-    Trigger intakeStowed;
+    Trigger intakeAvoidingMajorFouls;
     Trigger turretReadyToScore;
     Trigger turretReadyToShuttle;
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
     Trigger notNearTower;
+    Trigger climbReady;
+    Trigger climbStowed;
 
     // Trigger that is true when launcher is in an active launching state
     Trigger launcherActive;
@@ -45,11 +47,14 @@ public class SK26StateBinder implements CommandBinder {
             launcherReadyToScore = stateHandler.getLauncherReadyToScore();
             launcherReadyToShuttle = stateHandler.getLauncherReadyToShuttle();
             intakeDeployed = stateHandler.getIntakeDeployed();
+            intakeAvoidingMajorFouls = stateHandler.getIntakeAvoidingMajorFouls();
             turretReadyToScore = stateHandler.getTurretReadyToScore();
             turretReadyToShuttle = stateHandler.getTurretReadyToShuttle();
             inAllianceZone = stateHandler.getInAllianceZone();
             outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
+            climbReady = stateHandler.getClimbReady();
+            climbStowed = stateHandler.getClimbStowed();
         }
 
         /* Buttons */
@@ -113,6 +118,13 @@ public class SK26StateBinder implements CommandBinder {
                 stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.WAITING)
                 .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.WAITING))
             );
+        intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.READY))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.WAITING));
+        
+        intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone).and(launcherReadyToScore).and(turretReadyToScore)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.READY))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.WAITING));
 
     }
 
@@ -120,6 +132,9 @@ public class SK26StateBinder implements CommandBinder {
     {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
+        
+        DriverPorts.kStartbutton.button.onTrue(stateHandler.requestStateCommand(MacroState.CLIMBING));
+        DriverPorts.kBackbutton.button.onTrue(stateHandler.removeClimbFromRequestedStateCommand());
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
