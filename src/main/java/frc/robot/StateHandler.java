@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
@@ -223,7 +224,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             return;
         }
         intakeDeployed = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.GROUND);
-        intakeAvoidingMajorFouls = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.STOW);
+        intakeAvoidingMajorFouls = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.STOW)
+            .debounce(0.1, DebounceType.kRising);
     }
 
     /**

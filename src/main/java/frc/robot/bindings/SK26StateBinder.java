@@ -118,13 +118,14 @@ public class SK26StateBinder implements CommandBinder {
                 stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.WAITING)
                 .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.WAITING))
             );
-        intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.READY))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.WAITING));
+        // intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone)
+        //     .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.WAITING));
         
         intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone).and(launcherReadyToScore).and(turretReadyToScore)
             .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.READY))
             .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.WAITING));
+        DriverPorts.kStartbutton.button.onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, MacroState.Status.WAITING))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, MacroState.Status.WAITING));
 
     }
 
@@ -133,8 +134,8 @@ public class SK26StateBinder implements CommandBinder {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
         
-        DriverPorts.kStartbutton.button.onTrue(stateHandler.requestStateCommand(MacroState.CLIMBING));
-        DriverPorts.kBackbutton.button.onTrue(stateHandler.removeClimbFromRequestedStateCommand());
+        DriverPorts.kStartbutton.button.onTrue(stateHandler.requestStateCommand(MacroState.CLIMBING))
+            .onFalse(stateHandler.removeClimbFromRequestedStateCommand());
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());

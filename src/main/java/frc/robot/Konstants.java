@@ -513,6 +513,29 @@ public final class Konstants
                 this.height = height;
             }
         }
+
+        // ==================== Automated Climb Approach Constants ====================
+        
+        /** Distance from the tower front face for the approach pose (meters). */
+        public static final double kApproachDistanceMeters = 1.65;
+
+        /** Tolerance for X alignment when "hugging" the tower (meters). */
+        public static final double kAlignmentToleranceMeters = 0.076;
+
+        /** Path constraints for the approach pathfinding (slower for precision). */
+        public static final PathConstraints kClimbApproachConstraints = new PathConstraints(
+            2.5, 2.0,   // max velocity (m/s), max acceleration (m/s²)
+            360, 540,   // max angular velocity (deg/s), max angular acceleration (deg/s²)
+            12, false); // nominal voltage, unlimited acceleration
+
+        /** ProfiledPIDController constraints for final X alignment. */
+        public static final double kAlignmentMaxVelocity = 1.5;       // m/s
+        public static final double kAlignmentMaxAcceleration = 2.0;   // m/s²
+
+        /** PID gains for final X alignment. */
+        public static final double kAlignmentP = 3.0;
+        public static final double kAlignmentI = 0.0;
+        public static final double kAlignmentD = 0.1;
     }
 
 

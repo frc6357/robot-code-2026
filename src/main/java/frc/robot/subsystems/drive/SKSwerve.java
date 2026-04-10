@@ -57,8 +57,10 @@ public class SKSwerve extends SubsystemBase {
     private Pose2d[] emptyPath = new Pose2d[0];
 
     public void setSwerveRequest(SwerveRequest request) {
-        // Only allows PathPlanner to control the drivetrain during auto period through its own request
-        if(DriverStation.isAutonomousEnabled() && !request.equals(DriveRequests.pathPlannerRequest)) {
+        // Only allows PathPlanner and PID alignment to control the drivetrain during auto period
+        if(DriverStation.isAutonomousEnabled() 
+            && !request.equals(DriveRequests.pathPlannerRequest)
+            && !request.equals(DriveRequests.pidRequest)) {
             return;
         }
 		currentRequest = request;

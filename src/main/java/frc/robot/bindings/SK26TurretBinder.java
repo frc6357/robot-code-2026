@@ -52,7 +52,10 @@ public class SK26TurretBinder implements CommandBinder
         PointAtShuttlePoint = StateHandler.whenCurrentState(MacroState.SHUTTLING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
-        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE).or(StateHandler.whenCurrentState(MacroState.INTAKING).or(StateHandler.whenCurrentState(MacroState.SPITTING)));
+        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE)
+                .or(StateHandler.whenCurrentState(MacroState.INTAKING)
+                .or(StateHandler.whenCurrentState(MacroState.SPITTING)))
+                .or(StateHandler.whenCurrentState(MacroState.CLIMBING));
 
         if(swerveSubsystem.isEmpty()) {
             return;

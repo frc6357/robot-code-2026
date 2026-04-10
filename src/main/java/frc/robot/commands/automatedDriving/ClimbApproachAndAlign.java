@@ -1,0 +1,191 @@
+package frc.robot.commands.automatedDriving;
+
+import static frc.robot.Konstants.ClimbConstants.kAlignmentMaxAcceleration;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentMaxVelocity;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentP;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentI;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentD;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentToleranceMeters;
+import static frc.robot.Konstants.ClimbConstants.kApproachDistanceMeters;
+import static frc.robot.Konstants.ClimbConstants.kClimbApproachConstraints;
+
+import java.util.Set;
+
+import org.littletonrobotics.junction.Logger;
+
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import frc.lib.auto.Pathfinder;
+import frc.lib.utils.Field;
+import frc.lib.utils.FieldConstants;
+import frc.lib.utils.FieldConstants.Tower;
+import frc.robot.StateHandler;
+import frc.robot.StateHandler.MacroState.Status;
+import frc.robot.subsystems.drive.DriveRequests;
+import frc.robot.subsystems.drive.SKSwerve;
+
+/**
+ * Automated T1 climbing approach and alignment command.
+ * 
+ * <p>This command executes when the driver requests the CLIMBING state:
+ * <ol>
+ *   <li>Determines which tower post (left or right) is closest based on robot Y position</li>
+ *   <li>Pathfinds to an approach pose 1.65m from the tower front face</li>
+ *   <li>Uses a ProfiledPIDController to precisely align in X for the final "hug"</li>
+ * </ol>
+ * 
+ * <p>The rotation remains static after pathfinding (facing driver-forward).
+ */
+public class ClimbApproachAndAlign {
+
+    private ClimbApproachAndAlign() {
+        // Utility class - no instantiation
+    }
+
+    /**
+     * Creates the full climb approach and alignment command sequence.
+     * 
+     * @param drive The swerve drive subsystem
+     * @return A command that pathfinds to the approach pose, then aligns in X
+     */
+    public static Command create(SKSwerve drive) {
+        return Commands.sequence(
+            // Phase 1: Pathfind to approach pose
+            Commands.defer(() -> createPathfindCommand(drive), Set.of(drive)),
+            // Phase 2: Final X alignment with ProfiledPIDController
+            createAlignmentCommand(drive)
+        ).withName("ClimbApproachAndAlign");
+    }
+
+    /**
+     * Determines the target tower post based on which one the robot is closer to.
+     * 
+     * @param robotY Current robot Y position (meters)
+     * @return The Translation2d of the closest tower upright (left or right)
+     */
+    private static Translation2d getClosestTowerUpright(double robotY) {
+        Translation2d leftUpright;
+        Translation2d rightUpright;
+
+        if (Field.isBlue()) {
+            leftUpright = Tower.leftUpright;
+            rightUpright = Tower.rightUpright;
+        } else {
+            leftUpright = Tower.redLeftUpright;
+            rightUpright = Tower.redRightUpright;
+        }
+
+        double distToLeft = Math.abs(robotY - leftUpright.getY());
+        double distToRight = Math.abs(robotY - rightUpright.getY());
+
+        return distToLeft < distToRight ? leftUpright : rightUpright;
+    }
+
+    /**
+     * Calculates the approach pose for the robot based on the target tower upright.
+     * 
+     * <p>The approach pose is positioned {@value frc.robot.Konstants.ClimbConstants#kApproachDistanceMeters}m
+     * from the tower front face, with the robot facing driver-forward (0° on blue, 180° on red).
+     * 
+     * @param targetUpright The tower upright Translation2d
+     * @return The approach Pose2d
+     */
+    private static Pose2d calculateApproachPose(Translation2d targetUpright) {
+        double approachX;
+        Rotation2d approachRotation;
+
+        if (Field.isBlue()) {
+            // Blue alliance: approach from +X direction (tower is near X=0)
+            approachX = Tower.frontFaceX + kApproachDistanceMeters;
+            approachRotation = Rotation2d.fromDegrees(0); // Facing driver-forward (+X)
+        } else {
+            // Red alliance: approach from -X direction (tower is near X=fieldLength)
+            approachX = (FieldConstants.fieldLength - Tower.frontFaceX) - kApproachDistanceMeters;
+            approachRotation = Rotation2d.fromDegrees(180); // Facing driver-forward (-X in WPILib coords)
+        }
+
+        return new Pose2d(approachX, targetUpright.getY(), approachRotation);
+    }
+
+    /**
+     * Creates the pathfinding command to the approach pose.
+     * This is deferred to capture the robot's current position at execution time.
+     */
+    private static Command createPathfindCommand(SKSwerve drive) {
+        double robotY = drive.getRobotPose().getY();
+        Translation2d targetUpright = getClosestTowerUpright(robotY);
+        Pose2d approachPose = calculateApproachPose(targetUpright);
+
+        Logger.recordOutput("ClimbApproach/TargetUpright", targetUpright);
+        Logger.recordOutput("ClimbApproach/ApproachPose", approachPose);
+
+        return Pathfinder.PathfindToPoseCommand(approachPose, kClimbApproachConstraints, 0.0)
+            .withName("ClimbPathfindToApproach");
+    }
+
+    /**
+     * Creates the final X alignment command using a ProfiledPIDController.
+     * 
+     * <p>This command drives the robot forward/backward to align precisely with the tower,
+     * using motion profiling for smooth acceleration. The command finishes when within
+     * {@value frc.robot.Konstants.ClimbConstants#kAlignmentToleranceMeters}m of the target X.
+     */
+    private static Command createAlignmentCommand(SKSwerve drive) {
+        ProfiledPIDController xController = new ProfiledPIDController(
+            kAlignmentP, kAlignmentI, kAlignmentD,
+            new TrapezoidProfile.Constraints(kAlignmentMaxVelocity, kAlignmentMaxAcceleration)
+        );
+        xController.setTolerance(kAlignmentToleranceMeters);
+
+        return Commands.runEnd(
+            // Execute: drive robot using PID output for X velocity
+            () -> {
+                double robotX = drive.getRobotPose().getX();
+                
+                // Target X is the tower front face (alliance-adjusted)
+                double targetX = Field.isBlue() 
+                    ? Tower.frontFaceX 
+                    : (FieldConstants.fieldLength - Tower.frontFaceX);
+
+                double xVelocity = xController.calculate(robotX, targetX);
+
+                // Apply velocity as field-centric X movement (no Y or rotation)
+                // Uses pidRequest to bypass autonomous mode restrictions
+                drive.setSwerveRequest(
+                    DriveRequests.getPidRequestUpdater(() -> xVelocity, () -> 0.0, () -> 0.0)
+                        .apply(DriveRequests.pidRequest)
+                );
+
+                Logger.recordOutput("ClimbAlign/TargetX", targetX);
+                Logger.recordOutput("ClimbAlign/CurrentX", robotX);
+                Logger.recordOutput("ClimbAlign/XVelocity", xVelocity);
+                Logger.recordOutput("ClimbAlign/AtGoal", xController.atGoal());
+            },
+            // End: stop the robot
+            () -> {
+                drive.setSwerveRequest(
+                    DriveRequests.getPidRequestUpdater(() -> 0.0, () -> 0.0, () -> 0.0)
+                        .apply(DriveRequests.pidRequest)
+                );
+            },
+            drive
+        )
+        .beforeStarting(() -> {
+            // Reset controller when starting alignment
+            xController.reset(drive.getRobotPose().getX());
+        })
+        .until(() -> xController.atGoal())
+        // If it finishes naturally (at goal), we want to set the CLIMBING state to READY in the StateHandler.
+        .finallyDo((handleInterrupt) -> {
+            if(!handleInterrupt) {
+                StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
+            }
+        })
+        .withName("ClimbXAlignment");
+    }
+}

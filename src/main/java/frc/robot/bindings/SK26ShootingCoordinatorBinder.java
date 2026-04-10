@@ -11,7 +11,7 @@ import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 public class SK26ShootingCoordinatorBinder implements CommandBinder {
     private Optional<ShootingCoordinator> moveAndShootSystemContainer;
 
-    Trigger score = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+    Trigger score = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING)).or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
     Trigger shuttle = StateHandler.whenCurrentState(MacroState.SHUTTLING).or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
     Trigger stationary;
     Trigger moving;

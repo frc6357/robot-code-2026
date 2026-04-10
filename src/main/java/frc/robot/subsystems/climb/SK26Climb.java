@@ -264,7 +264,7 @@ public class SK26Climb extends SubsystemBase
      * @return A command requiring this subsystem.
      */
     public Command climbToHeightCommand(ClimbPosition position) {
-        return climbToHeightCommand(position.height);
+        return climbToHeightCommand(position.height).withName("ClimbTo" + position.name());
     }
 
     @Override

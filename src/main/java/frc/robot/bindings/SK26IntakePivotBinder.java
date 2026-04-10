@@ -60,7 +60,7 @@ public class SK26IntakePivotBinder implements CommandBinder
             .onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("IntakeDeploy"));
 
         // Stow when climbing
-        intakeAvoidMajorFoulsPosition.onTrue(
+        intakeAvoidMajorFoulsPosition.whileTrue(
             Commands.sequence(
                 pivot.setIntakePivotTargetCommand(FULL_STOW),
                 Commands.waitUntil(() -> pivot.getCurrentPosition() >= 0.0),

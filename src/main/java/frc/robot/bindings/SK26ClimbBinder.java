@@ -7,8 +7,9 @@ import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.StateHandler.MacroState.Status;
+import frc.robot.commands.automatedDriving.ClimbApproachAndAlign;
 import frc.robot.subsystems.climb.SK26Climb;
-import frc.robot.subsystems.intake.SK26IntakePivot;
+import frc.robot.subsystems.drive.SKSwerve;
 
 import static frc.robot.Ports.OperatorPorts.kUpDpad;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
@@ -22,6 +23,7 @@ import static frc.robot.Konstants.ClimbConstants.ClimbPosition.STOW;
 public class SK26ClimbBinder implements CommandBinder {
 
     Optional<SK26Climb> climbSubsystem;
+    Optional<SKSwerve> swerveSubsystem;
     
     Trigger prepareForT1Button;
     Trigger upButton;
@@ -30,10 +32,12 @@ public class SK26ClimbBinder implements CommandBinder {
     Trigger stowButton;
 
     Trigger extendClimb;
+    Trigger hoistClimb;
 
-    public SK26ClimbBinder(Optional<SK26Climb> climbSubsystem, Optional<SK26IntakePivot> intakePivot)
+    public SK26ClimbBinder(Optional<SK26Climb> climbSubsystem, Optional<SKSwerve> swerveSubsystem, Optional<StateHandler> stateHandler)
     {
         this.climbSubsystem = climbSubsystem;
+        this.swerveSubsystem = swerveSubsystem;
 
         this.prepareForT1Button = kUpDpad.button;
         this.upButton = kYbutton.button;
@@ -41,9 +45,14 @@ public class SK26ClimbBinder implements CommandBinder {
         this.hoistButton = kDownDpad.button;
         this.stowButton = kRightDpad.button;
 
-        if(intakePivot.isPresent()) {
-            this.extendClimb = StateHandler.whenStateHasStatus(MacroState.CLIMBING, Status.WAITING)
+        if(stateHandler.isPresent()) {
+            this.extendClimb = 
+                StateHandler.whenStateHasStatus(MacroState.CLIMBING, Status.WAITING)
+                .and(stateHandler.get().getIntakeAvoidingMajorFouls())
                 .and(StateHandler.whenCurrentState(MacroState.CLIMBING).or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE)));
+            this.hoistClimb = StateHandler.whenStateHasStatus(MacroState.CLIMBING, Status.READY)
+                .and(stateHandler.get().getIntakeAvoidingMajorFouls())
+                 .and(StateHandler.whenCurrentState(MacroState.CLIMBING).or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE)));
         }
     }
 
@@ -59,6 +68,20 @@ public class SK26ClimbBinder implements CommandBinder {
 
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
             downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
+
+            // Automated climb sequence: when CLIMBING is requested and intake is stowed,
+            // deploy arms to T_ONE and pathfind to tower approach pose in parallel
+            if (extendClimb != null && swerveSubsystem.isPresent()) {
+                SKSwerve drive = swerveSubsystem.get();
+                extendClimb.onTrue(
+                    climb.climbToHeightCommand(T_ONE)
+                        .alongWith(ClimbApproachAndAlign.create(drive))
+                        .withName("AutoClimbApproach")
+                );
+            } else if (extendClimb != null) {
+                // No swerve available - just deploy arms
+                extendClimb.onTrue(climb.climbToHeightCommand(T_ONE).withName("AutoClimbArmDeploy"));
+            }
         }
     }
 }
