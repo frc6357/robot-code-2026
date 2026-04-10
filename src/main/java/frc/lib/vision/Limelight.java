@@ -98,11 +98,12 @@ public class Limelight {
     }
 
     /**
-     * Cached snapshot of Limelight data for a single cycle.
-     * Call {@link Limelight#refreshSnapshot()} once per periodic cycle,
-     * then use getCached*() methods for zero-cost repeated access.
+     * Lazy-cached snapshot of Limelight data for a single cycle.
+     * Values are fetched on-demand and cached until {@link Limelight#invalidateCache()} is called.
+     * This avoids fetching data that isn't used while still preventing redundant NT reads.
      */
     public static class LimelightSnapshot {
+        // Cached values
         public boolean targetInView = false;
         public double horizontalOffset = 0;
         public double verticalOffset = 0;
@@ -115,7 +116,36 @@ public class Limelight {
         public double megaPoseTimestamp = 0;
         public RawFiducial[] rawFiducials = new RawFiducial[0];
         public double distanceToTag = 0;
-        public boolean valid = false; // True if snapshot was successfully populated
+        
+        // Flags indicating which values have been fetched this cycle
+        public boolean fetchedTv = false;
+        public boolean fetchedTx = false;
+        public boolean fetchedTy = false;
+        public boolean fetchedTa = false;
+        public boolean fetchedTagCount = false;
+        public boolean fetchedClosestTagID = false;
+        public boolean fetchedRawPose3d = false;
+        public boolean fetchedMegaPose2d = false;
+        public boolean fetchedRawPoseTimestamp = false;
+        public boolean fetchedMegaPoseTimestamp = false;
+        public boolean fetchedRawFiducials = false;
+        public boolean fetchedDistanceToTag = false;
+        
+        /** Reset all fetch flags - call at start of each cycle */
+        public void invalidate() {
+            fetchedTv = false;
+            fetchedTx = false;
+            fetchedTy = false;
+            fetchedTa = false;
+            fetchedTagCount = false;
+            fetchedClosestTagID = false;
+            fetchedRawPose3d = false;
+            fetchedMegaPose2d = false;
+            fetchedRawPoseTimestamp = false;
+            fetchedMegaPoseTimestamp = false;
+            fetchedRawFiducials = false;
+            fetchedDistanceToTag = false;
+        }
     }
 
     /* Debug */
@@ -124,7 +154,7 @@ public class Limelight {
     @Getter @Setter private String logStatus = "";
     @Getter @Setter private String tagStatus = "";
 
-    // Cached snapshot - populated once per cycle by refreshSnapshot()
+    // Lazy-cached snapshot - values fetched on-demand and cached for the cycle
     private final LimelightSnapshot snapshot = new LimelightSnapshot();
 
     /** Creates a new limelight object.
@@ -172,132 +202,195 @@ public class Limelight {
         return config.isAttached();
     }
 
-    // ======================= SNAPSHOT CACHING SYSTEM =======================
-    // Call refreshSnapshot() ONCE at the start of your subsystem's periodic(),
-    // then use getCached*() methods for repeated access without additional NT calls.
+    // ======================= LAZY CACHING SYSTEM =======================
+    // Call invalidateCache() ONCE at the start of your subsystem's periodic(),
+    // then use getCached*() methods which fetch on-demand and cache for the cycle.
 
     /**
-     * Refreshes the cached snapshot with current Limelight data.
-     * Call this ONCE per periodic cycle, then use getCached*() methods.
-     * This batches all NetworkTables reads into a single operation.
+     * Invalidates the cache, causing the next getCached*() calls to fetch fresh data.
+     * Call this ONCE at the start of each periodic cycle.
      */
-    public void refreshSnapshot() {
-        if (!isAttached()) {
-            snapshot.valid = false;
-            return;
-        }
-        
-        try {
-            // Get the bot pose estimate once - this contains most data we need
-            var poseEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue(config.getName());
-            var megaTagEstimate = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(config.getName());
-            
-            snapshot.targetInView = LimelightHelpers.getTV(config.getName());
-            snapshot.horizontalOffset = LimelightHelpers.getTX(config.getName());
-            snapshot.verticalOffset = LimelightHelpers.getTY(config.getName());
-            snapshot.targetSize = LimelightHelpers.getTA(config.getName());
-            snapshot.closestTagID = LimelightHelpers.getFiducialID(config.getName());
-            
-            // Extract data from the single pose estimate call
-            snapshot.tagCount = poseEstimate.tagCount;
-            snapshot.rawFiducials = poseEstimate.rawFiducials;
-            snapshot.rawPoseTimestamp = poseEstimate.timestampSeconds;
-            
-            // Get poses
-            snapshot.rawPose3d = LimelightHelpers.getBotPose3d_wpiBlue(config.getName());
-            snapshot.megaPose2d = megaTagEstimate.pose;
-            snapshot.megaPoseTimestamp = megaTagEstimate.timestampSeconds;
-            
-            // Calculate distance to tag
-            Pose3d cameraPoseTS = LimelightHelpers.getCameraPose3d_TargetSpace(config.getName());
-            double x = cameraPoseTS.getX();
-            double y = cameraPoseTS.getZ();
-            snapshot.distanceToTag = Math.sqrt(x * x + y * y);
-            
-            snapshot.valid = true;
-        } catch (Exception e) {
-            snapshot.valid = false;
-        }
+    public void invalidateCache() {
+        snapshot.invalidate();
     }
 
     /**
-     * @return The cached snapshot. Use after calling refreshSnapshot().
+     * @deprecated Use {@link #invalidateCache()} instead. This method now just invalidates the cache.
+     * The lazy-caching system fetches values on-demand rather than all at once.
+     */
+    @Deprecated
+    public void refreshSnapshot() {
+        invalidateCache();
+    }
+
+    /**
+     * @return The cached snapshot. Use getCached*() methods for lazy-loaded access.
      */
     public LimelightSnapshot getSnapshot() {
         return snapshot;
     }
 
-    /** @return Cached: Whether there's a valid target in view */
+    /** @return Cached: Whether there's a valid target in view (lazy-loaded) */
     public boolean getCachedTargetInView() {
-        return snapshot.valid && snapshot.targetInView;
+        if (!isAttached()) {
+            return false;
+        }
+        if (!snapshot.fetchedTv) {
+            snapshot.targetInView = LimelightHelpers.getTV(config.getName());
+            snapshot.fetchedTv = true;
+        }
+        return snapshot.targetInView;
     }
 
-    /** @return Cached: Horizontal offset to target */
+    /** @return Cached: Horizontal offset to target (lazy-loaded) */
     public double getCachedHorizontalOffset() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedTx) {
+            snapshot.horizontalOffset = LimelightHelpers.getTX(config.getName());
+            snapshot.fetchedTx = true;
+        }
         return snapshot.horizontalOffset;
     }
 
-    /** @return Cached: Vertical offset to target */
+    /** @return Cached: Vertical offset to target (lazy-loaded) */
     public double getCachedVerticalOffset() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedTy) {
+            snapshot.verticalOffset = LimelightHelpers.getTY(config.getName());
+            snapshot.fetchedTy = true;
+        }
         return snapshot.verticalOffset;
     }
 
-    /** @return Cached: Target size (percentage of image) */
+    /** @return Cached: Target size (percentage of image) (lazy-loaded) */
     public double getCachedTargetSize() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedTa) {
+            snapshot.targetSize = LimelightHelpers.getTA(config.getName());
+            snapshot.fetchedTa = true;
+        }
         return snapshot.targetSize;
     }
 
-    /** @return Cached: Number of AprilTags in view */
+    /** @return Cached: Number of AprilTags in view (lazy-loaded) */
     public int getCachedTagCount() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedTagCount) {
+            try {
+                snapshot.tagCount = LimelightHelpers.getBotPoseEstimate_wpiBlue(config.getName()).tagCount;
+            } catch (Exception e) {
+                snapshot.tagCount = 0;
+            }
+            snapshot.fetchedTagCount = true;
+        }
         return snapshot.tagCount;
     }
 
-    /** @return Cached: Whether multiple tags are visible */
+    /** @return Cached: Whether multiple tags are visible (lazy-loaded) */
     public boolean getCachedMultipleTagsInView() {
-        return snapshot.tagCount > 1;
+        return getCachedTagCount() > 1;
     }
 
-    /** @return Cached: Closest tag ID */
+    /** @return Cached: Closest tag ID (lazy-loaded) */
     public double getCachedClosestTagID() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedClosestTagID) {
+            snapshot.closestTagID = LimelightHelpers.getFiducialID(config.getName());
+            snapshot.fetchedClosestTagID = true;
+        }
         return snapshot.closestTagID;
     }
 
-    /** @return Cached: Raw 3D pose (MegaTag1) */
+    /** @return Cached: Raw 3D pose (MegaTag1) (lazy-loaded) */
     public Pose3d getCachedRawPose3d() {
+        if (!isAttached()) {
+            return new Pose3d();
+        }
+        if (!snapshot.fetchedRawPose3d) {
+            snapshot.rawPose3d = LimelightHelpers.getBotPose3d_wpiBlue(config.getName());
+            snapshot.fetchedRawPose3d = true;
+        }
         return snapshot.rawPose3d;
     }
 
-    /** @return Cached: MegaTag2 pose */
+    /** @return Cached: MegaTag2 pose (lazy-loaded) */
     public Pose2d getCachedMegaPose2d() {
+        if (!isAttached()) {
+            return new Pose2d();
+        }
+        if (!snapshot.fetchedMegaPose2d) {
+            snapshot.megaPose2d = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(config.getName()).pose;
+            snapshot.fetchedMegaPose2d = true;
+        }
         return snapshot.megaPose2d;
     }
 
-    /** @return Cached: Raw pose timestamp */
+    /** @return Cached: Raw pose timestamp (lazy-loaded) */
     public double getCachedRawPoseTimestamp() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedRawPoseTimestamp) {
+            snapshot.rawPoseTimestamp = LimelightHelpers.getBotPoseEstimate_wpiBlue(config.getName()).timestampSeconds;
+            snapshot.fetchedRawPoseTimestamp = true;
+        }
         return snapshot.rawPoseTimestamp;
     }
 
-    /** @return Cached: MegaTag2 pose timestamp */
+    /** @return Cached: MegaTag2 pose timestamp (lazy-loaded) */
     public double getCachedMegaPoseTimestamp() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedMegaPoseTimestamp) {
+            snapshot.megaPoseTimestamp = LimelightHelpers.getBotPoseEstimate_wpiBlue_MegaTag2(config.getName()).timestampSeconds;
+            snapshot.fetchedMegaPoseTimestamp = true;
+        }
         return snapshot.megaPoseTimestamp;
     }
 
-    /** @return Cached: Raw fiducial data array */
+    /** @return Cached: Raw fiducial data array (lazy-loaded) */
     public RawFiducial[] getCachedRawFiducials() {
+        if (!isAttached()) {
+            return new RawFiducial[0];
+        }
+        if (!snapshot.fetchedRawFiducials) {
+            try {
+                snapshot.rawFiducials = LimelightHelpers.getBotPoseEstimate_wpiBlue(config.getName()).rawFiducials;
+            } catch (Exception e) {
+                snapshot.rawFiducials = new RawFiducial[0];
+            }
+            snapshot.fetchedRawFiducials = true;
+        }
         return snapshot.rawFiducials;
     }
 
-    /** @return Cached: Distance to closest tag */
+    /** @return Cached: Distance to closest tag (lazy-loaded) */
     public double getCachedDistanceToTag() {
+        if (!isAttached()) {
+            return 0;
+        }
+        if (!snapshot.fetchedDistanceToTag) {
+            Pose3d cameraPoseTS = LimelightHelpers.getCameraPose3d_TargetSpace(config.getName());
+            double x = cameraPoseTS.getX();
+            double y = cameraPoseTS.getZ();
+            snapshot.distanceToTag = Math.sqrt(x * x + y * y);
+            snapshot.fetchedDistanceToTag = true;
+        }
         return snapshot.distanceToTag;
     }
 
-    /** @return Whether the snapshot is valid (refreshSnapshot succeeded) */
-    public boolean isSnapshotValid() {
-        return snapshot.valid;
-    }
-
-    // ======================= END SNAPSHOT CACHING =======================
+    // ======================= END LAZY CACHING =======================
 
     /**
      * Using the Limelight's config, sets the Limelight's camera pose in robot space.

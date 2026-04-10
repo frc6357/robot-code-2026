@@ -122,9 +122,10 @@ public class SKVision extends SubsystemBase {
         // Cache swerve rotation once for all Limelights
         Rotation2d cachedSwerveRotation = m_swerve.getRawDrivetrainRotation();
 
-        // OPTIMIZATION: Refresh all Limelight snapshots FIRST, batching NT reads
+        // OPTIMIZATION: Invalidate caches at the start of the cycle.
+        // Values will be lazy-loaded on first access, then cached for the rest of the cycle.
         for(Limelight ll : poseLimelights) {
-            // Set robot orientation before refreshing snapshot (needed for MegaTag2)
+            // Set robot orientation before any data access (needed for MegaTag2)
             if(ll.getName() == turretLL.getName()) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
@@ -148,10 +149,10 @@ public class SKVision extends SubsystemBase {
                 ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
             }
             
-            // Refresh snapshot AFTER setting orientation - batches all NT reads
-            ll.refreshSnapshot();
+            // Invalidate cache AFTER setting orientation - values will be lazy-loaded on demand
+            ll.invalidateCache();
             
-            // Use cached data for tag scanning
+            // Use cached data for tag scanning (lazy-loads only what's needed)
             scanForTagsCached(ll);
         }
 

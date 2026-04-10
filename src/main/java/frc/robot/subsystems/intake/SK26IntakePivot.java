@@ -2,10 +2,7 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderDiscontinuityPoint;
 import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
 import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerKG;
@@ -20,7 +17,6 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerPeakReverseVoltage;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPositionTolerance;
 import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
-import static frc.robot.Ports.pickupOBPorts.kPositionerEncoder;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 
@@ -29,18 +25,15 @@ import org.littletonrobotics.junction.Logger;
 // Imports from Phoenix 6
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
@@ -48,7 +41,6 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 // Imports from WPILib
