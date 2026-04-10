@@ -102,20 +102,20 @@ public class SK26LightsBinder implements CommandBinder {
 
         /* Scoring = SK Blue */
         scoringWaiting.and(autoMode).onTrue(
-            lights.setMode(LightMode.SOLID_GREEN, "Scoring (Waiting)")
+            lights.setMode(LightMode.SOLID_WHITE, "Scoring (Waiting)")
         ).onFalse(handleEffectFallbackCommand);
 
         scoringReady.and(autoMode).onTrue(
-            lights.setMode(LightMode.STROBE_GREEN, "Scoring (Ready)")
+            lights.setMode(LightMode.STROBE_WHITE, "Scoring (Ready)")
         ).onFalse(handleEffectFallbackCommand);
 
         /* Intaking = White */
         intakeWaiting.and(autoMode).onTrue(
-            lights.setMode(LightMode.SOLID_WHITE, "Intaking (Waiting)")
+            lights.setMode(LightMode.SOLID_GREEN, "Intaking (Waiting)")
         ).onFalse(handleEffectFallbackCommand);
 
         intakeReady.and(autoMode).onTrue(
-            lights.setMode(LightMode.STROBE_WHITE, "Intaking (Ready)")
+            lights.setMode(LightMode.STROBE_GREEN, "Intaking (Ready)")
         ).onFalse(handleEffectFallbackCommand);
 
         /* Steady Stream Scoring = Dual White/Green */
