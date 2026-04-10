@@ -29,9 +29,9 @@ public class SKVisionBinder implements CommandBinder {
             attemptStationaryPoseReset = new Trigger(() ->
                 {
                     ChassisSpeeds speeds = m_swerveContainer.get().getVelocity(false);
-                    return (speeds.omegaRadiansPerSecond < (3.14/6.0)) && 
-                            (speeds.vxMetersPerSecond < 0.1) &&
-                            (speeds.vyMetersPerSecond < 0.1);
+                    return (Math.abs(speeds.omegaRadiansPerSecond) < (3.14/6.0)) && 
+                            (Math.abs(speeds.vxMetersPerSecond) < 0.1) &&
+                            (Math.abs(speeds.vyMetersPerSecond) < 0.1);
                 }
             );
         }
