@@ -35,6 +35,8 @@ public class SK26LightsBinder implements CommandBinder {
     private Trigger steadyStreamScoringReady;
     private Trigger intakeWaiting;
     private Trigger intakeReady;
+    private Trigger climbWaiting;
+    private Trigger climbReady;
 
     boolean lightsPresent = false;
 
@@ -50,6 +52,8 @@ public class SK26LightsBinder implements CommandBinder {
         steadyStreamScoringReady = StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING);
         intakeWaiting = StateHandler.whenCurrentStateWaiting(MacroState.INTAKING);
         intakeReady = StateHandler.whenCurrentStateReady(MacroState.INTAKING);
+        climbWaiting = StateHandler.whenCurrentStateWaiting(MacroState.CLIMBING);
+        climbReady = StateHandler.whenCurrentStateReady(MacroState.CLIMBING);
         auto = new Trigger(DriverStation::isAutonomousEnabled);
         teleop = new Trigger(DriverStation::isTeleopEnabled);
         disabledFMS = new Trigger(
@@ -134,6 +138,15 @@ public class SK26LightsBinder implements CommandBinder {
 
         steadyStreamShuttlingReady.and(autoMode).onTrue(
             lights.setMode(LightMode.DUAL_STROBE_WHITE_YELLOW, "Steady Stream Shuttling (Ready)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        /* Climb - Party */
+        climbWaiting.and(autoMode).onTrue(
+            lights.setMode(LightMode.DISCO_BALL, "Climbing (Waiting)")
+        ).onFalse(handleEffectFallbackCommand);
+
+        climbReady.and(autoMode).onTrue(
+            lights.setMode(LightMode.DISCO_BALL, "Climbing (Ready)")
         ).onFalse(handleEffectFallbackCommand);
 
         /* Shift ending soon = Orange */
@@ -238,6 +251,9 @@ public class SK26LightsBinder implements CommandBinder {
         }
         else if(steadyStreamShuttlingWaiting.getAsBoolean()) {
             CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DUAL_SOLID_WHITE_YELLOW));
+        }
+        else if(climbReady.getAsBoolean() || climbWaiting.getAsBoolean()) {
+            CommandScheduler.getInstance().schedule(lights.setMode(LightMode.DISCO_BALL));
         }
         else if(teleop.getAsBoolean()) {
             CommandScheduler.getInstance().schedule(lights.setMode(LightMode.ALLIANCE_GRADIENT));

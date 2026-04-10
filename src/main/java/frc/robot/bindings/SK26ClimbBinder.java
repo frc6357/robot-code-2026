@@ -2,8 +2,11 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.robot.StateHandler;
+import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.climb.SK26Climb;
 
 import static frc.robot.Ports.OperatorPorts.kUpDpad;
@@ -17,6 +20,7 @@ import static frc.robot.Konstants.ClimbConstants.kClimbReturn;
 public class SK26ClimbBinder implements CommandBinder {
 
     Optional<SK26Climb> climbSubsystem;
+    Optional<StateHandler> stateHandler;
     
     Trigger t1Button;
     Trigger upButton;
@@ -24,9 +28,10 @@ public class SK26ClimbBinder implements CommandBinder {
     Trigger returnButton;
     Trigger zeroButton;
 
-    public SK26ClimbBinder(Optional<SK26Climb> climbSubsystem)
+    public SK26ClimbBinder(Optional<SK26Climb> climbSubsystem, Optional<StateHandler> stateHandler)
     {
         this.climbSubsystem = climbSubsystem;
+        this.stateHandler = stateHandler;
 
         this.t1Button = kUpDpad.button;
         this.upButton = kYbutton.button;
@@ -41,9 +46,23 @@ public class SK26ClimbBinder implements CommandBinder {
         {
             SK26Climb climb = climbSubsystem.get();
 
-            t1Button.onTrue(climb.climbToHeightCommand(kTOne).withName("L1ButtomClimb"));
-            returnButton.onTrue(climb.climbToHeightCommand(kClimbReturn).withName("ClimbToClimbPosition"));
-            zeroButton.onTrue(climb.climbToHeightCommand(0).withName("ClimbGoToZeroPosition"));
+            // Set climbing state when climb button is pressed, then execute climb command
+            t1Button.onTrue(
+                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
+                    .andThen(climb.climbToHeightCommand(kTOne))
+                    .withName("L1ButtonClimb"));
+            
+            returnButton.onTrue(
+                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
+                    .andThen(climb.climbToHeightCommand(kClimbReturn))
+                    .withName("ClimbToClimbPosition"));
+            
+            // Stow climb and return to IDLE state
+            zeroButton.onTrue(
+                climb.climbToHeightCommand(0)
+                    .andThen(Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.IDLE))))
+                    .withName("ClimbStowAndIdle"));
+            
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
             downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
         }
