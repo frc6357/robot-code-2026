@@ -32,6 +32,7 @@ import com.ctre.phoenix6.hardware.CANrange;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.GenericHID;
 import frc.lib.utils.CANPort;
+import frc.lib.utils.GuitarHeroController;
 import frc.lib.utils.SKTrigger;
 import frc.lib.utils.filters.FilteredAxis;
 import frc.lib.utils.filters.FilteredXboxController;
@@ -209,6 +210,12 @@ public class Ports
         }
 
 
+    }
+
+    public static class GuitarHeroPorts
+    {
+        /** Guitar Hero controller on USB port 2. */
+        public static final GuitarHeroController kGuitar = new GuitarHeroController(2);
     }
 
 
