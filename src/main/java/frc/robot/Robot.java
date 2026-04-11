@@ -24,7 +24,6 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 
 import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
-import frc.robot.subsystems.fueldetection.FuelHuntFileLogger;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -140,7 +139,6 @@ public class Robot extends LoggedRobot {
     public void disabledInit() {
         kDriver.setRumble(RumbleType.kBothRumble, 0.0);
         kOperator.setRumble(RumbleType.kBothRumble, 0.0);
-        FuelHuntFileLogger.close();
         m_robotContainer.disabledInit();
     }
 
