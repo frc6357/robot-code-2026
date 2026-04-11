@@ -178,7 +178,7 @@
   {
     "name": "/Preferences/Indexer/ManualVoltage",
     "type": "double",
-    "value": -6.75,
+    "value": -7.65,
     "properties": {
       "persistent": true
     }
@@ -298,7 +298,7 @@
   {
     "name": "/Preferences/DualLauncher/Tuning/Tolerance (rps)",
     "type": "double",
-    "value": 5.0,
+    "value": 3.0,
     "properties": {
       "persistent": true
     }
@@ -307,6 +307,14 @@
     "name": "/Preferences/DualLauncher/ManualTargetSpeed (rps)",
     "type": "double",
     "value": 35.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DualLauncher/Top:BottomRollerRatio",
+    "type": "double",
+    "value": 1.1,
     "properties": {
       "persistent": true
     }

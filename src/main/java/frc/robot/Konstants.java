@@ -155,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            3.5, 3.0, 
+            2.0, 3.0, 
             360, 540, 
             12, false);
 
@@ -551,7 +551,7 @@ public final class Konstants
                 public static final double kS = 0.25;  // Static friction (volts)
                 public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.4;   // Proportional gain
+                public static final double kP = 0.5;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -561,7 +561,7 @@ public final class Konstants
                 public static final double kS = 0.25;  // Static friction (volts)
                 public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.4;   // Proportional gain
+                public static final double kP = 0.5;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -575,7 +575,7 @@ public final class Konstants
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = 0.0;
+        public static final double kPhaseDelaySeconds = 0.21;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
@@ -604,56 +604,59 @@ public final class Konstants
         // "Stationary" speed threshold for deciding when to apply motion compensation
         public static final LinearVelocity kStationaryThresholdMetersPerSecond = MetersPerSecond.of(0.3);
 
+        public static final double newSpindexerFlywheelSpeedFudge = 0.99;
+
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization
         public static InterpolatingDoubleTreeMap createFlywheelSpeedMap() {
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            map.put(2.82, 23.3 * 60.0);
-            map.put(3.0, 24.0 * 60.0);
-            map.put(3.12, 24.3 * 60.0);
-            map.put(3.27, 24.8 * 60.0);
-            map.put(3.32, 25.5 * 60.0);
-            map.put(3.45, 25.9 * 60.0);
-            map.put(3.52, 26.0 * 60.0);
-            map.put(3.71, 26.2 * 60.0);
-            map.put(3.95, 26.8 * 60.0);
-            map.put(4.08, 27.4 * 60.0);
-            map.put(4.13, 27.55 * 60.0);
-            map.put(4.33, 27.9 * 60.0);
-            map.put(4.47, 28.2 * 60.0);
-            map.put(4.67, 29.1 * 60.0);
-            map.put(5.11, 30.5 * 60.0);
-            map.put(5.24, 30.95 * 60.0);
-            map.put(5.43, 31.5 * 60.0);
-            map.put(5.62, 32.0 * 60.0);
-            map.put(5.8, 32.5 * 60.0);
-            map.put(6.0, 33.0 * 60.0);
-            map.put(6.2, 33.5 * 60.0);
-            map.put(6.5, 34.2 * 60.0);
-            map.put(7.0, 35.5 * 60.0);
-            map.put(7.5, 37.0 * 60.0);
-            map.put(8.0, 38.5 * 60.0);
-            map.put(8.5, 40.0 * 60.0);
-            map.put(9.0, 41.5 * 60.0);
-            map.put(9.5, 43.0 * 60.0);
-            map.put(10.0, 45.0 * 60.0);
-            map.put(10.33, 46.0 * 60.0);
-            map.put(10.66, 47.0 * 60.0);
-            map.put(11.0, 48.0 * 60.0);
-            map.put(11.33, 49.0 * 60.0);
-            map.put(11.66, 50.0 * 60.0);
-            map.put(12.0, 51.0 * 60.0);
-            map.put(12.33, 52.0 * 60.0);
-            map.put(12.66, 53.0 * 60.0);
-            map.put(13.0, 54.0 * 60.0);
-            map.put(13.33, 55.0 * 60.0);
-            map.put(13.66, 56.0 * 60.0);
-            map.put(14.0, 57.0 * 60.0);
-            map.put(14.33, 58.0 * 60.0);
-            map.put(14.66, 59.0 * 60.0);
-            map.put(15.0, 60.0 * 60.0);
+            map.put(2.82, 23.3 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.0, 24.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.12, 24.3 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.27, 24.8 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.32, 25.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.45, 25.9 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.52, 26.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.71, 26.2 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.95, 26.8 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.08, 27.4 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.13, 27.55 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.33, 27.9 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.47, 28.2 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.67, 29.1 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.0, 30.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.11, 30.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.24, 30.95 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.43, 31.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.62, 32.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.8, 32.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.0, 33.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.2, 33.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.5, 34.2 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(7.0, 35.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(7.5, 37.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(8.0, 38.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(8.5, 40.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(9.0, 41.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(9.5, 43.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(10.0, 45.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(10.33, 46.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(10.66, 47.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.0, 48.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.33, 49.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.66, 50.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.0, 51.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.33, 52.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.66, 53.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.0, 54.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.33, 55.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.66, 56.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.0, 57.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.33, 58.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.66, 59.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(15.0, 60.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
             
 
             return map;
@@ -776,7 +779,7 @@ public final class Konstants
         public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
 
-        public static final double kChassisSpeedRollerFF = 1.0; // Volts of output per m/s of velocity in the intake's direction
+        public static final double kChassisSpeedRollerFF = 1.4; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

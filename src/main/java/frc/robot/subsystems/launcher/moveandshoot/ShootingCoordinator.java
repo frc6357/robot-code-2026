@@ -389,8 +389,7 @@ public class ShootingCoordinator {
     public static InterpolatedShotStrategy createShotStrategy() {
         return new InterpolatedShotStrategy.Builder()
             .withFlywheelSpeedMap(LauncherConstants.createFlywheelSpeedMap())
-            .withWheelRadius(LauncherConstants.kWheelRadius)             // For kinematic ToF calculation
-            .withSlipRatio(LauncherConstants.kSlipRatio)                 // Ball velocity / wheel velocity compensation
+            .withTimeOfFlightMap(LauncherConstants.createTimeOfFlightMap())
             .withFixedLaunchAngle(kFixedLaunchAngle)
             .withMaxIterations(kMaxIterations)                           // Max lookahead iterations
             .withConvergenceThreshold(kConvergenceThresholdMeters)    // Stop when distance converges within kConvergenceThresholdMeters

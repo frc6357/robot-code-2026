@@ -9,7 +9,7 @@
     "duallauncher": true,
     "lights": true,
     "indexer": true,
-    "climb": false,
+    "climb": true,
     "intakepivot": true,
     "intakerollers": true,
     "feeder": true,

@@ -3,6 +3,7 @@ package frc.robot.bindings;
 import java.util.Optional;
 
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.MatchType;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -155,7 +156,7 @@ public class SK26LightsBinder implements CommandBinder {
         )
         .onFalse(handleEffectFallbackCommand);
 
-        RobotContainer.shiftNotice.and(autoMode).onTrue(
+        RobotContainer.shiftNotice.and(autoMode).and(() -> DriverStation.getMatchType() != MatchType.None).onTrue(
             lights.setMode(LightMode.STROBE_PURPLE, "Shift Ending Notice")
         )
         .onFalse(handleEffectFallbackCommand);

@@ -28,7 +28,8 @@ public class SK26IntakeRollersBinder implements CommandBinder
         // States that want the rollers running
         runIntakeRollers = StateHandler.whenCurrentState(MacroState.INTAKING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING))
-            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
+            .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentState(MacroState.SHUTTLING));
 
         trashCompact = StateHandler.whenCurrentStateReady(MacroState.SCORING);
 
@@ -53,7 +54,7 @@ public class SK26IntakeRollersBinder implements CommandBinder
             .withName("IntakeRollersRunFromRobotVel"));
         }
         trashCompact.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage * 0.66).withName("IntakeRollersCompact"));
-        spitting.whileTrue(rollers.runAtVoltageCommand(-kIntakeFullVoltage).withName("IntakeRollersSpit"));
+        spitting.whileTrue(rollers.runAtVoltageCommand(-kIntakeFullVoltage * 1.5).withName("IntakeRollersSpit"));
 
         /* Manual */
         // OperatorPorts.kLTrigger.button.whileTrue(rollers.runAtVoltageCommand(kIntakeFullVoltage));
