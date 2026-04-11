@@ -73,18 +73,21 @@ public class FuelDetection extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (swerve == null) return;
+        // --- Limelight detection (requires swerve for pose) ---
+        if (swerve != null) {
+            RawDetection[] detections =
+                    LimelightHelpers.getRawDetections(limelightName);
 
-        RawDetection[] detections =
-                LimelightHelpers.getRawDetections(limelightName);
+            List<Translation2d> fieldPoints = new ArrayList<>();
+            for (RawDetection d : detections) {
+                Translation2d pt = projectToField(d, swerve.getRobotPose(), swerve.getRobotRotation());
+                if (pt != null) fieldPoints.add(pt);
+            }
 
-        List<Translation2d> fieldPoints = new ArrayList<>();
-        for (RawDetection d : detections) {
-            Translation2d pt = projectToField(d, swerve.getRobotPose(), swerve.getRobotRotation());
-            if (pt != null) fieldPoints.add(pt);
+            fuelMap.update(fieldPoints.toArray(new Translation2d[0]));
         }
 
-        fuelMap.update(fieldPoints.toArray(new Translation2d[0]));
+        // --- Always log the full fuel map (works with sim-injected fuel too) ---
         logFuelPoses();
         logBestCluster();
     }
@@ -123,6 +126,22 @@ public class FuelDetection extends SubsystemBase {
     // ---------------------------------------------------------------
 
     private void logFuelPoses() {
+        // --- All tracked fuel (including unconfirmed / low-confidence) ---
+        List<TrackedFuel> all = fuelMap.getTrackedFuels();
+        Pose2d[] allPoses2d = new Pose2d[all.size()];
+        Pose3d[] allPoses3d = new Pose3d[all.size()];
+
+        for (int i = 0; i < all.size(); i++) {
+            Translation2d t = all.get(i).getFieldPosition();
+            allPoses2d[i] = new Pose2d(t, new Rotation2d());
+            allPoses3d[i] = new Pose3d(t.getX(), t.getY(), BALL_RADIUS_M,
+                    new Rotation3d());
+        }
+
+        Logger.recordOutput(PREFIX + "/AllBalls2d", allPoses2d);
+        Logger.recordOutput(PREFIX + "/AllBalls3d", allPoses3d);
+
+        // --- Confirmed fuel only (passed confidence threshold) ---
         List<TrackedFuel> confirmed = fuelMap.getConfirmedFuels();
         Pose2d[] poses2d = new Pose2d[confirmed.size()];
         Pose3d[] poses3d = new Pose3d[confirmed.size()];
@@ -136,6 +155,10 @@ public class FuelDetection extends SubsystemBase {
 
         Logger.recordOutput(PREFIX + "/Balls2d", poses2d);
         Logger.recordOutput(PREFIX + "/Balls3d", poses3d);
+
+        // --- Counts ---
+        Logger.recordOutput(PREFIX + "/TrackedCount", all.size());
+        Logger.recordOutput(PREFIX + "/ConfirmedCount", confirmed.size());
     }
 
     private void logBestCluster() {

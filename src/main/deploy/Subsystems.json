@@ -13,5 +13,5 @@
     "intakepivot": true,
     "intakerollers": true,
     "feeder": true,
-    "fueldetection": false
+    "fueldetection": true
 }

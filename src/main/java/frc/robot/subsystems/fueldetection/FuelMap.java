@@ -192,4 +192,22 @@ public class FuelMap {
     public void clear() {
         trackedFuels.clear();
     }
+
+    /**
+     * Removes every tracked fuel within {@code radius} metres of the given
+     * position.  Used in simulation to "collect" balls when the robot drives
+     * over them.
+     *
+     * @return the number of fuels removed.
+     */
+    public int removeNear(Translation2d position, double radius) {
+        int removed = 0;
+        for (int i = trackedFuels.size() - 1; i >= 0; i--) {
+            if (trackedFuels.get(i).getFieldPosition().getDistance(position) <= radius) {
+                trackedFuels.remove(i);
+                removed++;
+            }
+        }
+        return removed;
+    }
 }

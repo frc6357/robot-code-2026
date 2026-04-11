@@ -39,6 +39,7 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
+import frc.robot.bindings.FuelAimBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SK26IntakePivotBinder;
 import frc.robot.bindings.SK26IntakeRollersBinder;
@@ -65,6 +66,7 @@ import frc.robot.subsystems.turret.SK26Turret;
 import frc.robot.subsystems.turret.SK26TurretSim;
 import frc.robot.subsystems.vision.SKVision;
 import frc.robot.subsystems.fueldetection.FuelDetection;
+import frc.robot.subsystems.fueldetection.SimFuelInjector;
 import frc.robot.subsystems.vision.VisionConfig;
 
 import static frc.robot.Ports.DriverPorts.kDriver;
@@ -273,6 +275,10 @@ public class RobotContainer {
                 if(subsystems.isFuelDetectionPresent()) {
                     m_fuelDetectionContainer = Optional.of(new FuelDetection(VisionConfig.INTAKE_CONFIG, m_swerveContainer));
                     m_fuelDetectionInstance = m_fuelDetectionContainer.get();
+                    // Sim-only: inject fake fuel so the pipeline can be tested
+                    if (m_swerveInstance != null) {
+                        new SimFuelInjector(m_fuelDetectionInstance, m_swerveInstance);
+                    }
                 }
             }
             else {
@@ -379,6 +385,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
+        buttonBinders.add(new FuelAimBinder(m_swerveContainer, m_fuelDetectionContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
