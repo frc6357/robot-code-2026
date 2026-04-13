@@ -93,7 +93,7 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
-  public Optional<SK26Climb> m_climbComtainer = Optional.empty();
+  public Optional<SK26Climb> m_climbContainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
@@ -247,6 +247,10 @@ public class RobotContainer {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
+                if(subsystems.isClimbPresent()) {
+                    m_climbContainer = Optional.of(new SK26Climb());
+                    m_climbInstance = m_climbContainer.get();
+                }
                 if(subsystems.isBangBangLauncherPresent()) {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
                     m_BBlauncherInstance = m_BBLauncherContainer.get();
@@ -294,8 +298,8 @@ public class RobotContainer {
                     m_visionInstance = m_visionContainer.get();
                 }
                 if(subsystems.isClimbPresent()) {
-                    m_climbComtainer = Optional.of(new SK26Climb());
-                    m_climbInstance = m_climbComtainer.get();
+                    m_climbContainer = Optional.of(new SK26Climb());
+                    m_climbInstance = m_climbContainer.get();
                 }
                 if(subsystems.isBangBangLauncherPresent()) {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
@@ -350,6 +354,8 @@ public class RobotContainer {
             m_stateHandlerContainer.ifPresent(sh -> sh.setIntakeSubsystem(m_intakePivotContainer));
             // Give StateHandler a reference to the drive for zone-based triggers
             m_stateHandlerContainer.ifPresent(sh -> sh.setDriveSubsystem(m_swerveContainer));
+            // Give StateHandler a reference to the climb for state readiness checking
+            m_stateHandlerContainer.ifPresent(sh -> sh.setClimbSubsystem(m_climbContainer));
         }
         catch (IOException e)
         {
@@ -367,7 +373,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add(new SK26ClimbBinder(m_climbComtainer, m_swerveContainer, m_stateHandlerContainer));
+        buttonBinders.add(new SK26ClimbBinder(m_climbContainer, m_swerveContainer, m_stateHandlerContainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());

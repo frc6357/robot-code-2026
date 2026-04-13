@@ -517,25 +517,44 @@ public final class Konstants
         // ==================== Automated Climb Approach Constants ====================
         
         /** Distance from the tower front face for the approach pose (meters). */
-        public static final double kApproachDistanceMeters = 1.65;
+        public static final double kApproachDistanceMeters = 0.5;
 
         /** Tolerance for X alignment when "hugging" the tower (meters). */
         public static final double kAlignmentToleranceMeters = 0.076;
 
         /** Path constraints for the approach pathfinding (slower for precision). */
         public static final PathConstraints kClimbApproachConstraints = new PathConstraints(
-            2.5, 2.0,   // max velocity (m/s), max acceleration (m/s²)
+            4.0, 4.0,   // max velocity (m/s), max acceleration (m/s²)
             360, 540,   // max angular velocity (deg/s), max angular acceleration (deg/s²)
             12, false); // nominal voltage, unlimited acceleration
 
         /** ProfiledPIDController constraints for final X alignment. */
-        public static final double kAlignmentMaxVelocity = 1.5;       // m/s
-        public static final double kAlignmentMaxAcceleration = 2.0;   // m/s²
+        public static final double kAlignmentMaxVelocity = 2.0;       // m/s
+        public static final double kAlignmentMaxAcceleration = 3.0;   // m/s²
 
         /** PID gains for final X alignment. */
-        public static final double kAlignmentP = 3.0;
+        public static final double kAlignmentP = 5.0;
         public static final double kAlignmentI = 0.0;
         public static final double kAlignmentD = 0.1;
+
+        /** ProfiledPIDController constraints for final Y alignment. */
+        public static final double kAlignmentYMaxVelocity = 2.0;       // m/s
+        public static final double kAlignmentYMaxAcceleration = 3.0;   // m/s²
+
+        /** PID gains for final Y alignment. */
+        public static final double kAlignmentYP = 5.0;
+        public static final double kAlignmentYI = 0.0;
+        public static final double kAlignmentYD = 0.1;
+
+        /** Tolerance for Y alignment when "hugging" the tower (meters). */
+        public static final double kAlignmentYToleranceMeters = 0.076;
+
+        /* Tower rung positions specifically for aligning our robot's bumper gap for the tower */
+        // TODO: Go onto the field and use vision to find the exact coordinates
+        public static final Translation2d kTowerLeftRungBlue = new Translation2d(8.23, 2.03); // Blue left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungBlue = new Translation2d(8.23, 5.77); // Blue right tower rung (from driver station)
+        public static final Translation2d kTowerLeftRungRed = new Translation2d(8.23, 7.97); // Red left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungRed = new Translation2d(8.23, 0.83); // Red right tower rung (from driver station)
     }
 
 
@@ -738,9 +757,9 @@ public final class Konstants
     {
         public static enum IntakePosition
         {
-            /** Set the intake angle to 0.271 intake rotations */
+            /** Set the intake angle to -0.235 intake rotations */
             GROUND(-0.235), // -0.02 with encoder
-            /** Set the intake angle to 0.213 intake rotations */
+            /** Set the intake angle to 0.02 intake rotations */
             COMPACTING(0.02),
             /** Set the intake angle to 0 rotations (zero position) */
             STOW(0.0),

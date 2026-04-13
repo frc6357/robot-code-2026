@@ -19,6 +19,10 @@ import edu.wpi.first.wpilibj2.command.Commands;
 
 public class OverrideAuto {
 
+    // Very unfinished work from 2025 off season/2026 pre season. This method is intended to allow us to interject a command 
+    // into an already running PathPlannerAuto command, then after that command finishes, have the robot pathfind to the next 
+    // pose in the currently active path to "recover" and continue on as if the auto had not been interrupted. 
+
     public static Command InterjectAutoAndRecover(Supplier<Command> selectedAutoCommand, Command toRun) {
         PathPlannerAuto currentPathPlannerAuto = null;
 

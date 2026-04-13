@@ -223,9 +223,14 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         if (intake.isEmpty()) {
             return;
         }
-        intakeDeployed = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.GROUND);
-        intakeAvoidingMajorFouls = new Trigger(() -> intake.get().isPositionerAtTarget() && intake.get().getPositionerTargetEnum() == IntakePosition.STOW)
-            .debounce(0.1, DebounceType.kRising);
+        intakeDeployed = new Trigger(() -> {
+            IntakePosition target = intake.get().getPositionerTargetEnum();
+            return intake.get().getCurrentPosition() <= target.rotations && target == IntakePosition.GROUND;
+        });
+        intakeAvoidingMajorFouls = new Trigger(() -> {
+            IntakePosition target = intake.get().getPositionerTargetEnum();
+            return intake.get().getCurrentPosition() >= target.rotations && target == IntakePosition.STOW;
+        }).debounce(0.1, DebounceType.kRising);
     }
 
     /**

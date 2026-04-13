@@ -6,6 +6,12 @@ import static frc.robot.Konstants.ClimbConstants.kAlignmentP;
 import static frc.robot.Konstants.ClimbConstants.kAlignmentI;
 import static frc.robot.Konstants.ClimbConstants.kAlignmentD;
 import static frc.robot.Konstants.ClimbConstants.kAlignmentToleranceMeters;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYMaxAcceleration;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYMaxVelocity;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYP;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYI;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYD;
+import static frc.robot.Konstants.ClimbConstants.kAlignmentYToleranceMeters;
 import static frc.robot.Konstants.ClimbConstants.kApproachDistanceMeters;
 import static frc.robot.Konstants.ClimbConstants.kClimbApproachConstraints;
 
@@ -17,15 +23,15 @@ import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.auto.Pathfinder;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants;
 import frc.lib.utils.FieldConstants.Tower;
-import frc.robot.StateHandler;
-import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 
@@ -58,7 +64,7 @@ public class ClimbApproachAndAlign {
             // Phase 1: Pathfind to approach pose
             Commands.defer(() -> createPathfindCommand(drive), Set.of(drive)),
             // Phase 2: Final X alignment with ProfiledPIDController
-            createAlignmentCommand(drive)
+            Commands.defer(() -> createAlignmentCommand(drive), Set.of(drive))
         ).withName("ClimbApproachAndAlign");
     }
 
@@ -129,42 +135,72 @@ public class ClimbApproachAndAlign {
     }
 
     /**
-     * Creates the final X alignment command using a ProfiledPIDController.
+     * Creates the final X and Y alignment command using ProfiledPIDControllers.
      * 
-     * <p>This command drives the robot forward/backward to align precisely with the tower,
+     * <p>This command drives the robot to align precisely with the tower,
      * using motion profiling for smooth acceleration. The command finishes when within
-     * {@value frc.robot.Konstants.ClimbConstants#kAlignmentToleranceMeters}m of the target X.
+     * {@value frc.robot.Konstants.ClimbConstants#kAlignmentToleranceMeters}m of the target X
+     * and {@value frc.robot.Konstants.ClimbConstants#kAlignmentYToleranceMeters}m of the target Y.
      */
     private static Command createAlignmentCommand(SKSwerve drive) {
+        boolean flipPIDOutput = Field.isRed(); // Flip PID output on red alliance to account for reversed field coordinates
+        Pose2d initPose = drive.getRobotPose();
+        ChassisSpeeds initSpeeds = drive.getVelocity(true);
+
         ProfiledPIDController xController = new ProfiledPIDController(
             kAlignmentP, kAlignmentI, kAlignmentD,
             new TrapezoidProfile.Constraints(kAlignmentMaxVelocity, kAlignmentMaxAcceleration)
         );
         xController.setTolerance(kAlignmentToleranceMeters);
+        xController.reset(new State(initPose.getX(), initSpeeds.vxMetersPerSecond));
+
+        ProfiledPIDController yController = new ProfiledPIDController(
+            kAlignmentYP, kAlignmentYI, kAlignmentYD,
+            new TrapezoidProfile.Constraints(kAlignmentYMaxVelocity, kAlignmentYMaxAcceleration)
+        );
+        yController.setTolerance(kAlignmentYToleranceMeters);
+        yController.reset(new State(initPose.getY(), initSpeeds.vyMetersPerSecond));
+
+        // Target X is the tower front face (alliance-adjusted)
+        final double targetX = Field.isBlue() 
+            ? Tower.frontFaceX 
+            : (FieldConstants.fieldLength - Tower.frontFaceX);
+
+        // Capture target Y at command creation time (based on closest upright)
+        final double targetY = getClosestTowerUpright(drive.getRobotPose().getY()).getY();
+
+        xController.setGoal(new State(targetX, 0.0));
+        yController.setGoal(new State(targetY, 0.0));
 
         return Commands.runEnd(
-            // Execute: drive robot using PID output for X velocity
+            // Execute: drive robot using PID output for X and Y velocity
             () -> {
-                double robotX = drive.getRobotPose().getX();
+                Pose2d robotPose = drive.getRobotPose();
+                double robotX = robotPose.getX();
+                double robotY = robotPose.getY();
                 
-                // Target X is the tower front face (alliance-adjusted)
-                double targetX = Field.isBlue() 
-                    ? Tower.frontFaceX 
-                    : (FieldConstants.fieldLength - Tower.frontFaceX);
+                double xVelocity = xController.calculate(robotX);
+                double yVelocity = yController.calculate(robotY);
 
-                double xVelocity = xController.calculate(robotX, targetX);
-
-                // Apply velocity as field-centric X movement (no Y or rotation)
+                // Apply velocity as field-centric X and Y movement (no rotation)
                 // Uses pidRequest to bypass autonomous mode restrictions
                 drive.setSwerveRequest(
-                    DriveRequests.getPidRequestUpdater(() -> xVelocity, () -> 0.0, () -> 0.0)
+                    DriveRequests.getPidRequestUpdater(
+                        () -> flipPIDOutput ? -xVelocity : xVelocity, 
+                        () -> flipPIDOutput ? -yVelocity : yVelocity, 
+                        () -> 0.0)
                         .apply(DriveRequests.pidRequest)
                 );
 
                 Logger.recordOutput("ClimbAlign/TargetX", targetX);
                 Logger.recordOutput("ClimbAlign/CurrentX", robotX);
                 Logger.recordOutput("ClimbAlign/XVelocity", xVelocity);
-                Logger.recordOutput("ClimbAlign/AtGoal", xController.atGoal());
+                Logger.recordOutput("ClimbAlign/XAtGoal", xController.atGoal());
+                Logger.recordOutput("ClimbAlign/TargetY", targetY);
+                Logger.recordOutput("ClimbAlign/CurrentY", robotY);
+                Logger.recordOutput("ClimbAlign/YVelocity", yVelocity);
+                Logger.recordOutput("ClimbAlign/YAtGoal", yController.atGoal());
+                Logger.recordOutput("ClimbAlign/AtGoal", xController.atGoal() && yController.atGoal());
             },
             // End: stop the robot
             () -> {
@@ -176,16 +212,12 @@ public class ClimbApproachAndAlign {
             drive
         )
         .beforeStarting(() -> {
-            // Reset controller when starting alignment
-            xController.reset(drive.getRobotPose().getX());
+            // Reset controllers when starting alignment
+            Pose2d robotPose = drive.getRobotPose();
+            xController.reset(robotPose.getX());
+            yController.reset(robotPose.getY());
         })
-        .until(() -> xController.atGoal())
-        // If it finishes naturally (at goal), we want to set the CLIMBING state to READY in the StateHandler.
-        .finallyDo((handleInterrupt) -> {
-            if(!handleInterrupt) {
-                StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
-            }
-        })
-        .withName("ClimbXAlignment");
+        .until(() -> xController.atGoal() && yController.atGoal())
+        .withName("ClimbXYAlignment");
     }
 }

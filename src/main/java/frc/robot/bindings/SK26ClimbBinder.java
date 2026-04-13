@@ -2,6 +2,7 @@ package frc.robot.bindings;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
@@ -14,6 +15,7 @@ import frc.robot.subsystems.drive.SKSwerve;
 import static frc.robot.Ports.OperatorPorts.kUpDpad;
 import static frc.robot.Ports.OperatorPorts.kYbutton;
 import static frc.robot.Ports.OperatorPorts.kAbutton;
+import static frc.robot.Ports.DriverPorts.kBackbutton;
 import static frc.robot.Ports.OperatorPorts.kRightDpad;
 import static frc.robot.Ports.OperatorPorts.kDownDpad;
 import static frc.robot.Konstants.ClimbConstants.ClimbPosition.T_ONE;
@@ -73,15 +75,22 @@ public class SK26ClimbBinder implements CommandBinder {
             // deploy arms to T_ONE and pathfind to tower approach pose in parallel
             if (extendClimb != null && swerveSubsystem.isPresent()) {
                 SKSwerve drive = swerveSubsystem.get();
-                extendClimb.onTrue(
-                    climb.climbToHeightCommand(T_ONE)
-                        .alongWith(ClimbApproachAndAlign.create(drive))
-                        .withName("AutoClimbApproach")
+                extendClimb.whileTrue(
+                    // TODO: Change Commands.none() in sequence back to climb command when running on robot
+                    // climb.climbToHeightCommand(T_ONE)
+                    Commands.none()
+                    .alongWith(ClimbApproachAndAlign.create(drive))
+                    .withName("AutoClimbApproach")
+                    .andThen(() -> {
+                        StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
+                    })
                 );
+                kBackbutton.button.whileTrue(ClimbApproachAndAlign.create(drive));
             } else if (extendClimb != null) {
                 // No swerve available - just deploy arms
                 extendClimb.onTrue(climb.climbToHeightCommand(T_ONE).withName("AutoClimbArmDeploy"));
             }
+
         }
     }
 }
