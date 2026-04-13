@@ -2,7 +2,6 @@ package frc.lib.utils;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 
 /**
@@ -48,8 +47,10 @@ public class GuitarHeroController {
         blueFret   = new JoystickButton(hid, 3);
         orangeFret = new JoystickButton(hid, 5);
 
-        strumUp   = new POVButton(hid, 0);
-        strumDown = new POVButton(hid, 180);
+        // Strum bar maps to POV/D-pad: up = 0°, down = 180°
+        // Use direct POV value check for reliability
+        strumUp   = new Trigger(() -> hid.getPOV() == 0);
+        strumDown = new Trigger(() -> hid.getPOV() == 180);
     }
 
     /** Green fret button trigger. */
