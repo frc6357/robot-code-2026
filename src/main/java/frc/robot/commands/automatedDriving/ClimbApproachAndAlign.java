@@ -14,6 +14,10 @@ import static frc.robot.Konstants.ClimbConstants.kAlignmentYD;
 import static frc.robot.Konstants.ClimbConstants.kAlignmentYToleranceMeters;
 import static frc.robot.Konstants.ClimbConstants.kApproachDistanceMeters;
 import static frc.robot.Konstants.ClimbConstants.kClimbApproachConstraints;
+import static frc.robot.Konstants.ClimbConstants.kTowerLeftRungBlue;
+import static frc.robot.Konstants.ClimbConstants.kTowerRightRungBlue;
+import static frc.robot.Konstants.ClimbConstants.kTowerLeftRungRed;
+import static frc.robot.Konstants.ClimbConstants.kTowerRightRungRed;
 
 import java.util.Set;
 
@@ -30,8 +34,6 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.auto.Pathfinder;
 import frc.lib.utils.Field;
-import frc.lib.utils.FieldConstants;
-import frc.lib.utils.FieldConstants.Tower;
 import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 
@@ -79,11 +81,11 @@ public class ClimbApproachAndAlign {
         Translation2d rightUpright;
 
         if (Field.isBlue()) {
-            leftUpright = Tower.leftUpright;
-            rightUpright = Tower.rightUpright;
+            leftUpright = kTowerLeftRungBlue;
+            rightUpright = kTowerRightRungBlue;
         } else {
-            leftUpright = Tower.redLeftUpright;
-            rightUpright = Tower.redRightUpright;
+            leftUpright = kTowerLeftRungRed;
+            rightUpright = kTowerRightRungRed;
         }
 
         double distToLeft = Math.abs(robotY - leftUpright.getY());
@@ -101,21 +103,21 @@ public class ClimbApproachAndAlign {
      * @param targetUpright The tower upright Translation2d
      * @return The approach Pose2d
      */
-    private static Pose2d calculateApproachPose(Translation2d targetUpright) {
+    private static Pose2d calculateApproachPose(Translation2d targetRung) {
         double approachX;
         Rotation2d approachRotation;
 
         if (Field.isBlue()) {
-            // Blue alliance: approach from +X direction (tower is near X=0)
-            approachX = Tower.frontFaceX + kApproachDistanceMeters;
+            // Blue alliance: tower is near X=0, approach from +X direction
+            approachX = targetRung.getX() + kApproachDistanceMeters;
             approachRotation = Rotation2d.fromDegrees(0); // Facing driver-forward (+X)
         } else {
-            // Red alliance: approach from -X direction (tower is near X=fieldLength)
-            approachX = (FieldConstants.fieldLength - Tower.frontFaceX) - kApproachDistanceMeters;
+            // Red alliance: tower is near X=fieldLength, approach from -X direction
+            approachX = targetRung.getX() - kApproachDistanceMeters;
             approachRotation = Rotation2d.fromDegrees(180); // Facing driver-forward (-X in WPILib coords)
         }
 
-        return new Pose2d(approachX, targetUpright.getY(), approachRotation);
+        return new Pose2d(approachX, targetRung.getY(), approachRotation);
     }
 
     /**
@@ -161,13 +163,10 @@ public class ClimbApproachAndAlign {
         yController.setTolerance(kAlignmentYToleranceMeters);
         yController.reset(new State(initPose.getY(), initSpeeds.vyMetersPerSecond));
 
-        // Target X is the tower front face (alliance-adjusted)
-        final double targetX = Field.isBlue() 
-            ? Tower.frontFaceX 
-            : (FieldConstants.fieldLength - Tower.frontFaceX);
-
-        // Capture target Y at command creation time (based on closest upright)
-        final double targetY = getClosestTowerUpright(drive.getRobotPose().getY()).getY();
+        // Target is the closest rung's coordinates directly
+        final Translation2d targetRung = getClosestTowerUpright(drive.getRobotPose().getY());
+        final double targetX = targetRung.getX();
+        final double targetY = targetRung.getY();
 
         xController.setGoal(new State(targetX, 0.0));
         yController.setGoal(new State(targetY, 0.0));

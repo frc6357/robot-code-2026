@@ -524,7 +524,7 @@ public final class Konstants
 
         /** Path constraints for the approach pathfinding (slower for precision). */
         public static final PathConstraints kClimbApproachConstraints = new PathConstraints(
-            4.0, 4.0,   // max velocity (m/s), max acceleration (m/s²)
+            3.0, 3.0,   // max velocity (m/s), max acceleration (m/s²)
             360, 540,   // max angular velocity (deg/s), max angular acceleration (deg/s²)
             12, false); // nominal voltage, unlimited acceleration
 
@@ -547,14 +547,13 @@ public final class Konstants
         public static final double kAlignmentYD = 0.1;
 
         /** Tolerance for Y alignment when "hugging" the tower (meters). */
-        public static final double kAlignmentYToleranceMeters = 0.076;
+        public static final double kAlignmentYToleranceMeters = 0.05;
 
         /* Tower rung positions specifically for aligning our robot's bumper gap for the tower */
-        // TODO: Go onto the field and use vision to find the exact coordinates
-        public static final Translation2d kTowerLeftRungBlue = new Translation2d(8.23, 2.03); // Blue left tower rung (from driver station)
-        public static final Translation2d kTowerRightRungBlue = new Translation2d(8.23, 5.77); // Blue right tower rung (from driver station)
-        public static final Translation2d kTowerLeftRungRed = new Translation2d(8.23, 7.97); // Red left tower rung (from driver station)
-        public static final Translation2d kTowerRightRungRed = new Translation2d(8.23, 0.83); // Red right tower rung (from driver station)
+        public static final Translation2d kTowerLeftRungBlue = new Translation2d(1.372, 4.179); // Blue left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungBlue = new Translation2d(1.372, 3.408); // Blue right tower rung (from driver station)
+        public static final Translation2d kTowerLeftRungRed = new Translation2d(15.168, 3.873); // Red left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungRed = new Translation2d(15.168, 4.65); // Red right tower rung (from driver station)
     }
 
 
