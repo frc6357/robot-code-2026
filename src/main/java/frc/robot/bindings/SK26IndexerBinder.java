@@ -101,13 +101,15 @@ public class SK26IndexerBinder implements CommandBinder
         //     )
         // ).withName("IndexerFeedAndUnjam"));
 
-        IndexFeed.whileTrue(Commands.repeatingSequence(
-            Commands.race(
-                Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)),
-                Commands.waitSeconds(1.5)
-            ),
-            IndexerUnjam()
-        ).withName("IndexerFeedAndUnjam"));
+        // IndexFeed.whileTrue(Commands.repeatingSequence(
+        //     Commands.race(
+        //         Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)),
+        //         Commands.waitSeconds(1.5)
+        //     ),
+        //     IndexerUnjam()
+        // ).withName("IndexerFeedAndUnjam"));
+        IndexFeed.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
+
         // IndexFeed.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
         //     Commands.race(
         //         Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)),

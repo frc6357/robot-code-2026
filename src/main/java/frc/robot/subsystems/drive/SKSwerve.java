@@ -286,7 +286,7 @@ public class SKSwerve extends SubsystemBase {
 
     public ChassisSpeeds getVelocity(boolean fieldRelative) {
         if(fieldRelative) {
-            return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getGyroRotation());
+            return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getRobotRotation());
         }
         else {
             return getRobotRelativeSpeeds();
