@@ -549,6 +549,21 @@ public final class Konstants
         /** Tolerance for Y alignment when "hugging" the tower (meters). */
         public static final double kAlignmentYToleranceMeters = 0.05;
 
+        /** Y error threshold before X alignment begins (meters). */
+        public static final double kAlignmentXEnableYErrorThreshold = 0.14;
+
+        /** ProfiledPIDController constraints for final rotational alignment. */
+        public static final double kAlignmentRotMaxVelocity = 360.0;       // deg/s
+        public static final double kAlignmentRotMaxAcceleration = 540.0;   // deg/s²
+
+        /** PID gains for final rotational alignment. */
+        public static final double kAlignmentRotP = 5.0;
+        public static final double kAlignmentRotI = 0.0;
+        public static final double kAlignmentRotD = 0.1;
+
+        /** Tolerance for rotational alignment (radians). */
+        public static final double kAlignmentRotToleranceRadians = Math.toRadians(2.0);
+
         /* Tower rung positions specifically for aligning our robot's bumper gap for the tower */
         public static final Translation2d kTowerLeftRungBlue = new Translation2d(1.372, 4.179); // Blue left tower rung (from driver station)
         public static final Translation2d kTowerRightRungBlue = new Translation2d(1.372, 3.408); // Blue right tower rung (from driver station)
