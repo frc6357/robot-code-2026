@@ -1,79 +1,126 @@
 package frc.lib.utils;
 
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.AXIS;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.BUTTON;
+import static frc.lib.utils.SKTrigger.INPUT_TYPE.POV;
+
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftTrigger;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftX;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kLeftY;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightTrigger;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightX;
+import static edu.wpi.first.wpilibj.XboxController.Axis.kRightY;
+import static edu.wpi.first.wpilibj.XboxController.Button.kA;
+import static edu.wpi.first.wpilibj.XboxController.Button.kB;
+import static edu.wpi.first.wpilibj.XboxController.Button.kBack;
+import static edu.wpi.first.wpilibj.XboxController.Button.kLeftBumper;
+import static edu.wpi.first.wpilibj.XboxController.Button.kLeftStick;
+import static edu.wpi.first.wpilibj.XboxController.Button.kRightBumper;
+import static edu.wpi.first.wpilibj.XboxController.Button.kRightStick;
+import static edu.wpi.first.wpilibj.XboxController.Button.kStart;
+import static edu.wpi.first.wpilibj.XboxController.Button.kX;
+import static edu.wpi.first.wpilibj.XboxController.Button.kY;
+
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.lib.utils.filters.FilteredAxis;
+import frc.lib.utils.filters.FilteredXboxController;
 
 /**
- * Wrapper for a Guitar Hero controller connected via USB adapter.
- * Provides named Trigger accessors for each fret button and the strum bar.
+ * A Guitar Hero controller that maps identically to an Xbox controller.
+ * Provides the same full set of inputs (ABXY / frets, D-pad / strum bar,
+ * triggers, bumpers, sticks) as the Driver and Operator port definitions.
  *
- * <p>Typical USB-HID mappings for a Guitar Hero controller:
+ * <p>Guitar Hero fret-to-Xbox mapping:
  * <ul>
- *   <li>Green fret  — Button 2</li>
- *   <li>Red fret    — Button 1</li>
- *   <li>Yellow fret — Button 4</li>
- *   <li>Blue fret   — Button 3</li>
- *   <li>Orange fret — Button 5</li>
- *   <li>Strum Up    — POV 0°</li>
- *   <li>Strum Down  — POV 180°</li>
+ *   <li>Green fret  → A button</li>
+ *   <li>Red fret    → B button</li>
+ *   <li>Yellow fret → Y button</li>
+ *   <li>Blue fret   → X button</li>
+ *   <li>Orange fret → Left Bumper</li>
+ *   <li>Strum Up    → D-pad Up (POV 0°)</li>
+ *   <li>Strum Down  → D-pad Down (POV 180°)</li>
  * </ul>
  */
 public class GuitarHeroController {
 
-    private final GenericHID hid;
+    // Underlying HID
+    public final GenericHID hid;
 
-    // Fret buttons
-    private final Trigger greenFret;
-    private final Trigger redFret;
-    private final Trigger yellowFret;
-    private final Trigger blueFret;
-    private final Trigger orangeFret;
+    // Filtered axes
+    public final FilteredAxis kLeftStickY;
+    public final FilteredAxis kLeftStickX;
+    public final FilteredAxis kRightStickX;
+    public final FilteredAxis kRightStickY;
 
-    // Strum bar (POV hat)
-    private final Trigger strumUp;
-    private final Trigger strumDown;
+    // ABXY (frets)
+    public final SKTrigger kAbutton;
+    public final SKTrigger kBbutton;
+    public final SKTrigger kXbutton;
+    public final SKTrigger kYbutton;
+
+    // D-pad (strum bar + sides)
+    public final SKTrigger kUpDpad;
+    public final SKTrigger kRightDpad;
+    public final SKTrigger kDownDpad;
+    public final SKTrigger kLeftDpad;
+
+    // Bumpers
+    public final SKTrigger kRBbutton;
+    public final SKTrigger kLBbutton;
+
+    // Triggers
+    public final SKTrigger kLTrigger;
+    public final SKTrigger kRTrigger;
+
+    // Menu buttons
+    public final SKTrigger kStartbutton;
+    public final SKTrigger kBackbutton;
+
+    // Stick buttons
+    public final SKTrigger kLSbutton;
+    public final SKTrigger kRSbutton;
 
     /**
-     * Creates a GuitarHeroController on the given HID port.
+     * Creates a GuitarHeroController on the given USB port.
+     * All inputs are mapped identically to an Xbox controller.
+     *
      * @param port The USB port index (e.g. 2 for the third controller)
      */
     public GuitarHeroController(int port) {
-        hid = new GenericHID(port);
+        hid = new FilteredXboxController(port).getHID();
 
-        greenFret  = new JoystickButton(hid, 2);
-        redFret    = new JoystickButton(hid, 1);
-        yellowFret = new JoystickButton(hid, 4);
-        blueFret   = new JoystickButton(hid, 3);
-        orangeFret = new JoystickButton(hid, 5);
+        // Axes
+        kLeftStickY  = new FilteredAxis(() -> hid.getRawAxis(kLeftY.value));
+        kLeftStickX  = new FilteredAxis(() -> hid.getRawAxis(kLeftX.value));
+        kRightStickX = new FilteredAxis(() -> hid.getRawAxis(kRightX.value));
+        kRightStickY = new FilteredAxis(() -> hid.getRawAxis(kRightY.value));
 
-        // Strum bar maps to POV/D-pad: up = 0°, down = 180°
-        // Use direct POV value check for reliability
-        strumUp   = new Trigger(() -> hid.getPOV() == 0);
-        strumDown = new Trigger(() -> hid.getPOV() == 180);
+        // ABXY
+        kAbutton = new SKTrigger(hid, kA.value, BUTTON);
+        kBbutton = new SKTrigger(hid, kB.value, BUTTON);
+        kXbutton = new SKTrigger(hid, kX.value, BUTTON);
+        kYbutton = new SKTrigger(hid, kY.value, BUTTON);
+
+        // D-pad
+        kUpDpad    = new SKTrigger(hid, 0, POV);
+        kRightDpad = new SKTrigger(hid, 90, POV);
+        kDownDpad  = new SKTrigger(hid, 180, POV);
+        kLeftDpad  = new SKTrigger(hid, 270, POV);
+
+        // Bumpers
+        kRBbutton = new SKTrigger(hid, kRightBumper.value, BUTTON);
+        kLBbutton = new SKTrigger(hid, kLeftBumper.value, BUTTON);
+
+        // Triggers
+        kLTrigger = new SKTrigger(hid, kLeftTrigger.value, AXIS);
+        kRTrigger = new SKTrigger(hid, kRightTrigger.value, AXIS);
+
+        // Menu
+        kStartbutton = new SKTrigger(hid, kStart.value, BUTTON);
+        kBackbutton  = new SKTrigger(hid, kBack.value, BUTTON);
+
+        // Stick buttons
+        kLSbutton = new SKTrigger(hid, kLeftStick.value, BUTTON);
+        kRSbutton = new SKTrigger(hid, kRightStick.value, BUTTON);
     }
-
-    /** Green fret button trigger. */
-    public Trigger greenFret()  { return greenFret; }
-
-    /** Red fret button trigger. */
-    public Trigger redFret()    { return redFret; }
-
-    /** Yellow fret button trigger. */
-    public Trigger yellowFret() { return yellowFret; }
-
-    /** Blue fret button trigger. */
-    public Trigger blueFret()   { return blueFret; }
-
-    /** Orange fret button trigger. */
-    public Trigger orangeFret() { return orangeFret; }
-
-    /** Strum bar pushed upward trigger. */
-    public Trigger strumUp()    { return strumUp; }
-
-    /** Strum bar pushed downward trigger. */
-    public Trigger strumDown()  { return strumDown; }
-
-    /** Returns the underlying GenericHID. */
-    public GenericHID getHID()  { return hid; }
 }
