@@ -733,6 +733,15 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> time of flight in seconds)
+            // Guessed values:
+            map.put(1.5, 0.33);
+            map.put(1.75, 0.39);
+            map.put(2.0, 0.45);
+            map.put(2.25, 0.52);
+            map.put(2.5, 0.58);
+            map.put(2.75, 0.64);
+
+            // Known values:
             map.put(3.02, 0.68);
             map.put(3.26, 0.76);
             map.put(3.55, 0.86);
@@ -740,7 +749,32 @@ public final class Konstants
             map.put(4.07, 0.99);
             map.put(4.47, 1.04);
             map.put(4.7, 1.13);
-            map.put(5.0, 1.0);
+
+            // Guessed values:
+            map.put(5.0, 1.2);
+            map.put(5.25, 1.27);
+            map.put(5.5, 1.33);
+            map.put(5.75, 1.39);
+            map.put(6.0, 1.46);
+            map.put(6.25, 1.52);
+            map.put(6.5, 1.58);
+            map.put(7.0, 1.71);
+            map.put(7.5, 1.83);
+            map.put(8.0, 1.96);
+            map.put(8.5, 2.08);
+            map.put(9.0, 2.21);
+            map.put(9.5, 2.33);
+            map.put(10.0, 2.46);
+            map.put(10.5, 2.58);
+            map.put(11.0, 2.71);
+            map.put(11.5, 2.83);
+            map.put(12.0, 2.96);
+            map.put(12.5, 3.08);
+            map.put(13.0, 3.21);
+            map.put(13.5, 3.33);
+            map.put(14.0, 3.46);
+            map.put(14.5, 3.59);
+            map.put(15.0, 3.71);
 
             return map;
         }
