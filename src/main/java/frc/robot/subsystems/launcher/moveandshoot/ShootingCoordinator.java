@@ -105,7 +105,7 @@ public class ShootingCoordinator {
             launcher.runVelocityCommand(() -> currentShot.flywheelSpeed()),
             // Continuously aim turret with lead angle compensation
             Commands.run(() -> {
-                turret.setAngleDegrees(MathUtil.inputModulus(calculateAdjustedTurretAngle(currentShot).in(Degrees), -180, 180));
+                turret.setAngleDegrees(MathUtil.inputModulus(calculateRobotRelativeTurretTarget(currentShot).in(Degrees), -180, 180));
             }, turret)
         ).withName("ScoreAndMoveCommand");
     }
@@ -123,9 +123,19 @@ public class ShootingCoordinator {
             // Continuously run flywheel at calculated speed
             launcher.runVelocityCommand(() -> currentShot.flywheelSpeed()),
             Commands.run(() -> {
-                turret.setAngleDegrees(MathUtil.inputModulus(calculateAdjustedTurretAngle(currentShot).in(Degrees), -180, 180));
+                turret.setAngleDegrees(MathUtil.inputModulus(calculateRobotRelativeTurretTarget(currentShot).in(Degrees), -180, 180));
             }, turret)
         ).withName("ShuttleAndMoveCommand");
+    }
+
+    private Angle calculateRobotRelativeTurretTarget(ShotParameters shot) {
+        double baseAngleDeg = shot.launcherYaw().in(Degrees);
+        
+        // Convert from field-relative to robot-relative by subtracting robot heading
+        double robotHeadingDeg = drive.getRobotPose().getRotation().getDegrees();
+        double robotRelativeAngleDeg = baseAngleDeg - robotHeadingDeg;
+                
+        return Degrees.of(robotRelativeAngleDeg - kTurretCoordinateOffset);
     }
 
     /**
