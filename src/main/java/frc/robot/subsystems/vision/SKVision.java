@@ -386,7 +386,7 @@ public class SKVision extends SubsystemBase {
             
             // Avoid division by zero
             if (distanceToTag > 0.001) {
-                score += (tagCount * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / distanceToTag;
+                score += (tagCount * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / (distanceToTag * 2);
             }
             score += targetSize * 1.25; // Range: 1-100
 

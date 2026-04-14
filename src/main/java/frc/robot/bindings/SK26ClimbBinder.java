@@ -26,6 +26,7 @@ public class SK26ClimbBinder implements CommandBinder {
 
     Optional<SK26Climb> climbSubsystem;
     Optional<SKSwerve> swerveSubsystem;
+    Optional<StateHandler> stateHandler;
     
     Trigger prepareForT1Button;
     Trigger upButton;
@@ -64,10 +65,23 @@ public class SK26ClimbBinder implements CommandBinder {
         {
             SK26Climb climb = climbSubsystem.get();
 
-            prepareForT1Button.onTrue(climb.climbToHeightCommand(T_ONE).withName("ClimbPrepareForT1"));
-            hoistButton.onTrue(climb.climbToHeightCommand(HOIST).withName("ClimbHoist"));
-            stowButton.onTrue(climb.climbToHeightCommand(STOW).withName("ClimbStow"));
-
+            // Set climbing state when climb button is pressed, then execute climb command
+            prepareForT1Button.onTrue(
+                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
+                    .andThen(climb.climbToHeightCommand(T_ONE))
+                    .withName("ClimbPrepareForT1"));
+            
+            hoistButton.onTrue(
+                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
+                    .andThen(climb.climbToHeightCommand(HOIST))
+                    .withName("ClimbHoist"));
+            
+            // Stow climb and return to IDLE state
+            stowButton.onTrue(
+                climb.climbToHeightCommand(STOW)
+                    .andThen(Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.IDLE))))
+                    .withName("ClimbStow"));
+            
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
             downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
 

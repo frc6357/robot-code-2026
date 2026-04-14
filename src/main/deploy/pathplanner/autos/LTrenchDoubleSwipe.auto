@@ -17,12 +17,6 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 1.67
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Request Scoring State"
@@ -31,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 6.0
+            "waitTime": 8.0
           }
         },
         {
