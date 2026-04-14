@@ -67,19 +67,16 @@ public class SK26ClimbBinder implements CommandBinder {
 
             // Set climbing state when climb button is pressed, then execute climb command
             prepareForT1Button.onTrue(
-                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
-                    .andThen(climb.climbToHeightCommand(T_ONE))
+                climb.climbToHeightCommand(T_ONE)
                     .withName("ClimbPrepareForT1"));
             
             hoistButton.onTrue(
-                Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.CLIMBING)))
-                    .andThen(climb.climbToHeightCommand(HOIST))
+                climb.climbToHeightCommand(HOIST)
                     .withName("ClimbHoist"));
             
             // Stow climb and return to IDLE state
             stowButton.onTrue(
                 climb.climbToHeightCommand(STOW)
-                    .andThen(Commands.runOnce(() -> stateHandler.ifPresent(sh -> sh.setCurrentState(MacroState.IDLE))))
                     .withName("ClimbStow"));
             
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
