@@ -520,7 +520,7 @@ public final class Konstants
         public static final double kApproachDistanceMeters = 0.5;
 
         /** Tolerance for X alignment when "hugging" the tower (meters). */
-        public static final double kAlignmentToleranceMeters = 0.076;
+        public static final double kAlignmentToleranceMeters = 0.035;
 
         /** Path constraints for the approach pathfinding (slower for precision). */
         public static final PathConstraints kClimbApproachConstraints = new PathConstraints(
@@ -547,10 +547,10 @@ public final class Konstants
         public static final double kAlignmentYD = 0.1;
 
         /** Tolerance for Y alignment when "hugging" the tower (meters). */
-        public static final double kAlignmentYToleranceMeters = 0.05;
+        public static final double kAlignmentYToleranceMeters = 0.035;
 
         /** Y error threshold before X alignment begins (meters). */
-        public static final double kAlignmentXEnableYErrorThreshold = 0.14;
+        public static final double kAlignmentXEnableYErrorThreshold = 0.11;
 
         /** ProfiledPIDController constraints for final rotational alignment. */
         public static final double kAlignmentRotMaxVelocity = 360.0;       // deg/s

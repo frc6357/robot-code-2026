@@ -131,7 +131,7 @@ public class ClimbApproachAndAlign {
      * Creates the pathfinding command to the approach pose.
      * This is deferred to capture the robot's current position at execution time.
      */
-    private static Command createPathfindCommand(SKSwerve drive) {
+    public static Command createPathfindCommand(SKSwerve drive) {
         double robotY = drive.getRobotPose().getY();
         Translation2d targetUpright = getClosestTowerUpright(robotY);
         Pose2d approachPose = calculateApproachPose(targetUpright);
@@ -152,7 +152,7 @@ public class ClimbApproachAndAlign {
      * {@value frc.robot.Konstants.ClimbConstants#kAlignmentYToleranceMeters}m of the target Y,
      * and {@value frc.robot.Konstants.ClimbConstants#kAlignmentRotToleranceRadians} radians of the target rotation.
      */
-    private static Command createAlignmentCommand(SKSwerve drive) {
+    public static Command createAlignmentCommand(SKSwerve drive) {
         boolean flipPIDOutput = Field.isRed(); // Flip PID output on red alliance to account for reversed field coordinates
         Pose2d initPose = drive.getRobotPose();
         ChassisSpeeds initSpeeds = drive.getVelocity(true);

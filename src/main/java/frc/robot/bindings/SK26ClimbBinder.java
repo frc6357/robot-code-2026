@@ -1,6 +1,7 @@
 package frc.robot.bindings;
 
 import java.util.Optional;
+import java.util.Set;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -82,20 +83,34 @@ public class SK26ClimbBinder implements CommandBinder {
             upButton.whileTrue(climb.climbUpCommand().until(() -> climb.isForwardLimitReached()).withName("ClimbUpCommand"));
             downButton.whileTrue(climb.climbDownCommand().until(() -> climb.isReverseLimitReached()).withName("ClimbDownCommand"));
 
+            hoistClimb.onTrue(climb.climbToHeightCommand(HOIST));
+
             // Automated climb sequence: when CLIMBING is requested and intake is stowed,
             // deploy arms to T_ONE and pathfind to tower approach pose in parallel
             if (extendClimb != null && swerveSubsystem.isPresent()) {
                 SKSwerve drive = swerveSubsystem.get();
                 extendClimb.whileTrue(
-                    // TODO: Change Commands.none() in sequence back to climb command when running on robot
+                    Commands.defer(() ->
+                        Commands.sequence(
+                            // Commands.parallel(
+                            //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                            //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
+                            // ),
+                            climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                            ClimbApproachAndAlign.createAlignmentCommand(drive).withName("TowerAlign"),
+                            Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
+                        ),
+                    Set.of(drive, climb)
+
+                    // // TODO: Change Commands.none() in sequence back to climb command when running on robot
                     // climb.climbToHeightCommand(T_ONE)
-                    Commands.none()
-                    .alongWith(ClimbApproachAndAlign.create(drive))
-                    .withName("AutoClimbApproach")
-                    .andThen(() -> {
-                        StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
-                    })
-                );
+                    // // Commands.none()
+                    // .alongWith(ClimbApproachAndAlign.create(drive))
+                    // .withName("AutoClimbApproach")
+                    // .andThen(() -> {
+                    //     StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
+                    // })
+                ));
                 kBackbutton.button.whileTrue(ClimbApproachAndAlign.create(drive));
             } else if (extendClimb != null) {
                 // No swerve available - just deploy arms

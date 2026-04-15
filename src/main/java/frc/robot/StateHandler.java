@@ -229,8 +229,9 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         });
         intakeAvoidingMajorFouls = new Trigger(() -> {
             IntakePosition target = intake.get().getPositionerTargetEnum();
-            return intake.get().getCurrentPosition() >= target.rotations && target == IntakePosition.STOW;
-        }).debounce(0.1, DebounceType.kRising);
+            return (Math.abs(intake.get().getCurrentPosition() - target.rotations) < 0.01) || intake.get().getCurrentPosition() >= target.rotations 
+                && (target == IntakePosition.STOW || target == IntakePosition.FULL_STOW);
+        }).debounce(0.1, DebounceType.kBoth);
     }
 
     /**
