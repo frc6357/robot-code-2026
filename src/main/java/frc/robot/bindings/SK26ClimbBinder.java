@@ -1,7 +1,6 @@
 package frc.robot.bindings;
 
 import java.util.Optional;
-import java.util.Set;
 
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -90,27 +89,19 @@ public class SK26ClimbBinder implements CommandBinder {
             if (extendClimb != null && swerveSubsystem.isPresent()) {
                 SKSwerve drive = swerveSubsystem.get();
                 extendClimb.whileTrue(
-                    Commands.defer(() ->
+                    // Commands.deferredProxy(() ->
                         Commands.sequence(
                             // Commands.parallel(
                             //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
                             //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
                             // ),
                             climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
-                            ClimbApproachAndAlign.createAlignmentCommand(drive).withName("TowerAlign"),
+                            ClimbApproachAndAlign.createAlignmentCommand(drive),
                             Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
-                        ),
-                    Set.of(drive, climb)
-
-                    // // TODO: Change Commands.none() in sequence back to climb command when running on robot
-                    // climb.climbToHeightCommand(T_ONE)
-                    // // Commands.none()
-                    // .alongWith(ClimbApproachAndAlign.create(drive))
-                    // .withName("AutoClimbApproach")
-                    // .andThen(() -> {
-                    //     StateHandler.MacroState.CLIMBING.setStatus(Status.READY);
-                    // })
-                ));
+                        )
+                    // , Set.of(drive, climb)
+                );
+                // );
                 kBackbutton.button.whileTrue(ClimbApproachAndAlign.create(drive));
             } else if (extendClimb != null) {
                 // No swerve available - just deploy arms

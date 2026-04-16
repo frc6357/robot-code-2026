@@ -182,9 +182,9 @@ public class ClimbApproachAndAlign {
         rotController.reset(new State(initPose.getRotation().getRadians(), initSpeeds.omegaRadiansPerSecond));
 
         // Target is the closest rung's coordinates directly
-        final Translation2d targetRung = getClosestTowerUpright(drive.getRobotPose().getY());
-        final double targetX = targetRung.getX();
-        final double targetY = targetRung.getY();
+        Translation2d targetRung = getClosestTowerUpright(drive.getRobotPose().getY());
+        double targetX = targetRung.getX();
+        double targetY = targetRung.getY();
         // Target rotation: 0° on blue (facing +X), 180° on red (facing -X)
         final double targetRotRadians = Field.isBlue() ? 0.0 : Math.PI;
 
@@ -243,15 +243,15 @@ public class ClimbApproachAndAlign {
             },
             drive
         )
-        .beforeStarting(() -> {
-            // Reset controllers when starting alignment, preserving current velocity
-            Pose2d robotPose = drive.getRobotPose();
-            ChassisSpeeds currentSpeeds = drive.getVelocity(true);
-            xController.reset(new State(robotPose.getX(), currentSpeeds.vxMetersPerSecond));
-            yController.reset(new State(robotPose.getY(), currentSpeeds.vyMetersPerSecond));
-            rotController.reset(new State(robotPose.getRotation().getRadians(), currentSpeeds.omegaRadiansPerSecond));
-        })
-        .until(() -> xController.atGoal() && yController.atGoal() && rotController.atGoal())
+        // .beforeStarting(() -> {
+        //     // Reset controllers when starting alignment, preserving current velocity
+        //     Pose2d robotPose = drive.getRobotPose();
+        //     ChassisSpeeds currentSpeeds = drive.getVelocity(true);
+        //     xController.reset(new State(robotPose.getX(), currentSpeeds.vxMetersPerSecond));
+        //     yController.reset(new State(robotPose.getY(), currentSpeeds.vyMetersPerSecond));
+        //     rotController.reset(new State(robotPose.getRotation().getRadians(), currentSpeeds.omegaRadiansPerSecond));
+        // })
+        .until(() -> xController.atSetpoint() && yController.atSetpoint() && rotController.atSetpoint())
         .withName("ClimbXYRotAlignment");
     }
 }
