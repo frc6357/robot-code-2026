@@ -147,7 +147,7 @@ public class ClimbAlignment extends Command {
 
     @Override
     public boolean isFinished() {
-        return xController.atSetpoint() && yController.atSetpoint() && rotController.atSetpoint();
+        return xController.atGoal() && yController.atGoal() && rotController.atGoal();
     }
 
     /**
