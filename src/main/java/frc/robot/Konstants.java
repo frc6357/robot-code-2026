@@ -529,20 +529,20 @@ public final class Konstants
             12, false); // nominal voltage, unlimited acceleration
 
         /** ProfiledPIDController constraints for final X alignment. */
-        public static final double kAlignmentMaxVelocity = 2.0;       // m/s
+        public static final double kAlignmentMaxVelocity = 3.0;       // m/s
         public static final double kAlignmentMaxAcceleration = 3.0;   // m/s²
 
         /** PID gains for final X alignment. */
-        public static final double kAlignmentP = 5.0;
+        public static final double kAlignmentP = 8.0;
         public static final double kAlignmentI = 0.0;
         public static final double kAlignmentD = 0.1;
 
         /** ProfiledPIDController constraints for final Y alignment. */
-        public static final double kAlignmentYMaxVelocity = 2.0;       // m/s
+        public static final double kAlignmentYMaxVelocity = 3.0;       // m/s
         public static final double kAlignmentYMaxAcceleration = 3.0;   // m/s²
 
         /** PID gains for final Y alignment. */
-        public static final double kAlignmentYP = 5.0;
+        public static final double kAlignmentYP = 8.0;
         public static final double kAlignmentYI = 0.0;
         public static final double kAlignmentYD = 0.1;
 
@@ -557,7 +557,7 @@ public final class Konstants
         public static final double kAlignmentRotMaxAcceleration = 540.0;   // deg/s²
 
         /** PID gains for final rotational alignment. */
-        public static final double kAlignmentRotP = 5.0;
+        public static final double kAlignmentRotP = 10.0;
         public static final double kAlignmentRotI = 0.0;
         public static final double kAlignmentRotD = 0.1;
 
