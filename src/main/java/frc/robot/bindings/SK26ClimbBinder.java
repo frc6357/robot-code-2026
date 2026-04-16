@@ -90,14 +90,17 @@ public class SK26ClimbBinder implements CommandBinder {
                 SKSwerve drive = swerveSubsystem.get();
                 extendClimb.whileTrue(
                     // Commands.deferredProxy(() ->
-                        Commands.sequence(
-                            // Commands.parallel(
-                            //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
-                            //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
-                            // ),
-                            climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
-                            ClimbApproachAndAlign.createAlignmentCommand(drive),
-                            Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
+                        Commands.defer(() ->
+                            Commands.sequence(
+                                // Commands.parallel(
+                                //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                                //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
+                                // ),
+                                climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                                ClimbApproachAndAlign.createAlignmentCommand(drive),
+                                Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
+                            ),
+                            Set.of(drive, climb)
                         )
                     // , Set.of(drive, climb)
                 );
