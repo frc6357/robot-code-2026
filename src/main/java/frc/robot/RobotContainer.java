@@ -388,7 +388,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
-        buttonBinders.add(new SK26GuitarHeroBinder(m_intakePivotContainer, m_intakeRollersContainer, m_climbComtainer));
+        buttonBinders.add(new SK26GuitarHeroBinder(m_intakePivotContainer, m_intakeRollersContainer, m_climbContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {
