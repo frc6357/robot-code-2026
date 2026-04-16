@@ -1,11 +1,13 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.STOW;
 import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
 import static frc.robot.Ports.GuitarHeroPorts.kGuitar;
 
 import java.util.Optional;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.subsystems.climb.SK26Climb;
@@ -54,6 +56,13 @@ public class SK26GuitarHeroBinder implements CommandBinder {
 
     @Override
     public void bindButtons() {
+        // DEBUG: Test if triggers fire at all (check console for these prints)
+        yellowFret.onTrue(Commands.print(">>> YELLOW FRET FIRED"));
+        strumUp.onTrue(Commands.print(">>> STRUM UP FIRED"));
+        strumDown.onTrue(Commands.print(">>> STRUM DOWN FIRED"));
+        // Also test the working ones for comparison
+        greenFret.onTrue(Commands.print(">>> GREEN FRET FIRED"));
+
         // Climb controls
         if (climbSubsystem.isPresent()) {
             SK26Climb climb = climbSubsystem.get();
@@ -67,9 +76,9 @@ public class SK26GuitarHeroBinder implements CommandBinder {
         if (intakePivotSubsystem.isPresent()) {
             SK26IntakePivot pivot = intakePivotSubsystem.get();
 
-            strumUp.onTrue(pivot.setIntakePivotTargetCommand(
-                frc.robot.Konstants.IntakeConstants.IntakePosition.STOW).withName("GuitarIntakeStow"));
+            strumUp.onTrue(pivot.setIntakePivotTargetCommand(STOW).withName("GuitarIntakeStow"));
             strumDown.onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("GuitarIntakeGround"));
+            
         }
 
         // Intake roller unjam (reverse voltage while held)
