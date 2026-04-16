@@ -1,24 +1,5 @@
 package frc.robot.commands.automatedDriving;
 
-import static frc.robot.Konstants.ClimbConstants.kAlignmentMaxAcceleration;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentMaxVelocity;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentP;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentI;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentD;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentToleranceMeters;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYMaxAcceleration;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYMaxVelocity;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYP;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYI;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYD;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentYToleranceMeters;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentXEnableYErrorThreshold;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotMaxAcceleration;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotMaxVelocity;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotP;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotI;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotD;
-import static frc.robot.Konstants.ClimbConstants.kAlignmentRotToleranceRadians;
 import static frc.robot.Konstants.ClimbConstants.kApproachDistanceMeters;
 import static frc.robot.Konstants.ClimbConstants.kClimbApproachConstraints;
 import static frc.robot.Konstants.ClimbConstants.kTowerLeftRungBlue;
@@ -30,18 +11,13 @@ import java.util.Set;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.State;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.auto.Pathfinder;
 import frc.lib.utils.Field;
-import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 
 /**
@@ -153,105 +129,6 @@ public class ClimbApproachAndAlign {
      * and {@value frc.robot.Konstants.ClimbConstants#kAlignmentRotToleranceRadians} radians of the target rotation.
      */
     public static Command createAlignmentCommand(SKSwerve drive) {
-        boolean flipPIDOutput = Field.isRed(); // Flip PID output on red alliance to account for reversed field coordinates
-        Pose2d initPose = drive.getRobotPose();
-        ChassisSpeeds initSpeeds = drive.getVelocity(true);
-
-        ProfiledPIDController xController = new ProfiledPIDController(
-            kAlignmentP, kAlignmentI, kAlignmentD,
-            new TrapezoidProfile.Constraints(kAlignmentMaxVelocity, kAlignmentMaxAcceleration)
-        );
-        xController.setTolerance(kAlignmentToleranceMeters);
-        xController.reset(new State(initPose.getX(), initSpeeds.vxMetersPerSecond));
-
-        ProfiledPIDController yController = new ProfiledPIDController(
-            kAlignmentYP, kAlignmentYI, kAlignmentYD,
-            new TrapezoidProfile.Constraints(kAlignmentYMaxVelocity, kAlignmentYMaxAcceleration)
-        );
-        yController.setTolerance(kAlignmentYToleranceMeters);
-        yController.reset(new State(initPose.getY(), initSpeeds.vyMetersPerSecond));
-
-        ProfiledPIDController rotController = new ProfiledPIDController(
-            kAlignmentRotP, kAlignmentRotI, kAlignmentRotD,
-            new TrapezoidProfile.Constraints(
-                Math.toRadians(kAlignmentRotMaxVelocity), 
-                Math.toRadians(kAlignmentRotMaxAcceleration))
-        );
-        rotController.setTolerance(kAlignmentRotToleranceRadians);
-        rotController.enableContinuousInput(-Math.PI, Math.PI);
-        rotController.reset(new State(initPose.getRotation().getRadians(), initSpeeds.omegaRadiansPerSecond));
-
-        // Target is the closest rung's coordinates directly
-        Translation2d targetRung = getClosestTowerUpright(drive.getRobotPose().getY());
-        double targetX = targetRung.getX();
-        double targetY = targetRung.getY();
-        // Target rotation: 0° on blue (facing +X), 180° on red (facing -X)
-        final double targetRotRadians = Field.isBlue() ? 0.0 : Math.PI;
-
-        xController.setGoal(new State(targetX, 0.0));
-        yController.setGoal(new State(targetY, 0.0));
-        rotController.setGoal(new State(targetRotRadians, 0.0));
-
-        return Commands.runEnd(
-            // Execute: drive robot using PID output for X, Y, and rotational velocity
-            () -> {
-                Pose2d robotPose = drive.getRobotPose();
-                double robotX = robotPose.getX();
-                double robotY = robotPose.getY();
-                double robotRotRadians = robotPose.getRotation().getRadians();
-                
-                double yError = Math.abs(robotY - targetY);
-                boolean xEnabled = yError <= kAlignmentXEnableYErrorThreshold;
-                
-                // Only run X controller when Y error is within threshold
-                double xVelocity = xEnabled ? xController.calculate(robotX) : 0.0;
-                double yVelocity = yController.calculate(robotY);
-                double rotVelocity = rotController.calculate(robotRotRadians);
-
-                // Apply velocity as field-centric X, Y, and rotational movement
-                // Uses pidRequest to bypass autonomous mode restrictions
-                drive.setSwerveRequest(
-                    DriveRequests.getPidRequestUpdater(
-                        () -> flipPIDOutput ? -xVelocity : xVelocity, 
-                        () -> flipPIDOutput ? -yVelocity : yVelocity, 
-                        () -> rotVelocity)
-                        .apply(DriveRequests.pidRequest)
-                );
-
-                // Logger.recordOutput("ClimbAlign/TargetX", targetX);
-                // Logger.recordOutput("ClimbAlign/CurrentX", robotX);
-                // Logger.recordOutput("ClimbAlign/XVelocity", xVelocity);
-                // Logger.recordOutput("ClimbAlign/XEnabled", xEnabled);
-                // Logger.recordOutput("ClimbAlign/XAtGoal", xController.atGoal());
-                // Logger.recordOutput("ClimbAlign/TargetY", targetY);
-                // Logger.recordOutput("ClimbAlign/CurrentY", robotY);
-                // Logger.recordOutput("ClimbAlign/YError", yError);
-                // Logger.recordOutput("ClimbAlign/YVelocity", yVelocity);
-                // Logger.recordOutput("ClimbAlign/YAtGoal", yController.atGoal());
-                // Logger.recordOutput("ClimbAlign/TargetRotRadians", targetRotRadians);
-                // Logger.recordOutput("ClimbAlign/CurrentRotRadians", robotRotRadians);
-                // Logger.recordOutput("ClimbAlign/RotVelocity", rotVelocity);
-                // Logger.recordOutput("ClimbAlign/RotAtGoal", rotController.atGoal());
-                // Logger.recordOutput("ClimbAlign/AtGoal", xController.atGoal() && yController.atGoal() && rotController.atGoal());
-            },
-            // End: stop the robot
-            () -> {
-                drive.setSwerveRequest(
-                    DriveRequests.getPidRequestUpdater(() -> 0.0, () -> 0.0, () -> 0.0)
-                        .apply(DriveRequests.pidRequest)
-                );
-            },
-            drive
-        )
-        // .beforeStarting(() -> {
-        //     // Reset controllers when starting alignment, preserving current velocity
-        //     Pose2d robotPose = drive.getRobotPose();
-        //     ChassisSpeeds currentSpeeds = drive.getVelocity(true);
-        //     xController.reset(new State(robotPose.getX(), currentSpeeds.vxMetersPerSecond));
-        //     yController.reset(new State(robotPose.getY(), currentSpeeds.vyMetersPerSecond));
-        //     rotController.reset(new State(robotPose.getRotation().getRadians(), currentSpeeds.omegaRadiansPerSecond));
-        // })
-        .until(() -> xController.atSetpoint() && yController.atSetpoint() && rotController.atSetpoint())
-        .withName("ClimbXYRotAlignment");
+        return new ClimbAlignment(drive);
     }
 }
