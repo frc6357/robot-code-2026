@@ -22,7 +22,6 @@ import static edu.wpi.first.wpilibj.XboxController.Button.kX;
 import static edu.wpi.first.wpilibj.XboxController.Button.kY;
 
 import edu.wpi.first.wpilibj.GenericHID;
-import org.littletonrobotics.junction.Logger;
 import frc.lib.utils.filters.FilteredAxis;
 
 /**
@@ -122,22 +121,5 @@ public class GuitarHeroController {
         // Stick buttons
         kLSbutton = new SKTrigger(hid, kLeftStick.value, BUTTON);
         kRSbutton = new SKTrigger(hid, kRightStick.value, BUTTON);
-    }
-
-    /**
-     * Logs all raw HID inputs for debugging controller mapping issues.
-     * Call this from a periodic method to see what the controller actually reports.
-     */
-    public void logInputs() {
-        // Log all buttons (1-indexed, up to 16)
-        for (int i = 1; i <= 12; i++) {
-            Logger.recordOutput("GuitarHero/Button/" + i, hid.getRawButton(i));
-        }
-        // Log POV
-        Logger.recordOutput("GuitarHero/POV", hid.getPOV());
-        // Log all axes
-        for (int i = 0; i < 6; i++) {
-            Logger.recordOutput("GuitarHero/Axis/" + i, hid.getRawAxis(i));
-        }
     }
 }

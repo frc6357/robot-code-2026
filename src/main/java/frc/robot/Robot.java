@@ -133,9 +133,6 @@ public class Robot extends LoggedRobot {
         m_commandScheduler.run();
         SKPreferences.refreshIfNeeded();
         TunableNumber.refreshIfNeeded();
-
-        // DEBUG: Log Guitar Hero raw inputs to find correct mapping
-        frc.robot.Ports.GuitarHeroPorts.kGuitar.logInputs();
     }
 
     /** This function is called once each time the robot enters Disabled mode. */
