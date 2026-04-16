@@ -9,6 +9,7 @@ import frc.robot.StateHandler;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.commands.automatedDriving.ClimbApproachAndAlign;
+import frc.robot.commands.automatedDriving.ClimbAlignment;
 import frc.robot.subsystems.climb.SK26Climb;
 import frc.robot.subsystems.drive.SKSwerve;
 
@@ -90,18 +91,18 @@ public class SK26ClimbBinder implements CommandBinder {
                 SKSwerve drive = swerveSubsystem.get();
                 extendClimb.whileTrue(
                     // Commands.deferredProxy(() ->
-                        Commands.defer(() ->
+                        //Commands.defer(() ->
                             Commands.sequence(
                                 // Commands.parallel(
                                 //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
                                 //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
                                 // ),
-                                climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
-                                ClimbApproachAndAlign.createAlignmentCommand(drive),
+                                //climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                                new ClimbAlignment(drive),
                                 Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
-                            ),
-                            Set.of(drive, climb)
-                        )
+                            )
+                            //Set.of(drive, climb)
+                        //)
                     // , Set.of(drive, climb)
                 );
                 // );
