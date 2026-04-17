@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.068659058487874,
-        "y": 5.676858054226475
+        "x": 3.45,
+        "y": 0.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.341156624637864,
-        "y": 6.080950288424651
+        "x": 3.1851069900142646,
+        "y": 0.7679885877318122
       },
       "isLocked": false,
-      "linkedName": "LeftBump"
+      "linkedName": "RScore"
     },
     {
       "anchor": {
-        "x": 0.7912280701754386,
-        "y": 5.966172248803828
+        "x": 2.0853209700427953,
+        "y": 3.239272467902996
       },
       "prevControl": {
-        "x": 2.021884481384369,
-        "y": 5.831889386040005
+        "x": 2.3089277677927766,
+        "y": 3.1274690690280114
       },
       "nextControl": null,
       "isLocked": false,
@@ -31,19 +31,7 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [
-    {
-      "name": "Request Intaking State",
-      "waypointRelativePos": 0,
-      "endWaypointRelativePos": null,
-      "command": {
-        "type": "named",
-        "data": {
-          "name": "Request Intaking State"
-        }
-      }
-    }
-  ],
+  "eventMarkers": [],
   "globalConstraints": {
     "maxVelocity": 4.5,
     "maxAcceleration": 3.0,
@@ -54,10 +42,10 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 180.0
+    "rotation": 0.0
   },
   "reversed": false,
-  "folder": "Left Bump",
+  "folder": "Right Trench",
   "idealStartingState": {
     "velocity": 0,
     "rotation": 180.0

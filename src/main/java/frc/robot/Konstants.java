@@ -533,7 +533,7 @@ public final class Konstants
         public static final double kAlignmentMaxAcceleration = 3.0;   // m/s²
 
         /** PID gains for final X alignment. */
-        public static final double kAlignmentP = 8.0;
+        public static final double kAlignmentP = 6.0;
         public static final double kAlignmentI = 0.0;
         public static final double kAlignmentD = 0.1;
 
@@ -542,7 +542,7 @@ public final class Konstants
         public static final double kAlignmentYMaxAcceleration = 3.0;   // m/s²
 
         /** PID gains for final Y alignment. */
-        public static final double kAlignmentYP = 8.0;
+        public static final double kAlignmentYP = 6.0;
         public static final double kAlignmentYI = 0.0;
         public static final double kAlignmentYD = 0.1;
 
@@ -557,7 +557,7 @@ public final class Konstants
         public static final double kAlignmentRotMaxAcceleration = 540.0;   // deg/s²
 
         /** PID gains for final rotational alignment. */
-        public static final double kAlignmentRotP = 10.0;
+        public static final double kAlignmentRotP = 8.0;
         public static final double kAlignmentRotI = 0.0;
         public static final double kAlignmentRotD = 0.1;
 
@@ -616,9 +616,9 @@ public final class Konstants
             // Bottom roller (large flywheel) — Clockwise Positive
             public static final class BottomRoller {
                 public static final double kS = 0.25;  // Static friction (volts)
-                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kV = 0.125;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.5;   // Proportional gain
+                public static final double kP = 1.1;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -626,9 +626,9 @@ public final class Konstants
             // Top roller (smaller contact wheels) — CounterClockwise Positive
             public static final class TopRoller {
                 public static final double kS = 0.25;  // Static friction (volts)
-                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kV = 0.125;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.5;   // Proportional gain
+                public static final double kP = 0.65;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -671,7 +671,7 @@ public final class Konstants
         // "Stationary" speed threshold for deciding when to apply motion compensation
         public static final LinearVelocity kStationaryThresholdMetersPerSecond = MetersPerSecond.of(0.3);
 
-        public static final double newSpindexerFlywheelSpeedFudge = 0.99;
+        public static final double newSpindexerFlywheelSpeedFudge = 1.0;
 
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization
@@ -696,7 +696,7 @@ public final class Konstants
             map.put(5.0, 30.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
             map.put(5.11, 30.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
             map.put(5.24, 30.95 * 60.0 * newSpindexerFlywheelSpeedFudge);
-            map.put(5.43, 31.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.43, 31.85 * 60.0 * newSpindexerFlywheelSpeedFudge);
             map.put(5.62, 32.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
             map.put(5.8, 32.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
             map.put(6.0, 33.0 * 60.0  * newSpindexerFlywheelSpeedFudge);

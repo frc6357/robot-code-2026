@@ -4,16 +4,19 @@ import static frc.robot.Konstants.ClimbConstants.ClimbPosition.T_ONE;
 import static frc.robot.Konstants.ClimbConstants.ClimbPosition.HOIST;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.STOW;
-import static frc.robot.Konstants.IntakeConstants.kIntakeFullVoltage;
 import static frc.robot.Ports.GuitarHeroPorts.kGuitar;
 
 import java.util.Optional;
+import java.util.Set;
 
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.robot.StateHandler;
+import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.climb.SK26Climb;
+import frc.robot.subsystems.indexer.SK26Indexer;
 import frc.robot.subsystems.intake.SK26IntakePivot;
-import frc.robot.subsystems.intake.SK26IntakeRollers;
 
 /**
  * Binds a Guitar Hero controller (mapped as an Xbox controller) to robot actions:
@@ -29,7 +32,7 @@ import frc.robot.subsystems.intake.SK26IntakeRollers;
 public class SK26GuitarHeroBinder implements CommandBinder {
 
     private final Optional<SK26IntakePivot> intakePivotSubsystem;
-    private final Optional<SK26IntakeRollers> intakeRollersSubsystem;
+    private final Optional<SK26Indexer> indexerSubsystem;
     private final Optional<SK26Climb> climbSubsystem;
 
     Trigger strumUp;
@@ -39,12 +42,14 @@ public class SK26GuitarHeroBinder implements CommandBinder {
     Trigger yellowFret;
     Trigger backButton;
 
+    Trigger IndexFeed;
+
     public SK26GuitarHeroBinder(
             Optional<SK26IntakePivot> intakePivotSubsystem,
-            Optional<SK26IntakeRollers> intakeRollersSubsystem,
+            Optional<SK26Indexer> indexerSubsystem,
             Optional<SK26Climb> climbSubsystem) {
         this.intakePivotSubsystem = intakePivotSubsystem;
-        this.intakeRollersSubsystem = intakeRollersSubsystem;
+        this.indexerSubsystem = indexerSubsystem;
         this.climbSubsystem = climbSubsystem;
 
         strumUp     = kGuitar.kUpDpad.button;
@@ -53,6 +58,12 @@ public class SK26GuitarHeroBinder implements CommandBinder {
         redFret     = kGuitar.kBbutton.button;
         yellowFret  = kGuitar.kYbutton.button;
         backButton  = kGuitar.kBackbutton.button;
+
+        IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
+            .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
+
     }
 
     @Override
@@ -77,10 +88,15 @@ public class SK26GuitarHeroBinder implements CommandBinder {
         }
 
         // Intake roller unjam (reverse voltage while held)
-        if (intakeRollersSubsystem.isPresent()) {
-            SK26IntakeRollers rollers = intakeRollersSubsystem.get();
+        if (indexerSubsystem.isPresent()) {
+            SK26Indexer indexer = indexerSubsystem.get();
 
-            backButton.whileTrue(rollers.runAtVoltageCommand(-kIntakeFullVoltage).withName("GuitarIntakeUnjam"));
+            backButton.onTrue(Commands.defer(() -> indexer.feedCommand(() -> 10.0), Set.of(indexer)));
+            backButton.onFalse(Commands.defer(
+                        () -> IndexFeed.getAsBoolean()
+                            ? indexer.feedCommand(() -> 10.0)
+                            : indexer.idleIndexerCommand(),
+                        Set.of(indexer)));
         }
     }
 }

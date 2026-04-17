@@ -97,7 +97,7 @@ public class SK26ClimbBinder implements CommandBinder {
                                 //     climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
                                 //     ClimbApproachAndAlign.createPathfindCommand(drive).withName("TowerPathfind")
                                 // ),
-                                //climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
+                                climb.climbToHeightCommand(T_ONE).withName("ClimbTOne"),
                                 new ClimbAlignment(drive),
                                 Commands.runOnce(() -> StateHandler.MacroState.CLIMBING.setStatus(Status.READY))
                             )

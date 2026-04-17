@@ -13,6 +13,7 @@ import static frc.robot.Ports.Sensors.launcherSensor;
 import java.util.Optional;
 import java.util.Set;
 
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Command;
 // import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -49,7 +50,8 @@ public class SK26IndexerBinder implements CommandBinder
         IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
             .or(StateHandler.whenCurrentStateReady(MacroState.SHUTTLING))
             .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SCORING))
-            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING));
+            .or(StateHandler.whenCurrentStateReady(MacroState.STEADY_STREAM_SHUTTLING))
+            .debounce(0.5, DebounceType.kFalling);
 
         IndexBackwards = StateHandler.whenCurrentStateWaiting(MacroState.SCORING)
             .or(StateHandler.whenCurrentStateWaiting(MacroState.SHUTTLING))
@@ -108,7 +110,15 @@ public class SK26IndexerBinder implements CommandBinder
         //     ),
         //     IndexerUnjam()
         // ).withName("IndexerFeedAndUnjam"));
-        IndexFeed.whileTrue(Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer)));
+        IndexFeed.whileTrue(
+            Commands.sequence(
+                Commands.race(
+                    indexer.feedCommand(() -> -manualIndexerVoltage.get()),
+                    Commands.waitSeconds(0.15)
+                ),
+                Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer))
+            ).withName("IndexerFeeding")
+        );
 
         // IndexFeed.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
         //     Commands.race(

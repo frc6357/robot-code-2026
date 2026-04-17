@@ -9,7 +9,6 @@ import static frc.robot.Ports.OperatorPorts;
 import java.util.Optional;
 
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
@@ -61,12 +60,13 @@ public class SK26IntakePivotBinder implements CommandBinder
 
         // Stow when climbing
         intakeAvoidMajorFoulsPosition.whileTrue(
-            Commands.sequence(
-                pivot.setIntakePivotTargetCommand(FULL_STOW),
-                Commands.waitUntil(() -> pivot.getCurrentPosition() >= 0.0),
-                pivot.setIntakePivotTargetCommand(STOW)
-            ).handleInterrupt(() -> pivot.setPositionerPosition(STOW))
-            .withName("IntakeStowForClimb"));
+            // Commands.sequence(
+            //     pivot.setIntakePivotTargetCommand(FULL_STOW),
+            //     Commands.waitUntil(() -> pivot.getCurrentPosition() >= 0.0),
+            //     pivot.setIntakePivotTargetCommand(STOW)
+            // ).handleInterrupt(() -> pivot.setPositionerPosition(STOW))
+            pivot.setIntakePivotTargetCommand(FULL_STOW).withName("IntakeStowForClimb"))
+        .onFalse(pivot.setIntakePivotTargetCommand(STOW));
 
         trashCompact.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
 

@@ -56,7 +56,7 @@ public class SK26Indexer extends SubsystemBase
     private double targetVoltage = 0.0;
 
     // Ball count tracked by external events (intake sensor, feeder notification, etc.)
-    private int numBallsInIndexer = 0;
+    // private int numBallsInIndexer = 0;
 
     // Cached sensor values to avoid redundant CAN reads
     private double cachedVelocityRPM = 0.0;
