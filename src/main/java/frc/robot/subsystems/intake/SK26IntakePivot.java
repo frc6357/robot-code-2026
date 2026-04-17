@@ -268,33 +268,33 @@ public class SK26IntakePivot extends SubsystemBase
 		// GROUND position. The PID keeps pushing into the hard-stop, stalling the motor.
 		// After 2 seconds of stall we know we're physically at ground, so we tell the
 		// motor "you are at -0.235" and the error drops to zero.
-		double velocityRPS = Math.abs(cachedVelocityRPS);
-		boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
-		boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
-		boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
+		// double velocityRPS = Math.abs(cachedVelocityRPS);
+		// boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
+		// boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
+		// boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
 
-		if (DriverStation.isEnabled() && targetingGround && motorStalled && stillHasError && !stallResetApplied) {
-			// Start / continue the stall timer
-			if (!stallTimerRunning) {
-				stallTimer.restart();
-				stallTimerRunning = true;
-			}
+		// if (DriverStation.isEnabled() && targetingGround && motorStalled && stillHasError && !stallResetApplied) {
+		// 	// Start / continue the stall timer
+		// 	if (!stallTimerRunning) {
+		// 		stallTimer.restart();
+		// 		stallTimerRunning = true;
+		// 	}
 
-			if (stallTimer.hasElapsed(STALL_TIME_SECONDS)) {
-				// We've been stalled long enough — reset position to known ground value
-				positionerMotor.setPosition(STALL_RESET_POSITION);
-				motorTargetPosition = STALL_RESET_POSITION;
-				stallResetApplied = true;
-				Logger.recordOutput("Intake/StallResetTriggered", true);
-			}
-		} else if (!targetingGround || !motorStalled || !stillHasError) {
-			// Motor is moving or we're no longer targeting ground — reset stall tracking
-			stallTimer.stop();
-			stallTimerRunning = false;
-			stallResetApplied = false;
-		}
+		// 	if (stallTimer.hasElapsed(STALL_TIME_SECONDS)) {
+		// 		// We've been stalled long enough — reset position to known ground value
+		// 		positionerMotor.setPosition(STALL_RESET_POSITION);
+		// 		motorTargetPosition = STALL_RESET_POSITION;
+		// 		stallResetApplied = true;
+		// 		Logger.recordOutput("Intake/StallResetTriggered", true);
+		// 	}
+		// } else if (!targetingGround || !motorStalled || !stillHasError) {
+		// 	// Motor is moving or we're no longer targeting ground — reset stall tracking
+		// 	stallTimer.stop();
+		// 	stallTimerRunning = false;
+		// 	stallResetApplied = false;
+		// }
 
-		Logger.recordOutput("Intake/StallResetApplied", stallResetApplied);
+		// Logger.recordOutput("Intake/StallResetApplied", stallResetApplied);
 		logOutputs();
 	}
 

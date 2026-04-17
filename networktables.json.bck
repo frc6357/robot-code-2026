@@ -16,9 +16,73 @@
     }
   },
   {
+    "name": "/Preferences/TorqueCurrent Output (A)",
+    "type": "double",
+    "value": 54.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Tolerance (rps)",
+    "type": "double",
+    "value": 0.85,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TorqueCurrentControl Debounce (sec)",
+    "type": "double",
+    "value": 0.025,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/DutyCycle FF (%/rps)",
+    "type": "double",
+    "value": 0.01489,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/AtGoalVelocity Debounce (sec)",
+    "type": "double",
+    "value": 0.2,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
     "name": "/Preferences/BBLauncher/ManualShootVelocity (rps)",
     "type": "double",
     "value": 24.5,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/p",
+    "type": "double",
+    "value": 0.07,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/i",
+    "type": "double",
+    "value": 0.02,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/TurretPID/d",
+    "type": "double",
+    "value": 0.005,
     "properties": {
       "persistent": true
     }
@@ -96,15 +160,15 @@
     }
   },
   {
-    "name": "/Preferences/BBLauncher/Prefs/Target Speed (RPM)",
+    "name": "/Preferences/Indexer Voltage",
     "type": "double",
-    "value": 5000.0,
+    "value": 0.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/DualLauncher/ManualTargetSpeed (rps)",
+    "name": "/Preferences/DualLauncher/ManualShootVelocity (rps)",
     "type": "double",
     "value": 35.0,
     "properties": {
@@ -112,9 +176,17 @@
     }
   },
   {
-    "name": "/Preferences/DualLauncher/Top:BottomRollerRatio",
+    "name": "/Preferences/Indexer/ManualVoltage",
     "type": "double",
-    "value": 1.1,
+    "value": -10.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Feeder/ManualVoltage",
+    "type": "double",
+    "value": -5.75,
     "properties": {
       "persistent": true
     }
@@ -146,7 +218,7 @@
   {
     "name": "/Preferences/DualLauncher/Bottom/kP",
     "type": "double",
-    "value": 0.4,
+    "value": 0.5,
     "properties": {
       "persistent": true
     }
@@ -194,7 +266,7 @@
   {
     "name": "/Preferences/DualLauncher/Top/kP",
     "type": "double",
-    "value": 0.4,
+    "value": 0.5,
     "properties": {
       "persistent": true
     }
@@ -232,25 +304,17 @@
     }
   },
   {
-    "name": "/Preferences/Indexer Voltage",
+    "name": "/Preferences/DualLauncher/ManualTargetSpeed (rps)",
     "type": "double",
-    "value": 0.0,
+    "value": 35.0,
     "properties": {
       "persistent": true
     }
   },
   {
-    "name": "/Preferences/Indexer/ManualVoltage",
+    "name": "/Preferences/DualLauncher/Top:BottomRollerRatio",
     "type": "double",
-    "value": -10.0,
-    "properties": {
-      "persistent": true
-    }
-  },
-  {
-    "name": "/Preferences/Feeder/ManualVoltage",
-    "type": "double",
-    "value": -5.75,
+    "value": 1.1,
     "properties": {
       "persistent": true
     }
