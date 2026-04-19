@@ -53,11 +53,12 @@ public class SKVision extends SubsystemBase {
     public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
     public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
     public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
+    public final Limelight climbLL = new Limelight(VisionConfig.CLIMB_CONFIG); // limelight-climb
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {turretLL}; 
+    public final Limelight[] allLimelights = {turretLL, intakeLL, climbLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {turretLL}; 
+    public final Limelight[] poseLimelights = {turretLL, climbLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
@@ -121,9 +122,10 @@ public class SKVision extends SubsystemBase {
         // Cache swerve rotation once for all Limelights
         Rotation2d cachedSwerveRotation = m_swerve.getRawDrivetrainRotation();
 
-        // OPTIMIZATION: Refresh all Limelight snapshots FIRST, batching NT reads
+        // OPTIMIZATION: Invalidate caches at the start of the cycle.
+        // Values will be lazy-loaded on first access, then cached for the rest of the cycle.
         for(Limelight ll : poseLimelights) {
-            // Set robot orientation before refreshing snapshot (needed for MegaTag2)
+            // Set robot orientation before any data access (needed for MegaTag2)
             if(ll.getName() == turretLL.getName()) {
                 if(m_turret == null) {
                     ll.setLogStatus("Disabled");
@@ -147,10 +149,10 @@ public class SKVision extends SubsystemBase {
                 ll.setRobotOrientation(cachedSwerveRotation.getDegrees());
             }
             
-            // Refresh snapshot AFTER setting orientation - batches all NT reads
-            ll.refreshSnapshot();
+            // Invalidate cache AFTER setting orientation - values will be lazy-loaded on demand
+            ll.invalidateCache();
             
-            // Use cached data for tag scanning
+            // Use cached data for tag scanning (lazy-loads only what's needed)
             scanForTagsCached(ll);
         }
 
@@ -191,7 +193,7 @@ public class SKVision extends SubsystemBase {
             else {
                 //ll.setLogStatus("Idle");
             }
-            ll.setIMUMode(IMUMode.INTERNAL_EXTERNAL_ASSIST); // For Limelight 4s only; this fuses the internal IMU with the external IMU to provide more accurate pose estimation and better performance
+            ll.setIMUMode(IMUMode.EXTERNAL_ONLY);// was INTERNAL_EXTERNAL_ASSIST // For Limelight 4s only; this fuses the internal IMU with the external IMU to provide more accurate pose estimation and better performance
             ll.setIMUAssistAlpha(0.001); // Sets the alpha value for IMU assist mode
             ll.setLEDMode(false); // Turns off LED lights on startup
         }
@@ -384,7 +386,7 @@ public class SKVision extends SubsystemBase {
             
             // Avoid division by zero
             if (distanceToTag > 0.001) {
-                score += (tagCount * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / distanceToTag;
+                score += (tagCount * VisionConfig.Thresholds.TAG_COUNT_WEIGHT) / (distanceToTag * 2);
             }
             score += targetSize * 1.25; // Range: 1-100
 

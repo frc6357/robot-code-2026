@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "RTrenchSwipe1RTrench"
+            "pathName": "HubDepot"
           }
         },
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "RTrenchToRScore"
+            "waitTime": 0.2
           }
         },
         {
@@ -26,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Right Trench",
+  "folder": "Hub",
   "choreoAuto": false
 }

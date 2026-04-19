@@ -36,7 +36,10 @@ import frc.robot.subsystems.drive.DriveRequests;
 import frc.robot.subsystems.drive.SKSwerve;
 import frc.robot.subsystems.drive.SKTargetPoint;
 import frc.robot.RobotContainer;
+import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
+import frc.robot.StateHandler.MacroState;
+import frc.robot.StateHandler.MacroState.Status;
 
 
 @SuppressWarnings("unused")
@@ -68,6 +71,8 @@ public class SKSwerveBinder implements CommandBinder{
     private final Trigger fastmode = kLSbutton.button;
     private final Trigger hubAlign = kLTrigger.button;
 
+    Trigger climbBump;
+
 
     public SKSwerveBinder(Optional<SKSwerve> m_drive) {
         this.m_drive = m_drive;
@@ -81,6 +86,9 @@ public class SKSwerveBinder implements CommandBinder{
         this.rotationFilter = new DriveStickFilter(
             driverRotationSlewPref.get(), 
             kJoystickDeadband);
+
+        climbBump = StateHandler.whenStateHasStatus(MacroState.CLIMBING, Status.READY)
+                    .and(StateHandler.whenCurrentState(MacroState.CLIMBING).or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE)));
     }
 
     @Override
@@ -126,14 +134,25 @@ public class SKSwerveBinder implements CommandBinder{
         //     Pathfinder.PathfindThenFollowPathCommand("PassUnderRTrench", kDefaultPathfindingConstraints)
         // );
 
-        // DriverPorts.kYbutton.button.toggleOnTrue(
-        //     Commands.defer(
-        //         () -> TravelUnderNearestTrench.createCommand(
-        //             drive.getRobotPose(),
-        //             drive.getVelocity(true),
-        //             kTrenchPathfindingConstraints),
-        //         Set.of(drive))
-        // );
+        DriverPorts.kAbutton.button.whileTrue(
+            Commands.defer(
+                () -> TravelUnderNearestTrench.createCommand(
+                    drive.getRobotPose(),
+                    drive.getVelocity(true),
+                    kTrenchPathfindingConstraints),
+                Set.of(drive))
+        );
+
+        climbBump.whileTrue(
+            drive.followSwerveRequestCommand(
+                DriveRequests.pidRequest, 
+                DriveRequests.getPidRequestUpdater(
+                    () -> -0.5, 
+                    () -> 0.0, 
+                    () -> 0.0
+                )
+            )
+        );
 
         // bumpAlign.whileTrue(new AlignForBumpJump(drive));
         // hubAlign.whileTrue(

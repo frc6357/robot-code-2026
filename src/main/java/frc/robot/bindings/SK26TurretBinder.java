@@ -10,6 +10,7 @@ import java.util.Optional;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
@@ -52,7 +53,10 @@ public class SK26TurretBinder implements CommandBinder
         PointAtShuttlePoint = StateHandler.whenCurrentState(MacroState.SHUTTLING)
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SHUTTLING));
 
-        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE).or(StateHandler.whenCurrentState(MacroState.INTAKING).or(StateHandler.whenCurrentState(MacroState.SPITTING)));
+        IsIdle = StateHandler.whenCurrentState(MacroState.IDLE)
+                .or(StateHandler.whenCurrentState(MacroState.INTAKING)
+                .or(StateHandler.whenCurrentState(MacroState.SPITTING)))
+                .or(StateHandler.whenCurrentState(MacroState.CLIMBING));
 
         if(swerveSubsystem.isEmpty()) {
             return;
@@ -98,7 +102,7 @@ public class SK26TurretBinder implements CommandBinder
         inAllianceZone.and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(Commands.deferredProxy(() -> 
             new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
                                                                         FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
-        ).withName("TurretTrackHub" + DriverStation.getAlliance().get()));
+        ).withName("TurretTrackHub" + DriverStation.getAlliance().orElseGet(() -> Alliance.Blue)));
 
 
         // Default command: Use the right joystick to manually move the turret when idle

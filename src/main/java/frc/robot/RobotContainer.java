@@ -39,8 +39,8 @@ import frc.robot.Robot.RobotMode;
 import frc.robot.bindings.SK26ClimbBinder;
 import frc.robot.bindings.FuelHuntBinder;
 import frc.robot.bindings.SK26BBLauncherBinder;
-import frc.robot.bindings.SK26DualLauncherBinder;
 import frc.robot.bindings.SK26FeederBinder;
+import frc.robot.bindings.SK26GuitarHeroBinder;
 import frc.robot.bindings.SK26IndexerBinder;
 import frc.robot.bindings.SK26IntakePivotBinder;
 import frc.robot.bindings.SK26IntakeRollersBinder;
@@ -94,7 +94,7 @@ public class RobotContainer {
 
   public Optional<SKSwerve> m_swerveContainer = Optional.empty();
   public Optional<SKVision> m_visionContainer = Optional.empty();
-  public Optional<SK26Climb> m_climbComtainer = Optional.empty();
+  public Optional<SK26Climb> m_climbContainer = Optional.empty();
   public Optional<SK26Turret> m_turretContainer = Optional.empty();
   public Optional<BangBangLauncher> m_BBLauncherContainer = Optional.empty();
   public Optional<SK26Launcher> m_StandardLauncherContainer = Optional.empty();
@@ -248,6 +248,10 @@ public class RobotContainer {
                     m_intakeRollersContainer = Optional.of(new SK26IntakeRollers());
                     m_intakeRollersInstance = m_intakeRollersContainer.get();
                 }
+                if(subsystems.isClimbPresent()) {
+                    m_climbContainer = Optional.of(new SK26Climb());
+                    m_climbInstance = m_climbContainer.get();
+                }
                 if(subsystems.isBangBangLauncherPresent()) {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
                     m_BBlauncherInstance = m_BBLauncherContainer.get();
@@ -295,8 +299,8 @@ public class RobotContainer {
                     m_visionInstance = m_visionContainer.get();
                 }
                 if(subsystems.isClimbPresent()) {
-                    m_climbComtainer = Optional.of(new SK26Climb());
-                    m_climbInstance = m_climbComtainer.get();
+                    m_climbContainer = Optional.of(new SK26Climb());
+                    m_climbInstance = m_climbContainer.get();
                 }
                 if(subsystems.isBangBangLauncherPresent()) {
                     m_BBLauncherContainer = Optional.of(new BangBangLauncher());
@@ -351,6 +355,8 @@ public class RobotContainer {
             m_stateHandlerContainer.ifPresent(sh -> sh.setIntakeSubsystem(m_intakePivotContainer));
             // Give StateHandler a reference to the drive for zone-based triggers
             m_stateHandlerContainer.ifPresent(sh -> sh.setDriveSubsystem(m_swerveContainer));
+            // Give StateHandler a reference to the climb for state readiness checking
+            m_stateHandlerContainer.ifPresent(sh -> sh.setClimbSubsystem(m_climbContainer));
         }
         catch (IOException e)
         {
@@ -368,7 +374,7 @@ public class RobotContainer {
     {
         buttonBinders.add(new SK26StateBinder(m_stateHandlerContainer));
         buttonBinders.add(new SKSwerveBinder(m_swerveContainer));
-        buttonBinders.add(new SK26ClimbBinder(m_climbComtainer));
+        buttonBinders.add(new SK26ClimbBinder(m_climbContainer, m_swerveContainer, m_stateHandlerContainer));
         buttonBinders.add(new SK26LauncherBinder(m_StandardLauncherContainer));
         buttonBinders.add(new SK26TurretBinder(m_turretContainer, m_swerveContainer));
         buttonBinders.add(new SKTargetPointsBinder());
@@ -376,12 +382,13 @@ public class RobotContainer {
         // buttonBinders.add(new SK26DualLauncherBinder(m_DualLauncherContainer, m_swerveContainer));
         buttonBinders.add(new SKVisionBinder(m_visionContainer, m_swerveContainer));
         buttonBinders.add(new SK26LightsBinder(m_lightsContainer));
-        buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer));
+        buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer, m_stateHandlerContainer));
         buttonBinders.add(new SK26IntakeRollersBinder(m_intakeRollersContainer, m_swerveContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
         buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
+        buttonBinders.add(new SK26GuitarHeroBinder(m_intakePivotContainer, m_indexerContainer, m_climbContainer));
         // Traversing through all the binding classes to actually bind the buttons
         for (CommandBinder subsystemGroup : buttonBinders)
         {

@@ -2,10 +2,7 @@ package frc.robot.subsystems.intake;
 
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderDiscontinuityPoint;
 import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderGearRatio;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderInverted;
-import static frc.robot.Konstants.IntakeConstants.kPositionerEncoderOffset;
 import static frc.robot.Konstants.IntakeConstants.kPositionerGainSchedulerErrorThreshold;
 // Imports from robot
 import static frc.robot.Konstants.IntakeConstants.kPositionerKG;
@@ -20,7 +17,6 @@ import static frc.robot.Konstants.IntakeConstants.kPositionerPeakReverseVoltage;
 import static frc.robot.Konstants.IntakeConstants.kPositionerPositionTolerance;
 import static frc.robot.Konstants.IntakeConstants.kPositionerStatorCurrentLimit;
 import static frc.robot.Konstants.IntakeConstants.kPositionerSupplyCurrentLimit;
-import static frc.robot.Ports.pickupOBPorts.kPositionerEncoder;
 import static frc.robot.Ports.pickupOBPorts.kPositionerFollowerMotor;
 import static frc.robot.Ports.pickupOBPorts.kPositionerMotor;
 
@@ -29,18 +25,15 @@ import org.littletonrobotics.junction.Logger;
 // Imports from Phoenix 6
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
-import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.ClosedLoopGeneralConfigs;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.VoltageConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
@@ -48,7 +41,6 @@ import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.MotorAlignmentValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 
 // Imports from WPILib
@@ -58,8 +50,6 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.commands.PathPlannerCommands;
-import frc.lib.subsystems.PathplannerSubsystem;
 import frc.robot.Konstants.IntakeConstants.IntakePosition;
 
 /**
@@ -67,7 +57,7 @@ import frc.robot.Konstants.IntakeConstants.IntakePosition;
  * that raises and lowers the intake using Motion Magic position control.
  * Uses TalonFX (Kraken X44) motors.
  */
-public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsystem
+public class SK26IntakePivot extends SubsystemBase
 {
 	// Motors
 	private final TalonFX positionerMotor;
@@ -191,8 +181,6 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 
 		// 
 		positionerMotor.setPosition(0.0);
-
-		addPathPlannerCommands();
 	}
 
 	/**
@@ -280,33 +268,33 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		// GROUND position. The PID keeps pushing into the hard-stop, stalling the motor.
 		// After 2 seconds of stall we know we're physically at ground, so we tell the
 		// motor "you are at -0.235" and the error drops to zero.
-		double velocityRPS = Math.abs(cachedVelocityRPS);
-		boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
-		boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
-		boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
+		// double velocityRPS = Math.abs(cachedVelocityRPS);
+		// boolean targetingGround = (targetPositionEnum == IntakePosition.GROUND);
+		// boolean motorStalled = velocityRPS < STALL_VELOCITY_THRESHOLD_RPS;
+		// boolean stillHasError = !isPositionerAtTarget(); // PID is actively trying to move
 
-		if (DriverStation.isEnabled() && targetingGround && motorStalled && stillHasError && !stallResetApplied) {
-			// Start / continue the stall timer
-			if (!stallTimerRunning) {
-				stallTimer.restart();
-				stallTimerRunning = true;
-			}
+		// if (DriverStation.isEnabled() && targetingGround && motorStalled && stillHasError && !stallResetApplied) {
+		// 	// Start / continue the stall timer
+		// 	if (!stallTimerRunning) {
+		// 		stallTimer.restart();
+		// 		stallTimerRunning = true;
+		// 	}
 
-			if (stallTimer.hasElapsed(STALL_TIME_SECONDS)) {
-				// We've been stalled long enough — reset position to known ground value
-				positionerMotor.setPosition(STALL_RESET_POSITION);
-				motorTargetPosition = STALL_RESET_POSITION;
-				stallResetApplied = true;
-				Logger.recordOutput("Intake/StallResetTriggered", true);
-			}
-		} else if (!targetingGround || !motorStalled || !stillHasError) {
-			// Motor is moving or we're no longer targeting ground — reset stall tracking
-			stallTimer.stop();
-			stallTimerRunning = false;
-			stallResetApplied = false;
-		}
+		// 	if (stallTimer.hasElapsed(STALL_TIME_SECONDS)) {
+		// 		// We've been stalled long enough — reset position to known ground value
+		// 		positionerMotor.setPosition(STALL_RESET_POSITION);
+		// 		motorTargetPosition = STALL_RESET_POSITION;
+		// 		stallResetApplied = true;
+		// 		Logger.recordOutput("Intake/StallResetTriggered", true);
+		// 	}
+		// } else if (!targetingGround || !motorStalled || !stillHasError) {
+		// 	// Motor is moving or we're no longer targeting ground — reset stall tracking
+		// 	stallTimer.stop();
+		// 	stallTimerRunning = false;
+		// 	stallResetApplied = false;
+		// }
 
-		Logger.recordOutput("Intake/StallResetApplied", stallResetApplied);
+		// Logger.recordOutput("Intake/StallResetApplied", stallResetApplied);
 		logOutputs();
 	}
 
@@ -318,13 +306,5 @@ public class SK26IntakePivot extends SubsystemBase implements PathplannerSubsyst
 		Logger.recordOutput("Intake/Positioner Velocity (RPS)", cachedVelocityRPS);
 		Logger.recordOutput("Intake/Positioner Error (rot)", getTargetPosition() - getCurrentPosition());
 		Logger.recordOutput("Intake/Intake Target (enum)", getPositionerTargetEnum());
-	}
-
-	@Override
-	public void addPathPlannerCommands()
-	{
-		PathPlannerCommands.addCommand("Intake Deploy", this.setIntakePivotTargetCommand(IntakePosition.GROUND).withName("IntakeDeployAuton"));
-		PathPlannerCommands.addCommand("Intake Stow", this.setIntakePivotTargetCommand(IntakePosition.STOW).withName("IntakeStowAuton"));
-		System.out.println("[SK26IntakePivot] PathPlanner commands added");
 	}
 }

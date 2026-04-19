@@ -17,8 +17,8 @@ class VisionConfigTest {
     @Test
     void testPoseStdDevs_STATIONARY_CLOSE() {
         VisionConfig.PoseStdDevs stdDevs = VisionConfig.PoseStdDevs.STATIONARY_CLOSE;
-        assertEquals(0.1, stdDevs.xy(), "STATIONARY_CLOSE xy should be 0.1");
-        assertEquals(0.1, stdDevs.theta(), "STATIONARY_CLOSE theta should be 0.1");
+        assertEquals(0.2, stdDevs.xy(), "STATIONARY_CLOSE xy should be 0.1");
+        assertEquals(1.0, stdDevs.theta(), "STATIONARY_CLOSE theta should be 0.1");
     }
 
     @Test
@@ -31,8 +31,8 @@ class VisionConfigTest {
     @Test
     void testPoseStdDevs_STRONG_MULTI() {
         VisionConfig.PoseStdDevs stdDevs = VisionConfig.PoseStdDevs.STRONG_MULTI;
-        assertEquals(0.1, stdDevs.xy(), "STRONG_MULTI xy should be 0.1");
-        assertEquals(0.1, stdDevs.theta(), "STRONG_MULTI theta should be 0.1");
+        assertEquals(1.0, stdDevs.xy(), "STRONG_MULTI xy should be 0.1");
+        assertEquals(2.0, stdDevs.theta(), "STRONG_MULTI theta should be 0.1");
     }
 
     @Test

@@ -8,6 +8,10 @@ import static frc.robot.Konstants.ClimbConstants.kClimbI;
 import static frc.robot.Konstants.ClimbConstants.kClimbP;
 import static frc.robot.Konstants.ClimbConstants.kClimbTolerance;
 import static frc.robot.Konstants.ClimbConstants.kClimbMotorSpeed;
+
+import frc.robot.Konstants.ClimbConstants.ClimbPosition;
+import lombok.Getter;
+
 import static frc.robot.Ports.ClimbPorts.kClimbMotor;
 import static frc.robot.Ports.ClimbPorts.kClimbMotorTwo;
 
@@ -27,7 +31,6 @@ import com.revrobotics.spark.config.SparkFlexConfig;
 
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -51,7 +54,12 @@ public class SK26Climb extends SubsystemBase
     private final double climbFactor = 1.0;   // TODO: change once we know encoder-to-height conversion
 
     private double cTargetHeight = 0.0;
-    private boolean isRunning = false;
+
+    @Getter
+    private boolean running = false;
+
+    @Getter
+    private ClimbPosition targetClimbEnum = ClimbPosition.STOW;
 
     public SK26Climb()
     {
@@ -118,10 +126,18 @@ public class SK26Climb extends SubsystemBase
     /** Checks if the climb is within tolerance of the target height. */
     public boolean climbIsAtHeight()
     {
-        double tolerance = DriverStation.isTeleop() 
+        double tolerance = DriverStation.isEnabled() 
             ? kClimbTolerance 
             : Rotations.of(0.1).in(Degrees);
         return Math.abs(getClimbTargetPosition() - getClimbPosition()) < tolerance;
+    }
+
+    public boolean climbIsAtPosition(ClimbPosition position)
+    {
+        double tolerance = DriverStation.isEnabled() 
+            ? kClimbTolerance 
+            : Rotations.of(0.1).in(Degrees);
+        return Math.abs(position.height - getClimbPosition()) < tolerance;
     }
 
     public double getClimbTargetPosition()
@@ -177,10 +193,10 @@ public class SK26Climb extends SubsystemBase
     /** Holds the current position to resist gravity. */
     public void hold()
     {
-        if (isRunning)
+        if (running)
         {
             cTargetHeight = getClimbPosition();
-            isRunning = false;
+            running = false;
         }
         setClimbHeight(cTargetHeight);
     }
@@ -195,7 +211,7 @@ public class SK26Climb extends SubsystemBase
     }
 
     public void setIsRunning(boolean running) {
-        isRunning = running;
+        this.running = running;
     }
     
     // ==================== Inline Command Factories ====================
@@ -238,6 +254,17 @@ public class SK26Climb extends SubsystemBase
         return this.runOnce(() -> { setClimbHeight(height); setIsRunning(true); })
                    .andThen(this.run(() -> {}))
                    .until(this::climbIsAtHeight);
+    }
+
+    /**
+     * Returns a command that sets the climb to a target position using PID
+     * and finishes when the position is reached.
+     *
+     * @param position The target climb position enum.
+     * @return A command requiring this subsystem.
+     */
+    public Command climbToHeightCommand(ClimbPosition position) {
+        return climbToHeightCommand(position.height).withName("ClimbTo" + position.name());
     }
 
     @Override

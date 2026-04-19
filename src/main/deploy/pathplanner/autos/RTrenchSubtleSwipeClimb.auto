@@ -7,13 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchSwipe1LTrench"
+            "pathName": "RTrenchSwipe1RTrenchSubtle"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "LTrenchToLScore"
+            "pathName": "RTrenchToRScore"
           }
         },
         {
@@ -25,7 +25,7 @@
         {
           "type": "wait",
           "data": {
-            "waitTime": 8.0
+            "waitTime": 5.0
           }
         },
         {
@@ -37,25 +37,19 @@
         {
           "type": "path",
           "data": {
-            "pathName": "LScoreToLTrench"
+            "pathName": "RScoreToRClimb"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "LTrenchSwipe2LTrench"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "LTrenchToLScore"
+            "name": "Request Climbing State"
           }
         }
       ]
     }
   },
   "resetOdom": true,
-  "folder": "Left Trench",
+  "folder": "Right Trench",
   "choreoAuto": false
 }

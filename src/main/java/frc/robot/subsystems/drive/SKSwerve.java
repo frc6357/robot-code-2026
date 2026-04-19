@@ -4,6 +4,7 @@ import static frc.robot.Konstants.AutoConstants.pathConfig;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.RobotContainer.m_field;
 
+import java.util.List;
 import java.util.function.UnaryOperator;
 
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -56,8 +57,10 @@ public class SKSwerve extends SubsystemBase {
     private Pose2d[] emptyPath = new Pose2d[0];
 
     public void setSwerveRequest(SwerveRequest request) {
-        // Only allows PathPlanner to control the drivetrain during auto period through its own request
-        if(DriverStation.isAutonomousEnabled() && !request.equals(DriveRequests.pathPlannerRequest)) {
+        // Only allows PathPlanner and PID alignment to control the drivetrain during auto period
+        if(DriverStation.isAutonomousEnabled() 
+            && !request.equals(DriveRequests.pathPlannerRequest)
+            && !request.equals(DriveRequests.pidRequest)) {
             return;
         }
 		currentRequest = request;
@@ -100,11 +103,10 @@ public class SKSwerve extends SubsystemBase {
         setupPoseEstimator();
         configureAutoBuilder();
 
-        PathPlannerLogging.setLogActivePathCallback((activePath) -> Logger.recordOutput("Drive/ActivePath", activePath.toArray(emptyPath)));
+        PathPlannerLogging.setLogActivePathCallback((activePath) -> displayActivePath(activePath));
 
         drivetrain.setDefaultCommand(drivetrain.applyRequest(()-> currentRequest).withName("DrivetrainRequestApplier"));
         SmartDashboard.putData("Elastic Field 2D", m_field);
-        // SmartDashboard.putData("Drive", this);
     }
 
     @Override
@@ -127,8 +129,13 @@ public class SKSwerve extends SubsystemBase {
             io.updateInputs(inputs); 
             Logger.processInputs("Drive/DeviceInputs", inputs);
         });
-		// m_field.setRobotPose(getRobotPose());
+		m_field.setRobotPose(getRobotPose());
 	}
+
+    private void displayActivePath(List<Pose2d> path) {
+        Logger.recordOutput("Drive/ActivePath", path.toArray(emptyPath));
+        m_field.getObject("ActivePath").setPoses(path);
+    }
 
     public GeneratedDrivetrain getDrivetrain() {
         return drivetrain;
@@ -281,7 +288,7 @@ public class SKSwerve extends SubsystemBase {
 
     public ChassisSpeeds getVelocity(boolean fieldRelative) {
         if(fieldRelative) {
-            return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getGyroRotation());
+            return ChassisSpeeds.fromRobotRelativeSpeeds(getRobotRelativeSpeeds(), getRobotRotation());
         }
         else {
             return getRobotRelativeSpeeds();

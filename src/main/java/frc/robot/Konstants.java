@@ -155,7 +155,7 @@ public final class Konstants
             12, false);
         
         public static final PathConstraints kTrenchPathfindingConstraints = new PathConstraints(
-            4.0, 3.65, 
+            2.0, 3.0, 
             360, 540, 
             12, false);
 
@@ -274,26 +274,43 @@ public final class Konstants
             public static final boolean kAttached = true;
         }
 
+        public static final class ClimbLight {
+            public static final String kName = "limelight-climb";
+
+            // Translation (in meters) from center of robot
+            public static final double kForward = Inches.of(0.0).in(Meters); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Inches.of(0.0).in(Meters); // (x) meters right of center; negative is left
+            public static final double kUp = Inches.of(0.0).in(Meters); // (y) meters up of center; negative is down (how did you get a limelight down there???)
+
+            // Rotation of limelight (in degrees and yaw)
+            public static final double kRoll = 0.0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 0.0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
+
+            public static final boolean kAttached = true;
+
+        }
+
         /* NOTE: this config should be representative of the Limelight's position when the turret is at 0 degrees */
         public static final class TurretLimelight {
             // Network/pipeline values
             public static final String kName = "limelight-turret"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
-            public static final double kForward = Units.inchesToMeters(-5.729); // (z) meters forward of center; negative is backwards
-            public static final double kRight = Units.inchesToMeters(-12.018); // (x) meters right of center; negative is left
+            public static final double kForward = Units.inchesToMeters(-4.508); // (z) meters forward of center; negative is backwards
+            public static final double kRight = Units.inchesToMeters(-8.071); // (x) meters right of center; negative is left
             public static final double kUp = Units.inchesToMeters(17.833); // (y) meters up of center; negative is down (how did you get a limelight down there???)
 
             // Rotation of limelight (in degrees and yaw)
-            public static final double kRoll = -0.5; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
-            public static final double kPitch = 17.6; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
+            public static final double kRoll = -0.55; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
+            public static final double kPitch = 16.4; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 90; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
             public static final boolean kAttached = true;
         }
-        public static final class LimelightThree {
+        public static final class IntakeLimelight {
             // Network/pipeline values
-            public static final String kName = "limelight-three"; // NetworkTable name and hostname
+            public static final String kName = "limelight-intake"; // NetworkTable name and hostname
 
             // Translation (in meters) from center of robot
             public static final double kForward = Inches.of(-5).in(Meters); // (z) meters forward of center; negative is backwards
@@ -303,7 +320,7 @@ public final class Konstants
             // Rotation of limelight (in degrees and yaw)
             public static final double kRoll = 0; // (roll) degrees tilted clockwise/ccw from 0° level [think plane wings tilting cw/ccw]
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
-            public static final double kYaw = 180; // (yaw) faces backward (same direction as intake)
+            public static final double kYaw = 0; // (yaw) faces backward (same direction as intake)
 
             public static final boolean kAttached = false;
         }
@@ -333,7 +350,7 @@ public final class Konstants
     public static final class IndexerConstants 
     {
         // Indexer feed speed in Rotations Per Second (RPS)
-        public static final double kIndexerFullVoltage = -7.65;
+        public static final double kIndexerFullVoltage = -10; //-7.65
 
         // Indexer idle speed in Rotations Per Second (RPS)
         public static final double kIndexerIdleVoltage = 0.0;
@@ -351,6 +368,9 @@ public final class Konstants
 
         // Max voltage output for indexer motor (for brownout protection)
         public static final double kMaxIndexerVoltage = 7.0;
+
+        // The speed the indexer motor runs at when there aren't balls in the hopper
+        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -382,12 +402,12 @@ public final class Konstants
 
     public static final class LightsConstants
     {
-        public static final int kNumLedOnBot = 60;
+        public static final int kNumLedOnBot = 84;
         public static final double kLightsOffBrightness = 0.0;
-        public static final double kLightsOnBrightness = 0.5;
+        public static final double kLightsOnBrightness = 1.0;
 
         public static final int kLightsPWMHeader = 9; // PWM Header on the RoboRIO that the lights are connected to (stupid value for now - change later)])
-        public static final int kLEDBufferLength = 60; // Number of LEDs on the robot (stupid value for now - change later)
+        public static final int kLEDBufferLength = 84; // Number of LEDs on the robot (stupid value for now - change later)
 
         public static final Color kSKCream = new Color(233 / 255.0, 235 / 255.0, 229 / 255.0);
         public static final Color kSKTeal = new Color(104 / 255.0, 185 / 255.0, 196 / 255.0);
@@ -480,8 +500,75 @@ public final class Konstants
         public static final double kClimbV = 0;
         public static final double kClimbTolerance = 1; //figure out tolerance
         public static final double kCLimbMax = 0; //figure out value of encoder when climb is at max height.
-        public static final double kTOne = 92;
-        public static final double kClimbReturn = 25;
+
+        public static enum ClimbPosition
+        {
+            STOW(0.0),
+            HOIST(25.0),
+            T_ONE(92.0);
+
+            public final double height;
+            ClimbPosition(double height)
+            {
+                this.height = height;
+            }
+        }
+
+        // ==================== Automated Climb Approach Constants ====================
+        
+        /** Distance from the tower front face for the approach pose (meters). */
+        public static final double kApproachDistanceMeters = 0.5;
+
+        /** Tolerance for X alignment when "hugging" the tower (meters). */
+        public static final double kAlignmentToleranceMeters = 0.035;
+
+        /** Path constraints for the approach pathfinding (slower for precision). */
+        public static final PathConstraints kClimbApproachConstraints = new PathConstraints(
+            3.0, 3.0,   // max velocity (m/s), max acceleration (m/s²)
+            360, 540,   // max angular velocity (deg/s), max angular acceleration (deg/s²)
+            12, false); // nominal voltage, unlimited acceleration
+
+        /** ProfiledPIDController constraints for final X alignment. */
+        public static final double kAlignmentMaxVelocity = 3.0;       // m/s
+        public static final double kAlignmentMaxAcceleration = 3.0;   // m/s²
+
+        /** PID gains for final X alignment. */
+        public static final double kAlignmentP = 6.0;
+        public static final double kAlignmentI = 0.0;
+        public static final double kAlignmentD = 0.1;
+
+        /** ProfiledPIDController constraints for final Y alignment. */
+        public static final double kAlignmentYMaxVelocity = 3.0;       // m/s
+        public static final double kAlignmentYMaxAcceleration = 3.0;   // m/s²
+
+        /** PID gains for final Y alignment. */
+        public static final double kAlignmentYP = 6.0;
+        public static final double kAlignmentYI = 0.0;
+        public static final double kAlignmentYD = 0.1;
+
+        /** Tolerance for Y alignment when "hugging" the tower (meters). */
+        public static final double kAlignmentYToleranceMeters = 0.035;
+
+        /** Y error threshold before X alignment begins (meters). */
+        public static final double kAlignmentXEnableYErrorThreshold = 0.11;
+
+        /** ProfiledPIDController constraints for final rotational alignment. */
+        public static final double kAlignmentRotMaxVelocity = 360.0;       // deg/s
+        public static final double kAlignmentRotMaxAcceleration = 540.0;   // deg/s²
+
+        /** PID gains for final rotational alignment. */
+        public static final double kAlignmentRotP = 8.0;
+        public static final double kAlignmentRotI = 0.0;
+        public static final double kAlignmentRotD = 0.1;
+
+        /** Tolerance for rotational alignment (radians). */
+        public static final double kAlignmentRotToleranceRadians = Math.toRadians(2.0);
+
+        /* Tower rung positions specifically for aligning our robot's bumper gap for the tower */
+        public static final Translation2d kTowerLeftRungBlue = new Translation2d(1.372, 4.179); // Blue left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungBlue = new Translation2d(1.372, 3.408); // Blue right tower rung (from driver station)
+        public static final Translation2d kTowerLeftRungRed = new Translation2d(15.168, 3.873); // Red left tower rung (from driver station)
+        public static final Translation2d kTowerRightRungRed = new Translation2d(15.168, 4.65); // Red right tower rung (from driver station)
     }
 
 
@@ -492,7 +579,8 @@ public final class Konstants
         public static final double kLauncherV = 0.093;
         public static final double kLauncherS = 0.25;
 
-        public static final double kWheelRadius = .0508; //TEMPORARY
+        public static final double kWheelRadius = .0381; // meters (1.5 inch radius)
+        public static final double kSlipRatio = 0.85; // Ball velocity / wheel velocity (1.0 = no slip, < 1.0 = ball slower)
         public static final double kShooterTolerance = 0.5; // +/- rps
         public static final double kTargetlaunchVelocity = 5; //meters per second
         public static final double kTargetMotorRPS = 15.665; //matches with kTargetLaunchVelocity
@@ -528,9 +616,9 @@ public final class Konstants
             // Bottom roller (large flywheel) — Clockwise Positive
             public static final class BottomRoller {
                 public static final double kS = 0.25;  // Static friction (volts)
-                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kV = 0.125;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.4;   // Proportional gain
+                public static final double kP = 1.1;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -538,9 +626,9 @@ public final class Konstants
             // Top roller (smaller contact wheels) — CounterClockwise Positive
             public static final class TopRoller {
                 public static final double kS = 0.25;  // Static friction (volts)
-                public static final double kV = 0.12;  // Velocity feedforward (volts per rps)
+                public static final double kV = 0.125;  // Velocity feedforward (volts per rps)
                 public static final double kA = 0.0;   // Acceleration feedforward (volts per rps^2)
-                public static final double kP = 0.4;   // Proportional gain
+                public static final double kP = 0.65;   // Proportional gain
                 public static final double kI = 0.0;   // Integral gain
                 public static final double kD = 0.0;   // Derivative gain
             }
@@ -554,7 +642,7 @@ public final class Konstants
             );
 
         // Phase delay compensation
-        public static final double kPhaseDelaySeconds = -1.2;
+        public static final double kPhaseDelaySeconds = 0.28;
 
         // Launch angle mode
         public enum LaunchAngleMode { FIXED, ADJUSTABLE }
@@ -583,30 +671,60 @@ public final class Konstants
         // "Stationary" speed threshold for deciding when to apply motion compensation
         public static final LinearVelocity kStationaryThresholdMetersPerSecond = MetersPerSecond.of(0.3);
 
+        public static final double newSpindexerFlywheelSpeedFudge = 1.0;
+
         // Placeholder interpolation data (replace with characterization data)
         // These maps would typically be loaded from CSV or built from characterization
         public static InterpolatingDoubleTreeMap createFlywheelSpeedMap() {
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> flywheel speed in RPM)
-            map.put(2.82, 23.3 * 60.0);
-            map.put(3.0, 24.0 * 60.0);
-            map.put(3.12, 24.3 * 60.0);
-            map.put(3.27, 24.8 * 60.0);
-            map.put(3.32, 25.5 * 60.0);
-            map.put(3.45, 25.9 * 60.0);
-            map.put(3.52, 26.0 * 60.0);
-            map.put(3.71, 26.2 * 60.0);
-            map.put(3.95, 26.8 * 60.0);
-            map.put(4.08, 27.4 * 60.0);
-            map.put(4.13, 27.55 * 60.0);
-            map.put(4.33, 27.9 * 60.0);
-            map.put(4.47, 28.2 * 60.0);
-            map.put(4.67, 29.1 * 60.0);
-            map.put(5.11, 30.5 * 60.0);
-            map.put(5.24, 30.95 * 60.0);
-            map.put(5.43, 31.5 * 60.0);
-            map.put(5.62, 32.0 * 60.0);
+            map.put(2.82, 23.3 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.0, 24.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.12, 24.3 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.27, 24.8 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.32, 25.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.45, 25.9 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.52, 26.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.71, 26.2 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(3.95, 26.8 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.08, 27.4 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.13, 27.55 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.33, 27.9 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.47, 28.2 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(4.67, 29.1 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.0, 30.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.11, 30.5 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.24, 30.95 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.43, 31.85 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.62, 32.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(5.8, 32.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.0, 33.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.2, 33.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(6.5, 34.2 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(7.0, 35.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(7.5, 37.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(8.0, 38.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(8.5, 40.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(9.0, 41.5 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(9.5, 43.0 * 60.0  * newSpindexerFlywheelSpeedFudge);
+            map.put(10.0, 45.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(10.33, 46.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(10.66, 47.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.0, 48.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.33, 49.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(11.66, 50.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.0, 51.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.33, 52.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(12.66, 53.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.0, 54.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.33, 55.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(13.66, 56.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.0, 57.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.33, 58.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(14.66, 59.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            map.put(15.0, 60.0 * 60.0 * newSpindexerFlywheelSpeedFudge);
+            
 
             return map;
         }
@@ -615,6 +733,15 @@ public final class Konstants
             InterpolatingDoubleTreeMap map = new InterpolatingDoubleTreeMap();
 
             // Example data (distance in meters -> time of flight in seconds)
+            // Guessed values:
+            map.put(1.5, 0.33);
+            map.put(1.75, 0.39);
+            map.put(2.0, 0.45);
+            map.put(2.25, 0.52);
+            map.put(2.5, 0.58);
+            map.put(2.75, 0.64);
+
+            // Known values:
             map.put(3.02, 0.68);
             map.put(3.26, 0.76);
             map.put(3.55, 0.86);
@@ -622,7 +749,32 @@ public final class Konstants
             map.put(4.07, 0.99);
             map.put(4.47, 1.04);
             map.put(4.7, 1.13);
-            map.put(5.0, 1.0);
+
+            // Guessed values:
+            map.put(5.0, 1.2);
+            map.put(5.25, 1.27);
+            map.put(5.5, 1.33);
+            map.put(5.75, 1.39);
+            map.put(6.0, 1.46);
+            map.put(6.25, 1.52);
+            map.put(6.5, 1.58);
+            map.put(7.0, 1.71);
+            map.put(7.5, 1.83);
+            map.put(8.0, 1.96);
+            map.put(8.5, 2.08);
+            map.put(9.0, 2.21);
+            map.put(9.5, 2.33);
+            map.put(10.0, 2.46);
+            map.put(10.5, 2.58);
+            map.put(11.0, 2.71);
+            map.put(11.5, 2.83);
+            map.put(12.0, 2.96);
+            map.put(12.5, 3.08);
+            map.put(13.0, 3.21);
+            map.put(13.5, 3.33);
+            map.put(14.0, 3.46);
+            map.put(14.5, 3.59);
+            map.put(15.0, 3.71);
 
             return map;
         }
@@ -656,13 +808,14 @@ public final class Konstants
     {
         public static enum IntakePosition
         {
-            /** Set the intake angle to 0.271 intake rotations */
+            /** Set the intake angle to -0.235 intake rotations */
             GROUND(-0.235), // -0.02 with encoder
-            /** Set the intake angle to 0.213 intake rotations */
-            COMPACTING(0.02), //TODO This value isn't doing much, needs to be investigated
+            /** Set the intake angle to 0.02 intake rotations */
+            COMPACTING(0.02),
             /** Set the intake angle to 0 rotations (zero position) */
-            STOW(0.0); //0.225 with encoder
-            
+            STOW(0.0),
+            /** Set the intake angle so far back that it guarantees a full stow even with bad PID tuning */
+            FULL_STOW(0.1);
 
             /**
              * The target position for the intake in mechanism rotations (not motor rotations). Positive is up, negative is down.
@@ -714,7 +867,7 @@ public final class Konstants
         public static final double kIntakeStatorCurrentLimit = 60;
 
         // Intake compact command oscillation
-        public static final double kIntakeCompactSwitchIntervalSeconds = 1.2;
+        public static final double kIntakeCompactSwitchIntervalSeconds = 0.387;
 
         public static final double kIntakeMotorSpeed = 0.5;
         public static final double kPositionerMotorSpeed = 0.5;
@@ -728,7 +881,7 @@ public final class Konstants
         public static final double kIntakeStationaryVoltage = -4.0;
         public static final double kIntakeIdleVoltage = 0.0;
 
-        public static final double kChassisSpeedRollerFF = 1.0; // Volts of output per m/s of velocity in the intake's direction
+        public static final double kChassisSpeedRollerFF = 1.4; // Volts of output per m/s of velocity in the intake's direction
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

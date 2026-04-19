@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "wait",
           "data": {
-            "pathName": "RTrenchSwipe1RTrench"
+            "waitTime": 1.0
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "RTrenchToRScore"
+            "pathName": "LTrenchLittleGreed"
           }
         },
         {
@@ -26,6 +26,6 @@
     }
   },
   "resetOdom": true,
-  "folder": "Right Trench",
+  "folder": "Left Trench",
   "choreoAuto": false
 }

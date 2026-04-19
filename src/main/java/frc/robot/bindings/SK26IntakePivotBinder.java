@@ -1,6 +1,7 @@
 package frc.robot.bindings;
 
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.COMPACTING;
+import static frc.robot.Konstants.IntakeConstants.IntakePosition.FULL_STOW;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.GROUND;
 import static frc.robot.Konstants.IntakeConstants.IntakePosition.STOW;
 import static frc.robot.Ports.OperatorPorts;
@@ -20,10 +21,10 @@ public class SK26IntakePivotBinder implements CommandBinder
     private final Optional<SK26IntakePivot> pivotSubsystem;
 
     Trigger intakingStates;
-    Trigger intakeZeroPosition;
+    Trigger intakeAvoidMajorFoulsPosition;
     Trigger trashCompact;
 
-    public SK26IntakePivotBinder(Optional<SK26IntakePivot> pivotSubsystem)
+    public SK26IntakePivotBinder(Optional<SK26IntakePivot> pivotSubsystem, Optional<StateHandler> stateHandlerContainer)
     {
         this.pivotSubsystem = pivotSubsystem;
 
@@ -33,10 +34,14 @@ public class SK26IntakePivotBinder implements CommandBinder
             .or(StateHandler.whenCurrentState(MacroState.STEADY_STREAM_SCORING));
 
         // States that want the intake stowed
-        intakeZeroPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
+        intakeAvoidMajorFoulsPosition = StateHandler.whenCurrentState(MacroState.CLIMBING)
             .or(StateHandler.whenCurrentState(MacroState.CLIMB_AND_SCORE));
 
-        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).debounce(3.0, DebounceType.kRising);
+        if(stateHandlerContainer.isPresent()) {
+            intakingStates = intakingStates.and(stateHandlerContainer.get().getClimbStowed());
+        }
+
+        trashCompact = StateHandler.whenCurrentState(MacroState.SCORING).or(StateHandler.whenCurrentState(MacroState.SHUTTLING)).debounce(0.75, DebounceType.kRising);
     }
 
     public void bindButtons()
@@ -54,9 +59,17 @@ public class SK26IntakePivotBinder implements CommandBinder
             .onTrue(pivot.setIntakePivotTargetCommand(GROUND).withName("IntakeDeploy"));
 
         // Stow when climbing
-        intakeZeroPosition.onTrue(pivot.setIntakePivotTargetCommand(STOW));
+        intakeAvoidMajorFoulsPosition.whileTrue(
+            // Commands.sequence(
+            //     pivot.setIntakePivotTargetCommand(FULL_STOW),
+            //     Commands.waitUntil(() -> pivot.getCurrentPosition() >= 0.0),
+            //     pivot.setIntakePivotTargetCommand(STOW)
+            // ).handleInterrupt(() -> pivot.setPositionerPosition(STOW))
+            pivot.setIntakePivotTargetCommand(FULL_STOW).withName("IntakeStowForClimb"))
+        .onFalse(pivot.setIntakePivotTargetCommand(STOW));
 
         trashCompact.whileTrue(new IntakeCompactCommand(pivot, GROUND.rotations, COMPACTING.rotations).withName("TrashCompactor"));
+
 
         /* Manual */
         // Pivoting

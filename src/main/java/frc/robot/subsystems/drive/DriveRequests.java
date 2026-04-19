@@ -31,6 +31,21 @@ public class DriveRequests {
     public static final SwerveRequest.FieldCentric teleopRequest = new SwerveRequest.FieldCentric()
         .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withDeadband(DriveConstants.kMaxSpeed.times(0.05));
 
+    /** Field-centric request for PID-controlled autonomous alignment (e.g., climb approach). */
+    public static final SwerveRequest.FieldCentric pidRequest = new SwerveRequest.FieldCentric()
+        .withDriveRequestType(DriveRequestType.OpenLoopVoltage).withDeadband(DriveConstants.kMaxSpeed.times(0.02));
+
+    public static final UnaryOperator<SwerveRequest.FieldCentric> getPidRequestUpdater(
+        Supplier<Double> xVelocity, Supplier<Double> yVelocity, Supplier<Double> rotVelocity
+    ) {
+        return (SwerveRequest.FieldCentric request) -> {
+            return request
+                    .withVelocityX(xVelocity.get())
+                    .withVelocityY(yVelocity.get())
+                    .withRotationalRate(rotVelocity.get());
+        };
+    }
+
     public static final UnaryOperator<SwerveRequest.FieldCentric> getTeleopRequestUpdater(
         Supplier<Double> xJoystick, Supplier<Double> yJoystick, Supplier<Double> rotJoystick, Supplier<Boolean> slow, Supplier<Boolean> fast
     ) {

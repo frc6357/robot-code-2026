@@ -22,12 +22,15 @@ public class SK26StateBinder implements CommandBinder {
 
     Trigger launcherReadyToScore;
     Trigger launcherReadyToShuttle;
-    Trigger intakeReady;
+    Trigger intakeDeployed;
+    Trigger intakeAvoidingMajorFouls;
     Trigger turretReadyToScore;
     Trigger turretReadyToShuttle;
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
     Trigger notNearTower;
+    Trigger climbReady;
+    Trigger climbStowed;
 
     // Trigger that is true when launcher is in an active launching state
     Trigger launcherActive;
@@ -43,12 +46,15 @@ public class SK26StateBinder implements CommandBinder {
         if (stateHandler != null) {
             launcherReadyToScore = stateHandler.getLauncherReadyToScore();
             launcherReadyToShuttle = stateHandler.getLauncherReadyToShuttle();
-            intakeReady = stateHandler.getIntakeReady();
+            intakeDeployed = stateHandler.getIntakeDeployed();
+            intakeAvoidingMajorFouls = stateHandler.getIntakeAvoidingMajorFouls();
             turretReadyToScore = stateHandler.getTurretReadyToScore();
             turretReadyToShuttle = stateHandler.getTurretReadyToShuttle();
             inAllianceZone = stateHandler.getInAllianceZone();
             outOfAllianceZone = inAllianceZone.negate();
             notNearTower = stateHandler.getNotNearTower();
+            climbReady = stateHandler.getClimbReady();
+            climbStowed = stateHandler.getClimbStowed();
         }
 
         /* Buttons */
@@ -86,21 +92,50 @@ public class SK26StateBinder implements CommandBinder {
 
     private void bindRobotStates() {
         inAllianceZone.and(notNearTower).and(launcherReadyToScore).and(turretReadyToScore)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY)))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING)));
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING))
+            );
         outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
-            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY)))
-            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING)));
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING))
+            );
+        intakeDeployed
+            .onTrue(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.READY)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.READY))
+            )
+            .onFalse(
+                stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.WAITING)
+                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.SPITTING, Status.WAITING))
+            );
+        // intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone)
+        //     .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, Status.WAITING));
+        
+        intakeAvoidingMajorFouls.and(climbReady).and(inAllianceZone).and(launcherReadyToScore).and(turretReadyToScore)
+            .onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.READY))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMB_AND_SCORE, Status.WAITING));
+        DriverPorts.kStartbutton.button.onTrue(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, MacroState.Status.WAITING))
+            .onFalse(stateHandler.setMacroStateStatusCommand(MacroState.CLIMBING, MacroState.Status.WAITING));
+
     }
 
     private void bindDriverButtons() 
     {
         DriverPorts.kLTrigger.button.onTrue(stateHandler.addIntakeToRequestedStateCommand())
             .onFalse(stateHandler.removeIntakeFromRequestedStateCommand());
+        
+        DriverPorts.kStartbutton.button.onTrue(stateHandler.requestStateCommand(MacroState.CLIMBING))
+            .onFalse(stateHandler.removeClimbFromRequestedStateCommand());
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
