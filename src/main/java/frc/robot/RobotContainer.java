@@ -136,6 +136,7 @@ public class RobotContainer {
   // period, thus determining which alliance will have the active shift first and every shift afterward.
   public LoggedDashboardChooser<Alliance> phaseTimerChooser;
   public Alliance winningAutoAlliance;
+  private boolean fmsShiftDataPolled = false;
 
   // ── Phase Timer: 2026 REBUILT Alliance Shift Tracking ──────────────────────
   // Teleop is 2:20 (140s). DriverStation.getMatchTime() counts DOWN from 140.0.
@@ -147,6 +148,7 @@ public class RobotContainer {
   // SHIFT 4:          elapsed 85s – 110s (25s)
   // END GAME:         elapsed 110s – 140s (both HUBs active)
   private static final double TRANSITION_SHIFT_END = 10.0;
+  private static final double FMS_SHIFT_DATA_POLL_ELAPSED = 4.5; // Poll FMS for game data by 4.5 seconds into teleop, to ensure we have the info before the transition shift ends at 10s.
   private static final double SHIFT_1_END          = 35.0;
   private static final double SHIFT_2_END          = 60.0;
   private static final double SHIFT_3_END          = 85.0;
@@ -429,6 +431,37 @@ public class RobotContainer {
         winningAutoAlliance = allianceToWinAuto;
     }
 
+    private void pollFmsShiftDataOnce(double elapsedTeleopSeconds) {
+        if (fmsShiftDataPolled || elapsedTeleopSeconds < FMS_SHIFT_DATA_POLL_ELAPSED) {
+            return;
+        }
+
+        fmsShiftDataPolled = true;
+        String gameData = DriverStation.getGameSpecificMessage();
+        if (gameData.isEmpty()) {
+            DriverStation.reportWarning(
+                "Phase timer FMS game data was empty; keeping dashboard/default AUTO winner: "
+                    + winningAutoAlliance,
+                false);
+            return;
+        }
+
+        switch (gameData.charAt(0)) {
+            case 'R':
+                winningAutoAlliance = Alliance.Red;
+                break;
+            case 'B':
+                winningAutoAlliance = Alliance.Blue;
+                break;
+            default:
+                DriverStation.reportWarning(
+                    "Phase timer FMS game data was invalid ('" + gameData
+                        + "'); keeping dashboard/default AUTO winner: " + winningAutoAlliance,
+                    false);
+                break;
+        }
+    }
+
     /**
      * Returns the Alliance whose HUB is ACTIVE during SHIFT 1.
      * Per the game manual: the auto-winning alliance has their HUB set to INACTIVE
@@ -471,6 +504,7 @@ public class RobotContainer {
         // Returns -1.0 if the FMS hasn't provided a time yet; treat that as the very start.
         double matchTime = DriverStation.getMatchTime();
         double elapsed   = (matchTime < 0.0) ? 0.0 : TELEOP_DURATION - matchTime;
+        pollFmsShiftDataOnce(elapsed);
 
         String label;
         double remaining;
@@ -542,6 +576,7 @@ public class RobotContainer {
     }
 
     public void teleopInit() {
+        fmsShiftDataPolled = false;
         if(m_stateHandlerContainer.isPresent()) {
             m_stateHandlerContainer.get().setCurrentState(MacroState.IDLE);
         }

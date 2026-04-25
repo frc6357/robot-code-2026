@@ -36,7 +36,7 @@ public class SK26DualLauncherBinder implements CommandBinder {
         this.launcherSubsystem = launcherSubsystem;
         this.drive = drive;
 
-        ManualShoot = kRTrigger.button/*.and(StateHandler.whenCurrentState(MacroState.IDLE))*/;
+        ManualShoot = kRTrigger.button;
 
         TuningRun = kLBbutton.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
 
@@ -59,7 +59,8 @@ public class SK26DualLauncherBinder implements CommandBinder {
                 );
             }
             else {     
-                // TODO: LAUNCHER - Switch which blocks are commented when done tuning launcher flywheel           
+                // Switch which blocks are commented to switch between distance-based velocity control and dashboard setpoint control.
+                // Dashboard control is for tuning and testing, distance-based control is for actual use in matches.         
                 Score.whileTrue(
                     launcher.runVelocityCommand(
                         () -> RPM.of(flywheelMap.get(

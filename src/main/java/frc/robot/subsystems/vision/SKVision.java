@@ -50,15 +50,15 @@ public class SKVision extends SubsystemBase {
     /* Example:
     public final Limelight rightLL = new Limelight(VisionConfig.RIGHT_CONFIG); // limelight-front
     */
-    public final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
-    public final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
-    public final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
-    public final Limelight climbLL = new Limelight(VisionConfig.CLIMB_CONFIG); // limelight-climb
+    public static final Limelight backLL = new Limelight(VisionConfig.BACK_CONFIG); // limelight-front
+    public static final Limelight turretLL = new Limelight(VisionConfig.TURRET_CONFIG); // limelight-turret
+    public static final Limelight intakeLL = new Limelight(VisionConfig.INTAKE_CONFIG); // limelight-intake
+    public static final Limelight climbLL = new Limelight(VisionConfig.CLIMB_CONFIG); // limelight-climb
     
     // Array of all limelights
-    public final Limelight[] allLimelights = {turretLL, intakeLL, climbLL}; 
+    public static final Limelight[] allLimelights = {turretLL, intakeLL, climbLL}; 
     // Limelights for pose estimation; order them from most used with best view to least used with worst view
-    public final Limelight[] poseLimelights = {turretLL, climbLL}; 
+    public static final Limelight[] poseLimelights = {turretLL, climbLL}; 
     
     
     private Pose3d[] emptyPose3dArray = new Pose3d[0];
@@ -731,11 +731,11 @@ public class SKVision extends SubsystemBase {
         double degStds = stdDevs.theta();
 
         if (m.highestAmbiguity() > VisionConfig.Thresholds.HIGH_AMBIGUITY) {
-            degStds = Math.min(degStds, VisionConfig.PoseStdDevs.HIGH_AMBIGUITY_PENALTY.theta());
+            degStds = Math.max(degStds, VisionConfig.PoseStdDevs.HIGH_AMBIGUITY_PENALTY.theta());
         }
 
         if (Math.abs(m.robotSpeed().omegaRadiansPerSecond) >= VisionConfig.Thresholds.HIGH_ROTATION_SPEED.in(RadiansPerSecond)) {
-            degStds = Math.min(degStds, VisionConfig.PoseStdDevs.HIGH_ROTATION_PENALTY.theta());
+            degStds = Math.max(degStds, VisionConfig.PoseStdDevs.HIGH_ROTATION_PENALTY.theta());
         }
 
         Pose2d integratedPose = new Pose2d(m.botposeMT2().getTranslation(), m.botposeMT2().getRotation());

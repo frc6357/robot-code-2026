@@ -50,8 +50,8 @@ public class SK26Climb extends SubsystemBase
     private final RelativeEncoder cEncoderRight;
     private final RelativeEncoder cEncoderLeft;
 
-    private final double motorRatio = 1.0;   // TODO: change once we know gear ratio
-    private final double climbFactor = 1.0;   // TODO: change once we know encoder-to-height conversion
+    private final double motorRatio = 1.0;
+    private final double climbFactor = 1.0;
 
     private double cTargetHeight = 0.0;
 
