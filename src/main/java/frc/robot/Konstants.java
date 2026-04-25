@@ -253,7 +253,7 @@ public final class Konstants
             public static final double kPitch = 0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 5; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = true;
+            public static final boolean kAttached = false;
         }
         */
 
@@ -370,7 +370,7 @@ public final class Konstants
         public static final double kMaxIndexerVoltage = 7.0;
 
         // The speed the indexer motor runs at when there aren't balls in the hopper
-        public static final double kIndexerFreeSpeed = 75.83; //TODO: Find indexer free speed
+        public static final double kIndexerFreeSpeed = 75.83;
     }
 
     /** Constants that are used when defining filters for controllers */
@@ -494,7 +494,7 @@ public final class Konstants
     public static final class ClimbConstants
     {
         public static final double kClimbMotorSpeed = .15;
-        public static final Double kClimbP = 0.4; // TODO: Test for proper value. Needs to be lowered, currently running to fast. Thinking around .3-.4 is a good value.
+        public static final Double kClimbP = 0.4;
         public static final double kClimbI = 0;
         public static final double kClimbD = 0;
         public static final double kClimbV = 0;

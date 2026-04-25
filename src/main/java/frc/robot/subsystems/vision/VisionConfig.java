@@ -21,7 +21,6 @@ import frc.robot.Konstants.VisionConstants.BackLimelight;
 import frc.robot.Konstants.VisionConstants.ClimbLight;
 import frc.robot.Konstants.VisionConstants.IntakeLimelight;
 import frc.robot.Konstants.VisionConstants.TurretLimelight;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.vision.SKVision.MultiLimelightCommandConfig;
 
 public final class VisionConfig {
@@ -137,7 +136,7 @@ public final class VisionConfig {
             configMaxOutput(DriveConstants.kMaxSpeed.times(0.55).in(MetersPerSecond));
             configError(0.01);
             configPipelineIndex(kAprilTagPipeline);
-            configLimelights(RobotContainer.m_visionInstance.poseLimelights);
+            configLimelights(SKVision.poseLimelights);
         }
 
         public static DriveToPose getConfig() {
@@ -155,7 +154,7 @@ public final class VisionConfig {
             configMaxOutput(DriveConstants.kMaxAngularRate.in(DegreesPerSecond) * 0.1);
             configError(1);
             configPipelineIndex(kAprilTagPipeline);
-            configLimelights(RobotContainer.m_visionInstance.poseLimelights);
+            configLimelights(SKVision.poseLimelights);
         }
 
         public static RotateToPose getConfig() {

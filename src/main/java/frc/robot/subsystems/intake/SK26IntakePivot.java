@@ -46,8 +46,6 @@ import com.ctre.phoenix6.signals.StaticFeedforwardSignValue;
 // Imports from WPILib
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Konstants.IntakeConstants.IntakePosition;
@@ -86,12 +84,12 @@ public class SK26IntakePivot extends SubsystemBase
 	// When targeting GROUND, if the motor stalls (velocity near zero) for STALL_TIME_SECONDS,
 	// we know we've hit the physical hard-stop and the rotor sensor has drifted.
 	// Reset the motor position to the known GROUND value so the PID stops pushing.
-	private static final double STALL_VELOCITY_THRESHOLD_RPS = 0.5;
-	private static final double STALL_TIME_SECONDS = 6.7;
-	private static final double STALL_RESET_POSITION = IntakePosition.GROUND.rotations; // -0.235
-	private final Timer stallTimer = new Timer();
-	private boolean stallTimerRunning = false;
-	private boolean stallResetApplied = false;
+	// private static final double STALL_VELOCITY_THRESHOLD_RPS = 0.5;
+	// private static final double STALL_TIME_SECONDS = 6.7;
+	// private static final double STALL_RESET_POSITION = IntakePosition.GROUND.rotations; // -0.235
+	// private final Timer stallTimer = new Timer();
+	// private boolean stallTimerRunning = false;
+	// private boolean stallResetApplied = false;
 
 	public SK26IntakePivot()
 	{
