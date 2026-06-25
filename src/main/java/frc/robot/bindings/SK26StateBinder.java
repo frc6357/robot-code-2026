@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
 import frc.robot.StateHandler;
 import frc.robot.Ports.DriverPorts;
+import frc.robot.Ports.OperatorPorts;
 import frc.robot.StateHandler.MacroState;
 import frc.robot.StateHandler.MacroState.Status;
 
@@ -58,7 +59,7 @@ public class SK26StateBinder implements CommandBinder {
         }
 
         /* Buttons */
-        turnOnScoring = DriverPorts.kRTrigger.button.and(inAllianceZone);
+        turnOnScoring = OperatorPorts.kRTrigger.button.and(inAllianceZone);
         turnOnShuttling = DriverPorts.kRTrigger.button.and(outOfAllianceZone);
         turnOnSpitting = DriverPorts.kXbutton.button;
 

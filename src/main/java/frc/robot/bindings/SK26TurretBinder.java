@@ -4,6 +4,7 @@ import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorCont
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
 import static frc.robot.Ports.OperatorPorts.kRightStickX;
+import static frc.robot.Ports.OperatorPorts.kRBbutton;
 
 import java.util.Optional;
 
@@ -39,6 +40,8 @@ public class SK26TurretBinder implements CommandBinder
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
 
+    Trigger manualTurret;
+
     SlewRateLimiter slewLimiter;
 
     public SK26TurretBinder(Optional<SK26Turret> turretSubsystem, Optional<SKSwerve> swerveSubsystem)
@@ -57,6 +60,8 @@ public class SK26TurretBinder implements CommandBinder
                 .or(StateHandler.whenCurrentState(MacroState.INTAKING)
                 .or(StateHandler.whenCurrentState(MacroState.SPITTING)))
                 .or(StateHandler.whenCurrentState(MacroState.CLIMBING));
+
+        manualTurret = kRBbutton.button;
 
         if(swerveSubsystem.isEmpty()) {
             return;
@@ -95,11 +100,18 @@ public class SK26TurretBinder implements CommandBinder
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
 
-        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(
+        // When right bumper is held, enable manual joystick control (overrides auto-tracking)
+        manualTurret.whileTrue(
+            new TurretJoystickCommand(
+                turret, 
+                () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()))
+            .withName("TurretManualJoystickBumper"));
+
+        inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).and(manualTurret.negate()).whileTrue(
             new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
             .withName("TurretTrackOperatorCommand"));
         
-        inAllianceZone.and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(Commands.deferredProxy(() -> 
+        inAllianceZone.and(() -> DriverStation.isEnabled()).and(IsIdle).and(manualTurret.negate()).whileTrue(Commands.deferredProxy(() -> 
             new TurretTrackPointCommand(turret, swerve, Field.isBlue() ? FieldConstants.Hub.topCenterPoint.toTranslation2d() :
                                                                         FieldConstants.Hub.redTopCenterPoint.toTranslation2d())
         ).withName("TurretTrackHub" + DriverStation.getAlliance().orElseGet(() -> Alliance.Blue)));

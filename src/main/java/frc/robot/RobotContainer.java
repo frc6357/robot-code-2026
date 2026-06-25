@@ -387,7 +387,7 @@ public class RobotContainer {
         buttonBinders.add(new SK26IntakePivotBinder(m_intakePivotContainer, m_stateHandlerContainer));
         buttonBinders.add(new SK26IntakeRollersBinder(m_intakeRollersContainer, m_swerveContainer));
         buttonBinders.add(new SK26IndexerBinder(m_indexerContainer));
-        buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator));
+        buttonBinders.add(new SK26ShootingCoordinatorBinder(m_shootingCoordinator, m_DualLauncherContainer));
         buttonBinders.add(new SK26FeederBinder(m_feederContainer));
         buttonBinders.add(new FuelHuntBinder(m_swerveContainer, m_fuelDetectionContainer));
         buttonBinders.add(new SK26GuitarHeroBinder(m_intakePivotContainer, m_indexerContainer, m_climbContainer));

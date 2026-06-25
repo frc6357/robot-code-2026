@@ -64,7 +64,7 @@ public class SK26DualLauncher extends SubsystemBase {
     @Getter
     private LauncherTuning launcherTuning = new LauncherTuning("DualLauncher");
 
-    private Pref<Double> flywheelTargetSpeed = SKPreferences.attach("DualLauncher/ManualTargetSpeed (rps)", 35.0);
+    private Pref<Double> flywheelTargetSpeed = SKPreferences.attach("DualLauncher/ManualTargetSpeed (rps)", 32.0);
     private Pref<Double> topRollerRatioToBottom = SKPreferences.attach("DualLauncher/Top:BottomRollerRatio", 1.1);
 
     // ==================== Live PID/FF Tuning (Phoenix Tuner X style) ====================
