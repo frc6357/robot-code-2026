@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants;
 import frc.lib.utils.FieldConstants.LinesVertical;
@@ -43,6 +45,8 @@ public class SK26TurretBinder implements CommandBinder
     Trigger manualTurret;
 
     SlewRateLimiter slewLimiter;
+
+    private static Pref<Double> speedMult = SKPreferences.attach("TurretSpeedMult", 1.0);
 
     public SK26TurretBinder(Optional<SK26Turret> turretSubsystem, Optional<SKSwerve> swerveSubsystem)
     {
@@ -104,7 +108,7 @@ public class SK26TurretBinder implements CommandBinder
         manualTurret.whileTrue(
             new TurretJoystickCommand(
                 turret, 
-                () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()))
+                () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()*speedMult.get()))
             .withName("TurretManualJoystickBumper"));
 
         inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).and(manualTurret.negate()).whileTrue(

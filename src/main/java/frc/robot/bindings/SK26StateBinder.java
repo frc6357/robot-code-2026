@@ -60,7 +60,7 @@ public class SK26StateBinder implements CommandBinder {
 
         /* Buttons */
         turnOnScoring = OperatorPorts.kRTrigger.button.and(inAllianceZone);
-        turnOnShuttling = DriverPorts.kRTrigger.button.and(outOfAllianceZone);
+        turnOnShuttling = OperatorPorts.kRTrigger.button.and(outOfAllianceZone);
         turnOnSpitting = DriverPorts.kXbutton.button;
 
         if (stateHandler != null) {

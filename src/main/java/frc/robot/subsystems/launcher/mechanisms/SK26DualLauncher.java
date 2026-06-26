@@ -64,7 +64,7 @@ public class SK26DualLauncher extends SubsystemBase {
     @Getter
     private LauncherTuning launcherTuning = new LauncherTuning("DualLauncher");
 
-    private Pref<Double> flywheelTargetSpeed = SKPreferences.attach("DualLauncher/ManualTargetSpeed (rps)", 32.0);
+    private Pref<Double> flywheelTargetSpeed = SKPreferences.attach("DualLauncher/ManualTargetSpeed (rps)", 28.0);
     private Pref<Double> topRollerRatioToBottom = SKPreferences.attach("DualLauncher/Top:BottomRollerRatio", 1.1);
 
     // ==================== Live PID/FF Tuning (Phoenix Tuner X style) ====================
@@ -106,6 +106,8 @@ public class SK26DualLauncher extends SubsystemBase {
     // Velocity tolerance (live-tunable)
     private final Pref<Double> velocityToleranceRPS = SKPreferences.attach(
         "DualLauncher/Tuning/Tolerance (rps)", DualLauncher.kVelocityToleranceRPS);
+
+    private static Pref<Double> speedMult = SKPreferences.attach("LauncherSpeedMult", 1.0);
 
     public SK26DualLauncher() {
         bottomMotor = new TalonFX(kLauncherFrontRollers.ID, CANBus.roboRIO());
@@ -299,7 +301,7 @@ public class SK26DualLauncher extends SubsystemBase {
      */
     public Command runVelocityCommand(Supplier<AngularVelocity> velocity) {
         return runEnd(
-            () -> runVelocity(velocity.get().in(RotationsPerSecond)),
+            () -> runVelocity(velocity.get().in(RotationsPerSecond) * speedMult.get()),
             this::stop);
     }
 
@@ -310,7 +312,7 @@ public class SK26DualLauncher extends SubsystemBase {
      */
     public Command runVelocityCommand(double rps) {
         return runEnd(
-            () -> runVelocity(rps),
+            () -> runVelocity(rps * speedMult.get()),
             this::stop);
     }
 

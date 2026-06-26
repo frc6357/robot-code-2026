@@ -194,6 +194,11 @@ public class SK26Turret extends SubsystemBase
     @Override
     public void periodic()
     {
+         // Reset wrapping flag if we're close to the target
+        if(joystickWrapping && atTarget()) {
+            joystickWrapping = false;
+        }
+        
         // ========== Batch refresh all status signals in a single CAN frame ==========
         BaseStatusSignal.refreshAll(turretAngleStatusSignal, turretAngularVelocityStatusSignal);
         
