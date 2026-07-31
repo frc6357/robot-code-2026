@@ -94,6 +94,12 @@ public class SK26StateBinder implements CommandBinder {
 
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
+
+        // Auto-transition robot state at shift boundaries
+        StateHandler.whenHubActive()
+            .onTrue(stateHandler.requestStateCommand(MacroState.SCORING));
+        StateHandler.whenHubInactive()
+            .onTrue(stateHandler.requestStateCommand(MacroState.INTAKING));
     }
 
     private void bindOperatorButtons() {

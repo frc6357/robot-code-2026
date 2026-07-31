@@ -90,6 +90,13 @@ public class SK26DualLauncherBinder implements CommandBinder {
             // Adjust gains and setpoint live on SmartDashboard, watch response in AdvantageScope.
             // TuningRun.toggleOnTrue(launcher.tuningCommand());
 
+            // Pre-spin the flywheel when the shift is about to end and our hub will be active next.
+            // Uses whileTrue so the command is naturally interrupted when a scoring command takes over.
+            StateHandler.shiftEndingSoonAndHubNextActive.whileTrue(
+                launcher.runVelocityCommand(LauncherConstants.DualLauncher.kPreSpinRPS)
+                    .withName("LauncherPreSpin")
+            );
+
             // Shoot trigger is available for ShootingCoordinator integration
             // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())));
         }

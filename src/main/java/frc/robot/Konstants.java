@@ -516,6 +516,11 @@ public final class Konstants
             // Default target velocity (rps) — typically overridden by commands/state handler
             public static final double kDefaultTargetRPS = 40.0;
 
+            // Pre-spin velocity (rps) — used to spin the flywheel up before a shift activates
+            // so the launcher is near scoring speed when the hub becomes active.
+            // Set slightly below typical scoring speeds (~24–29 rps from the interp table).
+            public static final double kPreSpinRPS = 25.0;
+
             // Current limits (amps) — protects motors and prevents brownout
             public static final Current kSupplyCurrentLimit = Amps.of(40);
             public static final Current kStatorCurrentLimit = Amps.of(80);
@@ -698,6 +703,29 @@ public final class Konstants
 
         public static final double kIntakeFullVoltage = -5.5;
         public static final double kIntakeIdleVoltage = 0.0;
+    }
+
+    /**
+     * Shift boundary times (in elapsed teleop seconds) from the 2026 REBUILT game manual.
+     * Teleop is 140s total. DriverStation.getMatchTime() counts DOWN from 140.
+     * elapsed = kTeleopDuration - getMatchTime().
+     *
+     * <pre>
+     * TRANSITION:  0s  – 10s  (both HUBs active)
+     * SHIFT 1:    10s  – 35s  (25s)
+     * SHIFT 2:    35s  – 60s  (25s)
+     * SHIFT 3:    60s  – 85s  (25s)
+     * SHIFT 4:    85s  – 110s (25s)
+     * END GAME:  110s  – 140s (both HUBs active)
+     * </pre>
+     */
+    public static final class ShiftConstants {
+        public static final double kTransitionEnd  = 10.0;
+        public static final double kShift1End      = 35.0;
+        public static final double kShift2End      = 60.0;
+        public static final double kShift3End      = 85.0;
+        public static final double kShift4End      = 110.0;
+        public static final double kTeleopDuration = 140.0;
     }
 
     public static final String kCANivoreName = "SwerveCANivore";

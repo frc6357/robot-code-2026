@@ -2,11 +2,14 @@ package frc.robot;
 
 import java.util.Optional;
 
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import org.littletonrobotics.junction.Logger;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -18,6 +21,7 @@ import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants.LinesVertical;
 import frc.lib.utils.FieldConstants.Tower;
 import frc.robot.Konstants.LauncherConstants;
+import frc.robot.Konstants.ShiftConstants;
 import frc.robot.Konstants.SwerveConstants;
 import frc.robot.StateHandler.MacroState.Status;
 import frc.robot.subsystems.drive.SKSwerve;
@@ -79,6 +83,7 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
 
     private static MacroState currentState = MacroState.IDLE;
     private static MacroState requestedState = MacroState.IDLE;
+    private static boolean currentHubActive = true;
 
     // private MacroState previousChosenState = MacroState.IDLE;
 
@@ -131,6 +136,40 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     @Getter
     private Trigger notNearTower = new Trigger(() -> true);
 
+    /**
+     * FMS game-specific message: "R" if Red scored more AUTO fuel (or was randomly selected),
+     * "B" if Blue. Empty string means practice / no FMS — hub defaults to active.
+     */
+    private String m_fmsHighScorer = "";
+
+    /**
+     * Whether our alliance's HUB is currently active (scoring counts).
+     * Defaults to true so the robot never refuses to score without FMS data.
+     */
+    private boolean m_hubActive = true;
+
+    /**
+     * Whether parseFmsData() has been called and FMS data was received.
+     */
+    private boolean m_fmsDataReceived = false;
+
+    /**
+     * Whether we are running in practice mode (no real FMS data — simulating shift behavior).
+     */
+    private boolean m_practiceMode = false;
+
+    /**
+     * The current shift phase name for logging (e.g. "TRANSITION", "SHIFT_1", "END_GAME").
+     */
+    private String m_shiftPhase = "UNKNOWN";
+
+    /**
+     * Trigger that is true when our alliance's HUB is currently active.
+     * Defaults to true (safe — always allow scoring).
+     */
+    @Getter
+    private Trigger hubActive = new Trigger(this::isHubActive);
+
     public StateHandler() {
         // Reset all states to default on construction
         for (MacroState state : MACRO_STATES) {
@@ -147,6 +186,10 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         stateChooser.addOption("CLIMB_AND_SCORE", MacroState.CLIMB_AND_SCORE);
 
         stateChooser.onChange((state) -> this.requestState(state));
+
+        // Parse FMS game-specific message once when teleop is first enabled
+        new Trigger(DriverStation::isTeleopEnabled)
+            .onTrue(Commands.runOnce(this::parseFmsData));
 
         addPathPlannerCommands();
     }
@@ -256,11 +299,8 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
             currentState = requestedState;
         }
 
-        // MacroState chosen = stateChooser.get();
-        // if (chosen != previousChosenState) {
-        //     setCurrentState(chosen);
-        //     previousChosenState = chosen;
-        // }
+        // Update hub active status based on current shift phase
+        updateHubStatus();
 
         logOutputs();
     }
@@ -272,6 +312,17 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
         for (MacroState state : MACRO_STATES) {
             Logger.recordOutput("StateHandler/" + state.name() + " Status", state.getStatus().name());
         }
+
+        // Hub shift tracking
+        double matchTime = DriverStation.getMatchTime();
+        double elapsed = (matchTime < 0.0) ? 0.0 : ShiftConstants.kTeleopDuration - matchTime;
+        Logger.recordOutput("StateHandler/Hub/Active", m_hubActive);
+        Logger.recordOutput("StateHandler/Hub/ShiftPhase", m_shiftPhase);
+        Logger.recordOutput("StateHandler/Hub/ElapsedTeleop", elapsed);
+        Logger.recordOutput("StateHandler/Hub/WeAreHighScorer", isWeHighScorer());
+        Logger.recordOutput("StateHandler/Hub/FmsHighScorer", m_fmsHighScorer);
+        Logger.recordOutput("StateHandler/Hub/FmsDataReceived", m_fmsDataReceived);
+        Logger.recordOutput("StateHandler/Hub/PracticeMode", m_practiceMode);
     }
 
     /**
@@ -467,6 +518,162 @@ public class StateHandler extends SubsystemBase implements PathplannerSubsystem{
     public Command turnOffLaunchingStatesCommand() {
         return Commands.runOnce(this::turnOffLaunchingStates).withName("TurnOffLaunchingStates");
     }
+
+    // ==================== Hub Active / Shift Phase ====================
+
+    /**
+     * Returns whether our alliance's HUB is currently active (scoring counts).
+     */
+    @AutoLogOutput
+    public boolean isHubActive() {
+        return m_hubActive;
+    }
+
+    /**
+     * Returns true if our alliance is the high scorer (auto winner) based on FMS data.
+     */
+    private boolean isWeHighScorer() {
+        if (m_fmsHighScorer.isEmpty()) {
+            return false;
+        }
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isEmpty()) {
+            return false;
+        }
+        if (alliance.get() == DriverStation.Alliance.Red) {
+            return m_fmsHighScorer.equals("R");
+        } else {
+            return m_fmsHighScorer.equals("B");
+        }
+    }
+
+    /**
+     * Reads the FMS game-specific message to determine which alliance scored more in AUTO.
+     * FMS sends "R" if Red was the high scorer (or randomly selected), "B" if Blue.
+     * When no FMS data is available (practice match), simulates shift behavior by assuming
+     * our alliance is the high scorer, so drivers experience realistic hub transitions.
+     */
+    public void parseFmsData() {
+        String msg = DriverStation.getGameSpecificMessage();
+        if (msg != null && !msg.isEmpty()) {
+            m_fmsHighScorer = msg.trim();
+            m_fmsDataReceived = true;
+            m_practiceMode = false;
+            System.out.println("[StateHandler] FMS data received: high scorer = " + m_fmsHighScorer);
+        } else {
+            // No FMS data — simulate by assuming we are the high scorer
+            var alliance = DriverStation.getAlliance();
+            if (alliance.isPresent() && alliance.get() == DriverStation.Alliance.Red) {
+                m_fmsHighScorer = "R";
+            } else {
+                m_fmsHighScorer = "B";
+            }
+            m_fmsDataReceived = false;
+            m_practiceMode = true;
+            System.out.println("[StateHandler] FMS data was not received — practice mode, simulating high scorer = " + m_fmsHighScorer);
+        }
+    }
+
+    /**
+     * Updates m_hubActive and m_shiftPhase based on current elapsed teleop time.
+     * Called every periodic cycle.
+     *
+     * <p>Uses DriverStation.getMatchTime() (counts down from 140s).
+     * elapsed = 140 - matchTime.
+     *
+     * <p>When we ARE the high scorer: hub is inactive in SHIFT 1 and SHIFT 3, active otherwise.
+     * When we are NOT the high scorer: hub is active in SHIFT 1 and SHIFT 3, inactive otherwise.
+     * Both hubs are always active during TRANSITION and END GAME.
+     */
+    private void updateHubStatus() {
+        if (!DriverStation.isTeleopEnabled()) {
+            m_hubActive = true;
+            m_shiftPhase = "DISABLED";
+            SmartDashboard.putBoolean("Hub Status/Our Hub Active", true);
+            SmartDashboard.putNumber("Match/Match Time Remaining", -1.0);
+            SmartDashboard.putNumber("Match/Time Until Next Shift", -1.0);
+            return;
+        }
+
+        double matchTime = DriverStation.getMatchTime();
+        double elapsed = (matchTime < 0.0) ? 0.0 : ShiftConstants.kTeleopDuration - matchTime;
+
+        boolean weAreHighScorer = isWeHighScorer();
+
+        if (elapsed < ShiftConstants.kTransitionEnd) {
+            // TRANSITION — both HUBs active
+            m_shiftPhase = "TRANSITION";
+            m_hubActive = true;
+        } else if (elapsed < ShiftConstants.kShift1End) {
+            // SHIFT 1 — high scorer inactive, low scorer active
+            m_shiftPhase = "SHIFT_1";
+            m_hubActive = !weAreHighScorer;
+        } else if (elapsed < ShiftConstants.kShift2End) {
+            // SHIFT 2 — high scorer active, low scorer inactive
+            m_shiftPhase = "SHIFT_2";
+            m_hubActive = weAreHighScorer;
+        } else if (elapsed < ShiftConstants.kShift3End) {
+            // SHIFT 3 — high scorer inactive, low scorer active
+            m_shiftPhase = "SHIFT_3";
+            m_hubActive = !weAreHighScorer;
+        } else if (elapsed < ShiftConstants.kShift4End) {
+            // SHIFT 4 — high scorer active, low scorer inactive
+            m_shiftPhase = "SHIFT_4";
+            m_hubActive = weAreHighScorer;
+        } else {
+            // END GAME — both HUBs active
+            m_shiftPhase = "END_GAME";
+            m_hubActive = true;
+        }
+
+        SmartDashboard.putBoolean("Hub Status/Our Hub Active", m_hubActive);
+        SmartDashboard.putNumber("Match/Match Time Remaining", Math.round(matchTime * 10.0) / 10.0);
+
+        // Compute seconds until the next shift boundary
+        double timeUntilNextShift;
+        if (elapsed < ShiftConstants.kTransitionEnd) {
+            timeUntilNextShift = ShiftConstants.kTransitionEnd - elapsed;
+        } else if (elapsed < ShiftConstants.kShift1End) {
+            timeUntilNextShift = ShiftConstants.kShift1End - elapsed;
+        } else if (elapsed < ShiftConstants.kShift2End) {
+            timeUntilNextShift = ShiftConstants.kShift2End - elapsed;
+        } else if (elapsed < ShiftConstants.kShift3End) {
+            timeUntilNextShift = ShiftConstants.kShift3End - elapsed;
+        } else if (elapsed < ShiftConstants.kShift4End) {
+            timeUntilNextShift = ShiftConstants.kShift4End - elapsed;
+        } else {
+            // END GAME — no next shift
+            timeUntilNextShift = 0.0;
+        }
+        SmartDashboard.putNumber("Match/Time Until Next Shift", Math.round(timeUntilNextShift * 10.0) / 10.0);
+
+        // Sync static field for trigger factories
+        currentHubActive = m_hubActive;
+    }
+
+    /**
+     * Creates a Trigger that is true when our alliance's HUB is currently active.
+     * @return A Trigger backed by the static hub-active state.
+     */
+    public static Trigger whenHubActive() {
+        return new Trigger(() -> currentHubActive);
+    }
+
+    /**
+     * Creates a Trigger that is true when our alliance's HUB is currently inactive.
+     * @return A Trigger backed by the negation of the static hub-active state.
+     */
+    public static Trigger whenHubInactive() {
+        return whenHubActive().negate();
+    }
+
+    /**
+     * Trigger that is true when the shift is ending soon AND our hub will be active
+     * in the next shift (i.e. currently inactive, about to become active).
+     * Used to pre-spin the launcher before the shift boundary.
+     */
+    public static final Trigger shiftEndingSoonAndHubNextActive =
+        new Trigger(() -> RobotContainer.shiftEndingSoon.getAsBoolean() && !currentHubActive);
 
     // ==================== Trigger Factory Methods ====================
 
