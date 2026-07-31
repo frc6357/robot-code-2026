@@ -59,8 +59,13 @@ public class SK26StateBinder implements CommandBinder {
         }
 
         /* Buttons */
-        turnOnScoring = OperatorPorts.kRTrigger.button.and(inAllianceZone);
-        turnOnShuttling = OperatorPorts.kRTrigger.button.and(outOfAllianceZone);
+        // Scoring can be requested by either driver or operator right trigger; whichever is held
+        // holds the request, and it only clears once BOTH are released.
+        turnOnScoring = DriverPorts.kRTrigger.button
+            .or(OperatorPorts.kRTrigger.button)
+            .and(inAllianceZone);
+        // SHUTTLING DISABLED FOR COMPETITION - re-enable by uncommenting this and its bindings below.
+        // turnOnShuttling = OperatorPorts.kRTrigger.button.and(outOfAllianceZone);
         turnOnSpitting = DriverPorts.kXbutton.button;
 
         if (stateHandler != null) {
@@ -101,15 +106,17 @@ public class SK26StateBinder implements CommandBinder {
                 stateHandler.setMacroStateStatusCommand(MacroState.SCORING, MacroState.Status.WAITING)
                 .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SCORING, Status.WAITING))
             );
-        outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
-            .onTrue(
-                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY))
-            )
-            .onFalse(
-                stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
-                .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING))
-            );
+        // SHUTTLING DISABLED FOR COMPETITION - readiness bookkeeping for states that can no longer
+        // become current. Left commented so it comes back with the binding above.
+        // outOfAllianceZone.and(launcherReadyToShuttle).and(turretReadyToShuttle)
+        //     .onTrue(
+        //         stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.READY)
+        //         .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.READY))
+        //     )
+        //     .onFalse(
+        //         stateHandler.setMacroStateStatusCommand(MacroState.SHUTTLING, MacroState.Status.WAITING)
+        //         .alongWith(stateHandler.setMacroStateStatusCommand(MacroState.STEADY_STREAM_SHUTTLING, Status.WAITING))
+        //     );
         intakeDeployed
             .onTrue(
                 stateHandler.setMacroStateStatusCommand(MacroState.INTAKING, Status.READY)
@@ -141,8 +148,10 @@ public class SK26StateBinder implements CommandBinder {
         turnOnScoring.onTrue(stateHandler.addScoringToRequestedStateCommand());
         turnOnScoring.onFalse(stateHandler.removeScoringFromRequestedStateCommand());
 
-        turnOnShuttling.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
-        turnOnShuttling.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
+        // SHUTTLING DISABLED FOR COMPETITION - this is the only entry point into the
+        // SHUTTLING / STEADY_STREAM_SHUTTLING states, so leaving it unbound makes them unreachable.
+        // turnOnShuttling.onTrue(stateHandler.addShuttlingToRequestedStateCommand());
+        // turnOnShuttling.onFalse(stateHandler.removeShuttlingFromRequestedStateCommand());
 
         turnOnSpitting.onTrue(stateHandler.requestStateCommand(MacroState.SPITTING));
         turnOnSpitting.onFalse(stateHandler.requestStateCommand(MacroState.IDLE));
