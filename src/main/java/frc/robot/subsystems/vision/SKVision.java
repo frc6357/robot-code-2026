@@ -119,8 +119,14 @@ public class SKVision extends SubsystemBase {
         tagIDsInView.clear();
         tagLOSTransforms.clear();
 
-        // Cache swerve rotation once for all Limelights
-        Rotation2d cachedSwerveRotation = m_swerve.getRawDrivetrainRotation();
+        // Cache swerve rotation once for all Limelights.
+        // This MUST be the pose estimator's heading, not the drivetrain's raw odometry heading.
+        // MegaTag2 consumes this yaw to solve translation, and its output is fused back into the
+        // pose estimator - so the two have to live in the same frame. They diverge whenever
+        // SKSwerve.resetOrientation() re-zeros field-centric drive (which only touches CTRE's
+        // internal odometry), and any offset between them rotates every vision measurement into
+        // the wrong place.
+        Rotation2d cachedSwerveRotation = m_swerve.getRobotRotation();
 
         // OPTIMIZATION: Invalidate caches at the start of the cycle.
         // Values will be lazy-loaded on first access, then cached for the rest of the cycle.
@@ -305,11 +311,8 @@ public class SKVision extends SubsystemBase {
     }
 
     private void updatePoseAutonomous() {
-        if(!DriverStation.isAutonomousEnabled()) {
-            return;
-        }
         for(Limelight ll : poseLimelights) {
-            if(!ll.targetInView()) {
+            if(!ll.getCachedTargetInView()) {
                 continue;
             }
             updatePoseSingleCam(ll);
@@ -339,12 +342,6 @@ public class SKVision extends SubsystemBase {
     private void updatePose() {
         Limelight bestLL = getBestLimelight();
         for(Limelight ll : poseLimelights) {
-            if(DriverStation.isDisabled()) {
-                ll.setThrottle(10);
-            }
-            else {
-                ll.setThrottle(0);
-            }
             if (!ll.getName().equals(bestLL.getName())) {
                 ll.sendInvalidStatus("Rejected: Not best Limelight");
             }
@@ -354,24 +351,29 @@ public class SKVision extends SubsystemBase {
     }
 
     public void estimatePose() {
-        // Make sure robot orientation is correct and applied to all pose limelights before updating pose
-        /**
-        Autonomous pose updater:
-        
-        For each limelight that has a tag in view, send it to be aggregated into the current pose estimate, alongside other
-        recent poses. To update the drivetrain's pose to the vision measurements, use the command for autonResetPoseToVision().
-        */
-        updatePoseAutonomous();
+        // Make sure robot orientation is correct and applied to all pose limelights before updating pose.
+        // These two paths are mutually exclusive: running both would feed the best Limelight's
+        // measurement into the Kalman filter twice on the same loop, doubling how much vision is trusted.
+        if(DriverStation.isAutonomousEnabled()) {
+            /*
+            Autonomous pose updater:
 
-        /*
-        Teleop/disabled pose updater:
+            For each limelight that has a tag in view, send it to be aggregated into the current pose estimate, alongside other
+            recent poses. To update the drivetrain's pose to the vision measurements, use the command for autonResetPoseToVision().
+            */
+            updatePoseAutonomous();
+        }
+        else {
+            /*
+            Teleop/disabled pose updater:
 
-        Instead of allowing all limelights to feed data into the SwervePoseEstimator, it scores each limelight that has a
-        tag in view based on the tag's proximity to the bot and the number of tags seen. Only then does it feed a pose measurement 
-        into the pose estimator. The pose can still be rejected for being too erroneous, but scoring each camera significantly
-        reduces the chances of a pose estimate being rejected.
-        */
-        updatePose();
+            Instead of allowing all limelights to feed data into the SwervePoseEstimator, it scores each limelight that has a
+            tag in view based on the tag's proximity to the bot and the number of tags seen. Only then does it feed a pose measurement
+            into the pose estimator. The pose can still be rejected for being too erroneous, but scoring each camera significantly
+            reduces the chances of a pose estimate being rejected.
+            */
+            updatePose();
+        }
     }
 
     public Limelight getBestLimelight() {
