@@ -3,7 +3,7 @@ package frc.robot.bindings;
 import static edu.wpi.first.units.Units.RPM;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Ports.OperatorPorts.kLBbutton;
-import static frc.robot.Ports.OperatorPorts.kRTrigger;
+import static frc.robot.Ports.OperatorPorts.kLTrigger;
 
 import java.util.Optional;
 import java.util.Set;
@@ -36,7 +36,7 @@ public class SK26DualLauncherBinder implements CommandBinder {
         this.launcherSubsystem = launcherSubsystem;
         this.drive = drive;
 
-        ManualShoot = kRTrigger.button;
+        ManualShoot = kLTrigger.button;
 
         TuningRun = kLBbutton.button.and(StateHandler.whenCurrentState(MacroState.IDLE));
 
@@ -92,8 +92,8 @@ public class SK26DualLauncherBinder implements CommandBinder {
             // Adjust gains and setpoint live on SmartDashboard, watch response in AdvantageScope.
             // TuningRun.toggleOnTrue(launcher.tuningCommand());
 
-            // Shoot trigger is available for ShootingCoordinator integration
-            // Shoot.whileTrue(launcher.runVelocityCommand(() -> RotationsPerSecond.of(kManualShootVelocity.get())));
+            // Manual override: hold operator LT to run at the dashboard-set manual speed.
+            ManualShoot.whileTrue(launcher.runVelocityFromPrefCommand().withName("LauncherManual"));
         }
     }
 }
