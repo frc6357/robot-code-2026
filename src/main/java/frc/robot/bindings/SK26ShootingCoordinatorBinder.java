@@ -11,6 +11,7 @@ import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 import frc.robot.subsystems.launcher.moveandshoot.ShootingCoordinator;
 
 import static frc.robot.Ports.OperatorPorts.kLBbutton;
+import static frc.robot.Ports.OperatorPorts.kRTrigger;
 
 public class SK26ShootingCoordinatorBinder implements CommandBinder {
     private Optional<ShootingCoordinator> moveAndShootSystemContainer;
@@ -22,6 +23,12 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
     Trigger moving;
     Trigger idle = StateHandler.whenCurrentState(MacroState.IDLE);
     Trigger manualShoot = kLBbutton.button;
+    /**
+     * Operator right trigger: full manual launch override. Runs the flywheel at the dashboard
+     * speed regardless of macro state, with no turret aiming. The feeder and indexer bind to
+     * this same button (gated on the flywheel reaching speed) in their own binders.
+     */
+    Trigger manualLaunch = kRTrigger.button;
 
     public SK26ShootingCoordinatorBinder(Optional<ShootingCoordinator> moveAndShootSystemContainer, Optional<SK26DualLauncher> launcherSubsystem) {
         this.moveAndShootSystemContainer = moveAndShootSystemContainer;
@@ -45,11 +52,19 @@ public class SK26ShootingCoordinatorBinder implements CommandBinder {
         // });
         // moving = stationary.negate();
 
+        // Manual launch override: spins the flywheel from the dashboard preference whenever the
+        // operator holds RT, independent of macro state. Bound first so the state-driven commands
+        // below can defer to it via manualLaunch.negate() -- without those guards the two
+        // launcher-requiring commands would repeatedly cancel each other.
+        manualLaunch.whileTrue(
+            launcher.runVelocityFromPrefCommand().withName("LauncherManualLaunch")
+        );
+
         // When score or shuttle triggers are active, run the appropriate shooting command
-        score.and(manualShoot).whileTrue(
+        score.and(manualShoot).and(manualLaunch.negate()).whileTrue(
             launcher.runVelocityFromPrefCommand()
         );
-        score.and(manualShoot.negate()).whileTrue(moveAndShootSystem.scoreMoving());
+        score.and(manualShoot.negate()).and(manualLaunch.negate()).whileTrue(moveAndShootSystem.scoreMoving());
         shuttle.whileTrue(moveAndShootSystem.shuttleMoving());
     }
 }

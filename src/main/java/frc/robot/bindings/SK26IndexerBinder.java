@@ -7,7 +7,9 @@ import frc.robot.StateHandler.MacroState;
 import frc.robot.subsystems.indexer.SK26Indexer;
 import static frc.robot.Konstants.IndexerConstants.kIndexerFullVoltage;
 import static frc.robot.Ports.OperatorPorts.kLTrigger;
+import static frc.robot.Ports.OperatorPorts.kRTrigger;
 import static frc.robot.Ports.Sensors.launcherSensor;
+import frc.robot.subsystems.launcher.mechanisms.SK26DualLauncher;
 
 // Imports from Java/WPILib
 import java.util.Optional;
@@ -35,16 +37,23 @@ public class SK26IndexerBinder implements CommandBinder
     Trigger BallPresent;
     Trigger BallDetected;
 
-    public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem)
+    /** Operator RT manual launch, gated on the flywheel actually being up to speed. */
+    Trigger ManualLaunch = new Trigger(() -> false);
+
+    public SK26IndexerBinder(Optional<SK26Indexer> indexerSubsystem, Optional<SK26DualLauncher> launcherSubsystem)
     {
         this.indexerSubsystem = indexerSubsystem;
         if(indexerSubsystem.isEmpty()) {
             return;
         }
-        if(indexerSubsystem.isEmpty()) {
-            return;
-        }
         indexer = indexerSubsystem.get();
+
+        // Hold operator RT to index manually, bypassing the state machine's READY gate (which also
+        // requires turret aim and pose checks) but still waiting on the flywheel. The falling
+        // debounce keeps the feed running through the RPM dip each ball causes.
+        launcherSubsystem.ifPresent(launcher ->
+            ManualLaunch = kRTrigger.button.and(
+                new Trigger(launcher::atTargetVelocity).debounce(0.5, DebounceType.kFalling)));
 
         // Feed when any shooting state is READY (launcher up to speed)
         IndexFeed = StateHandler.whenCurrentStateReady(MacroState.SCORING)
@@ -110,7 +119,9 @@ public class SK26IndexerBinder implements CommandBinder
         //     ),
         //     IndexerUnjam()
         // ).withName("IndexerFeedAndUnjam"));
-        IndexFeed.whileTrue(
+        // Guarded against ManualLaunch so this and the manual feed below never both require the
+        // indexer and cancel each other.
+        IndexFeed.and(ManualLaunch.negate()).whileTrue(
             Commands.sequence(
                 Commands.race(
                     indexer.feedCommand(() -> -manualIndexerVoltage.get()),
@@ -118,6 +129,13 @@ public class SK26IndexerBinder implements CommandBinder
                 ),
                 Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer))
             ).withName("IndexerFeeding")
+        );
+
+        // Manual launch feed. manualIndexerVoltage defaults to kIndexerFullVoltage (-10), so the
+        // raw pref value is the FORWARD direction here -- negating it would run the indexer backwards.
+        ManualLaunch.whileTrue(
+            Commands.defer(() -> indexer.feedCommand(() -> manualIndexerVoltage.get()), Set.of(indexer))
+                .withName("IndexerManualLaunch")
         );
 
         // IndexFeed.debounce(0.2, DebounceType.kFalling).whileTrue(Commands.repeatingSequence(
@@ -137,7 +155,7 @@ public class SK26IndexerBinder implements CommandBinder
         //IndexFeed.negate().whileTrue(Commands.defer(() -> indexer.feedCommand(() -> {return -manualIndexerVoltage.get() / 8.0;}), Set.of(indexer)));
         kLTrigger.button.onTrue(Commands.defer(() -> indexer.feedCommand(() -> -manualIndexerVoltage.get()), Set.of(indexer)));
         kLTrigger.button.onFalse(Commands.defer(
-                    () -> IndexFeed.getAsBoolean()
+                    () -> IndexFeed.getAsBoolean() || ManualLaunch.getAsBoolean()
                         ? indexer.feedCommand(() -> manualIndexerVoltage.get())
                         : indexer.idleIndexerCommand(),
                     Set.of(indexer)));

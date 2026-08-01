@@ -59,10 +59,10 @@ public class SK26StateBinder implements CommandBinder {
         }
 
         /* Buttons */
-        // Scoring can be requested by either driver or operator right trigger; whichever is held
-        // holds the request, and it only clears once BOTH are released.
+        // Scoring is requested by the driver right trigger only. The operator right trigger is
+        // the manual launch override (see SK26ShootingCoordinatorBinder/Feeder/Indexer binders)
+        // and deliberately does not enter the scoring state.
         turnOnScoring = DriverPorts.kRTrigger.button
-            .or(OperatorPorts.kRTrigger.button)
             .and(inAllianceZone);
         // SHUTTLING DISABLED FOR COMPETITION - re-enable by uncommenting this and its bindings below.
         // turnOnShuttling = OperatorPorts.kRTrigger.button.and(outOfAllianceZone);

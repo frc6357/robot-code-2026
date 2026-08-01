@@ -287,7 +287,11 @@ public final class Konstants
             public static final double kPitch = 0.0; // (pitch) degrees tilted up/down from 0° level [think plane nose tilting up/down]
             public static final double kYaw = 180; // (yaw) yaw rotated clockwise/ccw from 0° North [think of a compass facing cw/ccw]
 
-            public static final boolean kAttached = true;
+            // This camera is no longer mounted on the robot. Leaving it attached made every
+            // getCached*() call hit NetworkTables for a device that isn't there, and let it
+            // compete in SKVision.getBestLimelight(). All Limelight getters/setters early-return
+            // on !isAttached(), so this makes it fully inert without touching poseLimelights.
+            public static final boolean kAttached = false;
 
         }
 
