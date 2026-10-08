@@ -3,6 +3,7 @@ package frc.robot.bindings;
 import static frc.robot.Konstants.TargetPointConstants.TargetPoint.kOperatorControlled;
 import static frc.robot.Konstants.TurretConstants.kManualTurretSpeed;
 import static frc.robot.Konstants.TurretConstants.kTurretJoystickDeadband;
+import static frc.robot.Ports.OperatorPorts.kRBbutton;
 import static frc.robot.Ports.OperatorPorts.kRightStickX;
 
 import java.util.Optional;
@@ -14,6 +15,8 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.bindings.CommandBinder;
+import frc.lib.preferences.Pref;
+import frc.lib.preferences.SKPreferences;
 import frc.lib.utils.Field;
 import frc.lib.utils.FieldConstants;
 import frc.lib.utils.FieldConstants.LinesVertical;
@@ -39,7 +42,11 @@ public class SK26TurretBinder implements CommandBinder
     Trigger inAllianceZone;
     Trigger outOfAllianceZone;
 
+    Trigger manualTurret;
+
     SlewRateLimiter slewLimiter;
+
+    private static Pref<Double> speedMult = SKPreferences.attach("TurretSpeedMult", 1.0);
 
     public SK26TurretBinder(Optional<SK26Turret> turretSubsystem, Optional<SKSwerve> swerveSubsystem)
     {
@@ -57,6 +64,8 @@ public class SK26TurretBinder implements CommandBinder
                 .or(StateHandler.whenCurrentState(MacroState.INTAKING)
                 .or(StateHandler.whenCurrentState(MacroState.SPITTING)))
                 .or(StateHandler.whenCurrentState(MacroState.CLIMBING));
+
+        manualTurret = kRBbutton.button;
 
         if(swerveSubsystem.isEmpty()) {
             return;
@@ -94,6 +103,11 @@ public class SK26TurretBinder implements CommandBinder
         //     kOperatorControlled.point
         //     // Field.isBlue() ? kBlueHub.point : kRedHub.point
         // ).withName("TurretManualTrackHubCommand"));
+        manualTurret.whileTrue(
+            new TurretJoystickCommand(
+                turret, 
+                () -> slewLimiter.calculate(-kRightStickX.getFilteredAxis()*speedMult.get()))
+            .withName("TurretManualJoystickBumper"));
 
         inAllianceZone.negate().and(() -> DriverStation.isEnabled()).and(IsIdle).whileTrue(
             new TurretTrackPointCommand(turret, swerve, kOperatorControlled.point)
